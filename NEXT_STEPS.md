@@ -77,7 +77,62 @@ consecutive attachment points — both the distance and the direction the attach
 The output is a shell that is known to be traversable before any compute is spent folding it. The
 current chaining has no notion of traversability at all.
 
-## C. Grow the peptide, not the fragments
+## The plan
+
+Decided 2026-09-24. The order is **not** fixed as B then A, because B needs a reachability criterion
+and guessing one would bake in an unvalidated assumption. A can measure it instead:
+
+1. **Shared first piece — attachment geometry.** Every fragment is a side-chain analogue capped with
+   a methyl where the backbone would attach, so that methyl carbon marks roughly where CB sits and
+   the bond direction into it points where CA would go. This is the information the current pipeline
+   discards. Found by graph search over each fragment: a carbon with three hydrogens and exactly one
+   heavy-atom neighbour. Verified for all ten fragments:
+
+   | fragment | atoms | capping CH3 index |
+   |---|---|---|
+   | arginine | 19 | 15 |
+   | lysine | 17 | 12 |
+   | aspartic | 7 | 2 |
+   | glutamic | 7 | 3 |
+   | isoleucine | 14 | 2, 9 |
+   | leucine | 14 | 0, 5, 6 |
+   | serine | 6 | 2 |
+   | tryptophan | 19 | 15 |
+   | tyrosine | 17 | 10 |
+   | phenylalanine | 15 | 11 |
+
+   Isoleucine, leucine and valine-like fragments have several terminal methyls, so the attachment one
+   is ambiguous from the graph alone and needs picking by chemistry (the one that corresponds to CB),
+   not just by the CH3 test. Leucine's three candidates and isoleucine's two must be resolved before
+   either method can use them.
+
+2. **Calibrate A on pairs.** Condense two placed poses with k spacer residues between them, relax
+   with UMA, and record strain against attachment-point distance, the angle between the two
+   attachment vectors, and k. Pairs are small systems, so this sweep is cheap, and it yields an
+   empirical reachability criterion rather than an assumed one. It is also the direct diagnostic for
+   why designs do not fold as drawn.
+
+3. **B with the measured constraint.** Solve the pose subset and ordering against the criterion that
+   step 2 produced.
+
+4. **A on the full selection.** Condense and relax the whole peptide.
+
+A later iteration could feed A's strain results back into B's constraints, dropping fragment pairs
+that prove infeasible and re-solving.
+
+C below is **not** being pursued.
+
+## Superseded ordering note: B feeding A
+
+Decided 2026-09-24: build **B then A** as one pipeline. B chooses a pose subset and ordering that a
+backbone can actually follow; A condenses the peptide onto those poses and relaxes it with UMA. B
+must run first because A needs a connectable ordering to build along. A later iteration could feed
+A's strain results back into B's constraints, excluding fragment pairs that prove infeasible and
+re-solving the assignment.
+
+C below is **not** being pursued.
+
+## C. Grow the peptide, not the fragments (not pursued)
 
 A third option, in the spirit of the repo's own `grow_fragments`: start from the best pose and add
 one residue at a time, enumerating backbone dihedrals, scoring each candidate side-chain placement
