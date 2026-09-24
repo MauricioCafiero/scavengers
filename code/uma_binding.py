@@ -117,9 +117,11 @@ def peptide_charge(atoms, cyclic=False):
 def main(argv=None):
     parser = argparse.ArgumentParser(description=__doc__.split("\n\n")[0])
     parser.add_argument("outdir", help="a peptide_builder run directory, e.g. runs/octinoxate")
+    parser.add_argument("names", nargs="*", help="the structures to compute: a sequence name, or a path to a .cif")
+    parser.add_argument("--all", action="store_true", help="every structure in the run that is not already done")
     parser.add_argument("--relax-h", action="store_true",
                         help="relax hydrogens in the complex first (heavy atoms fixed)")
-    parser.add_argument("--limit", type=int, help="only the first N structures")
+    parser.add_argument("--force", action="store_true", help="recompute even if already in the csv")
     parser.add_argument("--model", default="uma-s-1p2p1", help="fairchem model (default: uma-s-1p2p1)")
     parser.add_argument("--fixer-venv", default=FIXER_VENV, help=f"venv with pdbfixer (default: {FIXER_VENV})")
     args = parser.parse_args(argv)
@@ -130,13 +132,41 @@ def main(argv=None):
     print(f"ligand SMILES: {smiles}")
 
     boltz_dir = os.path.join(args.outdir, "boltz")
-    cifs = sorted(glob.glob(os.path.join(boltz_dir, "boltz_results_*", "predictions", "*", "*_model_0.cif")))
-    if args.limit:
-        cifs = cifs[:args.limit]
-    if not cifs:
-        sys.exit(f"no Boltz structures found under {boltz_dir}")
-    print(f"{len(cifs)} structures found\n")
+    csv_path = os.path.join(boltz_dir, "uma_binding.csv")
+    done = {}
+    if os.path.exists(csv_path):
+        with open(csv_path) as f:
+            done = {r["name"]: r for r in csv.DictReader(f)}
 
+    def cif_for(name):
+        if name.endswith(".cif"):
+            return name
+        hits = glob.glob(os.path.join(boltz_dir, f"boltz_results_{name}", "predictions", "*", "*_model_0.cif"))
+        return hits[0] if hits else None
+
+    if args.names:
+        cifs = []
+        for name in args.names:
+            path = cif_for(name)
+            if path is None:
+                print(f"{name}: no Boltz structure found, skipping")
+            elif name in done and not args.force:
+                print(f"{name}: already done (use --force to redo)")
+            else:
+                cifs.append(path)
+    elif args.all:
+        cifs = sorted(glob.glob(os.path.join(boltz_dir, "boltz_results_*", "predictions", "*", "*_model_0.cif")))
+        if not args.force:
+            cifs = [p for p in cifs if os.path.basename(p).replace("_model_0.cif", "") not in done]
+    else:
+        sys.exit("name the structures to compute, or pass --all")
+
+    if not cifs:
+        sys.exit("nothing to compute")
+    print(f"{len(cifs)} structures to compute\n")
+
+    if not cifs:
+        print("nothing new to compute")
     import torch
     from fairchem.core import FAIRChemCalculator, pretrained_mlip
     from ase import Atoms
@@ -153,7 +183,8 @@ def main(argv=None):
         atoms.calc = calculator
         return atoms.get_potential_energy()
 
-    results = []
+    results = [r for r in done.values() if r["name"] not in
+               {os.path.basename(p).replace("_model_0.cif", "") for p in cifs}]
     for path in cifs:
         name = os.path.basename(path).replace("_model_0.cif", "")
         cyclic = name.startswith("cyclo_")
@@ -190,7 +221,6 @@ def main(argv=None):
         results.append({"name": name, "n_residues": n_res, "n_atoms": len(symbols),
                         "peptide_charge": pep_charge, "uma_ie_kcal_mol": f"{ie:.3f}"})
 
-        csv_path = os.path.join(boltz_dir, "uma_binding.csv")
         with open(csv_path, "w", newline="") as f:
             writer = csv.DictWriter(f, fieldnames=list(results[0].keys()))
             writer.writeheader()
