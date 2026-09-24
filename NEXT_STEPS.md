@@ -187,20 +187,23 @@ Nothing extra is installed in this repo; each external tool is called from its o
 
 ## Keeping the machine awake
 
-Long jobs need a sleep assertion, and it has to be released afterwards. Bind it to time, not to a
-job's PID: an assertion bound with `-w <pid>` dies when that job ends, so later work in the same
-session is unprotected.
+**An assertion is armed right now: `caffeinate -is -t 28800`, PID 4534, started 2026-09-24 23:47
+local, 8 hours.** It is deliberately left running. Disarm it when the working session ends:
 
 ```sh
-nohup caffeinate -is -t 21600 >/dev/null 2>&1 &   # 6 hours, independent of any job
-pmset -g assertions | grep -E 'PreventSystemSleep +[01]'   # 1 while held
-kill <caffeinate pid>                             # release when the work is done
+pgrep -f 'caffeinate -is'        # find it (ignore the Bash tool's own short -t 300 wrapper)
+kill <pid>
+pmset -g assertions | grep -E 'PreventSystemSleep +[01]'   # 0 once released
 ```
 
-`-i` prevents idle sleep, `-s` prevents system sleep and needs AC power. **Release it when the last
-job finishes** — otherwise it holds the machine awake for the full timeout with nothing running. The
-Bash tool wraps its own commands in a short `caffeinate -t 300`, which expires by itself and is not
-the one to kill.
+This machine sleeps mid-conversation, not only mid-job, which stalls detached work and interrupts
+the session, so the assertion has to cover the whole working session rather than an individual job.
+Bind it to a timeout, never to a job's PID: an assertion bound with `-w <pid>` dies when that job
+ends and leaves everything afterwards unprotected, which is the mistake that let the machine sleep
+earlier in this session.
+
+`-i` prevents idle sleep, `-s` prevents system sleep and needs AC power. The Bash tool wraps its own
+commands in a short `caffeinate -t 300` which expires by itself — that is not the one to kill.
 
 ## Repo
 
