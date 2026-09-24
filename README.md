@@ -132,6 +132,28 @@ python code/uma_binding.py runs/octinoxate              # UMA interaction energy
   environment via `--fixer-venv`, so nothing extra is needed here), the ligand with RDKit from its
   SMILES. Results go to `boltz/uma_binding.csv`.
 
+#### Controls and linker substitution
+
+```bash
+python code/fill_linkers.py runs/octinoxate --variants 2      # replace glycine linkers with ESM2
+python code/random_control.py runs/octinoxate --length 19     # 5 random peptides of the same length
+python code/random_control.py runs/octinoxate --length 19 --shuffle RYGLSGIKWDKSFEGDGGE
+```
+
+- **`fill_linkers.py`** masks every glycine linker and fills it with an ESM2 masked-language
+  model, most-confident position first, the way the
+  [GenMaskFill](https://github.com/MauricioCafiero/CafChem) repo does it. Glycine is not in the
+  fragment library, so every G in a design is a linker and the mask set is unambiguous; the designed
+  residues are never touched, so the fragment poses and their total IE still apply. Residues are
+  sampled from the candidates above `--prob-cutoff` rather than taken as the argmax: with this many
+  masks the 35M checkpoint's per-position distribution is nearly flat (confidence 0.06-0.10), and
+  the argmax collapses every linker to leucine. Filled sequences are appended to `sequences.csv`,
+  so `boltz_check.py` picks them up. ESM2 runs in the GenMaskFill environment (`--genmask-venv`).
+- **`random_control.py`** is the null model: random peptides of a given length, or with
+  `--shuffle`, permutations of one design that hold length and composition fixed and vary only the
+  order. Each goes through the same Boltz-2 and UMA path as the designs, and the results are
+  compared with the designs of that length. Results go to `boltz/controls.csv`.
+
 #### What the validation showed (octinoxate, 20 designs, uma-s-1p2p1)
 
 A folded peptide does not reproduce the designed shell. The fragment search puts every side chain
@@ -150,6 +172,27 @@ in contact with the ligand; a real backbone can only reach a fraction of those p
 - Boltz's affinity head reports confident numbers for complexes that are not in contact: the
   12-residue `RYGLGEFSDWKI` has its ligand 6.6 A away, yet scored pIC50 6.96 and binder probability
   0.75. Always read `overlay.csv` contact distances alongside an affinity.
+
+Substituting the glycine linkers helps, consistently but modestly. For four 19-residue designs the
+substitution improved Boltz's dG in 4 of 4 cases, by 0.01 to 0.38 kcal/mol (mean 0.22), and raised
+the binder probability in 3 of 4. The design whose substitution changed fewest positions moved
+least. Boltz's affinity head is nearly blind to the change in itself - one substituted sequence
+differed from its parent by 0.003 log units of pIC50 despite 5 of 19 residues changing - so the
+effect shows up through the fold rather than through sequence composition.
+
+Against a null model there is no evidence the fragment search adds value. At length 19 the four
+designs give UMA interaction energies of -16.2, -12.5, -10.1 and -7.2 kcal/mol (mean -11.5); five
+random sequences of the same length give -40.8, -9.5, -7.7, -5.1 and +12.1 (mean -10.2). The means
+are indistinguishable and the best random peptide is 2.5 times better than the best design. The
+designs are more consistent (all four physical, in a narrow band) while random sampling has much
+higher variance. n is far too small for significance, but there is no hint of an advantage either.
+
+Two explanations for that were tested and refuted. The best random binder is more charged than the
+designs (37% vs 23%), so a bias toward charged residues is not the cause. And the interaction
+energy does not track contact area: Spearman +0.17 against contact pairs and +0.42 against buried
+ligand atoms, the wrong sign, with two structures of near-identical burial differing by 35 kcal/mol.
+At fixed length the energy is set by contact quality rather than quantity; what drives that is
+still unexplained.
 
 `--linker-slack` tests the flexibility limit. With the designed geometry and fragment IE held fixed
 at -100.87 kcal/mol and only glycine added, one extra linker per gap clearly helps the fold reach
