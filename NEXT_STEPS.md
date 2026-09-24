@@ -185,6 +185,23 @@ Nothing extra is installed in this repo; each external tool is called from its o
   ligand-plus-fragment-poses `.xyz` in `runs/octinoxate/sequences/` — so copy the parent's, since the
   poses are identical and only linkers changed.
 
+## Keeping the machine awake
+
+Long jobs need a sleep assertion, and it has to be released afterwards. Bind it to time, not to a
+job's PID: an assertion bound with `-w <pid>` dies when that job ends, so later work in the same
+session is unprotected.
+
+```sh
+nohup caffeinate -is -t 21600 >/dev/null 2>&1 &   # 6 hours, independent of any job
+pmset -g assertions | grep -E 'PreventSystemSleep +[01]'   # 1 while held
+kill <caffeinate pid>                             # release when the work is done
+```
+
+`-i` prevents idle sleep, `-s` prevents system sleep and needs AC power. **Release it when the last
+job finishes** — otherwise it holds the machine awake for the full timeout with nothing running. The
+Bash tool wraps its own commands in a short `caffeinate -t 300`, which expires by itself and is not
+the one to kill.
+
 ## Repo
 
 - Work is pushed to **github.com/MauricioCafiero/scavengers**: their initial LICENSE commit plus our
