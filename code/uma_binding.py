@@ -9,9 +9,9 @@ Boltz writes heavy atoms only, so hydrogens are added first: the peptide with pd
 RDKit from the SMILES the run used. The net charge handed to UMA follows from that.
 
 Usage:
-    python code/uma_binding.py runs/octinoxate [--relax-h] [--limit N]
+    python code/uma_binding.py runs/octinoxate [--no-relax-h] [--limit N]
 
-pdbfixer is called in a separate environment (--fixer-venv), so nothing needs installing here.
+pdbfixer runs in process (pip install pdbfixer); --fixer-venv falls back to another environment.
 """
 import argparse
 import csv
@@ -23,7 +23,8 @@ import tempfile
 
 import numpy as np
 
-FIXER_VENV = os.path.expanduser("~/python_mac/pocket_assist/venv")
+# pdbfixer runs in process when installed; this is only the fallback interpreter, and only if set
+FIXER_VENV = os.environ.get("PEPTIDEBUILDER_FIXER_VENV")
 
 # side chains that carry a charge at pH 7, and the termini
 CHARGED = {"ARG": 1, "LYS": 1, "ASP": -1, "GLU": -1}
@@ -64,17 +65,40 @@ def write_pdb(atoms, path, hetatm=False):
         f.write("END\n")
 
 
-def protonate_peptide(atoms, fixer_venv, ph=7.0):
-    """Add hydrogens with pdbfixer; returns (symbols, positions)."""
+def protonate_peptide(atoms, fixer_venv=None, ph=7.0):
+    """Add hydrogens with pdbfixer; returns (symbols, positions).
+
+    pdbfixer is an ordinary pip install (it pulls openmm, which it is built on), so this normally
+    runs in process. `fixer_venv` is the original route -- the same script in another environment's
+    interpreter -- kept as a fallback for an environment that cannot install it. Both write and
+    re-read the same PDB, so they return identical numbers.
+    """
     with tempfile.TemporaryDirectory() as tmp:
         raw, fixed = os.path.join(tmp, "in.pdb"), os.path.join(tmp, "out.pdb")
         write_pdb(atoms, raw)
-        script = os.path.join(tmp, "fix.py")
-        open(script, "w").write(FIXER_SCRIPT)
-        out = subprocess.run([os.path.join(fixer_venv, "bin", "python"), script, raw, fixed, str(ph)],
-                             capture_output=True, text=True)
-        if not os.path.exists(fixed):
-            raise RuntimeError(f"pdbfixer failed:\n{out.stdout}\n{out.stderr}")
+        try:
+            from pdbfixer import PDBFixer
+            from openmm.app import PDBFile
+            fixer = PDBFixer(filename=raw)
+            fixer.findMissingResidues()
+            fixer.findMissingAtoms()
+            fixer.addMissingAtoms()
+            fixer.addMissingHydrogens(ph)
+            with open(fixed, "w") as fh:
+                PDBFile.writeFile(fixer.topology, fixer.positions, fh, keepIds=True)
+        except ImportError:
+            if not fixer_venv:
+                raise RuntimeError(
+                    "pdbfixer is not installed here and no --fixer-venv was given. Either\n"
+                    "  pip install pdbfixer        (or: uv pip install pdbfixer)\n"
+                    "or point --fixer-venv at an environment that has it.")
+            script = os.path.join(tmp, "fix.py")
+            open(script, "w").write(FIXER_SCRIPT)
+            out = subprocess.run(
+                [os.path.join(fixer_venv, "bin", "python"), script, raw, fixed, str(ph)],
+                capture_output=True, text=True)
+            if not os.path.exists(fixed):
+                raise RuntimeError(f"pdbfixer failed:\n{out.stdout}\n{out.stderr}")
         symbols, positions = [], []
         for line in open(fixed):
             if line.startswith(("ATOM", "HETATM")):
@@ -119,11 +143,24 @@ def main(argv=None):
     parser.add_argument("outdir", help="a peptide_builder run directory, e.g. runs/octinoxate")
     parser.add_argument("names", nargs="*", help="the structures to compute: a sequence name, or a path to a .cif")
     parser.add_argument("--all", action="store_true", help="every structure in the run that is not already done")
-    parser.add_argument("--relax-h", action="store_true",
+    parser.set_defaults(relax_h=True)
+    parser.add_argument("--no-relax-h", dest="relax_h", action="store_false",
+                        help="skip the hydrogen-only relaxation. pdbfixer's placement is not "
+                             "deterministic and alone moves the interaction energy by ~1 kcal/mol, "
+                             "so this is only for reproducing results recorded before it was "
+                             "made the default")
+    parser.add_argument("--relax-h", dest="relax_h", action="store_true",
                         help="relax hydrogens in the complex first (heavy atoms fixed)")
+    parser.add_argument("--fmax", type=float, default=0.10,
+                        help="force convergence for the hydrogen relaxation, eV/A (default: 0.10, "
+                             "the same loose budget binding_energy.py uses)")
+    parser.add_argument("--steps", type=int, default=75,
+                        help="step cap for the hydrogen relaxation (default: 75)")
     parser.add_argument("--force", action="store_true", help="recompute even if already in the csv")
     parser.add_argument("--model", default="uma-s-1p2p1", help="fairchem model (default: uma-s-1p2p1)")
-    parser.add_argument("--fixer-venv", default=FIXER_VENV, help=f"venv with pdbfixer (default: {FIXER_VENV})")
+    parser.add_argument("--fixer-venv", default=FIXER_VENV,
+                        help="venv with pdbfixer, only needed if it is not installed here "
+                             "(or $PEPTIDEBUILDER_FIXER_VENV)")
     args = parser.parse_args(argv)
 
     sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
@@ -207,9 +244,23 @@ def main(argv=None):
             complex_atoms.calc = calculator
             heavy = [i for i, s in enumerate(symbols) if s != "H"]
             complex_atoms.set_constraint(FixAtoms(indices=heavy))
-            BFGS(complex_atoms, logfile=None).run(fmax=0.05)
+            # logfile='-' not None: with None the optimiser prints nothing, so a run killed part
+            # way through leaves no record of how far it got. fmax/steps match binding_energy.py's
+            # loose budget -- without a step cap this can grind indefinitely on a flat hydrogen
+            # network.
+            opt = BFGS(complex_atoms, logfile='-')
+            opt.run(fmax=args.fmax, steps=args.steps)
             positions = complex_atoms.get_positions()
             pep_xyz, lig_xyz = positions[:len(pep_symbols)], positions[len(pep_symbols):]
+            # the geometry cost hours of relaxation; keep it
+            struct_dir = os.path.join(boltz_dir, "structures")
+            os.makedirs(struct_dir, exist_ok=True)
+            from peptide_builder import write_xyz
+            write_xyz(os.path.join(struct_dir, f"{name}_complex_relaxed_h.xyz"),
+                      symbols, positions,
+                      f"{name}: heavy atoms as predicted, hydrogens relaxed "
+                      f"(fmax {args.fmax}, max {args.steps} steps, "
+                      f"{opt.get_number_of_steps()} taken)")
 
         e_complex = energy(symbols, positions, total_charge)
         e_pep = energy(pep_symbols, pep_xyz, pep_charge)

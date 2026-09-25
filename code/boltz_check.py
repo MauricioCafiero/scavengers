@@ -18,7 +18,8 @@ import os
 import subprocess
 import sys
 
-BOLTZ_REPO = os.path.expanduser("~/python_mac/boltz_local")
+# resolved by boltz_env at call time; unset unless the environment names one
+BOLTZ_REPO = os.environ.get("PEPTIDEBUILDER_BOLTZ_REPO")
 
 YAML = """version: 1
 sequences:
@@ -46,20 +47,24 @@ def ligand_smiles(outdir: str):
     return Chem.MolToSmiles(Chem.RemoveHs(mol))
 
 
-def run_boltz(name: str, sequence: str, smiles: str, cyclic: bool, boltz_dir: str, boltz_repo: str):
-    """Write the yaml for one peptide, co-fold it, and return its affinity results."""
+def run_boltz(name: str, sequence: str, smiles: str, cyclic: bool, boltz_dir: str,
+              boltz_repo: str = None, boltz_cmd: str = None, boltz_venv: str = None):
+    """Write the yaml for one peptide, co-fold it, and return its affinity results.
+
+    `boltz_env.resolve_boltz` finds Boltz however it is installed here; `boltz_repo` is the old
+    hardwired argument, honoured as a venv if a caller still passes one.
+    """
+    from boltz_env import run_boltz as _run
+
     yaml_path = os.path.join(boltz_dir, f"{name}.yaml")
     with open(yaml_path, "w") as f:
         f.write(YAML.format(sequence=sequence, smiles=smiles,
                             cyclic="\n      cyclic: true" if cyclic else ""))
 
-    wrapper = os.path.join(boltz_repo, "code", "boltz_mps.py")
-    python = os.path.join(boltz_repo, ".venv", "bin", "python")
     log_path = os.path.join(boltz_dir, f"{name}.log")
-    with open(log_path, "w") as log:
-        code = subprocess.call([python, wrapper, "predict", yaml_path,
-                                "--num_workers", "0", "--out_dir", boltz_dir],
-                               stdout=log, stderr=subprocess.STDOUT)
+    code = _run(yaml_path, boltz_dir, log_path, boltz_cmd=boltz_cmd,
+                boltz_venv=boltz_venv or (os.path.join(boltz_repo, ".venv")
+                                          if boltz_repo else None))
     if code:
         print(f"  {name}: boltz failed (exit {code}), see {log_path}")
         return None
@@ -82,7 +87,12 @@ def main(argv=None):
     parser.add_argument("--limit", type=int, help="only the N best-scoring sequences")
     parser.add_argument("--sequences", help="comma-separated sequences to run instead of the csv order")
     parser.add_argument("--force", action="store_true", help="re-run sequences already in the comparison csv")
-    parser.add_argument("--boltz-repo", default=BOLTZ_REPO, help=f"path to the boltz repo (default: {BOLTZ_REPO})")
+    parser.add_argument("--boltz-repo", default=BOLTZ_REPO,
+                        help="a boltz checkout to use instead of however boltz is installed here")
+    parser.add_argument("--boltz-venv", default=os.environ.get("PEPTIDEBUILDER_BOLTZ_VENV"),
+                        help="venv with Boltz (or $PEPTIDEBUILDER_BOLTZ_VENV)")
+    parser.add_argument("--boltz-cmd", default=os.environ.get("PEPTIDEBUILDER_BOLTZ_CMD"),
+                        help="complete command that runs Boltz")
     args = parser.parse_args(argv)
 
     with open(os.path.join(args.outdir, "sequences.csv")) as f:
@@ -116,7 +126,8 @@ def main(argv=None):
         sequence = label.replace("cyclo-", "")
         name = ("cyclo_" if cyclic else "") + sequence
         print(f"[{i}/{len(rows)}] {label} ({len(sequence)} residues){' cyclic' if cyclic else ''}", flush=True)
-        out = run_boltz(name, sequence, smiles, cyclic, boltz_dir, args.boltz_repo)
+        out = run_boltz(name, sequence, smiles, cyclic, boltz_dir, args.boltz_repo,
+                        boltz_cmd=args.boltz_cmd, boltz_venv=args.boltz_venv)
         if out is None:
             continue
         results[label] = {"sequence": label, "n_residues": len(sequence),
