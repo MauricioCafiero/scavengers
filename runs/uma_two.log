@@ -1,0 +1,19 @@
+ligand SMILES: CCCC[C@H](CC)OC(=O)/C=C/c1ccc(OC)cc1
+SLWYVKLDVFLKYSIENFR: already done (use --force to redo)
+1 structures to compute
+
+W0924 23:40:04.349000 3996 torch/distributed/elastic/multiprocessing/redirects.py:35] NOTE: Redirects are currently not supported in MacOs.
+[23:40:14] WARNING: More than one matching pattern found - picking one
+
+WARNING:root:Model is being compiled this might take a while for the first time
+W0924 23:40:15.360000 3996 torch/_logging/_internal.py:1345] [0/0] Profiler record function <class 'torch.autograd.profiler.record_function'> will be ignored
+WARNING:root:The UMA fast path (merge_mole + compile) is only available for fixed composition, task, charge, and spin. This is optimized for MD applications. Falling back to a less optimized version for subsequent evaluations. Reason: 'Compositions differ from merged model'.
+Use inference_settings='batch' for heterogeneous batched evaluations.
+cyclo_LKSLFKIVIYSWLERRKGI     19 res, 400 atoms, peptide charge +4  IE    -6.66 kcal/mol
+
+23 structures compared (Spearman rank correlation):
+  UMA IE vs Boltz pIC50   -0.16
+  UMA IE vs fragment sum  -0.05
+  fragment sum vs pIC50   -0.22
+
+Results in runs/octinoxate/boltz/uma_binding.csv
