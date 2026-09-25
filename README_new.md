@@ -209,7 +209,7 @@ through its own wrapper.
 
 That asymmetry dominates the runtime. On a six-core Apple Silicon laptop, co-folding a 33-residue
 peptide with its ligand takes two to three minutes, while scoring that same complex takes 30 to 70
-minutes depending on size. If a CUDA device is available, `binding_energy.py` and `uma_binding.py` pick
+minutes depending on size. If a CUDA device is available, `binding_energy.py` picks
 it up automatically and the scoring bottleneck largely disappears.
 
 Memory matters more than core count. A scoring process holds 0.5 to 2.5 GB depending on what it is
@@ -222,13 +222,8 @@ doing, and running two concurrently on a 16 GB machine will push it into swap. R
 ```
 peptidebuilder/
 ├── code/                        all scripts; see the table below
-├── notebooks/
-│   └── frag_grow.ipynb          the original exploratory notebook
-├── data/
-│   ├── xyz_files/               ligand and peptide–ligand structures
-│   ├── md_videos/               MD trajectories
-│   └── log_files/               MD logs
 ├── runs/                        pipeline output, one directory per ligand
+│   └── octinoxate/              the worked example below
 ├── requirements.txt
 ├── LICENSE
 └── README.md
@@ -254,8 +249,8 @@ peptidebuilder/
 | `boltz_hints.py` | writes a Boltz-2 input with the designed shell as contact constraints, and co-folds it |
 | `boltz_check.py` | the simpler path: co-folds sequences straight from `sequences.csv` |
 | `check_fold.py` | per fold: is the ligand bound, how enclosed and how wrapped is it, were the contacts honoured |
-| `binding_energy.py` | interaction energy, ligand and peptide strain, cavity desolvation |
-| `uma_binding.py` | interaction energy alone, for Boltz output |
+| `binding_energy.py` | interaction energy, ligand and peptide strain, cavity desolvation. Writes every relaxed structure it produces |
+| `uma_binding.py` | reads Boltz CIFs and adds hydrogens — `parse_cif`, `protonate_peptide`, `protonate_ligand`, `peptide_charge` — used by everything above. Its own command line predates `binding_energy.py` and computes the interaction term alone |
 | `solvate.py` | wraps a molecule in explicit waters, for desolvation energies |
 
 ### Analysis and comparison
@@ -296,6 +291,7 @@ runs/octinoxate/
 ├── boltz/
 │   ├── *.yaml, *.log            Boltz inputs and logs
 │   ├── boltz_results_*/         folded complexes, as .cif
+│   ├── structures/              every geometry a relaxation produced
 │   ├── fold_check.csv           enclosure, wrapping, contacts, hints honoured
 │   ├── binding_*.csv            interaction and strain per complex
 │   └── partial_*.json           per-term results, saved as computed
@@ -306,9 +302,14 @@ runs/octinoxate/
     └── load_folds.pml           PyMOL script: loads all, superposed on the ligand
 ```
 
-Two conveniences worth knowing. `partial_*.json` holds each energy term the moment it is computed, so
-interrupting a long scoring run does not discard what it has already paid for. And `figures/` exists
-because the folded structures are otherwise buried at
+Scoring logs are written to `runs/*.log` and are kept, not ignored: they hold each relaxation's step
+count, timing and convergence, which is the only record of how a number was arrived at.
+
+Three conveniences worth knowing. `partial_*.json` holds each energy term the moment it is computed,
+so interrupting a long scoring run does not discard what it has already paid for. `structures/` holds
+the hydrogen-relaxed complex, the bound ligand and the relaxed free ligand for every complex scored —
+these cost 45 to 60 minutes each to produce, so they are written rather than derived once and thrown
+away. And `figures/` exists because the folded structures are otherwise buried at
 `boltz/boltz_results_<name>/predictions/<name>/<name>_model_0.cif`, which is tedious to load twelve of.
 
 ---
