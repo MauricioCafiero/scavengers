@@ -1,0 +1,150 @@
+=== sweep done; design test started Fri 25 Sep 2026 09:22:34 BST ===
+
+==============================================================================
+1. order the shell and count the spacers each step needs
+==============================================================================
+$ /Users/cafierom/python_mac/peptidebuilder/.venv/bin/python /Users/cafierom/python_mac/peptidebuilder/code/assign.py runs/octinoxate --poses arginine:3,lysine:5,aspartic:21,glutamic:9,isoleucine:4,leucine:13,serine:31,tryptophan:5,lysine:8,aspartic:8,glutamic:10,serine:20 --pairs-csv condense_shell12.csv --tol 0.2 --save runs/octinoxate/design.json
+loaded 165 poses from runs/octinoxate
+132 of 132 ordered pairs are connectable (closure < 0.2 A)
+
+poses  residues  sum k  budget  pad   total IE  IE/residue  sequence
+    1         1      0       0    0     -23.29      -23.29  R
+    2         4      2       1    0     -41.12      -10.28  RGGK
+    3         6      3       3    0     -57.91       -9.65  RGDGGK
+    4        10      6       4    0     -74.48       -7.45  RGGKGGDGGE
+    5        11      6       6    0     -87.23       -7.93  RGEGKGGDGGE
+    6        13      7       7    0     -96.56       -7.43  RGEGKGGDGGEGD
+    7        16      9       9    0    -101.84       -6.36  RGEGKGGDGGEGWGGD
+    8        19     11      10    0    -106.79       -5.62  RGEGKGGDGGEGSGGWGGD
+    9        20     11      12    1    -110.13       -5.51  EGEGKGDGIGGRGGWGGDGS
+   10        23     13      13    0    -112.47       -4.89  EGEGKGDGIGGRGGWGGDGSGGS
+   11        31     20      15    0    -114.15       -3.68  EGEGKGDGIGGRGGWGGDGGGGLGGGGSGGS
+   12        33     21      16    0    -113.12       -3.43  RGGDGGKGGGGLGGGGKGIGEGWGGDGSGGEGS
+
+'budget' is the glycine count the whole-path parameter count demands; 'pad' is how many
+more are needed than the per-edge minimums supply. A path short of budget cannot close
+as spelled, however connectable each step looks on its own.
+
+saved 12-pose design to runs/octinoxate/design.json: RGGDGGKGGGGLGGGGKGIGEGWGGDGSGGEGS
+
+longest traversable path uses 12 of 12 poses (sum k = 21, budget = 16, budget met):
+  arginine3 -> aspartic8   2 linker(s), closure 0.000 A, steric penalty 0.00
+  aspartic8 -> lysine8   2 linker(s), closure 0.000 A, steric penalty 0.00
+  lysine8 -> leucine13   4 linker(s), closure 0.000 A, steric penalty 0.00
+  leucine13 -> lysine5   4 linker(s), closure 0.000 A, steric penalty 0.00
+  lysine5 -> isoleucine4   1 linker(s), closure 0.000 A, steric penalty 0.00
+  isoleucine4 -> glutamic9   1 linker(s), closure 0.000 A, steric penalty 0.00
+  glutamic9 -> tryptophan5   1 linker(s), closure 0.000 A, steric penalty 0.00
+  tryptophan5 -> aspartic21   2 linker(s), closure 0.000 A, steric penalty 0.00
+  aspartic21 -> serine31   1 linker(s), closure 0.196 A, steric penalty 0.00
+  serine31 -> glutamic10   2 linker(s), closure 0.000 A, steric penalty 0.00
+  glutamic10 -> serine20   1 linker(s), closure 0.000 A, steric penalty 0.00
+
+design: RGGDGGKGGGGLGGGGKGIGEGWGGDGSGGEGS  (33 residues, 12 side chains, total fragment IE -113.1242 kcal/mol)
+spacers per step: [2, 2, 4, 4, 1, 1, 1, 2, 1, 2, 1]  (sum 21, budget 16)
+wrote the design's own shell to runs/octinoxate/sequences/RGGDGGKGGGGLGGGGKGIGEGWGGDGSGGEGS.xyz
+
+==============================================================================
+2. ESM2 variants of the glycine spacers
+==============================================================================
+  variant 1: RLVDALKNKTPLSAAEKSILEDWLADKSKSESS
+  variant 2: RKKDAKKRIRDLESIQKLILEKWGVDSSSNEDS
+
+==============================================================================
+3. write the Boltz inputs (hinted, plus one unhinted control)
+==============================================================================
+$ /Users/cafierom/python_mac/peptidebuilder/.venv/bin/python /Users/cafierom/python_mac/peptidebuilder/code/boltz_hints.py runs/octinoxate design.json --cutoff 4.5 --margin 1.0 --name RGGDGGKGGGGLGGGGKGIGEGWGGDGSGGEGS_hints
+ligand SMILES: CCCC[C@H](CC)OC(=O)/C=C/c1ccc(OC)cc1
+44 ligand atoms named by Boltz's own code path
+
+sequence: RGGDGGKGGGGLGGGGKGIGEGWGGDGSGGEGS  (33 residues)
+12 contact hints (closest ligand atom per designed residue):
+  residue   1 R  (arginine3     ) -> ligand O25  at 2.77 A -> max_distance 3.8
+  residue   4 D  (aspartic8     ) -> ligand C31  at 3.03 A -> max_distance 4.0
+  residue   7 K  (lysine8       ) -> ligand C37  at 4.20 A -> max_distance 5.2
+  residue  12 L  (leucine13     ) -> ligand C41  at 4.14 A -> max_distance 5.1
+  residue  17 K  (lysine5       ) -> ligand C36  at 3.09 A -> max_distance 4.1
+  residue  19 I  (isoleucine4   ) -> ligand C33  at 3.75 A -> max_distance 4.8
+  residue  21 E  (glutamic9     ) -> ligand C30  at 3.18 A -> max_distance 4.2
+  residue  23 W  (tryptophan5   ) -> ligand C37  at 3.55 A -> max_distance 4.5
+  residue  26 D  (aspartic21    ) -> ligand C37  at 3.13 A -> max_distance 4.1
+  residue  28 S  (serine31      ) -> ligand O26  at 2.94 A -> max_distance 3.9
+  residue  31 E  (glutamic10    ) -> ligand C34  at 3.06 A -> max_distance 4.1
+  residue  33 S  (serine20      ) -> ligand O27  at 3.77 A -> max_distance 4.8
+
+wrote runs/octinoxate/boltz/RGGDGGKGGGGLGGGGKGIGEGWGGDGSGGEGS_hints.yaml
+$ /Users/cafierom/python_mac/peptidebuilder/.venv/bin/python /Users/cafierom/python_mac/peptidebuilder/code/boltz_hints.py runs/octinoxate design.json --cutoff 4.5 --margin 1.0 --name RGGDGGKGGGGLGGGGKGIGEGWGGDGSGGEGS_esm1 --sequence RLVDALKNKTPLSAAEKSILEDWLADKSKSESS
+ligand SMILES: CCCC[C@H](CC)OC(=O)/C=C/c1ccc(OC)cc1
+44 ligand atoms named by Boltz's own code path
+
+sequence: RLVDALKNKTPLSAAEKSILEDWLADKSKSESS  (33 residues)
+12 contact hints (closest ligand atom per designed residue):
+  residue   1 R  (arginine3     ) -> ligand O25  at 2.77 A -> max_distance 3.8
+  residue   4 D  (aspartic8     ) -> ligand C31  at 3.03 A -> max_distance 4.0
+  residue   7 K  (lysine8       ) -> ligand C37  at 4.20 A -> max_distance 5.2
+  residue  12 L  (leucine13     ) -> ligand C41  at 4.14 A -> max_distance 5.1
+  residue  17 K  (lysine5       ) -> ligand C36  at 3.09 A -> max_distance 4.1
+  residue  19 I  (isoleucine4   ) -> ligand C33  at 3.75 A -> max_distance 4.8
+  residue  21 E  (glutamic9     ) -> ligand C30  at 3.18 A -> max_distance 4.2
+  residue  23 W  (tryptophan5   ) -> ligand C37  at 3.55 A -> max_distance 4.5
+  residue  26 D  (aspartic21    ) -> ligand C37  at 3.13 A -> max_distance 4.1
+  residue  28 S  (serine31      ) -> ligand O26  at 2.94 A -> max_distance 3.9
+  residue  31 E  (glutamic10    ) -> ligand C34  at 3.06 A -> max_distance 4.1
+  residue  33 S  (serine20      ) -> ligand O27  at 3.77 A -> max_distance 4.8
+
+wrote runs/octinoxate/boltz/RGGDGGKGGGGLGGGGKGIGEGWGGDGSGGEGS_esm1.yaml
+$ /Users/cafierom/python_mac/peptidebuilder/.venv/bin/python /Users/cafierom/python_mac/peptidebuilder/code/boltz_hints.py runs/octinoxate design.json --cutoff 4.5 --margin 1.0 --name RGGDGGKGGGGLGGGGKGIGEGWGGDGSGGEGS_esm2 --sequence RKKDAKKRIRDLESIQKLILEKWGVDSSSNEDS
+ligand SMILES: CCCC[C@H](CC)OC(=O)/C=C/c1ccc(OC)cc1
+44 ligand atoms named by Boltz's own code path
+
+sequence: RKKDAKKRIRDLESIQKLILEKWGVDSSSNEDS  (33 residues)
+12 contact hints (closest ligand atom per designed residue):
+  residue   1 R  (arginine3     ) -> ligand O25  at 2.77 A -> max_distance 3.8
+  residue   4 D  (aspartic8     ) -> ligand C31  at 3.03 A -> max_distance 4.0
+  residue   7 K  (lysine8       ) -> ligand C37  at 4.20 A -> max_distance 5.2
+  residue  12 L  (leucine13     ) -> ligand C41  at 4.14 A -> max_distance 5.1
+  residue  17 K  (lysine5       ) -> ligand C36  at 3.09 A -> max_distance 4.1
+  residue  19 I  (isoleucine4   ) -> ligand C33  at 3.75 A -> max_distance 4.8
+  residue  21 E  (glutamic9     ) -> ligand C30  at 3.18 A -> max_distance 4.2
+  residue  23 W  (tryptophan5   ) -> ligand C37  at 3.55 A -> max_distance 4.5
+  residue  26 D  (aspartic21    ) -> ligand C37  at 3.13 A -> max_distance 4.1
+  residue  28 S  (serine31      ) -> ligand O26  at 2.94 A -> max_distance 3.9
+  residue  31 E  (glutamic10    ) -> ligand C34  at 3.06 A -> max_distance 4.1
+  residue  33 S  (serine20      ) -> ligand O27  at 3.77 A -> max_distance 4.8
+
+wrote runs/octinoxate/boltz/RGGDGGKGGGGLGGGGKGIGEGWGGDGSGGEGS_esm2.yaml
+$ /Users/cafierom/python_mac/peptidebuilder/.venv/bin/python /Users/cafierom/python_mac/peptidebuilder/code/boltz_hints.py runs/octinoxate design.json --no-hints --name RGGDGGKGGGGLGGGGKGIGEGWGGDGSGGEGS_control
+ligand SMILES: CCCC[C@H](CC)OC(=O)/C=C/c1ccc(OC)cc1
+44 ligand atoms named by Boltz's own code path
+
+sequence: RGGDGGKGGGGLGGGGKGIGEGWGGDGSGGEGS  (33 residues)
+no contact hints (control run)
+
+wrote runs/octinoxate/boltz/RGGDGGKGGGGLGGGGKGIGEGWGGDGSGGEGS_control.yaml
+
+==============================================================================
+4. co-fold each one
+==============================================================================
+folding RGGDGGKGGGGLGGGGKGIGEGWGGDGSGGEGS_hints -> runs/octinoxate/boltz/RGGDGGKGGGGLGGGGKGIGEGWGGDGSGGEGS_hints.log
+  wrote runs/octinoxate/boltz/boltz_results_RGGDGGKGGGGLGGGGKGIGEGWGGDGSGGEGS_hints/predictions/RGGDGGKGGGGLGGGGKGIGEGWGGDGSGGEGS_hints/RGGDGGKGGGGLGGGGKGIGEGWGGDGSGGEGS_hints_model_0.cif
+folding RGGDGGKGGGGLGGGGKGIGEGWGGDGSGGEGS_esm1 -> runs/octinoxate/boltz/RGGDGGKGGGGLGGGGKGIGEGWGGDGSGGEGS_esm1.log
+  wrote runs/octinoxate/boltz/boltz_results_RGGDGGKGGGGLGGGGKGIGEGWGGDGSGGEGS_esm1/predictions/RGGDGGKGGGGLGGGGKGIGEGWGGDGSGGEGS_esm1/RGGDGGKGGGGLGGGGKGIGEGWGGDGSGGEGS_esm1_model_0.cif
+folding RGGDGGKGGGGLGGGGKGIGEGWGGDGSGGEGS_esm2 -> runs/octinoxate/boltz/RGGDGGKGGGGLGGGGKGIGEGWGGDGSGGEGS_esm2.log
+  wrote runs/octinoxate/boltz/boltz_results_RGGDGGKGGGGLGGGGKGIGEGWGGDGSGGEGS_esm2/predictions/RGGDGGKGGGGLGGGGKGIGEGWGGDGSGGEGS_esm2/RGGDGGKGGGGLGGGGKGIGEGWGGDGSGGEGS_esm2_model_0.cif
+folding RGGDGGKGGGGLGGGGKGIGEGWGGDGSGGEGS_control -> runs/octinoxate/boltz/RGGDGGKGGGGLGGGGKGIGEGWGGDGSGGEGS_control.log
+  wrote runs/octinoxate/boltz/boltz_results_RGGDGGKGGGGLGGGGKGIGEGWGGDGSGGEGS_control/predictions/RGGDGGKGGGGLGGGGKGIGEGWGGDGSGGEGS_control/RGGDGGKGGGGLGGGGKGIGEGWGGDGSGGEGS_control_model_0.cif
+
+==============================================================================
+5. binding energy on every folded complex: interaction, strain, cavity desolvation
+==============================================================================
+$ /Users/cafierom/python_mac/peptidebuilder/.venv/bin/python /Users/cafierom/python_mac/peptidebuilder/code/binding_energy.py runs/octinoxate --terms interaction,strain,cavity --replicates 2
+W0925 09:25:45.720000 19095 torch/distributed/elastic/multiprocessing/redirects.py:35] NOTE: Redirects are currently not supported in MacOs.
+[09:25:54] WARNING: More than one matching pattern found - picking one
+
+WARNING:root:Model is being compiled this might take a while for the first time
+W0925 09:25:55.073000 19095 torch/_logging/_internal.py:1345] [0/0] Profiler record function <class 'torch.autograd.profiler.record_function'> will be ignored
+WARNING:root:The UMA fast path (merge_mole + compile) is only available for fixed composition, task, charge, and spin. This is optimized for MD applications. Falling back to a less optimized version for subsequent evaluations. Reason: 'Compositions differ from merged model'.
+Use inference_settings='batch' for heterogeneous batched evaluations.
+=== finished Fri 25 Sep 2026 09:59:35 BST ===
+/Users/cafierom/.local/share/uv/python/cpython-3.12.13-macos-aarch64-none/lib/python3.12/multiprocessing/resource_tracker.py:279: UserWarning: resource_tracker: There appear to be 1 leaked semaphore objects to clean up at shutdown
+  warnings.warn('resource_tracker: There appear to be %d '
