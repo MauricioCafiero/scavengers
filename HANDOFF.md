@@ -39,21 +39,29 @@ corrected setup instructions.
 
 ### Documents
 
-* `README_new.md` — the new public README, written today. Complete apart from two pending energies
-  and the images the user is supplying.
-* `README.md` — the old one, carrying trials and negative results. The user's decision: this becomes
-  an **internal** document and `README_new.md` becomes `README.md`. Do not do that swap unprompted.
+* `README.md` — the public README. Complete: overview, workflow, installation, file-by-file
+  description, the octinoxate worked example with its twelve-row table and twelve renders, metrics,
+  traps, limitations and credit. Shell 2 is to be added to it as a second worked example (§4).
+* `README_previous.md` — the old README, carrying trials and negative results, kept as an internal
+  document.
 * `PROGRESS.md` — the full working log, with a findings list and the README summary table at the top.
 
 ### What is *not* done
 
-* Shell 2 has **not** been swept. A sweep was started at 19:21 and killed two minutes later at the
-  user's request; `condense_shell2.csv` may exist but is incomplete — **delete it and start over**.
-* Fix 4 in §2 (README installation section). Fixes 1-3 are done — see the table there.
-* The three `_control` structures have no rows in `boltz/fold_check.csv` and no energies in
-  any `boltz/binding*.csv`, though `esm2_control` was quoted this session at -20.27 kcal/mol,
-  0.53 enclosed, 0.40 wrapped. Track down or regenerate before the README table goes in:
-  the controls are what make the constraint ladder mean anything.
+**Only one thing: shell 2 has not been swept.** A sweep was started at 19:21 on 2026-09-25 and
+killed two minutes later at the user's request; the empty `condense_shell2.csv` it left has been
+deleted. Start from §3.
+
+Everything else listed here in earlier drafts is finished, so do not redo it:
+
+* All four code fixes in §2 — Boltz resolver wired in, pdbfixer and ESM2 local, ligand naming local,
+  README installation section rewritten. Verified, committed, pushed.
+* All twelve structures scored. `figures/manifest.csv` carries twelve complete rows of enclosure,
+  wrapping, contacts, interaction and ligand strain, and is the joined table to read.
+* The README is written and is now `README.md`, with all twelve renders in place and captions
+  checked against the manifest. The previous one is `README_previous.md`.
+* The repository has been cleaned and the history rebuilt: no inherited commits or files, `origin`
+  removed, `scavengers` the only remote. See §7 and `NEXT_STEPS.md`.
 
 ---
 
@@ -160,15 +168,43 @@ Boltz's before trusting it**: the current implementation is known-correct (check
 zero element mismatches, composition C17H24O3), so compare output against it while a Boltz install
 is still available. Keep the subprocess version as the fallback.
 
-### Fix 4 — README installation section — **STILL TO DO**
+### Fix 4 — README installation section — **DONE**
 
-`README_new.md` has an "Installation" section describing three external environments. Rewrite it to
-match reality after fixes 1–3: one required environment (this repo's `.venv`), one optional external
-one (Boltz, discoverable by flag or environment variable), and no absolute paths.
+The section described three external environments at absolute paths. It now describes one required
+environment (this repo's `.venv`, with the `uv pip` note) and one optional external one, Boltz,
+resolved at call time by `boltz_env.py` with `boltz_offline.py` for machines that have none. No
+absolute paths remain anywhere in the README.
 
 ---
 
 ## 3. Then: run the second shell
+
+### Before anything: ask, then keep the machine awake
+
+**Ask before starting the run.** §6 is not a formality — it is why this context was reset. Say what
+you intend to run and how long it will take, and wait. Do not begin because this document describes
+the commands.
+
+**Then arm a sleep assertion for the whole session, before the first job.** This machine sleeps
+mid-conversation, not only mid-job, which stalls detached work and interrupts the session, so the
+assertion has to cover the session rather than an individual calculation:
+
+```sh
+caffeinate -is -t 43200 &          # 12 h, dies on its own if forgotten
+pmset -g assertions | grep -E 'PreventSystemSleep +[01]'   # 1 once armed
+```
+
+Arm one, not several, and give it a timeout so it cannot outlive the session indefinitely. Disarm
+it when the work ends:
+
+```sh
+pgrep -f 'caffeinate -is'          # ignore the Bash tool's own short -t 300 wrapper
+kill <pid>
+```
+
+The assertion armed on 2026-09-25 at 16:49 ran 12 hours and expired by itself around 04:49 on the
+26th. Do not assume one is running — check with `pmset` before starting a long job.
+
 
 The point is to stop resting every conclusion on one designed arrangement. **Everything must be
 scored**, not a subset — the user was explicit about that.
@@ -227,15 +263,17 @@ prefix handling.
 
 ---
 
-## 4. Then: update the README
+## 4. Then: add shell 2 to the README
 
-* fill the two pending energies in the summary table (`esm2_f4`, `esm2_f8`)
-* add shell 2's results as a second worked example, and say whether the shell-1 findings replicate —
+The README is otherwise complete. Only one thing is wanted from shell 2:
+
+* add its results as a **second worked example**, and say whether the shell-1 findings replicate —
   particularly whether f12 folds again enclose the ligand with low ligand strain while partial
-  constraint sets distort it
-* rewrite Installation per fix 4
-* the user is supplying images; `README_new.md` has a placeholder table naming the files and captions
-* when the user says so, `README.md` → internal document, `README_new.md` → `README.md`
+  constraint sets distort it, and whether wrapping tracks interaction energy within a sequence or
+  inverts as it did for `esm2`.
+
+The existing worked example, its twelve-row table and its three figure ladders stay as they are.
+That is the comparison shell 2 is being run to provide.
 
 ---
 
