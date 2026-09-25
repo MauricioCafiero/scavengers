@@ -207,10 +207,20 @@ commands in a short `caffeinate -t 300` which expires by itself — that is not 
 
 ## Repo
 
-- Work is pushed to **github.com/MauricioCafiero/scavengers**: their initial LICENSE commit plus our
-  commits, code and `runs/octinoxate` only, no files inherited from the original repo.
-- This checkout's `origin` is still `lucia-71/peptidebuilder`. **Do not push there.** Push to
-  scavengers from a temporary worktree off `scavengers/main`, so the inherited history and the 197 MB
-  of `data/` never go with it.
-- `data/`, `notebooks/` and the scratch run directories stay out of scavengers; `runs/octinoxate` is
-  committed, other `runs/*` are ignored.
+- Work is pushed to **github.com/MauricioCafiero/scavengers**, which is now the only remote. `main`
+  tracks `scavengers/main`, so a bare `git push` goes to the right place. The `lucia-71/peptidebuilder`
+  remote has been removed, and the worktree dance previously needed to keep the inherited history out
+  is no longer necessary.
+- **No inherited material is in this history.** The 12 commits authored by the original author were
+  dropped when `main` was rebased onto the scavengers root (2026-09-25); the history now begins at
+  your own `Initial commit` and every commit is yours. Verified by blob hash across both trees: no
+  file here is byte-identical to any file of hers.
+- `data/` and `notebooks/` stay out. Both are inherited: `data/` is 197 MB of the original project's
+  MD trajectories, and `notebooks/frag_grow.ipynb` is her file, which one of our commits merely
+  relocated. **Checking which commit added a file to our history does not establish its origin** —
+  check whether the content appears in her tree. Restoring the notebook on the strength of the wrong
+  test is a mistake already made once.
+- `runs/octinoxate` is committed, other `runs/*` are ignored, except `runs/*.log`: the UMA scoring
+  logs are the only record of how long each relaxation took and whether it converged.
+- Credit to the original author stays in the README and in any publication. Keeping her commits out
+  of this repository's git history is separate from, and does not affect, that attribution.
