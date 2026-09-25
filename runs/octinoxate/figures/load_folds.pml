@@ -4,6 +4,11 @@
 
 # No `reinitialize` and no background colour: your .pymolrc defaults should win. Run this into a
 # fresh session if you want a clean slate.
+# The loads below are relative, so the script sets its own directory first. Without this, running
+# it from anywhere else fails every load, and PyMOL carries on to leave an empty session whose
+# only symptom is `Invalid selection name` later on.
+cd /Users/cafierom/python_mac/peptidebuilder/runs/octinoxate/figures
+
 set stick_radius, 0.15
 set sphere_scale, 0.22
 
@@ -27,14 +32,22 @@ pair_fit shell and id 1, orig_control and name C35, shell and id 2, orig_control
 # --- superpose everything on the ligand of the first fold -------------------------------------
 # The ligands are all the same molecule from the same SMILES, so they share atom names and align
 # cleanly. This is what makes the enclosure comparison visual.
-python
-from pymol import cmd
-objs = [o for o in cmd.get_names("objects") if o != "shell"]
-if objs:
-    ref = objs[0]
-    for o in objs[1:]:
-        cmd.align(f"{o} and not polymer", f"{ref} and not polymer", cycles=0)
-python end
+# --- superpose every fold on the ligand of the first ------------------------------
+# Plain `align` lines, not a `python ... python end` block: if anything inside that block
+# raised, PyMOL could be left with its parser in Python mode, and the next command typed
+# came back as "Invalid selection name" against a perfectly valid object.
+# The ligands are the same molecule from the same SMILES, so they share atom names.
+align orig_f4 and not polymer, orig_control and not polymer, cycles=0
+align orig_f8 and not polymer, orig_control and not polymer, cycles=0
+align orig_f12 and not polymer, orig_control and not polymer, cycles=0
+align esm1_control and not polymer, orig_control and not polymer, cycles=0
+align esm1_f4 and not polymer, orig_control and not polymer, cycles=0
+align esm1_f8 and not polymer, orig_control and not polymer, cycles=0
+align esm1_f12 and not polymer, orig_control and not polymer, cycles=0
+align esm2_control and not polymer, orig_control and not polymer, cycles=0
+align esm2_f4 and not polymer, orig_control and not polymer, cycles=0
+align esm2_f8 and not polymer, orig_control and not polymer, cycles=0
+align esm2_f12 and not polymer, orig_control and not polymer, cycles=0
 
 # --- representations --------------------------------------------------------------------------
 # No cartoon: a ribbon through the backbone reads as extra bulk next to the atoms being judged.
@@ -57,7 +70,11 @@ zoom not polymer, 8
 
 # --- one set at a time ------------------------------------------------------------------------
 # Loaded in reading order: control, f4, f8, f12 for orig, then esm1, then esm2. To compare a pair:
-#   disable all ; enable orig_control ; enable orig_f12
+#   disable all
+#   enable orig_control
+#   enable orig_f12
+# (one per line: PyMOL splits on a semicolon even inside a comment, so a hint written
+# on one line would execute its own tail)
 disable all
 enable orig_control
 enable shell
