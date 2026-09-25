@@ -34,8 +34,10 @@ def main(argv=None):
     parser.add_argument("--seed", type=int, default=1, help="random seed (default: 1)")
     parser.add_argument("--shuffle", help="instead of random sequences, shuffle this one (keeps composition)")
     parser.add_argument("--model", default="uma-s-1p2p1", help="fairchem model (default: uma-s-1p2p1)")
-    parser.add_argument("--boltz-repo", default=os.path.expanduser("~/python_mac/boltz_local"))
-    parser.add_argument("--fixer-venv", default=os.path.expanduser("~/python_mac/pocket_assist/venv"))
+    parser.add_argument("--boltz-repo", default=os.environ.get("PEPTIDEBUILDER_BOLTZ_REPO"),
+                        help="a boltz checkout to use instead of however boltz is installed here")
+    parser.add_argument("--fixer-venv", default=os.environ.get("PEPTIDEBUILDER_FIXER_VENV"),
+                        help="venv with pdbfixer, only needed if it is not installed here")
     args = parser.parse_args(argv)
 
     sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))

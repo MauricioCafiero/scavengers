@@ -15,7 +15,7 @@ on its next pass and they can be compared with the poly-glycine originals.
 Usage:
     python code/fill_linkers.py runs/octinoxate [--sequences S,S] [--limit N] [--dry-run]
 
-ESM2 runs in the GenMaskFill environment (--genmask-venv), so nothing is installed here.
+ESM2 runs in process (pip install transformers); --genmask-venv falls back to another environment.
 """
 import argparse
 import csv
@@ -25,7 +25,8 @@ import subprocess
 import sys
 import tempfile
 
-GENMASK_VENV = os.path.expanduser("~/python_mac/GenMaskFill/.venv")
+# ESM2 runs in process when transformers is installed; this is only the fallback, and only if set
+GENMASK_VENV = os.environ.get("PEPTIDEBUILDER_GENMASK_VENV")
 DEFAULT_MODEL = "facebook/esm2_t12_35M_UR50D"
 
 # fills one mask at a time, choosing the position the model is most confident about but
@@ -84,9 +85,15 @@ json.dump(results, open(out_path, "w"))
 '''
 
 
-def fill(sequences, genmask_venv=GENMASK_VENV, model=DEFAULT_MODEL,
+def fill(sequences, genmask_venv=None, model=DEFAULT_MODEL,
          cutoff=0.05, variants=1, seed=1):
-    """Fill the glycine linkers of each sequence; returns a list of result dicts."""
+    """Fill the glycine linkers of each sequence; returns a list of result dicts.
+
+    transformers is an ordinary pip install, so this normally runs in process. `genmask_venv` is
+    the original route -- the same script in another environment's interpreter -- kept as a
+    fallback. Both run the identical script text, in process by exec rather than a second copy of
+    the algorithm, so the two routes cannot drift apart and the same seed gives the same fills.
+    """
     with tempfile.TemporaryDirectory() as tmp:
         in_path = os.path.join(tmp, "in.json")
         out_path = os.path.join(tmp, "out.json")
@@ -94,10 +101,27 @@ def fill(sequences, genmask_venv=GENMASK_VENV, model=DEFAULT_MODEL,
         json.dump({"sequences": list(sequences), "model": model, "cutoff": cutoff,
                    "variants": variants, "seed": seed}, open(in_path, "w"))
         open(script, "w").write(FILL_SCRIPT)
-        proc = subprocess.run([os.path.join(genmask_venv, "bin", "python"), script, in_path, out_path],
-                              capture_output=True, text=True)
-        if not os.path.exists(out_path):
-            raise RuntimeError(f"ESM2 fill failed:\n{proc.stdout[-2000:]}\n{proc.stderr[-2000:]}")
+        try:
+            import transformers  # noqa: F401
+        except ImportError:
+            if not genmask_venv:
+                raise RuntimeError(
+                    "transformers is not installed here and no --genmask-venv was given. Either\n"
+                    "  pip install transformers    (or: uv pip install transformers)\n"
+                    "or point --genmask-venv at an environment that has it.")
+            proc = subprocess.run(
+                [os.path.join(genmask_venv, "bin", "python"), script, in_path, out_path],
+                capture_output=True, text=True)
+            if not os.path.exists(out_path):
+                raise RuntimeError(f"ESM2 fill failed:\n{proc.stdout[-2000:]}\n{proc.stderr[-2000:]}")
+        else:
+            saved = sys.argv
+            sys.argv = [script, in_path, out_path]
+            try:
+                exec(compile(FILL_SCRIPT, "fill_linkers:FILL_SCRIPT", "exec"),
+                     {"__name__": "__main__"})
+            finally:
+                sys.argv = saved
         return json.load(open(out_path))
 
 
@@ -111,7 +135,9 @@ def main(argv=None):
     parser.add_argument("--prob-cutoff", type=float, default=0.05, help="minimum candidate probability to sample from (default: 0.05)")
     parser.add_argument("--seed", type=int, default=1, help="sampling seed (default: 1)")
     parser.add_argument("--model", default=DEFAULT_MODEL, help=f"HF ESM2 checkpoint (default: {DEFAULT_MODEL})")
-    parser.add_argument("--genmask-venv", default=GENMASK_VENV, help=f"venv with transformers (default: {GENMASK_VENV})")
+    parser.add_argument("--genmask-venv", default=GENMASK_VENV,
+                        help="venv with transformers, only needed if it is not installed here "
+                             "(or $PEPTIDEBUILDER_GENMASK_VENV)")
     args = parser.parse_args(argv)
 
     csv_path = os.path.join(args.outdir, "sequences.csv")
