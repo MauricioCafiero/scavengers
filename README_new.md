@@ -138,8 +138,8 @@ python code/design_test.py runs/octinoxate \
 
 ## Installation
 
-The repository's own environment is small. Everything expensive is called out to a separate
-environment, so nothing conflicts.
+One environment runs everything except the folding, and Boltz-2 is optional and discoverable rather
+than assumed at a fixed path.
 
 ### This repository
 
@@ -149,8 +149,17 @@ source .venv/bin/activate
 pip install -r requirements.txt
 ```
 
-That gives `fairchem-core`, `ase`, `numpy`, `torch`, `rdkit` and `py3Dmol`. Python 3.12 is what this has
-been run on.
+That gives `fairchem-core`, `ase`, `numpy`, `torch`, `rdkit`, `py3Dmol`, `pdbfixer` and
+`transformers`. `pdbfixer` pulls `openmm`, which it is built on. Python 3.12 is what this has been
+run on.
+
+If the environment was made with `uv`, note that it has no `pip` in it, so install with
+`uv pip install --python .venv/bin/python -r requirements.txt` — `.venv/bin/python -m pip` fails with
+"No module named pip".
+
+`transformers` currently resolves `huggingface-hub` below 2.0. That is safe here: `fairchem-core`
+declares `huggingface-hub>=0.27.1` with no upper bound and uses exactly one function from it,
+`hf_hub_download`. A UMA single point gives the same energy either side of the change.
 
 The UMA potential is downloaded on first use from Hugging Face and needs a token with access to the
 Meta FAIR-Chem repository:
@@ -161,19 +170,36 @@ huggingface-cli login
 
 The default checkpoint is `uma-s-1p2p1`. Pass `--model` to change it.
 
-### External environments
+### Boltz-2, the one external dependency
 
-Three tools run in their own environments and are invoked as subprocesses. Each script takes a flag to
-point elsewhere if your paths differ.
+Boltz-2 does the co-folding. It is heavy and GPU-bound, so it may live in its own environment rather
+than this one — but nothing here assumes where. `code/boltz_env.py` resolves how to run it, first
+match winning:
 
-| tool | what it provides | default path | flag |
-|---|---|---|---|
-| **Boltz-2** | co-folding peptide with ligand | `~/python_mac/boltz_local/.venv` | `--boltz-venv` |
-| **pdbfixer / OpenMM** | adds hydrogens to Boltz output | `~/python_mac/pocket_assist/venv` | `--fixer-venv` |
-| **ESM2 / transformers** | fills glycine linkers | `~/python_mac/GenMaskFill/.venv` | `--genmask-venv` |
+1. `--boltz-cmd`, or `$PEPTIDEBUILDER_BOLTZ_CMD` — a complete command, used as given
+2. `--boltz-venv`, or `$PEPTIDEBUILDER_BOLTZ_VENV` — a virtualenv holding Boltz
+3. `boltz` importable in this environment — the plain `pip install boltz` case
+4. `boltz` on `$PATH`
+5. an MPS wrapper beside the venv, if that layout happens to exist
 
-Boltz-2 is driven through `~/python_mac/boltz_local/code/boltz_mps.py`, a wrapper that arranges the two
-passes needed so the structure and affinity models do not have to share memory.
+If none match, the error lists these options rather than failing obscurely.
+
+**No Boltz at all?** `code/boltz_offline.py export` writes every input into one folder with the
+command to run, you fold them anywhere — a GPU box, Colab, a cluster queue — and `import` puts the
+structures back where the scoring scripts look. That route is also the practical way to use a GPU for
+scoring, which is where the time actually goes.
+
+### Optional overrides
+
+pdbfixer and ESM2 run in process. These only matter if an environment cannot install them, in which
+case each falls back to calling another interpreter:
+
+| flag | environment variable | what it provides |
+|---|---|---|
+| `--fixer-venv` | `$PEPTIDEBUILDER_FIXER_VENV` | pdbfixer / OpenMM, adds hydrogens to Boltz output |
+| `--genmask-venv` | `$PEPTIDEBUILDER_GENMASK_VENV` | ESM2 / transformers, fills glycine linkers |
+
+Both routes run identical code and return identical numbers.
 
 ### Hardware
 
