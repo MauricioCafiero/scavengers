@@ -4,16 +4,24 @@
 for every structure in the run. That replaces the old definition, which relaxed each complex's own
 bound pose and so measured every structure against a different local minimum.
 
-Two things make this reproducible where the old one was not, and cheap where the old one was not:
+**The bound state is the ligand as it exists in the complex, hydrogens included.** Strain is the energy
+released on going from that state to the totally free one, so `E(bound_i)` must be the ligand with the
+hydrogens the complex relaxation gave it -- positioned in the peptide's field. Re-placing those
+hydrogens on the isolated ligand and relaxing them changes the initial state to one the ligand never
+occupies, and relaxes away part of the very energy being measured. It was tried, and it lowered every
+one of 24 strains by 0.2 to 6.1 kcal/mol. Do not do it.
 
-* **`E(bound_i)` needs only the ligand's heavy atoms**, which come from the Boltz CIF, plus hydrogens
-  added by RDKit's `AddHs(addCoords=True)` -- geometric, deterministic -- and then relaxed with the
-  heavy atoms held fixed. No complex relaxation, so this runs on folds whose complex geometries were
-  never saved, and takes seconds per structure instead of tens of minutes.
-* **The hydrogens are optimised on the isolated ligand, not inside the complex.** Previously they were
-  relaxed in the peptide's field, starting from a `pdbfixer` protonation that is not deterministic, and
-  that was worth 3.6 kcal/mol of apparent strain on one structure tested twice. Optimising them alone
-  also separates conformational strain from interaction, which is the point of reporting them apart.
+That is also why the peptide's influence on those hydrogens is not double-counted against the
+interaction energy: interaction is evaluated at one fixed geometry and says nothing about what is
+released on reaching the free state. They are different legs of the same cycle.
+
+So `E(bound_i)` comes from one of two places, in this order:
+
+1. `boltz/structures/<name>_ligand_bound.xyz`, written by `binding_energy.py` -- the bound ligand with
+   its complex-relaxed hydrogens. A single point on it, no relaxation.
+2. failing that, the scoring log: the step-0 energy of the `relaxing free ligand` BFGS block is exactly
+   that same quantity, which is how folds scored before geometry saving existed can still be corrected
+   without re-running anything.
 
 Results go to a csv of their own; nothing existing is modified.
 
@@ -31,6 +39,61 @@ import sys
 import numpy as np
 
 
+def bound_energy(name, boltz_dir, calc):
+    """E(ligand in the complex, with its complex-relaxed hydrogens), in kcal/mol-equivalent.
+
+    Two sources, in order. Both are the same physical state -- the bound ligand exactly as the complex
+    relaxation left it -- so they are interchangeable and neither involves touching a hydrogen.
+
+    1. `structures/<name>_ligand_bound.xyz`, written by `binding_energy.py`. A single point.
+    2. the scoring log: the step-0 energy of that fold's `relaxing free ligand` BFGS block is the
+       energy of the bound ligand, because step 0 is evaluated before the optimiser moves anything.
+       This is how folds scored before geometry saving existed are handled.
+    """
+    import glob as _glob
+    import re as _re
+    from binding_energy import energy as _energy, EV_TO_KCAL as _EV
+
+    path = os.path.join(boltz_dir, "structures", f"{name}_ligand_bound.xyz")
+    if os.path.exists(path):
+        lines = open(path).read().splitlines()
+        n = int(lines[0])
+        sym, xyz = [], []
+        for ln in lines[2:2 + n]:
+            f = ln.split()
+            sym.append(f[0])
+            xyz.append([float(f[1]), float(f[2]), float(f[3])])
+        return _energy(sym, np.array(xyz), 0, calc) * _EV, "xyz"
+
+    # A structure scored more than once appears in more than one log. Those are repeat measurements --
+    # they differ by the pdbfixer hydrogen spread, 0.21 kcal/mol for the one structure scored twice
+    # here -- so take the most recent and say that others existed, rather than silently depending on
+    # filename order.
+    logs = os.path.join(os.path.dirname(boltz_dir), "uma_logs", "score_*.log")
+    hits = []
+    for log in sorted(_glob.glob(logs), key=os.path.getmtime):
+        lines = open(log, errors="replace").read().splitlines()
+        cur = None
+        for j, ln in enumerate(lines):
+            m = _re.match(r"^([A-Za-z0-9_]+)\s*$", ln)
+            if m and not ln.startswith(("BFGS", "Step")):
+                cur = m.group(1)
+            if "relaxing free ligand" in ln and cur == name:
+                for k in range(j + 1, min(j + 5, len(lines))):
+                    b = _re.match(r"BFGS:\s+0\s+\S+\s+(-?\d+\.\d+)", lines[k])
+                    if b:
+                        hits.append((float(b.group(1)) * _EV, os.path.basename(log)))
+                        break
+    if not hits:
+        return None, None
+    e, src = hits[-1]
+    if len(hits) > 1:
+        spread = max(h[0] for h in hits) - min(h[0] for h in hits)
+        print(f"    note: {name} was scored {len(hits)} times, spread {spread:.3f} kcal/mol; "
+              f"using the most recent ({src})", flush=True)
+    return e, src
+
+
 def main(argv=None):
     p = argparse.ArgumentParser(description=__doc__.split("\n\n")[0],
                                formatter_class=argparse.RawDescriptionHelpFormatter)
@@ -38,18 +101,12 @@ def main(argv=None):
     p.add_argument("--match", help="only folds whose name contains this")
     p.add_argument("--reference", default="ligand_reference.json")
     p.add_argument("--out", default="strain_global.csv")
-    p.add_argument("--fmax", type=float, default=0.01, help="hydrogen relaxation cutoff (default 0.01)")
-    p.add_argument("--steps", type=int, default=300, help="hydrogen relaxation cap (default 300)")
     p.add_argument("--model", default="uma-s-1p2p1")
-    p.add_argument("--save-structures", action="store_true",
-                   help="write each bound ligand with its relaxed hydrogens")
     args = p.parse_args(argv)
 
     sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
     from boltz_check import ligand_smiles
-    from uma_binding import parse_cif, protonate_ligand
-    from binding_energy import energy, relax_hydrogens, EV_TO_KCAL
-    from peptide_builder import write_xyz
+    from binding_energy import EV_TO_KCAL  # noqa: F401  (bound_energy imports its own)
     from fairchem.core import pretrained_mlip, FAIRChemCalculator
 
     ref_path = os.path.join(args.outdir, args.reference)
@@ -86,32 +143,28 @@ def main(argv=None):
         sys.exit("no folded complexes found")
     print(f"{len(cifs)} folds\n")
 
-    smiles = ligand_smiles(args.outdir)
     calc = FAIRChemCalculator(pretrained_mlip.get_predict_unit(args.model, device="cpu"),
                              task_name="omol")
-    struct_dir = os.path.join(boltz_dir, "structures")
-    if args.save_structures:
-        os.makedirs(struct_dir, exist_ok=True)
-
-    rows = []
+    rows, missing = [], []
     for i, cif in enumerate(cifs, 1):
         name = os.path.basename(cif).replace("_model_0.cif", "")
-        _pep, lig = parse_cif(cif)
-        sym, xyz, chg = protonate_ligand(lig, smiles)
-        # Hydrogens relaxed with the heavy atoms fixed: Boltz's coordinates are the prediction and
-        # must not move, but RDKit's geometric hydrogens carry an artificial strain of their own.
-        xyz = relax_hydrogens(sym, xyz, chg, calc, fmax=args.fmax, steps=args.steps,
-                              label=f"{name} ligand")
-        e_bound = energy(sym, xyz, chg, calc) * EV_TO_KCAL
+        e_bound, src = bound_energy(name, boltz_dir, calc)
+        if e_bound is None:
+            missing.append(name)
+            print(f"[{i}/{len(cifs)}] {name:<38} SKIPPED: no bound ligand geometry and none in the "
+                  f"logs", flush=True)
+            continue
         strain = e_bound - e_ref
-        if args.save_structures:
-            write_xyz(os.path.join(struct_dir, f"{name}_ligand_bound_hrelaxed.xyz"), sym, xyz,
-                      f"{name}: Boltz heavy atoms, hydrogens relaxed alone at fmax {args.fmax}")
-        rows.append({"name": name, "n_atoms": len(sym), "ligand_charge": chg,
-                     "e_bound_kcal": f"{e_bound:.3f}",
+        rows.append({"name": name, "e_bound_kcal": f"{e_bound:.3f}",
                      "e_reference_kcal": f"{e_ref:.3f}",
-                     "strain_global_kcal": f"{strain:.3f}"})
-        print(f"[{i}/{len(cifs)}] {name:<38} strain {strain:>8.3f}", flush=True)
+                     "strain_global_kcal": f"{strain:.3f}", "source": src})
+        print(f"[{i}/{len(cifs)}] {name:<38} strain {strain:>8.3f}   [{src}]", flush=True)
+
+    if missing:
+        print(f"\n{len(missing)} fold(s) had no bound ligand: {', '.join(missing)}")
+        print("Score them first -- binding_energy.py writes structures/<name>_ligand_bound.xyz.")
+    if not rows:
+        sys.exit("nothing to write")
 
     out = os.path.join(boltz_dir, args.out)
     with open(out, "w", newline="") as fh:

@@ -647,6 +647,23 @@ Run `ligand_reference.py` once per ligand, then `strain_global.py` after folding
 per-structure free-ligand relaxation, which was a meaningful slice of its runtime. `binding_shell*.csv`
 keeps the interaction energy; strain comes from `strain_global.csv`.
 
-`boltz/strain_tight_shell2.csv` is superseded. It holds the intermediate experiment -- shell 2's
-strains at fmax 0.01 with a 1000-step cap, against per-structure references -- and is kept only as the
-record of how the defect was characterised. Do not quote from it.
+### One wrong turn, recorded so it is not repeated
+
+While fixing this I also re-placed the bound ligand's hydrogens with RDKit and relaxed them on the
+isolated ligand, on the reasoning that hydrogens optimised in the peptide's field conflate strain with
+interaction. **That is wrong.** Strain is the energy released going from the bound state to the free
+one, and the bound state is the ligand as it exists in the complex, hydrogens included. Relaxing them
+first inserts an intermediate state -- bound, then bound-heavy-atoms-with-free-molecule-hydrogens, then
+the global minimum -- and reports only the second leg while discarding the first. It lowered all 24
+strains by 0.2 to 6.1 kcal/mol. The double-counting argument was also wrong: interaction energy is
+evaluated at one fixed geometry and says nothing about the path to the free state, so the two are
+different legs of the same cycle, not the same term twice.
+
+`strain_global.py` now takes a single point on `structures/<name>_ligand_bound.xyz` and does not touch a
+hydrogen. It reproduces all 24 canonical values exactly. The intermediate experiment's outputs --
+`strain_tight_shell2.csv` and the `_ligand_relaxed_tight.xyz` files -- were deleted; they were wrong by
+construction and cheap to regenerate, so keeping them only risked someone quoting them.
+
+Note that `strain_global.py` reports when a fold appears in more than one scoring log, since those are
+repeat measurements. The shell-1 glycine control was scored three times, spread 0.207 kcal/mol, which is
+a direct measure of the pdbfixer hydrogen repeatability.

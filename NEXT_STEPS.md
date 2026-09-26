@@ -147,8 +147,9 @@ restrained MD toward the designed positions, and pharmacophore-style screening o
 Redefined 2026-09-26. Strain is now `E(bound) - E_ref` against **one shared reference per ligand** --
 the ligand's own lowest conformer, from `code/ligand_reference.py` (20 ETKDG embeddings, MMFF-ranked,
 five lowest relaxed with UMA), stored in `runs/<ligand>/ligand_reference.json` and reused by every
-shell. `code/strain_global.py` applies it to each fold from the Boltz heavy atoms alone, so it needs no
-complex relaxation. `binding_energy.py` no longer needs to compute `strain_ligand` at all.
+shell. `code/strain_global.py` applies it to each fold as a single point on the bound ligand as the complex
+relaxation left it -- that state must not be re-relaxed, not even its hydrogens; see the wrong turn
+recorded in HANDOFF.md section 10. `binding_energy.py` no longer needs to compute `strain_ligand` at all.
 
 The old definition relaxed each complex's own bound pose, so every structure was measured against a
 different local minimum. It was sensitive to the force cutoff (+1.5 to +7.7 kcal/mol between fmax 0.1
