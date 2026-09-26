@@ -1,0 +1,40 @@
+{
+  "tag": "validate_l4",
+  "gpu": "L4",
+  "structures": [
+    "s2_orig_control"
+  ],
+  "terms": "interaction,strain_ligand",
+  "out": "binding_modal.csv",
+  "returncode": 0,
+  "remote_scoring_minutes": 4.0,
+  "wall_minutes_including_startup": 4.2,
+  "minutes_per_structure": 4.0,
+  "device": {
+    "cuda_available": true,
+    "device": "NVIDIA L4",
+    "torch": "2.13.0+cu130"
+  },
+  "packages": [
+    "torch==2.13.0",
+    "fairchem-core==2.22.0",
+    "ase==3.29.0",
+    "rdkit==2026.3.6",
+    "numpy==2.4.6",
+    "pdbfixer==1.12.0"
+  ],
+  "produced": [
+    "boltz/binding_modal.csv",
+    "boltz/partial_s2_orig_control.json",
+    "boltz/structures/s2_orig_control_complex_relaxed_h.xyz",
+    "boltz/structures/s2_orig_control_ligand_bound.xyz",
+    "boltz/structures/s2_orig_control_ligand_relaxed.xyz"
+  ],
+  "sha256": {
+    "boltz/partial_s2_orig_control.json": "6701f2bc95961bf6",
+    "boltz/binding_modal.csv": "fe8f2da4cfd555b4",
+    "boltz/structures/s2_orig_control_ligand_relaxed.xyz": "4da4a9b0137a2e9d",
+    "boltz/structures/s2_orig_control_ligand_bound.xyz": "e7f575c0cd070f36",
+    "boltz/structures/s2_orig_control_complex_relaxed_h.xyz": "53d7593cf6801fa5"
+  }
+}

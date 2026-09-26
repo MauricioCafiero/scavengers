@@ -142,6 +142,23 @@ connectivity is never a post-hoc problem.
 Rejected as too close to existing tools: backbone-first sampling with an external builder,
 restrained MD toward the designed positions, and pharmacophore-style screening of folded candidates.
 
+## Ligand strain: read HANDOFF.md section 10 before quoting any strain number
+
+Redefined 2026-09-26. Strain is now `E(bound) - E_ref` against **one shared reference per ligand** --
+the ligand's own lowest conformer, from `code/ligand_reference.py` (20 ETKDG embeddings, MMFF-ranked,
+five lowest relaxed with UMA), stored in `runs/<ligand>/ligand_reference.json` and reused by every
+shell. `code/strain_global.py` applies it to each fold from the Boltz heavy atoms alone, so it needs no
+complex relaxation. `binding_energy.py` no longer needs to compute `strain_ligand` at all.
+
+The old definition relaxed each complex's own bound pose, so every structure was measured against a
+different local minimum. It was sensitive to the force cutoff (+1.5 to +7.7 kcal/mol between fmax 0.1
+and 0.01), to the step cap (a generous one lets the ligand change conformer -- up to 1.0 A of
+heavy-atom drift), and to `pdbfixer`'s non-deterministic hydrogens (3.6 kcal/mol on one structure).
+Interaction energy was never affected, because it compares the complex with its own parts at one fixed
+geometry and the hydrogen error cancels.
+
+All 24 existing folds were recomputed; `runs/octinoxate/boltz/strain_global.csv` holds the result.
+
 ## Environment map
 
 Nothing extra is installed in this repo; each external tool is called from its own environment.

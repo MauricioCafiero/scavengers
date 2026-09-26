@@ -22,6 +22,10 @@
 # own, so stage 6 passes it only the structures with no partial yet.
 #
 # Nothing of another shell's is written: every output is named from <prefix> or <shell-number>.
+#
+# Ligand strain comes from stage 5c, not from the scoring stage: one reference conformer per run
+# (ligand_reference.json) and one cheap pass over the folds (strain_shell<N>.csv). The scoring stage
+# computes the interaction energy alone.
 set -u
 
 if [ $# -lt 3 ]; then
@@ -197,15 +201,45 @@ done
 $PY code/overlay.py $RUN --match ${PREFIX}_ --out overlay_shell$NUM.csv \
     2>&1 | tee $LOGS/overlay_shell$NUM.log
 
+say "stage 5c: ligand strain against one shared reference -- also cheap"
+# The reference is a property of the ligand, not of any fold, so it is computed once per run and
+# reused. Relaxing each complex's own bound pose instead measures every structure against a different
+# local minimum, which is what made the old strain numbers depend on the force cutoff, the step cap
+# and pdbfixer's non-deterministic hydrogens. See HANDOFF.md section 10.
+if [ -f $RUN/ligand_reference.json ]; then
+    print -r -- "ligand_reference.json exists, reusing it"
+else
+    $PY code/ligand_reference.py $RUN 2>&1 | tee $UMALOGS/ligand_reference.log
+    [ -f $RUN/ligand_reference.json ] || { print -r -- "STOPPING: no reference written"; exit 1; }
+fi
+# Needs only the Boltz heavy atoms plus RDKit hydrogens, so this runs without any complex relaxation.
+$PY code/strain_global.py $RUN --match ${PREFIX}_ --out strain_shell$NUM.csv --save-structures \
+    2>&1 | tee $UMALOGS/strain_shell$NUM.log
+
 # ---------------------------------------------------------------------------------------------
 say "stage 6: score -- THE BOTTLENECK, 40-50 min each on CPU"
 # strain_peptide is left out deliberately: a free peptide collapses in vacuum, so that term measures
 # collapse rather than strain. If a CUDA device is around, binding_energy.py finds it and this takes
-# minutes per structure instead -- see boltz_offline.py for moving the whole thing to a GPU box.
-if [ ${#TODO} -eq 0 ]; then
+# minutes per structure instead -- see code/modal_score.py for renting one.
+#
+# SKIP_SCORING=1 stops here and writes the structure list, for scoring on a GPU elsewhere. Everything
+# before this stage is cheap; this stage is the only expensive one. Default is unchanged: score here.
+if [ "${SKIP_SCORING:-0}" = "1" ]; then
+    mkdir -p $RUN/modal
+    print -rl -- $TODO > $RUN/modal/shell$NUM.txt
+    print -r -- "SKIP_SCORING=1: ${#TODO} structures left unscored, listed in $RUN/modal/shell$NUM.txt"
+    print -r -- ""
+    print -r -- "  modal run code/modal_score.py --structures-file $RUN/modal/shell$NUM.txt \\"
+    print -r -- "      --out $BINDING --gpu L4"
+    print -r -- ""
+    print -r -- "then re-run this script to pick up from stage 5 with the scores in place."
+    exit 0
+elif [ ${#TODO} -eq 0 ]; then
     print -r -- "every fold already scored, skipping"
 else
-    $PY code/binding_energy.py $RUN --terms interaction,strain_ligand \
+    # interaction only. strain_ligand is stage 5c's job now, against the shared reference, and
+    # leaving it out here also removes the per-structure free-ligand relaxation from the slow stage.
+    $PY code/binding_energy.py $RUN --terms interaction \
         --out $BINDING --structures "${(j:,:)TODO}" 2>&1 | tee -a $UMALOGS/score_shell$NUM.log
 fi
 
