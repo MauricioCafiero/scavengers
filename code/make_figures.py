@@ -62,14 +62,57 @@ reset
 zoom not polymer, 8
 
 # --- one set at a time ------------------------------------------------------------------------
-# Loaded in reading order: control, f4, f8, f12 for orig, then esm1, then esm2. To compare a pair:
+# Loaded in reading order: control, f4, f8, f12 for each sequence set in turn. To compare a pair:
 #   disable all
-#   enable orig_control
-#   enable orig_f12
+#   enable {first}
+#   enable {second}
 # (one per line: PyMOL splits on a semicolon even inside a comment, so a hint written
 # on one line would execute its own tail)
+#
+# The name below is the first fold actually loaded, not a fixed one. It used to be hard-coded to
+# shell 1's `orig_control`, so a second shell's script disabled everything and then enabled an
+# object that did not exist -- opening it showed an empty window with no error worth reading.
 disable all
-enable orig_control
+enable {first}
+"""
+
+# Representation only, no loads and no alignment, so it can be applied to whatever is in the session:
+#   @style.pml
+# Written only when absent, so a hand-tuned copy is never overwritten.
+#
+# Note for anyone editing this: PyMOL splits commands on a semicolon even inside a comment, so text
+# following one is executed as a command. Never put that character in this file.
+STYLE_PML = """# Representation only. No loads, no alignment.
+# Run it after loading whatever you want:  @style.pml
+
+set auto_show_cartoon, 0
+set auto_show_lines, 0
+
+hide everything
+show sticks
+
+bg_color black
+color green, polymer
+color red, not polymer
+set stick_radius, 0.15
+
+# yellow reads cleanly against black, green and red at once.
+# A negative label_size is in Angstroms rather than screen points, so the text scales with the
+# molecule instead of staying the same size as you zoom out.
+set label_size, -0.7
+set label_color, yellow
+
+# every residue, on CA only, so one label per residue rather than one per atom
+label polymer and name CA, resn+resi
+
+# No zoom: your current view is probably the one you want. Type "zoom polymer" if you want the
+# whole thing framed.
+#
+# Adjustments, to type at the prompt:
+#   set label_size, -0.5      smaller, still scaling with zoom
+#   set label_size, -1.0      larger, still scaling with zoom
+#   set label_color, wheat
+#   label none
 """
 
 
@@ -80,18 +123,27 @@ def main(argv=None):
     parser.add_argument("--ligand", default="octinoxate")
     parser.add_argument("--design-sequence", default="RGGDGGKGGGGLGGGGKGIGEGWGGDGSGGEGS",
                         help="the design whose shell .xyz to include as the reference")
+    parser.add_argument("--fig-dir", default="figures",
+                        help="output directory inside outdir (default figures). Give a second shell "
+                             "its own, or it overwrites the first shell's manifest and script")
+    parser.add_argument("--match",
+                        help="only include folds whose name contains this, e.g. s2_ for a second "
+                             "shell. Without it every fold under boltz/ is gathered")
     args = parser.parse_args(argv)
 
     boltz_dir = os.path.join(args.outdir, "boltz")
-    fig_dir = os.path.join(args.outdir, "figures")
+    fig_dir = os.path.join(args.outdir, args.fig_dir)
     os.makedirs(fig_dir, exist_ok=True)
 
-    # numbers, keyed by structure name, from whichever csvs exist
+    # Numbers, keyed by structure name, from every results csv present. This is a glob rather than a
+    # list of filenames because the list went stale: it named a `binding_a.csv` that does not exist
+    # and omitted `binding_esm2f.csv`, so re-running this script would have silently blanked the
+    # esm2 interaction and strain columns of a manifest that was correct on disk. Each scoring run
+    # writes its own csv under a name of its own choosing, so matching the pattern is the only way
+    # to stay correct as runs accumulate.
     numbers = {}
-    for name in ("fold_check.csv", "binding_is.csv", "binding_esmf.csv", "binding_a.csv"):
-        path = os.path.join(boltz_dir, name)
-        if not os.path.exists(path):
-            continue
+    for path in sorted(glob.glob(os.path.join(boltz_dir, "fold_check*.csv"))
+                       + sorted(glob.glob(os.path.join(boltz_dir, "binding_*.csv")))):
         with open(path) as fh:
             for row in csv.DictReader(fh):
                 numbers.setdefault(row["name"], {}).update(
@@ -99,17 +151,29 @@ def main(argv=None):
 
     cifs = sorted(glob.glob(os.path.join(boltz_dir, "boltz_results_*", "predictions", "*",
                                          "*_model_0.cif")))
+    if args.match:
+        cifs = [c for c in cifs if args.match in os.path.basename(c)]
     if not cifs:
-        sys.exit(f"no folded complexes under {boltz_dir}")
+        sys.exit(f"no folded complexes under {boltz_dir}"
+                 + (f" matching {args.match!r}" if args.match else ""))
 
     long_name = args.design_sequence
     SETS = {"orig": 0, "esm1": 1, "esm2": 2}
     VARIANTS = {"control": 0, "f4": 1, "f8": 2, "f12": 3}
 
     def order(short):
-        """control -> f4 -> f8 -> f12, grouped by sequence set: the order to read them in."""
-        grp, _, var = short.partition("_")
-        return SETS.get(grp, 9), VARIANTS.get(var, 9), short
+        """control -> f4 -> f8 -> f12, grouped by sequence set: the order to read them in.
+
+        A shell prefix (`s2_orig_f4`) is stripped before the set and variant are read, so a second
+        shell's ladder reads in the same order as the first's rather than collapsing to
+        alphabetical. The prefix stays the leading sort key, keeping each shell's folds together.
+        """
+        shell, rest = "", short
+        grp, _, var = rest.partition("_")
+        if grp not in SETS and var:
+            shell, rest = grp, var
+            grp, _, var = rest.partition("_")
+        return shell, SETS.get(grp, 9), VARIANTS.get(var, 9), short
 
     manifest, loads = [], []
     for cif in cifs:
@@ -166,7 +230,8 @@ def main(argv=None):
     shell = os.path.join(args.outdir, "sequences", long_name + ".xyz")
     if os.path.exists(shell):
         shutil.copy(shell, os.path.join(fig_dir, "designed_shell.xyz"))
-        loads.insert(0, ((-1, -1, "shell"), "load designed_shell.xyz, shell"))
+        # Same shape as order() returns, or sorting compares an int against a str and raises.
+        loads.insert(0, (("", -1, -1, "shell"), "load designed_shell.xyz, shell"))
         print("included the designed shell as designed_shell.xyz")
     else:
         print(f"note: no designed shell at {shell}, so the reference is not included")
@@ -201,7 +266,17 @@ def main(argv=None):
                 f"align {n} and not polymer, {names[0]} and not polymer, cycles=0")
         align_block = "\n".join(align_lines) + "\n" if len(names) > 1 else ""
 
-        fh.write(header + "\n" + "\n".join(ordered) + "\n" + fit_cmd + align_block + PML_FOOTER)
+        footer = PML_FOOTER.format(first=names[0] if names else "all",
+                                   second=names[-1] if len(names) > 1 else "all")
+        fh.write(header + "\n" + "\n".join(ordered) + "\n" + fit_cmd + align_block + footer)
+
+    # A representation script beside the loader, so a new figure directory is usable on its own.
+    # Never overwritten: shell 1's copy may have been tuned by hand.
+    style_path = os.path.join(fig_dir, "style.pml")
+    if not os.path.exists(style_path):
+        with open(style_path, "w") as fh:
+            fh.write(STYLE_PML)
+        print(f"wrote {style_path}")
 
     print(f"\n{len(cifs)} structures copied to {fig_dir}")
     print(f"manifest -> {man_path}")

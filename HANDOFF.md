@@ -48,9 +48,10 @@ corrected setup instructions.
 
 ### What is *not* done
 
-**Only one thing: shell 2 has not been swept.** A sweep was started at 19:21 on 2026-09-25 and
-killed two minutes later at the user's request; the empty `condense_shell2.csv` it left has been
-deleted. Start from §3.
+**Shell 2 ran overnight on 2026-09-26 and is all but complete.** Sweep (132/132 ordered pairs, 4752
+rows), design, two ESM2 variants, twelve folds, geometry check, overlay and figures are all done; the
+scoring of the twelve complexes was still finishing at the time of writing. §8 holds the queue of
+shells to test next and the condition for starting them. §9 records what shell 2 showed.
 
 Everything else listed here in earlier drafts is finished, so do not redo it:
 
@@ -365,3 +366,217 @@ publications only; its wording was narrowed today after it caused a README to be
   `solvation` class, modified here in four ways, all documented in that file's docstring.
 * The older `frag_grow` repository referred to in conversation is **not on this machine** and not on
   the user's GitHub; the only trace is the filename `notebooks/frag_grow.ipynb`.
+
+---
+
+## 8. The next two shells: `tryptophan/2` then `isoleucine/2`
+
+Decided 2026-09-26 with the user. **Do not launch either until the shell-2 run is fully wrapped** —
+see the gate at the end of this section.
+
+### Why these two, and not the next-richest
+
+The twenty enumerated shells are **18 distinct**, and nine of those are strict subsets: each
+`copies=1` shell is literally the first pass of its `copies=2` counterpart, and the `lysine` and
+`aspartic` walks converge to identical selections. So the family offers only nine independent
+arrangements plus nested subsets — considerably less variety than "twenty shells" implies.
+
+More important, **the selection criterion is biased by the same artifact that makes the ESM2
+energies untrustworthy.** Mean UMA interaction energy per pose, over all 165:
+
+| class | n | mean | best |
+|---|---|---|---|
+| charged (R, K, D, E) | 67 | −10.79 | −23.29 |
+| aromatic (F, W, Y) | 28 | −4.71 | −8.94 |
+| neutral aliphatic | 70 | −2.94 | −6.01 |
+
+Charged fragments score 2.3x better than aromatics and 3.7x better than aliphatics on a gas-phase
+energy with no desolvation term. Across the twenty runs, IE per fragment correlates **−0.56 with
+charged fraction** and **+0.63 with aromatic fraction**. Greedy selection ranks shells by total IE,
+so the ranking rewards charge — and shells 1 and 2, the two richest, are the two most
+charge-dominated arrangements in the family (58% and 42% charged; shell 1 has a single aromatic among
+twelve fragments).
+
+That is backwards for this ligand. Octinoxate is a methoxyphenyl chromophore conjugated to an ester
+on a branched C8 chain; a real binder grips the ring and the tail. Both shells tested largely ignore
+both. **Tryptophan pose 2, at −8.94, is the best non-charged pose in the whole library, and neither
+shell uses it** — both take tryptophan pose 5 at −5.28, because when arginine or phenylalanine picks
+first the tryptophan is crowded out.
+
+### Test 1: `tryptophan/2` — composition, at matched size
+
+```
+tryptophan:2,tyrosine:0,phenylalanine:4,lysine:1,aspartic:21,glutamic:8,leucine:5,serine:4,tryptophan:5,lysine:8,leucine:13,serine:32
+```
+
+`n=12`, total IE −60.40, budget 16, 33% charged, 33% aromatic (F, W, W, Y), overlap 5/12 with shells
+1+2 combined. Holds fragment count and spacer budget identical to both shells already run, so
+composition moves and size does not. It secures tryptophan's best pose, the untested aromatic site.
+Its other aromatics are compromised by mutual clashes — tyrosine lands at rank 4/10 and
+phenylalanine at 8/11 — so this is a less charged shell, not an idealised aromatic interface.
+
+It also tests something neither shell could: **whether total fragment IE predicts anything.** Shells
+1 and 2 differ by 3.5% (−113.12 against −109.15), far too close to tell. At −60.40 this shell is 47%
+weaker. If it folds and wraps comparably, the pipeline is ranking shells by the artifact rather than
+the chemistry, which would be the most consequential methodological result here so far.
+
+### Test 2: `isoleucine/2` — maximum independence, lowest charge
+
+```
+isoleucine:18,leucine:2,serine:4,tryptophan:5,tyrosine:0,phenylalanine:7,lysine:1,aspartic:18,glutamic:8,isoleucine:2,leucine:5,serine:32,tryptophan:0
+```
+
+`n=13`, total IE −57.87, budget 18, **23% charged** (the lowest in the family), 31% aromatic, overlap
+only **2/13** — the most genuinely independent arrangement available. Note that size moves too
+(13 fragments, budget 18), so it confounds composition with size; run it second, after
+`tryptophan/2` has isolated composition at matched size.
+
+### A cheap controlled extra, if wanted
+
+`arginine/1` is a strict subset of shell 1 — the same eight poses as its first pass:
+
+```
+arginine:3,lysine:5,aspartic:21,glutamic:9,isoleucine:4,leucine:13,serine:31,tryptophan:5
+```
+
+`n=8`, IE −89.73, budget 10. Varies **only** fragment count and spacer budget, with zero
+compositional change. Shells 1 and 2 both needed 21 spacers against a budget of 16 and both produced
+33-residue peptides that are 64% glycine; that overshoot has never been varied, and it is a leading
+candidate explanation for why designed positions are not reproduced.
+
+### The gate: do not start until shell 2 is wrapped
+
+All of these must be true first:
+
+1. `runs/octinoxate/boltz/binding_shell2.csv` and `binding_shell2_forced.csv` between them hold all
+   twelve `s2_*` structures, and no scoring process is running.
+2. `runs/octinoxate/figures_shell2/manifest.csv` has twelve complete rows — rerun
+   `make_figures.py runs/octinoxate --fig-dir figures_shell2 --match s2_ --design-sequence <s2 seq>`
+   after the last structure lands, because the pass that ran mid-run only saw three.
+3. Shell 2 is written into the README as the second worked example (§4), including the findings in §9.
+4. The working tree is committed.
+
+### Naming for these runs
+
+Use `s3_*` for `tryptophan/2` and `s4_*` for `isoleucine/2`, with `condense_shell3.csv` /
+`condense_shell4.csv`, `design_shell3.json` / `design_shell4.json`,
+`fold_check_shell3.csv` / `_shell4.csv`, `binding_shell3.csv` / `_shell4.csv`, and
+`--fig-dir figures_shell3` / `figures_shell4`. `code/run_shell2_forced.sh` is the working template —
+it has the correct `--boltz-args=--use_potentials` form. **Do not copy `code/run_shell2.sh`**: it
+passes that flag space-separated, which argparse rejects, and it cost nine folds.
+
+The enumeration is reproducible with
+`/private/tmp/.../scratchpad/enumerate_shells.py` — if that scratchpad is gone, it is 60 lines
+reimplementing `peptide_builder.select_poses` over `energies.csv` and `poses/*.xyz`, walking
+`FRAGS[start:] + FRAGS[:start]` for each start at `copies` 1 and 2. Worth moving into `code/` if a
+third shell family is ever enumerated.
+
+---
+
+## 9. What shell 2 showed
+
+Run 2026-09-26. Shell is `phenylalanine/2`, the second richest at −109.15 kcal/mol, sharing five of
+its twelve poses with shell 1. Sweep found **all 132 ordered pairs connectable**, 4752 rows, as shell
+1's did. Energies below are complete for the controls and partial for the forced folds at the time of
+writing; finish the table from `binding_shell2.csv` and `binding_shell2_forced.csv`.
+
+### The design replicates shell 1's shape exactly
+
+| | shell 1 | shell 2 |
+|---|---|---|
+| sequence | `RGGDGGKGGGGLGGGGKGIGEGWGGDGSGGEGS` | `RGEGGEGGKGGFGGDGGIGLGGSGWGGGGLGGS` |
+| residues | 33 | 33 |
+| spacers / budget | 21 / 16 | 21 / 16 |
+| poses in path | 12 / 12 | 12 / 12 |
+| worst closure | 0.196 A | 0.120 A |
+
+Two shells sharing only five poses, ordered by independent Held-Karp searches, arrive at the same
+length, the same spacer count and the same overshoot. The single-shell caveat in the README's
+Limitations now has a second data point.
+
+### Findings
+
+* **Shell 2's unconstrained control is a far better structure than shell 1's.** `s2_orig_control`
+  wraps 20/20 ligand atoms with no constraints at all, encloses 0.60, sits 7.7 A from the peptide
+  centroid against an Rg of 13.3, and binds at −25.18 kcal/mol. Shell 1's `orig_control` managed
+  0.75 wrapped, 0.495 enclosed, 20.9 A separation and −15.83 — the ligand stuck to the outside. So
+  shell 1's poor control was a property of that arrangement, not of the method.
+* **Designed positions are still not reproduced: 1 of 144** across all twelve folds, at sound ligand
+  superposition (RMSD 0.06–0.85 A). Historical baseline was 10/396. But the *distances* improve
+  markedly under constraint — median to the designed position falls from ~12–14.5 A unconstrained to
+  ~7.6–9.8 A forced, in all three ladders — and the median to the nearest side chain **of any type**
+  falls to **3.0–4.9 A**. So the constraints put side chains in roughly the right places with the
+  wrong identities there. That points at the ordering and sequence-assembly step, not at
+  reachability, which the sweep shows is satisfiable for every pair.
+* **`s2_orig_control` wraps completely while reproducing none of the design.** Shell 1 could not
+  separate these, because its control failed at both. Wrapping success and design realisation are
+  independent.
+* **The f8 rung is pathological, four for four.** Highest ligand strain of every ladder it appears in
+  (25.57 here, 27.78 and 36.44 in shell 1) and it drives the sum net-unfavourable twice (+5.66 here,
+  +14.14 for shell 1's `orig_f8`). Shell 2's `orig_f8` is also worst of its ladder on enclosure
+  (0.43). The eight-contact set specifically buys contacts by bending the ligand.
+* **Ranked by sum (interaction + ligand strain), f12 wins in both shells' `esm1` ladders** — shell 1:
+  −7.42, −0.23, −1.32, **−9.98**; shell 2: −3.68, −12.84, +5.66, **−23.48**. This is a better
+  headline than the enclosure-based claim, because it survives cases where raw interaction energy
+  misleads: shell 1's `esm1_f8` has the strongest interaction of its ladder (−29.10) yet is nearly
+  net-zero once strain is counted.
+* **But for the glycine design the two shells reverse, and this is the most consequential result of
+  the run.** Forcing twelve contacts *gains* shell 1 thirty kcal/mol and *costs* shell 2 ten:
+
+  | glycine design | control sum | f12 sum | effect of forcing |
+  |---|---|---|---|
+  | shell 1 | −6.68 | **−36.91** | gains 30 kcal/mol |
+  | shell 2 | **−18.22** | −8.13 | loses 10 kcal/mol |
+
+  It tracks how good the unconstrained fold already was. Shell 1's control had the ligand on the
+  outside (0.75 wrapped, centroid 20.9 A), so the constraints had everything to gain; shell 2's
+  already wrapped 20/20 at 7.7 A, so they could only disturb it, and the geometry agrees — wrapping
+  fell 1.00 to 0.85, interaction −25.18 to −17.56.
+
+  So **forced contacts are a rescue mechanism, not an improvement**: they help when the unconstrained
+  fold has failed and hurt when it has already succeeded. The README's "forcing the full set of
+  contacts produces the design that was wanted" is true of shell 1's starting point and not in
+  general. Rewrite that claim conditionally rather than restating it, and report the control's
+  wrapping beside any f12 result so the reader can see which regime they are in.
+* **The README's claim that every f12 fold is the most enclosed of its set fails here.** It holds for
+  `orig` (0.70) and barely for `esm1` (0.675 against f8's 0.67), but `esm2`'s best-enclosed fold is
+  **f8 at 0.86** with f12 at 0.61. `s2_esm2_f8` is the best-enclosed structure in the shell-2 set
+  (0.95 wrapped, 19/20 engaged, 31 contacts). Qualify that claim rather than restating it.
+* **The ESM2 charge artifact is worse here and now quantified.** The fill took the design from charge
+  −1 to **+5** (`RGERKEKSKLIFIIDSKIFLSFSIWRFLILLRS`), and `s2_esm2_control` posts **−74.89
+  kcal/mol** — nominally the strongest binding in the project. **Exclude the whole `esm2` set from
+  any energy-based conclusion**, on this evidence: across its four folds, interaction energy
+  correlates **+0.93 with ligand-to-peptide centroid separation** and only **+0.18 with enclosure**,
+  with the wrong sign.
+
+  | fold | centroid | interaction | enclosed | wrapped | contacts |
+  |---|---|---|---|---|---|
+  | f12 | 5.9 A | −72.72 | 0.61 | 0.75 | 17 |
+  | control | 6.7 A | −74.89 | 0.51 | 0.85 | 18 |
+  | f8 | 9.5 A | −28.29 | **0.86** | **0.95** | **31** |
+  | f4 | 16.0 A | −7.53 | 0.50 | 0.55 | 20 |
+
+  `s2_esm2_f8` has the best geometry in the entire shell-2 set and scores 46 kcal/mol *worse* than the
+  control, purely because the control's centroid sits 2.8 A closer. That is long-range electrostatics
+  on a +5 peptide, not a binding interface. For contrast, `esm1` — net charge 0 — moves 33 kcal/mol
+  across comparable geometry changes and its enclosure ladder is monotonic. n=4, and the control/f12
+  pair is effectively tied (0.8 A, 2.2 kcal/mol), but f8 and f4 are unambiguous.
+
+  Constrain the residue set during linker filling, and report net charge beside any interaction
+  energy. An earlier reading of this data — that the energy "barely responds" to geometry, from
+  control-versus-f12 alone — was wrong: it is not inert, it tracks distance.
+* **`esm1` enclosure is monotonic in constraint** (0.375, 0.64, 0.67, 0.675) while its interaction
+  energy is not (f8 dips). Geometry and energy diverge inside a single ladder — as do enclosure and
+  wrapping in the `orig` ladder, where the control is best wrapped and f12 best enclosed.
+
+### Process notes worth keeping
+
+* `boltz/structures/` was created for the first time by this run. The twelve shell-1 complexes were
+  all scored before commit `d28ac25` added the geometry saving, so none of their relaxed structures
+  were ever written — they were never written, not lost.
+* Scoring runs **40–50 min per structure** on this laptop, not the 28 min the first structure
+  suggested. Twelve complexes is most of a night. The A100 route via `boltz_offline.py` is the real
+  answer for any further shell.
+* A scoring process holds 0.5–2.0 GB, matching the README. `top`'s `MEM` column is not resident size
+  and will mislead you; use `ps -o rss`. Output through `tee` is block-buffered, so BFGS steps appear
+  in bursts of ~100 — absence of recent log lines is not a stall. Check `ps -o time` against `etime`.

@@ -220,7 +220,11 @@ commands in a short `caffeinate -t 300` which expires by itself — that is not 
   relocated. **Checking which commit added a file to our history does not establish its origin** —
   check whether the content appears in her tree. Restoring the notebook on the strength of the wrong
   test is a mistake already made once.
-- `runs/octinoxate` is committed, other `runs/*` are ignored, except `runs/*.log`: the UMA scoring
-  logs are the only record of how long each relaxation took and whether it converged.
+- `runs/octinoxate` is committed and other `runs/*` are ignored. Logs are split by engine:
+  `runs/octinoxate/uma_logs/` for the 21 runs where UMA ran (the only record of how long each
+  relaxation took and whether it converged), `runs/octinoxate/logs/` for the 10 with no UMA in them
+  (geometry sweeps, Boltz folds, analysis). All 31 sat loose in `runs/` until 2026-09-26, kept by a
+  `!runs/*.log` negation that is now only a safety net for a stray. No code writes into either
+  folder — every log path but Boltz's comes from a shell redirect, so choose the right one.
 - Credit to the original author stays in the README and in any publication. Keeping her commits out
   of this repository's git history is separate from, and does not affect, that attribution.
