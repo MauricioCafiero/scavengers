@@ -113,17 +113,17 @@ check_fold.py              is the ligand bound, how much of it is enclosed and w
         │                  the requested contacts honoured
         ├─ boltz/fold_check.csv
         │
+binding_energy.py          interaction energy for each folded complex, and the bound-state geometry
+        │                  the strain step needs
+        ├─ boltz/binding_*.csv, boltz/structures/*_ligand_bound.xyz
+        │
 ligand_reference.py        the ligand's lowest conformer, as the one reference every strain is
         │                  measured against. Computed once per ligand and reused by every shell
         ├─ ligand_reference.json
         │
-strain_global.py           ligand strain for each fold against that reference. Needs only the Boltz
-        │                  heavy atoms, so it is cheap and needs no complex relaxation
+strain_global.py           ligand strain per fold: E(bound) − E(reference), a single point on the
+        │                  bound ligand exactly as the complex relaxation left it
         ├─ boltz/strain_*.csv
-        │
-binding_energy.py          interaction energy for each folded complex
-        │
-        ├─ boltz/binding_*.csv
         │
 make_figures.py            flat filenames, a manifest joining structures to their numbers, and a
                            PyMOL script that loads everything superposed on the ligand
@@ -259,7 +259,7 @@ peptidebuilder/
 | `overlay.py` | superposes a fold on the designed shell and counts reproduced side-chain positions |
 | `random_control.py` | null model: random sequences of matched length |
 | `ligand_reference.py` | finds the ligand's lowest conformer once — 20 ETKDG embeddings, MMFF-ranked, the five best relaxed with UMA — as the single reference every strain is measured against |
-| `strain_global.py` | recomputes ligand strain for every fold against that reference, from the Boltz heavy atoms plus RDKit hydrogens. No complex relaxation, so it works on folds whose geometries were never saved |
+| `strain_global.py` | ligand strain for every fold against that reference. A single point on the bound ligand as the complex relaxation left it — `structures/<name>_ligand_bound.xyz`, or the step-0 energy of that fold's free-ligand block in the scoring log, which is the same state and lets folds scored before geometry saving be corrected without re-running |
 | `correlate.py` | joins every results CSV on structure name and correlates the properties against each other. `--group` reports each subset separately, because these correlations invert between binding mechanisms |
 | `make_figures.py` | flat filenames, a manifest, and a PyMOL loading script |
 
@@ -366,7 +366,7 @@ tightest designed contacts supplied as constraints. Twelve structures in total.
 |---|---|---|---|---|---|---|---|---|
 | `orig_control` | 0.495 | 0.75 | 15/20 | 20.9 Å | −15.83 | 14.66 | −1.17 | — |
 | `orig_f4` | 0.595 | 0.85 | 17/20 | 7.1 Å | −26.32 | 11.64 | −14.68 | 3/4 |
-| `orig_f8` | 0.515 | 0.65 | 13/20 | 8.4 Å | −22.30 | 42.06 \* | +19.76 | 1/8 |
+| `orig_f8` | 0.515 | 0.65 | 13/20 | 8.4 Å | −22.30 | 42.06 | +19.76 | 1/8 |
 | **`orig_f12`** | **0.96** | **1.00** | 20/20 | 4.2 Å | **−45.86** | 12.80 | **−33.07** | 0/12 |
 | `esm1_control` | 0.455 | 0.60 | 12/20 | 8.4 Å | −12.22 | 7.20 | −5.02 | — |
 | `esm1_f4` | 0.605 | 0.65 | 13/20 | 6.6 Å | −20.89 | 27.16 | **+6.27** | 0/4 |
@@ -776,9 +776,19 @@ whichever basin that relaxation happened to fall into. The consequences were lar
   alone, while the heavy atoms stayed bit-identical.
 
 A single reference removes all three: differences between structures now reflect only their bound
-geometries. `strain_global.py` recomputes the term for every fold, and needs only the ligand's heavy
-atoms from the Boltz CIF plus RDKit hydrogens — no complex relaxation, so it runs in seconds per
-structure and works on folds whose complex geometries were never saved.
+geometries. `strain_global.py` computes the term for every fold as one single point on the bound ligand
+**exactly as the complex relaxation left it** — `structures/<name>_ligand_bound.xyz`, or equivalently
+the step-0 energy of that fold's free-ligand block in the scoring log, which is the same state and so
+lets folds scored before geometry saving existed be corrected without re-running anything.
+
+**The bound state must not be re-relaxed, in whole or in part.** Strain is the energy released going
+from the bound state to the free one, and the bound state is the ligand as it exists in the complex,
+hydrogens included. Re-placing those hydrogens on the isolated ligand inserts an intermediate state —
+bound, then bound-heavy-atoms-with-free-molecule-hydrogens, then the global minimum — and reports only
+the second leg, discarding the first. It was tried, and it lowered all 24 strains by 0.2 to 6.1
+kcal/mol. The hydrogen reorganisation is part of what the relaxation releases, and it is not
+double-counted against the interaction energy, which is evaluated at one fixed geometry and says nothing
+about the path to the free state.
 
 **A negative strain is a failed reference, not a finding.** It means a bound pose sits below the
 supposed global minimum, so the conformer search missed it; re-run with more embeddings.

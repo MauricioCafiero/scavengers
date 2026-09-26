@@ -201,21 +201,6 @@ done
 $PY code/overlay.py $RUN --match ${PREFIX}_ --out overlay_shell$NUM.csv \
     2>&1 | tee $LOGS/overlay_shell$NUM.log
 
-say "stage 5c: ligand strain against one shared reference -- also cheap"
-# The reference is a property of the ligand, not of any fold, so it is computed once per run and
-# reused. Relaxing each complex's own bound pose instead measures every structure against a different
-# local minimum, which is what made the old strain numbers depend on the force cutoff, the step cap
-# and pdbfixer's non-deterministic hydrogens. See HANDOFF.md section 10.
-if [ -f $RUN/ligand_reference.json ]; then
-    print -r -- "ligand_reference.json exists, reusing it"
-else
-    $PY code/ligand_reference.py $RUN 2>&1 | tee $UMALOGS/ligand_reference.log
-    [ -f $RUN/ligand_reference.json ] || { print -r -- "STOPPING: no reference written"; exit 1; }
-fi
-# Needs only the Boltz heavy atoms plus RDKit hydrogens, so this runs without any complex relaxation.
-$PY code/strain_global.py $RUN --match ${PREFIX}_ --out strain_shell$NUM.csv --save-structures \
-    2>&1 | tee $UMALOGS/strain_shell$NUM.log
-
 # ---------------------------------------------------------------------------------------------
 say "stage 6: score -- THE BOTTLENECK, 40-50 min each on CPU"
 # strain_peptide is left out deliberately: a free peptide collapses in vacuum, so that term measures
@@ -242,6 +227,27 @@ else
     $PY code/binding_energy.py $RUN --terms interaction \
         --out $BINDING --structures "${(j:,:)TODO}" 2>&1 | tee -a $UMALOGS/score_shell$NUM.log
 fi
+
+say "stage 6b: ligand strain against one shared reference -- cheap"
+# Runs after scoring because the bound state is the ligand as it exists in the complex,
+# hydrogens included, and binding_energy.py is what writes that geometry
+# (structures/<name>_ligand_bound.xyz). Re-placing those hydrogens on the isolated ligand
+# would change the initial state to one the ligand never occupies and relax away part of
+# the energy being measured.
+#
+# The reference is a property of the ligand, not of any fold, so it is computed once per run and
+# reused. Relaxing each complex's own bound pose instead measures every structure against a different
+# local minimum, which is what made the old strain numbers depend on the force cutoff, the step cap
+# and pdbfixer's non-deterministic hydrogens. See HANDOFF.md section 10.
+if [ -f $RUN/ligand_reference.json ]; then
+    print -r -- "ligand_reference.json exists, reusing it"
+else
+    $PY code/ligand_reference.py $RUN 2>&1 | tee $UMALOGS/ligand_reference.log
+    [ -f $RUN/ligand_reference.json ] || { print -r -- "STOPPING: no reference written"; exit 1; }
+fi
+# Needs only the Boltz heavy atoms plus RDKit hydrogens, so this runs without any complex relaxation.
+$PY code/strain_global.py $RUN --match ${PREFIX}_ --out strain_shell$NUM.csv --save-structures \
+    2>&1 | tee $UMALOGS/strain_shell$NUM.log
 
 say "stage 7: figures, into their own directory"
 $PY code/make_figures.py $RUN --fig-dir $FIGDIR --match ${PREFIX}_ --design-sequence "$SEQ" \
