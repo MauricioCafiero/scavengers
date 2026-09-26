@@ -3,7 +3,9 @@ __pycache__/
 # pipeline output: keep the octinoxate results, ignore scratch and test runs
 runs/*
 !runs/octinoxate/
-# but never ignore a run log: these are the only record of how long a calculation took, whether
-# it converged, and what it printed on the way. Regenerating one means re-running the hours of
-# UMA relaxation that produced it.
+# Run logs belong beside the results they describe, in runs/<ligand>/logs/, which the line above
+# already keeps. This negation is only a safety net for one redirected to runs/ by mistake: never
+# ignore a run log, because it is the only record of how long a calculation took, whether it
+# converged, and what it printed on the way. Regenerating one means re-running the hours of UMA
+# relaxation that produced it.
 !runs/*.log

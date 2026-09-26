@@ -41,6 +41,43 @@ def read_hints(yaml_path):
             for r, a, d, f in HINT_RE.findall(open(yaml_path).read())]
 
 
+def _dihedral(p0, p1, p2, p3):
+    b0, b1, b2 = p0 - p1, p2 - p1, p3 - p2
+    b1 /= np.linalg.norm(b1)
+    v = b0 - np.dot(b0, b1) * b1
+    w = b2 - np.dot(b2, b1) * b1
+    return np.degrees(np.arctan2(np.dot(np.cross(b1, v), w), np.dot(v, w)))
+
+
+def helical_fraction(pep_atoms):
+    """Fraction of residues whose backbone phi/psi sit in the alpha-helical basin.
+
+    Reported because it explains binding mode better than anything else measured here: a substituted
+    sequence can come back as a rigid helix that grips the ligand in a surface groove, or collapse
+    around it, and the two look alike on wrapping. The basin is deliberately generous -- phi -63+-35,
+    psi -43+-35 -- because Boltz's geometry is not refined and a tight window reports zero for folds
+    that are visibly helical.
+
+    Terminal residues have no phi or psi, so they are excluded rather than counted as non-helical.
+    """
+    res = {}
+    for a in pep_atoms:
+        res.setdefault(int(a["resseq"]), {})[a["name"]] = np.array(a["xyz"], dtype=float)
+    keys = sorted(res)
+    n_hel = n_tot = 0
+    for i in range(1, len(keys) - 1):
+        prev, cur, nxt = res[keys[i - 1]], res[keys[i]], res[keys[i + 1]]
+        try:
+            phi = _dihedral(prev["C"], cur["N"], cur["CA"], cur["C"])
+            psi = _dihedral(cur["N"], cur["CA"], cur["C"], nxt["N"])
+        except KeyError:
+            continue
+        n_tot += 1
+        if -98 < phi < -28 and -78 < psi < -8:
+            n_hel += 1
+    return round(n_hel / n_tot, 3) if n_tot else ""
+
+
 def check(cif_path, boltz_dir, contact=4.0, wrap=4.5):
     name = os.path.basename(cif_path).replace("_model_0.cif", "")
     pep, lig = parse_cif(cif_path)
@@ -76,6 +113,7 @@ def check(cif_path, boltz_dir, contact=4.0, wrap=4.5):
     row["enclosed_fraction"] = round(float(reached.mean()), 3)
     row["centroid_separation"] = round(float(np.linalg.norm(centre - ph.mean(axis=0))), 1)
     row["peptide_rg"] = round(float(np.sqrt(((ph - ph.mean(axis=0)) ** 2).sum(1).mean())), 1)
+    row["helical_fraction"] = helical_fraction(pep)
 
     row["ligand_heavy_atoms"] = len(lh)
     row["engaged"] = int((per_ligand < wrap).sum())

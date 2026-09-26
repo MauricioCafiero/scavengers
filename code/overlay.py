@@ -140,6 +140,11 @@ def main(argv=None):
     parser.add_argument("outdir", help="a peptide_builder run directory, e.g. runs/octinoxate")
     parser.add_argument("--cutoff", type=float, default=3.0, help="a fragment counts as matched within this, A (default: 3.0)")
     parser.add_argument("--save-overlays", action="store_true", help="write the superposed complex next to each design")
+    parser.add_argument("--out", default="overlay.csv",
+                        help="output csv name inside boltz/ (default overlay.csv). Give a second "
+                             "shell its own, or it overwrites the first shell's results")
+    parser.add_argument("--match",
+                        help="only folds whose name contains this, e.g. s2_ for a second shell")
     args = parser.parse_args(argv)
 
     sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
@@ -154,8 +159,11 @@ def main(argv=None):
         os.makedirs(overlay_dir, exist_ok=True)
 
     cifs = sorted(glob.glob(os.path.join(boltz_dir, "boltz_results_*", "predictions", "*", "*_model_0.cif")))
+    if args.match:
+        cifs = [c for c in cifs if args.match in os.path.basename(c)]
     if not cifs:
-        sys.exit(f"no Boltz structures found under {boltz_dir}")
+        sys.exit(f"no Boltz structures found under {boltz_dir}"
+                 + (f" matching {args.match!r}" if args.match else ""))
 
     rows = []
     for path in cifs:
@@ -213,7 +221,7 @@ def main(argv=None):
                          f"Boltz complex superposed on {name} design by ligand")
 
     if rows:
-        csv_path = os.path.join(boltz_dir, "overlay.csv")
+        csv_path = os.path.join(boltz_dir, args.out)
         with open(csv_path, "w", newline="") as f:
             writer = csv.DictWriter(f, fieldnames=list(rows[0].keys()))
             writer.writeheader()

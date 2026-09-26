@@ -1,0 +1,30 @@
+version: 1
+sequences:
+  - protein:
+      id: A
+      sequence: RGEGGEGGKGGFGGDGGIGLGGSGWGGGGLGGS
+      msa: empty
+  - ligand:
+      id: B
+      smiles: 'CCCC[C@H](CC)OC(=O)/C=C/c1ccc(OC)cc1'
+constraints:
+  - contact:
+      token1: [A, 1]
+      token2: [B, O25]
+      max_distance: 3.8
+      force: true
+  - contact:
+      token1: [A, 6]
+      token2: [B, C34]
+      max_distance: 4.1
+      force: true
+  - contact:
+      token1: [A, 15]
+      token2: [B, C37]
+      max_distance: 4.1
+      force: true
+  - contact:
+      token1: [A, 23]
+      token2: [B, O26]
+      max_distance: 4.0
+      force: true
