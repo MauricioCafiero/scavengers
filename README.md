@@ -113,7 +113,15 @@ check_fold.py              is the ligand bound, how much of it is enclosed and w
         │                  the requested contacts honoured
         ├─ boltz/fold_check.csv
         │
-binding_energy.py          interaction energy and ligand strain for each folded complex
+ligand_reference.py        the ligand's lowest conformer, as the one reference every strain is
+        │                  measured against. Computed once per ligand and reused by every shell
+        ├─ ligand_reference.json
+        │
+strain_global.py           ligand strain for each fold against that reference. Needs only the Boltz
+        │                  heavy atoms, so it is cheap and needs no complex relaxation
+        ├─ boltz/strain_*.csv
+        │
+binding_energy.py          interaction energy for each folded complex
         │
         ├─ boltz/binding_*.csv
         │
@@ -250,6 +258,8 @@ peptidebuilder/
 | `compare_folds.py` | pairwise structural comparison, superposed on the ligand and on the peptide |
 | `overlay.py` | superposes a fold on the designed shell and counts reproduced side-chain positions |
 | `random_control.py` | null model: random sequences of matched length |
+| `ligand_reference.py` | finds the ligand's lowest conformer once — 20 ETKDG embeddings, MMFF-ranked, the five best relaxed with UMA — as the single reference every strain is measured against |
+| `strain_global.py` | recomputes ligand strain for every fold against that reference, from the Boltz heavy atoms plus RDKit hydrogens. No complex relaxation, so it works on folds whose geometries were never saved |
 | `correlate.py` | joins every results CSV on structure name and correlates the properties against each other. `--group` reports each subset separately, because these correlations invert between binding mechanisms |
 | `make_figures.py` | flat filenames, a manifest, and a PyMOL loading script |
 
@@ -275,6 +285,7 @@ runs/octinoxate/
 ├── combined.xyz                 ligand + all selected fragments: the designed shell
 ├── sequences/                   one .xyz per design, ligand + its placed fragments
 ├── sequences.csv                every design's sequence, start residue, fragment count, total IE
+├── ligand_reference.json        the ligand's lowest conformer and the energy every strain uses
 ├── condense_<shell>.csv         reachability sweep: closure per pair, spacer count, CA choice
 ├── design.json                  chosen path, spacer counts, sequence, budget check
 ├── condense/                    condensed structures from the chain route
@@ -286,7 +297,8 @@ runs/octinoxate/
 │   ├── boltz_results_*/         folded complexes, as .cif
 │   ├── structures/              every geometry a relaxation produced
 │   ├── fold_check.csv           enclosure, wrapping, contacts, hints honoured
-│   ├── binding_*.csv            interaction and strain per complex
+│   ├── binding_*.csv            interaction energy per complex
+│   ├── strain_*.csv             ligand strain per complex, against the shared reference
 │   └── partial_*.json           per-term results, saved as computed
 └── figures/
     ├── *.cif                    every fold under a readable name
@@ -352,22 +364,24 @@ tightest designed contacts supplied as constraints. Twelve structures in total.
 
 | structure | enclosed | wrapped | engaged | centroid sep | interaction | ligand strain | sum | hints |
 |---|---|---|---|---|---|---|---|---|
-| `orig_control` | 0.495 | 0.75 | 15/20 | 20.9 Å | −15.83 | 9.14 | −6.68 | — |
-| `orig_f4` | 0.595 | 0.85 | 17/20 | 7.1 Å | −26.32 | 10.32 | −16.01 | 3/4 |
-| `orig_f8` | 0.515 | 0.65 | 13/20 | 8.4 Å | −22.30 | 36.44 \* | +14.14 | 1/8 |
-| **`orig_f12`** | **0.96** | **1.00** | 20/20 | 4.2 Å | **−45.86** | 8.95 | **−36.91** | 0/12 |
-| `esm1_control` | 0.455 | 0.60 | 12/20 | 8.4 Å | −12.22 | 4.80 | −7.42 | — |
-| `esm1_f4` | 0.605 | 0.65 | 13/20 | 6.6 Å | −20.89 | 20.66 | −0.23 | 0/4 |
-| `esm1_f8` | 0.75 | 0.90 | 18/20 | 4.1 Å | −29.10 | 27.78 | −1.32 | 1/8 |
-| `esm1_f12` | 0.76 | 0.80 | 16/20 | 3.4 Å | −17.11 | 7.13 | −9.98 | 1/12 |
-| `esm2_control` | 0.53 | 0.40 | 8/20 | 7.7 Å | −20.27 | 10.89 | −9.38 | — |
-| `esm2_f4` | 0.46 | 0.50 | 10/20 | 11.0 Å | −39.90 | 15.70 | −24.20 | 0/4 |
-| `esm2_f8` | 0.625 | 0.75 | 15/20 | 10.4 Å | −29.66 | 8.85 | −20.81 | 0/8 |
-| `esm2_f12` | 0.905 | 1.00 | 20/20 | 7.1 Å | −21.14 | 6.92 | −14.22 | 0/12 |
+| `orig_control` | 0.495 | 0.75 | 15/20 | 20.9 Å | −15.83 | 14.66 | −1.17 | — |
+| `orig_f4` | 0.595 | 0.85 | 17/20 | 7.1 Å | −26.32 | 11.64 | −14.68 | 3/4 |
+| `orig_f8` | 0.515 | 0.65 | 13/20 | 8.4 Å | −22.30 | 42.06 \* | +19.76 | 1/8 |
+| **`orig_f12`** | **0.96** | **1.00** | 20/20 | 4.2 Å | **−45.86** | 12.80 | **−33.07** | 0/12 |
+| `esm1_control` | 0.455 | 0.60 | 12/20 | 8.4 Å | −12.22 | 7.20 | −5.02 | — |
+| `esm1_f4` | 0.605 | 0.65 | 13/20 | 6.6 Å | −20.89 | 27.16 | **+6.27** | 0/4 |
+| `esm1_f8` | 0.75 | 0.90 | 18/20 | 4.1 Å | −29.10 | 36.91 | **+7.81** | 1/8 |
+| `esm1_f12` | 0.76 | 0.80 | 16/20 | 3.4 Å | −17.11 | 11.26 | −5.85 | 1/12 |
+| `esm2_control` | 0.53 | 0.40 | 8/20 | 7.7 Å | −20.27 | 19.14 | −1.14 | — |
+| `esm2_f4` | 0.46 | 0.50 | 10/20 | 11.0 Å | −39.90 | 25.91 | −13.99 | 0/4 |
+| `esm2_f8` | 0.625 | 0.75 | 15/20 | 10.4 Å | −29.66 | 15.61 | −14.05 | 0/8 |
+| `esm2_f12` | 0.905 | 1.00 | 20/20 | 7.1 Å | −21.14 | 9.86 | −11.28 | 0/12 |
 
 Energies in kcal/mol. All three sequences are 33 residues.
-\* `orig_f8`'s ligand strain did not converge within its step budget, so 36.44 is a lower bound and
-that row is worse than shown.
+\* `orig_f8`'s free-ligand relaxation did not converge within its step budget when this was first
+scored. That no longer affects the number: ligand strain is now measured against a single reference
+conformer rather than a per-structure relaxation, so no per-row convergence caveat applies. See
+[what the metrics mean](#what-the-metrics-mean).
 
 ### What the example shows
 
@@ -383,11 +397,12 @@ enclosed, it is the most effective intervention available. Every f12 fold is the
 of its own set.
 
 **Partial constraint sets damage the ligand.** The four- and eight-contact folds repeatedly gain
-interaction energy by bending the ligand rather than by surrounding it: 36.44, 27.78 and 20.66 kcal/mol
-of ligand strain, against 6.92 to 9.14 for every twelve-contact fold. Two of them end up net
-unfavourable. A peptide can satisfy a few contacts by pulling the ligand toward whichever residues are
-nearby, but satisfying twelve at once requires surrounding it, and a ligand can only be surrounded in a
-conformation it can actually adopt.
+interaction energy by bending the ligand rather than by surrounding it: 42.06, 36.91 and 27.16 kcal/mol
+of ligand strain, against 9.86 to 12.80 for every twelve-contact fold. **Three of them end up net
+unfavourable** — `orig_f8` at +19.76, `esm1_f8` at +7.81 and `esm1_f4` at +6.27. A peptide can satisfy
+a few contacts by pulling the ligand toward whichever residues are nearby, but satisfying twelve at
+once requires surrounding it, and a ligand can only be surrounded in a conformation it can actually
+adopt.
 
 **The ESM2 substitution locks the fold.** All four esm1 structures are the same shape to within 0.3–0.8 Å
 CA RMSD, whether they were given zero, four, eight or twelve constraints. Backbone dihedrals explain it:
@@ -432,7 +447,7 @@ set.
 |---|---|---|---|
 | ![orig_control](runs/octinoxate/figures/orig_control.png) | ![orig_f4](runs/octinoxate/figures/orig_f4.png) | ![orig_f8](runs/octinoxate/figures/orig_f8.png) | ![orig_f12](runs/octinoxate/figures/orig_f12.png) |
 | 0.75 / −15.83 | 0.85 / −26.32 | 0.65 / −22.30 | **1.00 / −45.86** |
-| ligand against the outside, centroids 20.9 Å apart | | ligand bent to buy contacts: 36.44 kcal/mol of strain | every ligand atom contacted, 47 pairs, none charged |
+| ligand against the outside, centroids 20.9 Å apart | | ligand bent to buy contacts: 42.06 kcal/mol of strain, net unfavourable | every ligand atom contacted, 47 pairs, none charged |
 
 **The first ESM2 variant.** The helix barely changes shape across the whole ladder.
 
@@ -503,38 +518,46 @@ esm2   RGERKEKSKLIFIIDSKIFLSFSIWRFLILLRS      net charge +5
 
 | structure | enclosed | wrapped | engaged | centroid sep | interaction | ligand strain | sum | hints | designed positions |
 |---|---|---|---|---|---|---|---|---|---|
-| **`s2_orig_control`** | 0.60 | **1.00** | 20/20 | 7.7 Å | −25.18 | 6.96 | **−18.22** | — | 0/12 |
-| `s2_orig_f4` | 0.625 | 0.85 | 17/20 | 2.9 Å | −17.48 | 11.91 | −5.57 | 0/4 | 0/12 |
-| `s2_orig_f8` | 0.43 | 0.85 | 17/20 | 9.6 Å | −11.07 | 30.38 | **+19.31** | 1/8 | 0/12 |
-| `s2_orig_f12` | 0.70 | 0.85 | 17/20 | 7.2 Å | −17.56 | 9.43 | −8.13 | 1/12 | 0/12 |
-| `s2_esm1_control` | 0.375 | 0.55 | 11/20 | 11.2 Å | −9.70 | 6.02 | −3.68 | — | 0/12 |
-| `s2_esm1_f4` | 0.64 | 0.80 | 16/20 | 6.8 Å | −29.55 | 16.71 | −12.84 | 1/4 | 0/12 |
-| `s2_esm1_f8` | 0.67 | 0.80 | 16/20 | 5.5 Å | −19.91 | 25.57 | **+5.66** | 1/8 | 0/12 |
-| **`s2_esm1_f12`** | 0.675 | 0.90 | 18/20 | 5.9 Å | **−42.39** | 18.92 | **−23.48** | **3/12** | **1/12** |
-| `s2_esm2_control` | 0.51 | 0.85 | 17/20 | 6.7 Å | *−74.89* | 4.64 | *−70.25* | — | 0/12 |
-| `s2_esm2_f4` | 0.50 | 0.55 | 11/20 | 16.0 Å | −7.53 | 20.69 | **+13.17** | 0/4 | 0/12 |
-| **`s2_esm2_f8`** | **0.86** | **0.95** | 19/20 | 9.5 Å | −28.29 | 15.48 | −12.81 | 0/8 | 0/12 |
-| `s2_esm2_f12` | 0.61 | 0.75 | 15/20 | 5.9 Å | *−72.72* | 8.34 | *−64.38* | 2/12 | 0/12 |
+| **`s2_orig_control`** | 0.60 | **1.00** | 20/20 | 7.7 Å | −25.18 | 9.23 | **−15.95** | — | 0/12 |
+| `s2_orig_f4` | 0.625 | 0.85 | 17/20 | 2.9 Å | −17.48 | 15.87 | −1.61 | 0/4 | 0/12 |
+| `s2_orig_f8` | 0.43 | 0.85 | 17/20 | 9.6 Å | −11.07 | 36.80 | **+25.73** | 1/8 | 0/12 |
+| `s2_orig_f12` | 0.70 | 0.85 | 17/20 | 7.2 Å | −17.56 | 16.07 | −1.49 | 1/12 | 0/12 |
+| `s2_esm1_control` | 0.375 | 0.55 | 11/20 | 11.2 Å | −9.70 | 11.64 | **+1.93** | — | 0/12 |
+| `s2_esm1_f4` | 0.64 | 0.80 | 16/20 | 6.8 Å | −29.55 | 21.43 | −8.12 | 1/4 | 0/12 |
+| `s2_esm1_f8` | 0.67 | 0.80 | 16/20 | 5.5 Å | −19.91 | 33.74 | **+13.83** | 1/8 | 0/12 |
+| **`s2_esm1_f12`** | 0.675 | 0.90 | 18/20 | 5.9 Å | **−42.39** | 23.37 | **−19.03** | **3/12** | **1/12** |
+| `s2_esm2_control` | 0.51 | 0.85 | 17/20 | 6.7 Å | *−74.89* | 9.05 | *−65.84* | — | 0/12 |
+| `s2_esm2_f4` | 0.50 | 0.55 | 11/20 | 16.0 Å | −7.53 | 29.32 | **+21.80** | 0/4 | 0/12 |
+| **`s2_esm2_f8`** | **0.86** | **0.95** | 19/20 | 9.5 Å | −28.29 | 23.30 | −4.99 | 0/8 | 0/12 |
+| `s2_esm2_f12` | 0.61 | 0.75 | 15/20 | 5.9 Å | *−72.72* | 12.78 | *−59.94* | 2/12 | 0/12 |
 
 Energies in kcal/mol; all three sequences are 33 residues. **The `esm2` energies are italicised
 because they are artifacts, not measurements** — see below.
 
 ### What replicates, and what does not
 
-**The eight-contact fold is reliably the damaged one.** `s2_orig_f8` and `s2_esm1_f8` carry the
-highest ligand strain of their ladders, at 30.38 and 25.57 kcal/mol, and both end net unfavourable at
-+19.31 and +5.66. Across both shells this is now five f8 folds out of five, each the highest-strain
-member of its own ladder. A peptide can satisfy a few contacts by pulling the ligand toward whichever
-residues are nearby; eight is apparently enough to demand serious distortion and too few to require
-the wrap that would relieve it.
+**The eight-contact fold is usually the damaged one, with a consistent exception.** `s2_orig_f8` and
+`s2_esm1_f8` carry the highest ligand strain of their ladders, at 36.80 and 33.74 kcal/mol, and both
+end net unfavourable at +25.73 and +13.83. Across the six ladders in both shells, f8 is the
+highest-strain rung in **four** — both `orig` and both `esm1` — at 33.7 to 42.1 kcal/mol.
+
+**The two exceptions are both `esm2`, in both shells**, where f4 carries the higher strain instead:
+25.91 against f8's 15.61 in shell 1, and 29.32 against 23.30 in shell 2. That is the same sequence
+family that breaks the enclosure ladder and whose energies are charge artifacts, so it is the branch
+that behaves differently on every measure rather than a random exception.
+
+A peptide can satisfy a few contacts by pulling the ligand toward whichever residues are nearby; eight
+is apparently enough to demand serious distortion and too few to require the wrap that would relieve
+it — except where the substitution has already locked the fold into a shape that four contacts fight
+harder than eight.
 
 **Forced contacts are a rescue mechanism, not an improvement.** This is the sharpest disagreement
 between the two shells, and it resolves rather than contradicts the first example:
 
 | glycine design | control | twelve forced contacts | effect |
 |---|---|---|---|
-| shell 1 | −6.68 | **−36.91** | forcing gains 30 kcal/mol |
-| shell 2 | **−18.22** | −8.13 | forcing loses 10 kcal/mol |
+| shell 1 | −1.17 | **−33.07** | forcing gains 32 kcal/mol |
+| shell 2 | **−15.95** | −1.49 | forcing loses 14 kcal/mol |
 
 Shell 1's unconstrained control left the ligand pressed against the outside — 0.75 wrapped, centroid
 20.9 Å — so the constraints had everything to gain. Shell 2's control already contacted all twenty
@@ -663,7 +686,7 @@ worse — the reverse of the first shell.
 |---|---|---|---|
 | ![s2_orig_control](runs/octinoxate/figures_shell2/s2_orig_control.png) | ![s2_orig_f4](runs/octinoxate/figures_shell2/s2_orig_f4.png) | ![s2_orig_f8](runs/octinoxate/figures_shell2/s2_orig_f8.png) | ![s2_orig_f12](runs/octinoxate/figures_shell2/s2_orig_f12.png) |
 | **1.00 / −25.18** | 0.85 / −17.48 | 0.85 / −11.07 | 0.85 / −17.56 |
-| **groove**, Rg 13.3 Å, 3% helical — every ligand atom contacted, none of it enclosed | **groove**, Rg 11.8 Å | 30.38 kcal/mol of ligand strain, net unfavourable | most compact of all at Rg 7.7 Å, 36 contacts, still worse than the control |
+| **groove**, Rg 13.3 Å, 3% helical — every ligand atom contacted, none of it enclosed | **groove**, Rg 11.8 Å | 36.80 kcal/mol of ligand strain, net unfavourable | most compact of all at Rg 7.7 Å, 36 contacts, still worse than the control |
 
 **The first ESM2 variant.** The only ladder where geometry and energy agree throughout, and the only
 fold in 144 to reproduce a designed position.
@@ -672,7 +695,7 @@ fold in 144 to reproduce a designed position.
 |---|---|---|---|
 | ![s2_esm1_control](runs/octinoxate/figures_shell2/s2_esm1_control.png) | ![s2_esm1_f4](runs/octinoxate/figures_shell2/s2_esm1_f4.png) | ![s2_esm1_f8](runs/octinoxate/figures_shell2/s2_esm1_f8.png) | ![s2_esm1_f12](runs/octinoxate/figures_shell2/s2_esm1_f12.png) |
 | 0.55 / −9.70 | 0.80 / −29.55 | 0.80 / −19.91 | **0.90 / −42.39** |
-| 42% helical, as all four are | **encapsulates**, Rg 9.6 Å | **encapsulates**, but 25.57 kcal/mol of strain, net unfavourable | **encapsulates**, Rg 9.3 Å — 3/12 hints honoured and the only fold in 144 to reproduce a designed position |
+| 42% helical, as all four are | **encapsulates**, Rg 9.6 Å | **encapsulates**, but 33.74 kcal/mol of strain, net unfavourable | **encapsulates**, Rg 9.3 Å — 3/12 hints honoured and the only fold in 144 to reproduce a designed position |
 
 **The second ESM2 variant.** Net charge +5. The energies track how close the ligand sits, not how
 well it is held, so read the geometry columns and ignore the numbers.
@@ -732,9 +755,37 @@ rigid interaction energy containing no strain. Hydrogens are relaxed first with 
 which leaves Boltz's predicted geometry untouched while removing the arbitrariness of where pdbfixer
 placed them.
 
-**`ligand strain`** — `E(ligand at its geometry in the complex) − E(ligand relaxed alone)`. The
-conformational price the ligand pays. This is real signal rather than noise: it varied 4.34 kcal/mol
-between two structures whose repeat measurements agree to 0.6.
+**`ligand strain`** — `E(ligand at its geometry in the complex) − E_ref`, the conformational price the
+ligand pays, where **`E_ref` is one shared reference: the ligand's own lowest conformer, computed once
+per ligand** by `ligand_reference.py` and reused for every structure and every shell. It is a property
+of the ligand and the potential, not of any fold, so it is computed on first use and then simply read;
+`strain_global.py` refuses to run if the stored reference's SMILES or model does not match the run's,
+since a reference from a different molecule would silently corrupt every strain rather than fail.
+
+That reference matters more than it sounds. Earlier this term relaxed each complex's own bound pose to
+get its free-ligand energy, which measured every structure against a *different* local minimum —
+whichever basin that relaxation happened to fall into. The consequences were large:
+
+* At the default `fmax 0.1` the free-ligand relaxation stops well short of a minimum. Tightening to
+  0.01 moved individual strains by **+1.5 to +7.7 kcal/mol**, and the sweep only converged by 0.02
+  (6.96 → 8.08 → 8.56 → 8.61 for one structure at 0.10, 0.05, 0.02, 0.01).
+* With a loose step cap the ligand cannot travel; with a generous one it changes conformer. The
+  largest shifts came with up to **1.0 Å of heavy-atom drift** — a rotor flipping, not a relaxation.
+* The bound-state hydrogens were relaxed inside the complex, starting from a `pdbfixer` protonation
+  that is **not deterministic**. Two scorings of one structure differed by 3.6 kcal/mol from that
+  alone, while the heavy atoms stayed bit-identical.
+
+A single reference removes all three: differences between structures now reflect only their bound
+geometries. `strain_global.py` recomputes the term for every fold, and needs only the ligand's heavy
+atoms from the Boltz CIF plus RDKit hydrogens — no complex relaxation, so it runs in seconds per
+structure and works on folds whose complex geometries were never saved.
+
+**A negative strain is a failed reference, not a finding.** It means a bound pose sits below the
+supposed global minimum, so the conformer search missed it; re-run with more embeddings.
+
+Interaction energy is unaffected by any of this, which is why it was reliable throughout: it compares
+the complex against its own parts at one fixed geometry, so hydrogen-placement error largely cancels.
+Strain compares a bound state against a separately relaxed one, and nothing cancels.
 
 **`hints`** — requested contacts satisfied, of those requested. Worth reporting and worth not trusting
 as a measure of success: it is uncorrelated with everything else in the table.
@@ -794,6 +845,18 @@ concluding. Of three sub-2.6 Å contacts found here, one was an n→π\* interac
 70° out of plane, one a CH···O hydrogen bond 17° off the C–H vector, and only the third — a backbone
 carbonyl oxygen 2.55 Å from an ether oxygen, with no donor available to either — was genuinely
 unphysical.
+
+**Ligand strain needs a shared reference, and the defaults do not give one.** Relaxing each complex's
+own bound pose measures every structure against a different local minimum. At `fmax 0.1` the relaxation
+stops 1.5–7.7 kcal/mol short; raise the step cap and the ligand changes conformer instead (up to 1.0 Å
+of heavy-atom drift). Compute one reference conformer per run with `ligand_reference.py` and use
+`strain_global.py`. Interaction energy is immune, because it compares the complex with its own parts at
+one geometry and the hydrogen-placement error cancels.
+
+**`pdbfixer` is non-deterministic on some platforms.** Three protonations of one CIF on the same
+machine gave hydrogen positions differing by up to 2.3 Å, RMSD 0.78 Å, with heavy atoms untouched. On a
+Linux container the same call was stable to 0.01 kcal/mol across runs. This is why strain must not
+depend on hydrogens optimised inside the complex.
 
 **Interaction energy grows with system size** (Spearman −0.52 against peptide length) and does not track
 contact area. Compare designs of matched length, or normalise.

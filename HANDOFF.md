@@ -511,12 +511,16 @@ Limitations now has a second data point.
 * **`s2_orig_control` wraps completely while reproducing none of the design.** Shell 1 could not
   separate these, because its control failed at both. Wrapping success and design realisation are
   independent.
-* **The f8 rung is pathological, four for four.** Highest ligand strain of every ladder it appears in
-  (25.57 here, 27.78 and 36.44 in shell 1) and it drives the sum net-unfavourable twice (+5.66 here,
-  +14.14 for shell 1's `orig_f8`). Shell 2's `orig_f8` is also worst of its ladder on enclosure
+* **The f8 rung is the damaged one in four of the six ladders**, and `esm2` is the exception in both
+  shells. Recomputed against a shared reference conformer (see the note at the end of this section),
+  f8 carries the highest ligand strain of both `orig` and both `esm1` ladders at 33.7-42.1 kcal/mol,
+  and drives the sum net-unfavourable in three: `orig_f8` +19.76 and `esm1_f8` +7.81 in shell 1,
+  `s2_orig_f8` +25.73 and `s2_esm1_f8` +13.83 in shell 2. For `esm2` it is f4 that strains the ligand
+  more, in both shells (25.91 against 15.61; 29.32 against 23.30). Shell 2's `orig_f8` is also worst
+  of its ladder on enclosure
   (0.43). The eight-contact set specifically buys contacts by bending the ligand.
 * **Ranked by sum (interaction + ligand strain), f12 wins in both shells' `esm1` ladders** — shell 1:
-  −7.42, −0.23, −1.32, **−9.98**; shell 2: −3.68, −12.84, +5.66, **−23.48**. This is a better
+  −5.02, +6.27, +7.81, **−5.85**; shell 2: +1.93, −8.12, +13.83, **−19.03**. This is a better
   headline than the enclosure-based claim, because it survives cases where raw interaction energy
   misleads: shell 1's `esm1_f8` has the strongest interaction of its ladder (−29.10) yet is nearly
   net-zero once strain is counted.
@@ -525,8 +529,8 @@ Limitations now has a second data point.
 
   | glycine design | control sum | f12 sum | effect of forcing |
   |---|---|---|---|
-  | shell 1 | −6.68 | **−36.91** | gains 30 kcal/mol |
-  | shell 2 | **−18.22** | −8.13 | loses 10 kcal/mol |
+  | shell 1 | −1.17 | **−33.07** | gains 32 kcal/mol |
+  | shell 2 | **−15.95** | −1.49 | loses 14 kcal/mol |
 
   It tracks how good the unconstrained fold already was. Shell 1's control had the ligand on the
   outside (0.75 wrapped, centroid 20.9 A), so the constraints had everything to gain; shell 2's
@@ -580,3 +584,69 @@ Limitations now has a second data point.
 * A scoring process holds 0.5–2.0 GB, matching the README. `top`'s `MEM` column is not resident size
   and will mislead you; use `ps -o rss`. Output through `tee` is block-buffered, so BFGS steps appear
   in bursts of ~100 — absence of recent log lines is not a stall. Check `ps -o time` against `etime`.
+
+---
+
+## 10. Ligand strain was redefined on 2026-09-26. Read this before quoting any strain number.
+
+Every ligand strain in §9 and in both README worked examples was recomputed. The old definition
+relaxed each complex's own bound pose to get the free-ligand energy, which measured every structure
+against a **different** local minimum. Three separate defects fed into it, found while validating GPU
+scoring on Modal:
+
+1. **The default `fmax 0.1` stops well short of a minimum.** Tightening to 0.01 moved individual
+   strains by +1.5 to +7.7 kcal/mol; a sweep on one structure gave 6.96, 8.08, 8.56, 8.61 at fmax
+   0.10, 0.05, 0.02, 0.01, converging only by 0.02.
+2. **A generous step cap lets the ligand change conformer rather than relax.** The largest shifts came
+   with up to 1.0 A of heavy-atom drift -- a rotor flipping. Raising the cap from 75 to 1000 was a
+   mistake made while investigating this; it confounds the cutoff with the search.
+3. **The bound-state hydrogens came from `pdbfixer`, which is not deterministic here.** Three
+   protonations of one CIF on this Mac gave hydrogen positions differing by up to 2.3 A, RMSD 0.78 A,
+   with heavy atoms untouched. That alone was worth 3.6 kcal/mol of apparent strain. The same call on
+   a Linux container was stable to 0.01 kcal/mol across runs.
+
+### The definition now
+
+`strain_i = E(bound_i) - E_ref`, one shared `E_ref` per run:
+
+* `code/ligand_reference.py` embeds 20 conformers with ETKDG, ranks them with MMFF94, and relaxes the
+  five lowest with UMA at fmax 0.01. The lowest is the reference, written to `ligand_reference.json`
+  and `boltz/structures/ligand_global_reference.xyz`. For octinoxate it is conformer 18 at
+  **-557162.371 kcal/mol-equivalent**, with a 0.996 kcal/mol spread across the five. Note that ETKDG
+  returned duplicates (conformers 1 and 11 were identical), so the five kept were fewer than five
+  distinct geometries -- raise `--n-conformers` if a strain ever comes back negative, which would mean
+  a bound pose below the reference and hence a missed global minimum. None did.
+* `code/strain_global.py` recomputes the term for every fold from the ligand's heavy atoms in the
+  Boltz CIF plus RDKit hydrogens relaxed with the heavy atoms fixed. **No complex relaxation**, so it
+  costs seconds per structure and works on folds whose complex geometries were never saved -- which is
+  how shell 1's twelve were corrected despite predating the geometry-saving commit.
+* For the 24 folds already scored, `E(bound_i)` was recovered with **no computation at all**: it is the
+  step-0 energy of the free-ligand BFGS block in each scoring log, in eV, immediately after the line
+  `relaxing free ligand`. Results in `boltz/strain_global.csv`.
+
+### What changed, and what did not
+
+Interaction energy is **unchanged and was never affected** -- it compares the complex against its own
+parts at one fixed geometry, so hydrogen-placement error largely cancels. That is why the CPU-vs-GPU
+gap was 0.9 kcal/mol on interaction and 4.6 on strain.
+
+Surviving unchanged: f12 wins by sum in `S1 orig`, `S1 esm1` and `S2 esm1`; shell 2's `orig` control
+still beats its f12, so forced contacts rescue rather than improve; `esm2`'s energies still track
+centroid distance rather than wrap.
+
+Changed: the "five for five" f8 claim was wrong on two counts -- it only counted four ladders, and on
+all six f8 leads in four with `esm2` the exception in both shells. Three more structures are now
+net-unfavourable (`esm1_f4` +6.27, `esm1_f8` +7.81, `s2_esm1_control` +1.93). `S1 esm2`'s best rung by
+sum nominally flips f4 to f8, but at -13.99 against -14.05 they are tied and neither should be called
+the winner. Every absolute strain rose by +1.3 to +9.1.
+
+### For shell 3 onwards
+
+Run `ligand_reference.py` once per ligand, then `strain_global.py` after folding. There is no need for
+`binding_energy.py` to compute `strain_ligand` at all any more -- dropping that term also removes the
+per-structure free-ligand relaxation, which was a meaningful slice of its runtime. `binding_shell*.csv`
+keeps the interaction energy; strain comes from `strain_global.csv`.
+
+`boltz/strain_tight_shell2.csv` is superseded. It holds the intermediate experiment -- shell 2's
+strains at fmax 0.01 with a 1000-step cap, against per-structure references -- and is kept only as the
+record of how the defect was characterised. Do not quote from it.
