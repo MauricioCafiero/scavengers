@@ -634,9 +634,22 @@ conformation happens to be compact, which is why every forced `esm1` fold encaps
 not itself good or bad; it decides the mode before any constraint is applied, and whether that helps
 is luck.
 
-`check_fold.py` reports `helical_fraction`, so this is measured rather than eyeballed. On the first
-shell's structures it gives 81% for `esm1_f12` and 6% for `orig_f12`, reproducing the figures quoted
-in that example.
+**The glycine design's extended folds look like β sheets and are not.** `s2_orig_control` is **81%
+β-basin**, the most extended backbone in the set, which is why it reads as pleated on inspection. But it
+carries only **6 non-local backbone hydrogen bonds**, where a sheet needs a ladder of them between
+paired strands. It is an extended, unpaired chain — the expected outcome for a sequence that is 64%
+glycine, glycine being both a poor β-former and the residue with the most backbone freedom to give
+away. `s2_orig_f4` is the same at 36% β and 6 non-local bonds.
+
+The exception is informative: `s2_orig_f12` has the **most non-local hydrogen bonds of any fold in the
+set**, 11, at the most compact Rg of 7.7 Å. Forcing twelve contacts is the only intervention that gave
+the glycine design any tertiary structure at all, even though it cost binding energy. The `esm2` folds
+sit at the opposite extreme — 0% β and zero non-local bonds, with 34 to 43 helical ones, a helix bonded
+only to itself.
+
+`check_fold.py` reports `helical_fraction`, `beta_fraction`, `helical_hbonds` and `nonlocal_hbonds`, so
+all of this is measured rather than eyeballed. On the first shell's structures the helicity gives 81%
+for `esm1_f12` and 6% for `orig_f12`, reproducing the figures quoted in that example.
 
 ### Figures
 
@@ -700,11 +713,19 @@ structure that visibly encapsulates the ligand has Rg 9.3–9.8 Å and every one
 surface groove has 11.8–14.9 Å, with nothing in between, while `enclosed` separates the same two groups
 by 0.015 and `wrapped` gets them backwards.
 
-**`helical_fraction`** — the fraction of residues whose backbone φ/ψ fall in the α-helical basin,
-using a generous φ −63±35, ψ −43±35 window because Boltz's geometry is unrefined and a tight window
-reports zero for folds that are plainly helical. It explains binding mode: a substituted sequence often
-comes back as a rigid helix that can only grip the ligand along its surface, and encapsulating then
-requires the helix to break.
+**`helical_fraction`** and **`beta_fraction`** — the fraction of residues whose backbone φ/ψ fall in
+the α-helical and extended-β basins, using generous windows (helix φ −63±35, ψ −43±35) because Boltz's
+geometry is unrefined and a tight window reports zero for folds that are plainly helical. Together
+they explain binding mode: a substituted sequence often comes back as a rigid helix that can only grip
+the ligand along its surface, and encapsulating then requires the helix to break.
+
+**`helical_hbonds`** and **`nonlocal_hbonds`** — backbone N···O contacts under 3.3 Å, split by
+sequence separation: 3 to 5 residues apart, which is the i,i+4 bond a helix makes with itself, against
+more than 5 apart, which is where strand pairing would appear. **The split is the point.** A high
+`beta_fraction` means an extended backbone, not a sheet, and only the non-local count distinguishes
+them — the glycine design's unconstrained fold reaches 81% β with just 6 non-local bonds, so it is
+extended and unpaired rather than pleated into a sheet. Counting all separations together hides this
+and ranks a pure helix highest, since 40-odd i,i+4 bonds swamp everything while pairing nothing.
 
 **`interaction`** — `E(complex) − E(peptide) − E(ligand)`, all three at the complex geometry, so it is a
 rigid interaction energy containing no strain. Hydrogens are relaxed first with heavy atoms fixed,

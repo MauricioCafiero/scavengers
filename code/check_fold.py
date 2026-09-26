@@ -49,22 +49,32 @@ def _dihedral(p0, p1, p2, p3):
     return np.degrees(np.arctan2(np.dot(np.cross(b1, v), w), np.dot(v, w)))
 
 
-def helical_fraction(pep_atoms):
-    """Fraction of residues whose backbone phi/psi sit in the alpha-helical basin.
+def secondary_structure(pep_atoms):
+    """Backbone conformation and hydrogen bonding, as a dict of columns.
 
-    Reported because it explains binding mode better than anything else measured here: a substituted
+    Reported because it explains binding mode better than anything else measured here. A substituted
     sequence can come back as a rigid helix that grips the ligand in a surface groove, or collapse
-    around it, and the two look alike on wrapping. The basin is deliberately generous -- phi -63+-35,
-    psi -43+-35 -- because Boltz's geometry is not refined and a tight window reports zero for folds
-    that are visibly helical.
+    around it, and the two look alike on wrapping alone.
 
-    Terminal residues have no phi or psi, so they are excluded rather than counted as non-helical.
+    `helical_fraction` and `beta_fraction` are phi/psi basin counts. Both windows are deliberately
+    generous -- helix phi -63+-35, psi -43+-35 -- because Boltz's geometry is unrefined and a tight
+    window reports zero for folds that are plainly helical. Terminal residues have no phi or psi, so
+    they are excluded rather than counted as coil.
+
+    **A high `beta_fraction` is an extended backbone, not a sheet.** A sheet needs paired strands, so
+    the H-bond counts are split to tell them apart: `helical_hbonds` counts backbone N...O within
+    3.3 A between residues 3 to 5 apart, which is the i,i+4 bond a helix makes with itself, and
+    `nonlocal_hbonds` counts those more than 5 apart, which is where strand pairing would show. A
+    glycine-rich chain reaches 81% beta with only 6 non-local bonds: extended, unpaired, no sheet.
+    Counting all separations together hides the difference, and a pure helix scores highest on that
+    combined figure despite having no pairing at all.
     """
     res = {}
     for a in pep_atoms:
         res.setdefault(int(a["resseq"]), {})[a["name"]] = np.array(a["xyz"], dtype=float)
     keys = sorted(res)
-    n_hel = n_tot = 0
+
+    n_hel = n_beta = n_tot = 0
     for i in range(1, len(keys) - 1):
         prev, cur, nxt = res[keys[i - 1]], res[keys[i]], res[keys[i + 1]]
         try:
@@ -75,7 +85,30 @@ def helical_fraction(pep_atoms):
         n_tot += 1
         if -98 < phi < -28 and -78 < psi < -8:
             n_hel += 1
-    return round(n_hel / n_tot, 3) if n_tot else ""
+        elif -180 < phi < -70 and (psi > 90 or psi < -150):
+            n_beta += 1
+
+    local = nonlocal_ = 0
+    for i in keys:
+        for j in keys:
+            sep = abs(i - j)
+            if sep < 3:
+                continue
+            try:
+                d = float(np.linalg.norm(res[i]["N"] - res[j]["O"]))
+            except KeyError:
+                continue
+            if d < 3.3:
+                if sep <= 5:
+                    local += 1
+                else:
+                    nonlocal_ += 1
+    return {
+        "helical_fraction": round(n_hel / n_tot, 3) if n_tot else "",
+        "beta_fraction": round(n_beta / n_tot, 3) if n_tot else "",
+        "helical_hbonds": local,
+        "nonlocal_hbonds": nonlocal_,
+    }
 
 
 def check(cif_path, boltz_dir, contact=4.0, wrap=4.5):
@@ -113,7 +146,7 @@ def check(cif_path, boltz_dir, contact=4.0, wrap=4.5):
     row["enclosed_fraction"] = round(float(reached.mean()), 3)
     row["centroid_separation"] = round(float(np.linalg.norm(centre - ph.mean(axis=0))), 1)
     row["peptide_rg"] = round(float(np.sqrt(((ph - ph.mean(axis=0)) ** 2).sum(1).mean())), 1)
-    row["helical_fraction"] = helical_fraction(pep)
+    row.update(secondary_structure(pep))
 
     row["ligand_heavy_atoms"] = len(lh)
     row["engaged"] = int((per_ligand < wrap).sum())
