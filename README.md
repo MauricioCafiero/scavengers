@@ -265,6 +265,8 @@ peptidebuilder/
 | `correlate.py` | joins every results CSV on structure name and correlates the properties against each other. `--group` reports each subset separately, because these correlations invert between binding mechanisms |
 | `make_figures.py` | flat filenames, a manifest, and a PyMOL loading script |
 | `cif_to_md.py` | splits a Boltz complex into the protein PDB and ligand SDF the OpenMM MD pipeline wants, assigning ligand bond orders from the run's SMILES. See [dynamics and MM/GBSA](#what-happens-after-this-pipeline-dynamics-and-mmgbsa) |
+| `md_contacts.py` | contacts, centroid separation and peptide Rg in windows across a trajectory: whether the designed pose survived, which one ΔG cannot tell you. Heavy atoms only, so the counts stay comparable with `fold_check*.csv` |
+| `md_frames.py` | representative end-of-run frames as PDBs for figures — a ten-model ensemble superposed on the peptide, and the single frame nearest the window mean. `--window-ns` picks a different interval where the end of a run is unrepresentative |
 
 ### Running a whole shell, and renting a GPU
 
@@ -327,6 +329,7 @@ runs/octinoxate/
     ├── protein_fixed.pdb        and ligand_prepped.sdf: the prepared inputs
     ├── system/                  the solvated, parameterised system
     ├── prod*/                   trajectory, energy log, wrapped solute
+    │   ├── frames_last.pdb      ten end-of-run models, and frame_medoid.pdb, for figures
     │   └── mmgbsa/              FINAL_RESULTS_MMPBSA.dat and its prmtops
     └── mmgbsa_summary.csv       every leg's decomposition in one table (at md/ root)
 ```
@@ -1072,12 +1075,92 @@ structures have essentially the same van der Waals contact (−19.1 against −1
 ways, and van der Waals dominates electrostatics in both — which is what the contact analysis of
 `orig_f12` already said, 47 contacts and none of them charged.
 
-That is also the flat answer to whether the geometric and energetic metrics can be reconciled: **in
-water they agree that neither structure is remarkable.** −13.7 and −16.3 kcal/mol are ordinary
-millimolar-to-micromolar affinities, not the −45 to −75 the gas phase advertised. The filter is doing
-its job; it is just not measuring what its units claim.
+That is also the flat answer to whether these two can be reconciled: **in water neither is
+remarkable.** −13.7 and −16.3 kcal/mol are ordinary millimolar-to-micromolar affinities, not the −45 to
+−75 the gas phase advertised.
 
-Results across all legs are in `runs/octinoxate/md/mmgbsa_summary.csv`.
+### Which metric was right: four structures in water
+
+Two shell-3 structures were then run to 20 ns for the same cost as one of the above, chosen because the
+static pipeline ranked them at opposite extremes. `s3_orig_f12` is the tightest fold in the project and
+the *worst* static score of the four; `s3_esm2_f4` is the folded helical hairpin.
+
+| structure | ΔG bind | VDWAALS | EEL | EGB | UMA interaction | ligand strain | static sum | enclosed | contacts |
+|---|---|---|---|---|---|---|---|---|---|
+| **`s3_orig_f12`** | **−24.33 ± 0.08** | −34.41 | −7.99 | +22.74 | −25.13 | 44.05 | **+18.92** | **0.965** | **67** |
+| **`s3_esm2_f4`** | **−21.08 ± 0.08** | −23.45 | −2.60 | +8.58 | −34.59 | 15.16 | −19.43 | 0.795 | 36 |
+| `s2_esm2_control` | −16.25 ± 0.08 | −19.12 | −2.62 | +8.17 | −74.89 | 9.05 | **−65.84** | 0.510 | 18 |
+| `orig_f12` | −13.71 ± 0.04 | −19.75 | −5.32 | +14.01 | −45.86 | 12.80 | −33.07 | 0.960 | 47 |
+
+**The static score ranks these four in close to reverse order.** Spearman against ΔG is −0.80 for the
+static sum, −0.80 for UMA interaction alone, +0.40 for enclosed fraction and +0.80 for MM/GBSA's own
+van der Waals term. At n = 4 those coefficients are indicative rather than statistical — one swapped
+pair moves them a long way — but the endpoints need no statistics: **the best static score is third of
+four in water, and the worst static score is first.**
+
+Two of those comparisons are worth isolating.
+
+**`orig_f12` against `s3_orig_f12`: the same fold twice, ranked backwards.** These are geometric
+near-twins from shells 47% apart in fragment energy — 0.960 against 0.965 enclosed, both 1.00 wrapped
+and 20/20 engaged, Rg 8.0 against 8.1 Å. The static sum separates them by 52 kcal/mol in favour of
+`orig_f12`; MM/GBSA separates them by 10.6 in favour of `s3_orig_f12`. **And the inversion is not the
+strain term's fault**, which matters because single-trajectory MM/GBSA reports BOND, ANGLE and DIHED as
+exactly zero — intramolecular terms cancel by construction, so ΔG contains no ligand strain at all and
+comparing it to a static sum that does would be unfair. Comparing interaction alone:
+
+| | `orig_f12` | `s3_orig_f12` | difference |
+|---|---|---|---|
+| UMA gas-phase interaction | −45.86 | −25.13 | **+20.73**, UMA prefers `orig_f12` |
+| MM/GBSA gas-phase, VDW + EEL | −25.08 | −42.41 | **−17.33**, the force field prefers `s3_orig_f12` |
+| of which VDWAALS | −19.75 | −34.41 | −14.66 |
+
+The sign inverts on the interaction term by itself: a 38 kcal/mol swing in the difference between two
+folds no geometric measure can tell apart. So the charge artifact is not the only problem with the
+static energies — the interaction term misranks a pair where charge is not even the variable.
+
+**And the geometry called it.** `s3_orig_f12` has 67 contacts against 47, and its VDWAALS is 14.7
+kcal/mol stronger. The force field rewards buried contact area, which is exactly the quantity
+`enclosed_fraction` and `contacts_under_cutoff` estimate, and it charges 8.7 more desolvation for the
+privilege and still comes out 10.6 ahead. **Read the geometry, not the energy.**
+
+**Does the designed pose survive?** `code/md_contacts.py` profiles a trajectory in windows; the answer
+differs per structure and only one of the four decays:
+
+| structure | contacts, first → last decile | centroid separation | frames with no contact |
+|---|---|---|---|
+| `s3_orig_f12` | 50.7 → **60.8** (mean 56.6) | 5.02 → **3.75 Å**, tightest 2.24 Å at 6–8 ns | **0 / 2000** |
+| `s3_esm2_f4` | 19.8 → 20.6 (mean 20.1) | 7.67 → 5.82 Å | **0 / 2000** |
+| `s2_esm2_control` | 22.0 → 22.4 (mean 23.4) | 8.61 → 11.38 Å | 1 / 2000 |
+| `orig_f12` | 71.0 → 31.4 (mean 34.3) | 4.7 → 5.07 Å, out to **13.6 Å** | 8 / 20,000 |
+
+`s3_orig_f12` is the first structure here whose designed enclosure **improves** in water rather than
+merely surviving: it gains ten contacts and closes from 5.0 to 3.8 Å. Its twin does the opposite,
+leaving the cavity at 6 ns, sitting on the surface for twelve nanoseconds and re-inserting only in the
+last two. Neither ever releases the ligand, and no static clash recurs — closest heavy-atom approaches
+over whole trajectories are 2.59 to 2.66 Å, against the 2.44 Å that `orig_f12`'s prediction contained.
+
+**The helical hairpin holds.** `s3_esm2_f4` was the structural question mark: two helical arms clamped
+on the ligand by side-chain packing with **zero non-local backbone H-bonds**, which looked like the sort
+of thing water would prise open. It does not.
+
+| | Boltz prediction | over 20 ns |
+|---|---|---|
+| helical fraction | 91% | 81% |
+| β fraction | 0% | **0%**, never converts |
+| CA end-to-end | 17.6 Å | **18.1 ± 2.9 Å** |
+| closest approach of the two arms | 6.4 Å | **6.4 ± 0.5 Å** |
+| peptide Rg | 10.3 Å | 10.4–10.8 Å |
+
+End-to-end never drifts back toward the unfolded rod's 49.8 Å, and the arms hold at 6.4 Å with a
+standard deviation of 0.5 Å. Side-chain packing alone keeps the hairpin shut for 20 ns at 300 K, which
+is the closest this project has come to a designed tertiary arrangement being confirmed rather than
+merely predicted.
+
+Results across all legs are in `runs/octinoxate/md/mmgbsa_summary.csv`. `code/md_frames.py` writes the
+representative end-of-run PDBs each figure is rendered from — a ten-model ensemble superposed on the
+peptide, plus the single frame closest to the window mean. Use `--window-ns` where the trailing window
+misrepresents the run, as it does for `orig_f12`, whose last 2 ns are the only part where the ligand is
+back in the cavity.
 
 ---
 
