@@ -227,10 +227,15 @@ def main(argv=None):
     parser.add_argument("--no-relax-h", action="store_true",
                         help="skip the hydrogen-only relaxation (not advised: pdbfixer's hydrogen "
                              "placement alone moves the interaction energy by ~1 kcal/mol)")
+    # These govern every BFGS relaxation in this script. In practice that means the complex's
+    # hydrogen relaxation, which is the one that always runs and which sets the bound-state energy
+    # that ligand strain is measured from; the free-peptide and free-ligand relaxations share the
+    # budget but are both off by default. Do not raise the step cap casually -- at 1000 steps the
+    # ligand drifts 1.0 A heavy-atom RMSD through rotor flips, which is a different molecule.
     parser.add_argument("--fmax", type=float, default=0.10,
-                        help="force convergence for the strain relaxations, eV/A (default 0.10)")
+                        help="force convergence for every BFGS relaxation here, eV/A (default 0.10)")
     parser.add_argument("--steps", type=int, default=75,
-                        help="step cap for the strain relaxations (default 75)")
+                        help="step cap for every BFGS relaxation here (default 75)")
     parser.add_argument("--replicates", type=int, default=1,
                         help="water placements per solvation energy (default 1)")
     parser.add_argument("--waters", type=int, help="fixed water count (default: scaled by size)")

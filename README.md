@@ -24,6 +24,8 @@ be co-folded with the ligand, and the fold checked against what was asked for.
 - [Where output goes](#where-output-goes)
 - [Worked example: octinoxate](#worked-example-octinoxate)
 - [Second worked example: a different shell around the same ligand](#second-worked-example-a-different-shell-around-the-same-ligand)
+- [Third worked example: testing the selection criterion itself](#third-worked-example-testing-the-selection-criterion-itself)
+- [What happens after this pipeline: dynamics and MM/GBSA](#what-happens-after-this-pipeline-dynamics-and-mmgbsa)
 - [What the metrics mean](#what-the-metrics-mean)
 - [Traps](#traps)
 - [Limitations](#limitations)
@@ -262,6 +264,18 @@ peptidebuilder/
 | `strain_global.py` | ligand strain for every fold against that reference. A single point on the bound ligand as the complex relaxation left it — `structures/<name>_ligand_bound.xyz`, or the step-0 energy of that fold's free-ligand block in the scoring log, which is the same state and lets folds scored before geometry saving be corrected without re-running |
 | `correlate.py` | joins every results CSV on structure name and correlates the properties against each other. `--group` reports each subset separately, because these correlations invert between binding mechanisms |
 | `make_figures.py` | flat filenames, a manifest, and a PyMOL loading script |
+| `cif_to_md.py` | splits a Boltz complex into the protein PDB and ligand SDF the OpenMM MD pipeline wants, assigning ligand bond orders from the run's SMILES. See [dynamics and MM/GBSA](#what-happens-after-this-pipeline-dynamics-and-mmgbsa) |
+
+### Running a whole shell, and renting a GPU
+
+| file | purpose |
+|---|---|
+| `run_shell.sh` | the parameterised runner for one shell end to end: design, variants, folding, checking, scoring, overlay, strain, figures. Stage 0 preflights the forced-contact flags before anything expensive starts, `SKIP_SCORING=1` stops after folding so scoring can go elsewhere, and strain runs at stage 6b *after* scoring because scoring is what writes `_ligand_bound.xyz` |
+| `modal_score.py` | runs the scoring step on a rented GPU, shipping the CIFs out and the logs and structures back through `runs/<ligand>/modal/<tag>/`. It calls `binding_energy.py` unmodified, so a remote score and a local one are the same computation |
+| `modal_md.py` | runs the MD production leg on a rented GPU by importing `openmm_md.dynamics.run`, so a remote trajectory and a local one come from the same protocol. Keeps the full solvated trajectory on a Volume and returns only the stripped solute |
+
+Both Modal scripts leave the local code untouched: nothing in the list above knows or cares whether it
+was run on this laptop or rented hardware.
 
 ### The alternative route
 
@@ -300,12 +314,27 @@ runs/octinoxate/
 │   ├── binding_*.csv            interaction energy per complex
 │   ├── strain_*.csv             ligand strain per complex, against the shared reference
 │   └── partial_*.json           per-term results, saved as computed
-└── figures/
-    ├── *.cif                    every fold under a readable name
-    ├── designed_shell.xyz       the arrangement that was asked for
-    ├── manifest.csv             every structure joined to its numbers
-    └── load_folds.pml           PyMOL script: loads all, superposed on the ligand
+├── figures/                     shell 1; `figures_shell2/` and `figures_shell3/` alongside
+│   ├── *.cif                    every fold under a readable name
+│   ├── designed_shell.xyz       the arrangement that was asked for
+│   ├── manifest.csv             every structure joined to its numbers
+│   ├── load_folds.pml           PyMOL script: loads all, superposed on the ligand
+│   ├── style.pml                the representation, including the residue labels
+│   └── *.png                    the renders reproduced in this README
+├── modal/<tag>/                 staging for a rented-GPU run, before its logs and structures
+│                                are copied back into the paths above
+└── md/<structure>/              dynamics and MM/GBSA, one directory per structure
+    ├── protein_fixed.pdb        and ligand_prepped.sdf: the prepared inputs
+    ├── system/                  the solvated, parameterised system
+    ├── prod*/                   trajectory, energy log, wrapped solute
+    │   └── mmgbsa/              FINAL_RESULTS_MMPBSA.dat and its prmtops
+    └── mmgbsa_summary.csv       every leg's decomposition in one table (at md/ root)
 ```
+
+`load_folds.pml` loads and superposes; it does not style. Run `@style.pml` beside it for the
+representation used in this README's figures, which is what draws the residue labels. `style.pml` is
+written only when absent, so a hand-tuned copy in one figure directory is never overwritten — and, for
+the same reason, is not inherited by the next shell's directory either.
 
 Logs are split by which engine ran, and both are kept rather than ignored. A run that invoked UMA
 goes in `runs/<ligand>/uma_logs/`: it holds each relaxation's step count, timing and convergence,
@@ -546,18 +575,24 @@ highest-strain rung in **four** — both `orig` and both `esm1` — at 33.7 to 4
 family that breaks the enclosure ladder and whose energies are charge artifacts, so it is the branch
 that behaves differently on every measure rather than a random exception.
 
+**Shell 3 replicates both halves of this**, which makes it the most reproducible energetic result here:
+f8 is again the highest-strain rung for `orig` (55.77) and for `esm1` (61.67) — the two worst strains in
+the project — and `esm2` is again the exception, with f4 at 15.16 just above f8's 14.70. Nine ladders
+across three shells, and the rule and its exception hold in all nine.
+
 A peptide can satisfy a few contacts by pulling the ligand toward whichever residues are nearby; eight
 is apparently enough to demand serious distortion and too few to require the wrap that would relieve
 it — except where the substitution has already locked the fold into a shape that four contacts fight
 harder than eight.
 
 **Forced contacts are a rescue mechanism, not an improvement.** This is the sharpest disagreement
-between the two shells, and it resolves rather than contradicts the first example:
+between the shells, and it resolves rather than contradicts the first example:
 
 | glycine design | control | twelve forced contacts | effect |
 |---|---|---|---|
 | shell 1 | −1.17 | **−33.07** | forcing gains 32 kcal/mol |
 | shell 2 | **−15.95** | −1.49 | forcing loses 14 kcal/mol |
+| shell 3 | +15.03 | +18.92 | forcing costs 4 kcal/mol; neither is favourable |
 
 Shell 1's unconstrained control left the ligand pressed against the outside — 0.75 wrapped, centroid
 20.9 Å — so the constraints had everything to gain. Shell 2's control already contacted all twenty
@@ -566,6 +601,14 @@ and the geometry says so: wrapping fell from 1.00 to 0.85. **Forcing the full co
 the designed arrangement when the unconstrained fold has failed, and degrades it when the
 unconstrained fold has already succeeded.** Read the control's wrapping first to know which case you
 are in.
+
+Shell 3 is the third case, and the one the rule does not cover: its control wraps 0.80 with the ligand
+9.5 Å out, neither failed nor succeeded, and forcing moves the energy barely at all — from +15.03 to
++18.92, both unfavourable. What forcing *does* achieve there is entirely geometric: enclosure goes from
+0.735 to 0.965 and engagement from 16/20 to 20/20, at 30 kcal/mol of extra ligand strain that the energy
+then charges for. **So the rule holds for the energy and breaks for the geometry** — forcing reliably
+improves the cavity and unreliably improves the score, which is the same disagreement that runs through
+the whole of shell 3.
 
 **A shell can succeed at the objective without realising the design.** `s2_orig_control` wraps every
 ligand heavy atom while reproducing none of the twelve designed side-chain positions. The first shell
@@ -708,6 +751,333 @@ well it is held, so read the geometry columns and ignore the numbers.
 
 `load_folds.pml` in `figures_shell2/` loads all twelve superposed on the ligand with the designed
 shell in marine, and `style.pml` beside it applies the representation used here.
+
+---
+
+## Third worked example: testing the selection criterion itself
+
+The first two shells were chosen the same way — by total fragment interaction energy, −113.12 and
+−109.15 kcal/mol, the two richest arrangements the sweep found. They also turned out to be the two most
+charged, and that is not a coincidence: across all fragment poses, charged ones average **−10.79
+kcal/mol against −4.71 aromatic and −2.94 aliphatic**, and across 36 folds the interaction energy
+correlates **−0.56** with charged-residue fraction. The criterion that picks shells is substantially
+measuring charge.
+
+Which makes one experiment obvious. Take a shell that is much *weaker* on that criterion and much less
+charged, and see what the folds do. If the criterion is sound, the geometry should get worse. If the
+criterion is mostly counting charge, it might not.
+
+Shell 3 is seeded on **tryptophan pose 2** and comes in at −60.40 kcal/mol — **47% weaker than shell
+1** — with its composition shifted from charge to aromatics:
+
+| | shell 1 | shell 2 | shell 3 |
+|---|---|---|---|
+| sequence | `RGGDGGKGGGGLGGGGKGIGEGWGGDGSGGEGS` | `RGEGGEGGKGGFGGDGGIGLGGSGWGGGGLGGS` | `YGGDGFGKGGGLGGGKGGGGLGGWGGEGSGGWGS` |
+| residues | 33 | 33 | 34 |
+| spacers used, against a budget of 16 | 21 | 21 | 22 |
+| poses in the path | 12 / 12 | 12 / 12 | 12 / 12 |
+| worst closure | 0.196 Å | 0.120 Å | 0.188 Å |
+| **charged poses** | **7 (58%)** | 5 (42%) | **4 (33%)** |
+| **aromatic poses** | 1 (8%) | 2 (17%) | **4 (33%)** |
+| **total fragment interaction energy** | **−113.12** | −109.15 | **−60.40** |
+
+The structural counts hold for a third time — twelve poses ordered by an independent exact search,
+arriving at 33–34 residues and 21–22 spacers against the same budget of 16. Three shells now overshoot
+that budget by the same margin, so the overshoot is a property of twelve-fragment shells around this
+ligand, not of any one arrangement.
+
+```
+esm1   YLSDAFGKSSKLADLKDGSTLPSWASETSSLWKS      net charge  0
+esm2   YINDSFIKINYLINKKKFKILKIWLLEISFLWSS      net charge +4
+```
+
+### Results
+
+| structure | enclosed | wrapped | engaged | sep | Rg | helix | β | interaction | ligand strain | sum | hints | designed positions |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| `s3_orig_control` | 0.735 | 0.80 | 16/20 | 9.5 Å | 7.8 | 22% | 22% | +0.92 | 14.12 | **+15.03** | — | 2/12 |
+| `s3_orig_f4` | 0.655 | 0.80 | 16/20 | 7.2 Å | 7.8 | 3% | 31% | −28.45 | 39.45 | **+11.01** | 1/4 | 1/12 |
+| `s3_orig_f8` | 0.880 | 0.85 | 17/20 | 7.9 Å | 7.8 | 19% | 16% | −5.62 | 55.77 | **+50.15** | 1/8 | 0/12 |
+| **`s3_orig_f12`** | **0.965** | **1.00** | **20/20** | **3.6 Å** | 8.1 | 19% | 16% | −25.13 | 44.05 | **+18.92** | 2/12 | 0/12 |
+| `s3_esm1_control` | 0.755 | 0.85 | 17/20 | 5.0 Å | 9.4 | 59% | 6% | −26.88 | 13.68 | −13.21 | — | 1/12 |
+| `s3_esm1_f4` | 0.785 | 0.70 | 14/20 | 6.5 Å | 9.5 | 72% | 9% | −19.30 | 51.17 | **+31.87** | 1/4 | 1/12 |
+| `s3_esm1_f8` | 0.850 | **0.95** | 19/20 | 5.3 Å | 9.4 | 69% | 16% | +2.00 | 61.67 | **+63.67** | 1/8 | 1/12 |
+| **`s3_esm1_f12`** | 0.880 | 0.90 | 18/20 | 4.3 Å | 9.3 | 72% | 3% | −25.14 | 11.65 | **−13.50** | 1/12 | 1/12 |
+| `s3_esm2_control` | 0.360 | 0.45 | 9/20 | 13.6 Å | 15.0 | 100% | 0% | −10.78 | 13.13 | +2.35 | — | 1/12 |
+| **`s3_esm2_f4`** | 0.795 | 0.90 | 18/20 | 7.0 Å | 10.3 | 91% | 0% | −34.59 | 15.16 | **−19.43** | 0/4 | 0/12 |
+| `s3_esm2_f8` | 0.795 | 0.80 | 16/20 | 6.3 Å | 10.2 | 91% | 0% | −21.56 | 14.70 | −6.85 | 0/8 | 0/12 |
+| `s3_esm2_f12` | 0.640 | 0.75 | 15/20 | 6.3 Å | 9.7 | 88% | 0% | −25.05 | 10.83 | −14.22 | 0/12 | 0/12 |
+
+Energies in kcal/mol. Ligand strain is measured against the single global-minimum reference at
+−557162.371 kcal/mol-equiv, as everywhere else in this README.
+
+### The answer: geometry improved, energy got worse
+
+**A 47% weaker shell folded better, not worse.**
+
+| | shell 1 | shell 2 | shell 3 |
+|---|---|---|---|
+| designed positions reproduced, out of 144 | not measured | **1** | **8** |
+| best fold | `orig_f12`, 0.960 enclosed | `s2_esm2_f8`, 0.860 | `s3_orig_f12`, 0.965 |
+| best enclosed fraction | 0.960 | 0.860 | **0.965** |
+| net favourable folds | **9 / 12** | 8 / 12 | **5 / 12** |
+| best sum | −33.07 | −65.84 *(artifact)* | −19.43 |
+| median ligand strain | 15.61 | 21.43 | 15.16 |
+
+Shell 3 reproduces **eight** designed side-chain positions across its twelve folds where shell 2
+reproduced **one**. (Shell 1's folds were never measured this way — `overlay.csv` holds its sequence-level
+comparisons, not its twelve folds, so the column is blank rather than zero.)
+
+More striking is what its best fold is. `s3_orig_f12` and shell 1's `orig_f12` are near-twins, arrived at
+from shells 47% apart in fragment interaction energy:
+
+| | `orig_f12` (shell 1) | `s3_orig_f12` (shell 3) |
+|---|---|---|
+| enclosed | 0.960 | 0.965 |
+| wrapped | 1.00 | 1.00 |
+| engaged | 20/20 | 20/20 |
+| centroid separation | 4.2 Å | **3.6 Å** |
+| contacts under cutoff | 47 | **67** |
+| mean ligand distance | 3.49 Å | **3.39 Å** |
+| closest approach | **2.44 Å** (a clash) | 2.65 Å |
+| peptide Rg | 8.0 Å | 8.1 Å |
+
+Two independent sweeps, two different seeds, two shells with only a fraction of their poses in common,
+both producing a glycine-spaced design whose fully forced fold closes around the ligand at 0.96 enclosure
+with every ligand atom engaged. Shell 3's is the tighter of the two on every count and it does not carry
+shell 1's 2.44 Å clash. **That convergence is the most reproducible result in the project**, and it says
+the fully forced glycine design is a robust target rather than one lucky fold.
+
+By energy it is the worst: 5 of 12 net favourable against 9 and 8, and its best sum is −19.43 where
+shell 1 managed −33.07. **The two families of metric disagree, and they disagree systematically** — the
+shell that was selected for having less charge scores worse on a criterion that rewards charge, while
+folding into better cavities. Shell 2's headline −65.84 is itself an artifact of net charge +5, so the
+energetic ranking of all three shells rests on the term least worth trusting.
+
+This is the strongest statement this repository can make about its own scoring: **total fragment
+interaction energy is the wrong criterion for choosing which shell to fold.** It should be replaced by
+something geometric — closure quality and pose diversity — or at minimum weighted to neutralise the
+charge bias. What it should *not* be is read as a prediction of how well a shell will fold, because on
+three shells it got the order backwards.
+
+### The helix that folds instead of breaking
+
+The `esm2` variant is the most interesting fold in the set, and it works by a mechanism neither earlier
+shell used. Unconstrained it is a 100% helical rod at Rg 15.0 Å with the ligand flung 13.6 Å away and
+only 7 contacts — the worst geometry in shell 3. Force contacts on it and it does not break: it **bends
+double, keeping its helix intact, and clamps the ligand between the two arms.**
+
+| | `s3_esm2_control` | `s3_esm2_f4` | `s3_esm2_f8` | `s3_esm2_f12` | `s2_esm2_f8` |
+|---|---|---|---|---|---|
+| Rg | 15.0 Å | 10.3 Å | 10.2 Å | 9.7 Å | 9.8 Å |
+| helical fraction | 100% | **91%** | **91%** | **88%** | 87% |
+| β fraction | 0% | 0% | 0% | 0% | **6%** |
+| helical H-bonds | 42 | **45** | **46** | 38 | 34 |
+| non-local H-bonds | 0 | **0** | **0** | **0** | 0 |
+| CA end-to-end | 49.8 Å | **17.6 Å** | **18.1 Å** | **8.5 Å** | 11.4 Å |
+| CA contour length | 125.2 Å | 125.4 Å | 125.5 Å | 125.4 Å | 121.2 Å |
+| closest approach of the two halves | 8.7 Å | 6.4 Å | 6.3 Å | 5.5 Å | 5.9 Å |
+
+Read the last three rows together. The contour length along the CA trace is **unchanged** at 125 Å while
+the end-to-end distance collapses from 49.8 Å to 8.5–18 Å: the chain is not compacting, it is folding
+back on itself. The two halves come within 5.5–6.4 Å, which is helix-packing contact. And the helical
+H-bond count goes *up*, to 45 and 46 — the helix is not merely surviving the fold, it is better
+hydrogen-bonded after it.
+
+Contrast shell 2's `s2_esm2_f8`, which reached a similar Rg by the opposite route: its helicity fell to
+87%, it picked up 6% β, and its helical H-bonds dropped from 36 to 34. That one broke its helix to bind.
+Shell 3's keeps it.
+
+What holds the hairpin shut is worth stating because of what it is not: **zero non-local backbone
+H-bonds** in any of these folds. There is no β-sheet, no backbone clasp. The two helical arms are held
+together by side-chain packing alone — which is exactly what a designed shell is, twelve side chains
+arranged around a ligand, and the closest this project has come to Boltz building the thing that was
+designed rather than something else that happens to contain it.
+
+It is also the one sequence in shell 3 whose forced folds are all net favourable (−19.43, −6.85,
+−14.22), at ligand strains of 10.8–15.2 kcal/mol, the lowest in the shell. **And it satisfies none of
+the designed contact hints — 0/4, 0/8, 0/12.** It wraps the ligand well, holds it cheaply, and does so
+without honouring a single hint it was given, which is a useful reminder that hint satisfaction is a
+third metric that can disagree with the other two.
+
+### Figures
+
+All twelve structures, peptide in green, ligand in red, one row per sequence and one column per rung of
+the constraint ladder. Captions are `wrapped` / `interaction` in kcal/mol.
+
+**The glycine design.** Only the fully forced fold encapsulates — and it is the best-enclosed structure
+in the project, at a ligand strain of 44.05 kcal/mol that makes it net unfavourable anyway.
+
+| unconstrained | 4 contacts | 8 contacts | 12 contacts |
+|---|---|---|---|
+| ![s3_orig_control](runs/octinoxate/figures_shell3/s3_orig_control.png) | ![s3_orig_f4](runs/octinoxate/figures_shell3/s3_orig_f4.png) | ![s3_orig_f8](runs/octinoxate/figures_shell3/s3_orig_f8.png) | ![s3_orig_f12](runs/octinoxate/figures_shell3/s3_orig_f12.png) |
+| 0.80 / +0.92 | 0.80 / −28.45 | 0.85 / −5.62 | **1.00 / −25.13** |
+| 22% helix and 22% β at Rg 7.8 Å; reproduces 2 designed positions, the most of any control | ligand 7.2 Å out, helix collapsed to 3% | 59 contacts but 55.77 kcal/mol of strain, the second worst in the shell | **encapsulates** — 0.965 enclosed, 20/20 engaged, 3.6 Å separation, 67 contacts, no clash; a tighter twin of shell 1's `orig_f12`, at +18.92 net |
+
+**The first ESM2 variant.** Two of the four encapsulate, and they are separated by 50 kcal/mol of ligand
+strain — the clearest single illustration that enclosure and energy are independent.
+
+| unconstrained | 4 contacts | 8 contacts | 12 contacts |
+|---|---|---|---|
+| ![s3_esm1_control](runs/octinoxate/figures_shell3/s3_esm1_control.png) | ![s3_esm1_f4](runs/octinoxate/figures_shell3/s3_esm1_f4.png) | ![s3_esm1_f8](runs/octinoxate/figures_shell3/s3_esm1_f8.png) | ![s3_esm1_f12](runs/octinoxate/figures_shell3/s3_esm1_f12.png) |
+| 0.85 / −26.88 | 0.70 / −19.30 | **0.95 / +2.00** | **0.90 / −25.14** |
+| 59% helical at Rg 9.4 Å, net −13.21 without any forcing | the only rung that loses ground, 14/20 engaged | **encapsulates** — 0.95 wrapped, 19/20 engaged, 55 contacts, but **61.67 kcal/mol of strain**, the worst in the shell and net +63.67 | **encapsulates** — 0.88 enclosed at 4.3 Å, and only 11.65 kcal/mol of strain: net **−13.50**, the one fold here that is both well enclosed and cheap |
+
+**The second ESM2 variant.** Net charge +4. A folded helix wrapping the ligand: the rod bends double
+without breaking, and the two arms close on the ligand.
+
+| unconstrained | 4 contacts | 8 contacts | 12 contacts |
+|---|---|---|---|
+| ![s3_esm2_control](runs/octinoxate/figures_shell3/s3_esm2_control.png) | ![s3_esm2_f4](runs/octinoxate/figures_shell3/s3_esm2_f4.png) | ![s3_esm2_f8](runs/octinoxate/figures_shell3/s3_esm2_f8.png) | ![s3_esm2_f12](runs/octinoxate/figures_shell3/s3_esm2_f12.png) |
+| 0.45 / −10.78 | **0.90 / −34.59** | 0.80 / −21.56 | 0.75 / −25.05 |
+| 100% helical rod, Rg 15.0 Å, ligand 13.6 Å away with 7 contacts — worst geometry in the shell | **folded helix**, 91% helical at Rg 10.3 Å, end-to-end 49.8 → 17.6 Å, 36 contacts; best sum in the shell at −19.43 | **folded helix**, 91% helical, 33 contacts, net −6.85 | most folded of all, end-to-end 8.5 Å, 88% helical; net −14.22 |
+
+`load_folds.pml` in `figures_shell3/` loads all twelve superposed on the ligand with the designed shell
+in marine. It loads and aligns only — run `@style.pml` beside it for the representation used here,
+which is what draws the residue labels.
+
+---
+
+## What happens after this pipeline: dynamics and MM/GBSA
+
+Everything above is static. A fold is predicted, its geometry measured and its energy computed at that
+one geometry, in the gas phase, with no solvent and no time. That is enough to rank and to reject, and
+it is not enough to believe. **This repository is the filter; molecular dynamics is the verdict.**
+
+The distinction matters because the filter's own metrics say so. Enclosure and wrapping are the design
+objective, interaction energy is a proxy that has inverted the verdict more than once, and ligand strain
+is a gas-phase quantity with no desolvation term. None of those can tell you whether a complex survives
+in water. What they can do is choose which two or three structures out of thirty-six are worth an hour
+of GPU each.
+
+### The handoff
+
+MD and MM/GBSA live in a separate project, **`~/python_mac/openmm`** (the `omd` CLI), for a hard reason:
+GAFF2/OpenFF ligand parameterisation is not pip-installable, so that pipeline needs a conda environment
+(`openmm-md`: openmm, openmmforcefields, openff-toolkit, mdtraj, parmed, AmberTools). This repository's
+`.venv` has openmm but not the parameterisation stack, and cannot get it. Two environments called at
+their boundary, as with Boltz.
+
+`code/cif_to_md.py` is the adapter. Boltz writes one CIF holding peptide and ligand together, heavy
+atoms only; `omd` wants a protein PDB and a ligand SDF apart. The ligand needs care: a PDB or CIF
+records no bond orders, so the SDF is built by assigning bond orders from the run's own SMILES as a
+template, then adding hydrogens with coordinates — the same route `uma_binding.protonate_ligand` takes.
+Without the template step the aromatic ring and the ester come out as single bonds and the ligand is
+parameterised as something it is not. **Check the printed formula before going further.**
+
+```bash
+python code/cif_to_md.py runs/octinoxate --structure orig_f12
+
+OMD=~/miniforge3/envs/openmm-md/bin/omd
+M=runs/octinoxate/md/orig_f12
+$OMD prep-protein --pdb $M/orig_f12_protein.pdb --out $M/protein_fixed.pdb
+$OMD prep-ligand  --sdf $M/orig_f12_ligand.sdf  --out $M/ligand_prepped.sdf
+$OMD build --protein $M/protein_fixed.pdb --ligand $M/ligand_prepped.sdf \
+           --out-dir $M/system --no-auto-cofactors --box-shape dodecahedron
+$OMD run     --system $M/system/system.xml --topology $M/system/complex.pdb \
+             --out-dir $M/prod --steps 10000000 --platform OpenCL
+$OMD analyze --traj $M/prod/traj.dcd --topology $M/system/complex.pdb --out-dir $M/prod
+$OMD mmgbsa  --protein $M/protein_fixed.pdb --ligand $M/ligand_prepped.sdf \
+             --traj $M/prod/traj_wrapped.xtc --topology $M/prod/traj_wrapped.pdb \
+             --out-dir $M/prod/mmgbsa --no-auto-cofactors --run
+```
+
+`analyze` is not optional: it is what writes the wrapped, solute-only `traj_wrapped.xtc` and matching
+`traj_wrapped.pdb` that `mmgbsa` requires.
+
+### Where to run the dynamics
+
+Only `run` wants a GPU. Everything either side of it — parameterisation, MM/GBSA — is conda-only and
+cheap on CPU, so the split is clean, and `code/modal_md.py` takes just that one leg to a rented A10G.
+It imports `openmm_md.dynamics.run` rather than reimplementing the protocol, so a Modal trajectory and a
+local one come out of the same tested code: same minimisation, same restrained equilibration, same
+integrator, same timestep. That is not a nicety — these trajectories are compared as binding energies,
+and a protocol difference would be indistinguishable from a result.
+
+| | local, six-core Apple Silicon | Modal A10G |
+|---|---|---|
+| platform | OpenCL (FAIRChem has no MPS backend, but OpenMM reaches the GPU this way) | CUDA, passed explicitly |
+| rate | 1.72 ms/step at 8,647 particles | 0.376 ms/step at 23,121 particles |
+| 20 ns of the 23k system | ~14 hours | **63 minutes, $1.15** |
+| equilibration | forced onto CPU — OpenCL in single precision cannot run the restrained phase | fine on CUDA |
+
+Two things are worth knowing before renting anything. `dynamics.py`'s `auto` platform probe does not
+list CUDA, so on a GPU host it silently selects CPU — renting a GPU to compute on a processor. Pass
+`CUDA` explicitly, which takes the branch that raises rather than degrades. And warm up before timing:
+OpenMM's CUDA platform compiles and autotunes lazily, so an un-warmed probe reads 2–5× too slow.
+
+**Box size, not peptide size, sets the cost.** A compact fold and an extended one of the same sequence
+length differ enormously: `orig_f12` at radius of gyration 8.0 Å solvates to 8,647 particles, while
+`s2_esm2_control` at 15.0 Å — a 100% helical rod — needs 33,045 in a cubic box. Read `peptide_rg` before
+estimating a run, and use `--box-shape dodecahedron`: a rhombic dodecahedron holds the same minimum
+image distance in ~71% of the volume, which took that system from 33,045 particles to **23,121**, a 30%
+saving for no change in physics.
+
+### How long is long enough
+
+`orig_f12`, the best structure in the first worked example, computed on the leading *n* ns of one 20 ns
+trajectory:
+
+| window | VDWAALS | EEL | EGB | ESURF | **ΔG bind** |
+|---|---|---|---|---|---|
+| 40 ps (pilot) | −38.28 | −14.88 | +32.28 | −4.48 | **−25.37 ± 0.50** |
+| 5 ns | −31.23 | −10.81 | +24.67 | −4.14 | **−21.52 ± 0.29** |
+| 10 ns | −23.46 | −8.17 | +17.89 | −3.12 | **−16.86 ± 0.37** |
+| 15 ns | −20.43 | −6.08 | +14.60 | −2.70 | **−14.61 ± 0.38** |
+| 20 ns | −19.75 | −5.32 | +14.01 | −2.64 | **−13.71 ± 0.04** |
+
+The successive changes are 3.85, 4.66, 2.25, 0.90 — halving, so 20 ns is converged and anything shorter
+is not. **A short window does not give a noisy answer, it gives a confidently wrong one:** the 40 ps
+pilot's ±0.50 is the sampling error on forty correlated frames drawn from the starting pose, and it
+overstates binding by 11.7 kcal/mol. Every window is tight and every short one is too negative, because
+they are all still measuring the Boltz pose rather than the ensemble. **Run 20 ns; do not trust 5.**
+
+What relaxes is the pose itself. Over the run the ligand leaves the cavity it was designed into —
+heavy-atom contacts within 4 Å fall 71 → 19 and the centroid separation goes 4.7 → 9.9 Å by 6 ns — sits
+on the surface for twelve nanoseconds, then re-inserts in the last two (5.07 Å, 31 contacts). It never
+dissociates: 8 frames out of 20,000 have no contact at all. The designed 2.44 Å static clash never
+recurs, the closest heavy-atom approach over the whole trajectory being 2.61 Å. So the enclosure was
+real but not a minimum — which is exactly the kind of statement no static score can make.
+
+### The charge artifact, tested
+
+The static pipeline's worst known bias is that gas-phase interaction energy rewards net charge: across
+36 folds it correlates −0.56 with charged-residue fraction, and charged fragment poses average −10.79
+kcal/mol against −4.71 aromatic and −2.94 aliphatic. `EGB` is precisely the term that penalises exposed
+charge, so MM/GBSA should take most of that advantage away. That is a falsifiable prediction about a
+specific number, and the second 20 ns run was run to test it.
+
+| | `orig_f12` | `s2_esm2_control` |
+|---|---|---|
+| peptide charge | −1 | **+5** |
+| peptide Rg | 8.0 Å (compact) | 15.4 Å (100% helical rod) |
+| UMA gas-phase interaction | −45.86 | **−74.89** |
+| VDWAALS | −19.75 | −19.12 |
+| EEL | −5.32 | −2.62 |
+| EGB | +14.01 | +8.17 |
+| ESURF | −2.64 | −2.67 |
+| **MM/GBSA ΔG bind** | **−13.71 ± 0.04** | **−16.25 ± 0.08** |
+
+**The prediction holds.** A 29.0 kcal/mol gas-phase advantage becomes a 2.5 kcal/mol advantage in
+water: 91% of it evaporates. Anyone ranking these two on the static number would have believed the
++5 sequence was in a different class, and it is not.
+
+The mechanism is not the one the artifact's name suggests. The +5 peptide's electrostatic attraction to
+the ligand is *weaker*, not stronger (−2.62 against −5.32), which makes sense the moment one remembers
+the ligand is neutral — there is no charge for a charge to pull on. What UMA was rewarding is long-range
+polarisation of a neutral ligand by a charged rod, and GB screens that almost completely. The +5 peptide
+then wins its small margin back through desolvation, not attraction: it buries less (+8.17 against
++14.01) because its ligand lies in a shallow surface groove rather than a closed cavity. The two
+structures have essentially the same van der Waals contact (−19.1 against −19.8) reached two different
+ways, and van der Waals dominates electrostatics in both — which is what the contact analysis of
+`orig_f12` already said, 47 contacts and none of them charged.
+
+That is also the flat answer to whether the geometric and energetic metrics can be reconciled: **in
+water they agree that neither structure is remarkable.** −13.7 and −16.3 kcal/mol are ordinary
+millimolar-to-micromolar affinities, not the −45 to −75 the gas phase advertised. The filter is doing
+its job; it is just not measuring what its units claim.
+
+Results across all legs are in `runs/octinoxate/md/mmgbsa_summary.csv`.
 
 ---
 
@@ -890,10 +1260,11 @@ assumed.
 **One ligand.** Every number here comes from octinoxate. Whether the spacer thresholds, the enclosure
 relationship or the constraint behaviour transfer to other ligands is untested.
 
-**Two shells.** Twenty shells were enumerated and two have been swept and folded in full, giving
-twenty-four structures. That is enough to show that several single-shell conclusions did not
-generalise — the effect of forcing contacts reverses between them — but not enough to establish the
-ones that did. The remaining eighteen are untested.
+**Three shells.** Twenty shells were enumerated and three have been swept and folded in full, giving
+thirty-six structures. That is enough to show that several single-shell conclusions did not
+generalise — the effect of forcing contacts reverses between them — and enough to establish two that
+did: the 21–22 spacer overshoot against a budget of 16, and the fully forced glycine design, which two
+independent shells converged on at 0.96 enclosure. The remaining seventeen are untested.
 
 **The twenty shells are less independent than they sound.** Only 18 of the 20 are distinct, and nine
 of those are strict subsets of another: each single-copy shell is the first pass of its two-copy
@@ -905,11 +1276,24 @@ selection ranks shells by total fragment interaction energy, and that energy str
 fragments: across all 165 poses, charged side-chain analogues average −10.79 kcal/mol against −4.71
 for aromatics and −2.94 for neutral aliphatics, on a gas-phase potential with no desolvation term.
 Across the twenty shells, interaction energy per fragment correlates −0.56 with charged fraction and
-+0.63 with aromatic fraction. Both shells tested here are therefore among the most charge-dominated in
-the family — the first is 58% charged with a single aromatic among twelve fragments — which is
-backwards for a ligand that is a methoxyphenyl chromophore on a branched alkyl chain. Whether a
-less charged, more aromatic shell folds better despite scoring worse is untested, and is the next
-thing to try.
++0.63 with aromatic fraction. The first two shells tested are therefore among the most charge-dominated
+in the family — the first is 58% charged with a single aromatic among twelve fragments — which is
+backwards for a ligand that is a methoxyphenyl chromophore on a branched alkyl chain.
+
+**That bias has now been tested, and the criterion fails.** Shell 3 was chosen deliberately weak and
+deliberately aromatic — 47% weaker on the selection criterion, 33% charged against 58% — and it folded
+*better*: eight designed positions reproduced against shell 2's one, and the tightest fold in the
+project. It also scored worse, 5 of 12 net favourable against 9 and 8. Total fragment interaction energy
+therefore ranks shells in roughly the reverse of how well they fold, and should be replaced by a
+geometric criterion or reweighted to neutralise the charge term. See
+[the third worked example](#third-worked-example-testing-the-selection-criterion-itself).
+
+**Peptide strain is still not reported.** Relaxing a free peptide in vacuum measures collapse rather
+than strain, so the term is disabled. Referencing it instead against the peptide's Boltz apo fold was
+tried and does not work — vacuum still rewards the compact bound folds over an extended apo helix by
+over 100 kcal/mol, and the apo prediction is only confident for sequences whose fold does not change on
+binding. See `archive/peptide_strain/` for the attempt and the evidence. It needs implicit solvent to be
+meaningful, which puts it in MM/GBSA territory rather than here.
 
 **No experimental validation.** Nothing here has been synthesised or measured. The energies come from a
 machine learning potential in the gas phase, with no solvent, no entropy and no desolvation.

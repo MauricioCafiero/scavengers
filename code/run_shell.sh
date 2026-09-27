@@ -245,8 +245,8 @@ else
     $PY code/ligand_reference.py $RUN 2>&1 | tee $UMALOGS/ligand_reference.log
     [ -f $RUN/ligand_reference.json ] || { print -r -- "STOPPING: no reference written"; exit 1; }
 fi
-# Needs only the Boltz heavy atoms plus RDKit hydrogens, so this runs without any complex relaxation.
-$PY code/strain_global.py $RUN --match ${PREFIX}_ --out strain_shell$NUM.csv --save-structures \
+# A single point per fold on the bound ligand the scoring stage already wrote. No relaxation here.
+$PY code/strain_global.py $RUN --match ${PREFIX}_ --out strain_shell$NUM.csv \
     2>&1 | tee $UMALOGS/strain_shell$NUM.log
 
 say "stage 7: figures, into their own directory"

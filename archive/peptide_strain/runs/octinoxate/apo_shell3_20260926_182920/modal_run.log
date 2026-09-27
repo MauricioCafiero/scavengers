@@ -1,0 +1,16 @@
+
+--- stderr ---
+Traceback (most recent call last):
+  File "/root/code/peptide_apo.py", line 170, in <module>
+    raise SystemExit(main())
+                     ^^^^^^
+  File "/root/code/peptide_apo.py", line 166, in main
+    return do_energy(args)
+           ^^^^^^^^^^^^^^^
+  File "/root/code/peptide_apo.py", line 121, in do_energy
+    xyz = relax_hydrogens(sym, xyz, chg, calc, fmax=args.fmax, steps=args.steps,
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/root/code/binding_energy.py", line 82, in relax_hydrogens
+    atoms.info.update({"charge": int(charge), "spin": int(spin)})
+                                 ^^^^^^^^^^^
+TypeError: int() argument must be a string, a bytes-like object or a real number, not 'tuple'
