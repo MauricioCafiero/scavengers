@@ -6,3 +6,444 @@ poses: tryptophan:2,tyrosine:0,phenylalanine:4,lysine:1,aspartic:21,glutamic:8,l
 no design_shell3.json yet, preflight deferred to after stage 2
 
 === stage 1: reachability sweep : 14:34:16 ===
+sweep: 132 of 132 ordered pairs
+
+=== stage 2: ordering and spacer counts : 15:56:52 ===
+loaded 165 poses from runs/octinoxate
+130 of 132 ordered pairs are connectable (closure < 0.2 A)
+
+poses  residues  sum k  budget  pad   total IE  IE/residue  sequence
+    1         1      0       0    0     -16.78      -16.78  D
+    2         3      1       1    0     -25.72       -8.57  WGD
+    3         6      3       3    0     -31.64       -5.27  WGDGGS
+    4         9      5       4    0     -37.46       -4.16  WGYGGDGGS
+    5        12      7       6    0     -42.73       -3.56  WGYGGDGGWGGS
+    6        14      8       7    0     -47.21       -3.37  WGYGGKGDGGSGGW
+    7        16      9       9    0     -51.27       -3.20  WGYGGKGDGGSGGWGS
+    8        17      9      10    1     -54.82       -3.22  FGDGKGGWGSGYGGWGS
+    9        18      9      12    3     -57.64       -3.20  FGDGKGGWGSGYGEGWGS
+   10        23     13      13    0     -59.74       -2.60  FGDGKGGWGSGYGEGGLGGGWGS
+   11        31     20      15    0     -61.42       -1.98  FGDGKGGWGSGYGEGGLGGGWGGGGLGGGGS
+   12        34     22      16    0     -60.40       -1.78  YGGDGFGKGGGLGGGKGGGGLGGWGGEGSGGWGS
+
+'budget' is the glycine count the whole-path parameter count demands; 'pad' is how many
+more are needed than the per-edge minimums supply. A path short of budget cannot close
+as spelled, however connectable each step looks on its own.
+
+saved 12-pose design to runs/octinoxate/design_shell3.json: YGGDGFGKGGGLGGGKGGGGLGGWGGEGSGGWGS
+
+longest traversable path uses 12 of 12 poses (sum k = 22, budget = 16, budget met):
+  tyrosine0 -> aspartic21   2 linker(s), closure 0.119 A, steric penalty 0.00
+  aspartic21 -> phenylalanine4   1 linker(s), closure 0.131 A, steric penalty 0.00
+  phenylalanine4 -> lysine1   1 linker(s), closure 0.000 A, steric penalty 0.00
+  lysine1 -> leucine5   3 linker(s), closure 0.000 A, steric penalty 0.00
+  leucine5 -> lysine8   3 linker(s), closure 0.075 A, steric penalty 0.00
+  lysine8 -> leucine13   4 linker(s), closure 0.000 A, steric penalty 0.00
+  leucine13 -> tryptophan2   2 linker(s), closure 0.000 A, steric penalty 0.00
+  tryptophan2 -> glutamic8   2 linker(s), closure 0.000 A, steric penalty 0.00
+  glutamic8 -> serine4   1 linker(s), closure 0.084 A, steric penalty 0.00
+  serine4 -> tryptophan5   2 linker(s), closure 0.028 A, steric penalty 0.00
+  tryptophan5 -> serine32   1 linker(s), closure 0.188 A, steric penalty 0.00
+preflight ok: flags parse and the yaml carries 4 forced contacts
+design: YGGDGFGKGGGLGGGKGGGGLGGWGGEGSGGWGS
+wrote the design's own shell to runs/octinoxate/sequences/YGGDGFGKGGGLGGGKGGGGLGGWGGEGSGGWGS.xyz
+
+=== stage 3: two ESM2 linker variants : 15:56:53 ===
+design charge +0   esm1 +0 YLSDAFGKSSKLADLKDGSTLPSWASETSSLWKS   esm2 +4 YINDSFIKINYLINKKKFKILKIWLLEISFLWSS
+
+=== stage 4: twelve folds : 15:56:58 ===
+  folding s3_orig_control
+  folding s3_orig_f4
+  folding s3_orig_f8
+  folding s3_orig_f12
+  folding s3_esm1_control
+  folding s3_esm1_f4
+  folding s3_esm1_f8
+  folding s3_esm1_f12
+  folding s3_esm2_control
+  folding s3_esm2_f4
+  folding s3_esm2_f8
+  folding s3_esm2_f12
+12 folds present, 12 still to score
+
+=== stage 5: geometry check -- free, and the primary measure : 16:22:40 ===
+
+esm1_f12
+  residue   1 -> O25  asked <=  3.8 A, got  11.79 A  MISSED  (forced)
+  residue   4 -> C31  asked <=  4.0 A, got   9.07 A  MISSED  (forced)
+  residue   7 -> C37  asked <=  5.2 A, got  12.26 A  MISSED  (forced)
+  residue  12 -> C41  asked <=  5.1 A, got   6.70 A  MISSED  (forced)
+  residue  17 -> C36  asked <=  4.1 A, got   9.87 A  MISSED  (forced)
+  residue  19 -> C33  asked <=  4.8 A, got   6.46 A  MISSED  (forced)
+  residue  21 -> C30  asked <=  4.2 A, got   8.35 A  MISSED  (forced)
+  residue  23 -> C37  asked <=  4.5 A, got   3.66 A  ok  (forced)
+  residue  26 -> C37  asked <=  4.1 A, got   9.42 A  MISSED  (forced)
+  residue  28 -> O26  asked <=  3.9 A, got  12.12 A  MISSED  (forced)
+  residue  31 -> C34  asked <=  4.1 A, got  10.57 A  MISSED  (forced)
+  residue  33 -> O27  asked <=  4.8 A, got  18.58 A  MISSED  (forced)
+
+esm1_f4
+  residue   1 -> O25  asked <=  3.8 A, got  10.30 A  MISSED  (forced)
+  residue   4 -> C31  asked <=  4.0 A, got   7.25 A  MISSED  (forced)
+  residue  28 -> O26  asked <=  3.9 A, got  11.55 A  MISSED  (forced)
+  residue  31 -> C34  asked <=  4.1 A, got  11.70 A  MISSED  (forced)
+
+esm1_f8
+  residue   1 -> O25  asked <=  3.8 A, got   9.22 A  MISSED  (forced)
+  residue   4 -> C31  asked <=  4.0 A, got   9.42 A  MISSED  (forced)
+  residue  17 -> C36  asked <=  4.1 A, got   9.24 A  MISSED  (forced)
+  residue  21 -> C30  asked <=  4.2 A, got   8.38 A  MISSED  (forced)
+  residue  23 -> C37  asked <=  4.5 A, got   4.41 A  ok  (forced)
+  residue  26 -> C37  asked <=  4.1 A, got   8.35 A  MISSED  (forced)
+  residue  28 -> O26  asked <=  3.9 A, got  13.13 A  MISSED  (forced)
+  residue  31 -> C34  asked <=  4.1 A, got  14.18 A  MISSED  (forced)
+
+esm2_f12
+  residue   1 -> O25  asked <=  3.8 A, got  23.35 A  MISSED  (forced)
+  residue   4 -> C31  asked <=  4.0 A, got  18.46 A  MISSED  (forced)
+  residue   7 -> C37  asked <=  5.2 A, got  14.50 A  MISSED  (forced)
+  residue  12 -> C41  asked <=  5.1 A, got   8.47 A  MISSED  (forced)
+  residue  17 -> C36  asked <=  4.1 A, got   6.37 A  MISSED  (forced)
+  residue  19 -> C33  asked <=  4.8 A, got   8.72 A  MISSED  (forced)
+  residue  21 -> C30  asked <=  4.2 A, got   8.94 A  MISSED  (forced)
+  residue  23 -> C37  asked <=  4.5 A, got  13.86 A  MISSED  (forced)
+  residue  26 -> C37  asked <=  4.1 A, got   7.31 A  MISSED  (forced)
+  residue  28 -> O26  asked <=  3.9 A, got   4.75 A  MISSED  (forced)
+  residue  31 -> C34  asked <=  4.1 A, got   6.58 A  MISSED  (forced)
+  residue  33 -> O27  asked <=  4.8 A, got   8.33 A  MISSED  (forced)
+
+esm2_f4
+  residue   1 -> O25  asked <=  3.8 A, got   4.07 A  MISSED  (forced)
+  residue   4 -> C31  asked <=  4.0 A, got   9.04 A  MISSED  (forced)
+  residue  28 -> O26  asked <=  3.9 A, got  14.32 A  MISSED  (forced)
+  residue  31 -> C34  asked <=  4.1 A, got   5.27 A  MISSED  (forced)
+
+esm2_f8
+  residue   1 -> O25  asked <=  3.8 A, got  27.29 A  MISSED  (forced)
+  residue   4 -> C31  asked <=  4.0 A, got  20.07 A  MISSED  (forced)
+  residue  17 -> C36  asked <=  4.1 A, got   7.13 A  MISSED  (forced)
+  residue  21 -> C30  asked <=  4.2 A, got   9.09 A  MISSED  (forced)
+  residue  23 -> C37  asked <=  4.5 A, got  12.03 A  MISSED  (forced)
+  residue  26 -> C37  asked <=  4.1 A, got   5.59 A  MISSED  (forced)
+  residue  28 -> O26  asked <=  3.9 A, got   6.00 A  MISSED  (forced)
+  residue  31 -> C34  asked <=  4.1 A, got   6.00 A  MISSED  (forced)
+
+orig_f12
+  residue   1 -> O25  asked <=  3.8 A, got   6.87 A  MISSED  (forced)
+  residue   4 -> C31  asked <=  4.0 A, got   5.75 A  MISSED  (forced)
+  residue   7 -> C37  asked <=  5.2 A, got   6.38 A  MISSED  (forced)
+  residue  12 -> C41  asked <=  5.1 A, got   5.54 A  MISSED  (forced)
+  residue  17 -> C36  asked <=  4.1 A, got   4.88 A  MISSED  (forced)
+  residue  19 -> C33  asked <=  4.8 A, got   5.68 A  MISSED  (forced)
+  residue  21 -> C30  asked <=  4.2 A, got   5.06 A  MISSED  (forced)
+  residue  23 -> C37  asked <=  4.5 A, got   7.52 A  MISSED  (forced)
+  residue  26 -> C37  asked <=  4.1 A, got   6.54 A  MISSED  (forced)
+  residue  28 -> O26  asked <=  3.9 A, got   4.21 A  MISSED  (forced)
+  residue  31 -> C34  asked <=  4.1 A, got   5.58 A  MISSED  (forced)
+  residue  33 -> O27  asked <=  4.8 A, got   7.89 A  MISSED  (forced)
+
+orig_f4
+  residue   1 -> O25  asked <=  3.8 A, got   2.66 A  ok  (forced)
+  residue   4 -> C31  asked <=  4.0 A, got   4.29 A  MISSED  (forced)
+  residue  28 -> O26  asked <=  3.9 A, got   3.44 A  ok  (forced)
+  residue  31 -> C34  asked <=  4.1 A, got   3.80 A  ok  (forced)
+
+orig_f8
+  residue   1 -> O25  asked <=  3.8 A, got   2.56 A  ok  (forced)
+  residue   4 -> C31  asked <=  4.0 A, got   6.01 A  MISSED  (forced)
+  residue  17 -> C36  asked <=  4.1 A, got   8.20 A  MISSED  (forced)
+  residue  21 -> C30  asked <=  4.2 A, got  10.14 A  MISSED  (forced)
+  residue  23 -> C37  asked <=  4.5 A, got   6.97 A  MISSED  (forced)
+  residue  26 -> C37  asked <=  4.1 A, got  16.55 A  MISSED  (forced)
+  residue  28 -> O26  asked <=  3.9 A, got  13.62 A  MISSED  (forced)
+  residue  31 -> C34  asked <=  4.1 A, got  10.43 A  MISSED  (forced)
+
+s2_esm1_f12
+  residue   1 -> O25  asked <=  3.8 A, got   3.52 A  ok  (forced)
+  residue   3 -> C33  asked <=  4.2 A, got   9.99 A  MISSED  (forced)
+  residue   6 -> C34  asked <=  4.1 A, got   6.92 A  MISSED  (forced)
+  residue   9 -> C31  asked <=  4.2 A, got   3.71 A  ok  (forced)
+  residue  12 -> C33  asked <=  4.6 A, got   6.67 A  MISSED  (forced)
+  residue  15 -> C37  asked <=  4.1 A, got  11.11 A  MISSED  (forced)
+  residue  18 -> C35  asked <=  4.6 A, got   9.73 A  MISSED  (forced)
+  residue  20 -> O27  asked <=  4.7 A, got  10.96 A  MISSED  (forced)
+  residue  23 -> O26  asked <=  4.0 A, got  16.44 A  MISSED  (forced)
+  residue  25 -> C37  asked <=  4.5 A, got  16.35 A  MISSED  (forced)
+  residue  30 -> C41  asked <=  5.1 A, got   4.37 A  ok  (forced)
+  residue  33 -> C29  asked <=  4.2 A, got  12.02 A  MISSED  (forced)
+
+s2_esm1_f4
+  residue   1 -> O25  asked <=  3.8 A, got   3.44 A  ok  (forced)
+  residue   6 -> C34  asked <=  4.1 A, got   6.82 A  MISSED  (forced)
+  residue  15 -> C37  asked <=  4.1 A, got  10.12 A  MISSED  (forced)
+  residue  23 -> O26  asked <=  4.0 A, got  16.68 A  MISSED  (forced)
+
+s2_esm1_f8
+  residue   1 -> O25  asked <=  3.8 A, got   6.29 A  MISSED  (forced)
+  residue   3 -> C33  asked <=  4.2 A, got   8.24 A  MISSED  (forced)
+  residue   6 -> C34  asked <=  4.1 A, got   6.70 A  MISSED  (forced)
+  residue   9 -> C31  asked <=  4.2 A, got   9.12 A  MISSED  (forced)
+  residue  15 -> C37  asked <=  4.1 A, got  17.16 A  MISSED  (forced)
+  residue  23 -> O26  asked <=  4.0 A, got   5.72 A  MISSED  (forced)
+  residue  25 -> C37  asked <=  4.5 A, got   3.21 A  ok  (forced)
+  residue  33 -> C29  asked <=  4.2 A, got  11.40 A  MISSED  (forced)
+
+s2_esm2_f12
+  residue   1 -> O25  asked <=  3.8 A, got  22.38 A  MISSED  (forced)
+  residue   3 -> C33  asked <=  4.2 A, got  15.86 A  MISSED  (forced)
+  residue   6 -> C34  asked <=  4.1 A, got  13.60 A  MISSED  (forced)
+  residue   9 -> C31  asked <=  4.2 A, got   7.94 A  MISSED  (forced)
+  residue  12 -> C33  asked <=  4.6 A, got   3.82 A  ok  (forced)
+  residue  15 -> C37  asked <=  4.1 A, got   3.64 A  ok  (forced)
+  residue  18 -> C35  asked <=  4.6 A, got  10.01 A  MISSED  (forced)
+  residue  20 -> O27  asked <=  4.7 A, got   6.62 A  MISSED  (forced)
+  residue  23 -> O26  asked <=  4.0 A, got  14.44 A  MISSED  (forced)
+  residue  25 -> C37  asked <=  4.5 A, got  18.96 A  MISSED  (forced)
+  residue  30 -> C41  asked <=  5.1 A, got  18.21 A  MISSED  (forced)
+  residue  33 -> C29  asked <=  4.2 A, got  25.63 A  MISSED  (forced)
+
+s2_esm2_f4
+  residue   1 -> O25  asked <=  3.8 A, got   6.92 A  MISSED  (forced)
+  residue   6 -> C34  asked <=  4.1 A, got   7.16 A  MISSED  (forced)
+  residue  15 -> C37  asked <=  4.1 A, got   6.72 A  MISSED  (forced)
+  residue  23 -> O26  asked <=  4.0 A, got  16.67 A  MISSED  (forced)
+
+s2_esm2_f8
+  residue   1 -> O25  asked <=  3.8 A, got   4.08 A  MISSED  (forced)
+  residue   3 -> C33  asked <=  4.2 A, got   8.99 A  MISSED  (forced)
+  residue   6 -> C34  asked <=  4.1 A, got   8.33 A  MISSED  (forced)
+  residue   9 -> C31  asked <=  4.2 A, got   6.76 A  MISSED  (forced)
+  residue  15 -> C37  asked <=  4.1 A, got   6.97 A  MISSED  (forced)
+  residue  23 -> O26  asked <=  4.0 A, got   8.31 A  MISSED  (forced)
+  residue  25 -> C37  asked <=  4.5 A, got   4.60 A  MISSED  (forced)
+  residue  33 -> C29  asked <=  4.2 A, got   7.56 A  MISSED  (forced)
+
+s2_orig_f12
+  residue   1 -> O25  asked <=  3.8 A, got   6.44 A  MISSED  (forced)
+  residue   3 -> C33  asked <=  4.2 A, got   7.91 A  MISSED  (forced)
+  residue   6 -> C34  asked <=  4.1 A, got  13.05 A  MISSED  (forced)
+  residue   9 -> C31  asked <=  4.2 A, got  11.68 A  MISSED  (forced)
+  residue  12 -> C33  asked <=  4.6 A, got   9.11 A  MISSED  (forced)
+  residue  15 -> C37  asked <=  4.1 A, got  11.55 A  MISSED  (forced)
+  residue  18 -> C35  asked <=  4.6 A, got   2.90 A  ok  (forced)
+  residue  20 -> O27  asked <=  4.7 A, got   4.97 A  MISSED  (forced)
+  residue  23 -> O26  asked <=  4.0 A, got  14.48 A  MISSED  (forced)
+  residue  25 -> C37  asked <=  4.5 A, got   5.35 A  MISSED  (forced)
+  residue  30 -> C41  asked <=  5.1 A, got   7.58 A  MISSED  (forced)
+  residue  33 -> C29  asked <=  4.2 A, got   5.36 A  MISSED  (forced)
+
+s2_orig_f4
+  residue   1 -> O25  asked <=  3.8 A, got  10.53 A  MISSED  (forced)
+  residue   6 -> C34  asked <=  4.1 A, got   7.60 A  MISSED  (forced)
+  residue  15 -> C37  asked <=  4.1 A, got  10.36 A  MISSED  (forced)
+  residue  23 -> O26  asked <=  4.0 A, got   4.04 A  MISSED  (forced)
+
+s2_orig_f8
+  residue   1 -> O25  asked <=  3.8 A, got   6.69 A  MISSED  (forced)
+  residue   3 -> C33  asked <=  4.2 A, got   8.64 A  MISSED  (forced)
+  residue   6 -> C34  asked <=  4.1 A, got   3.43 A  ok  (forced)
+  residue   9 -> C31  asked <=  4.2 A, got   9.46 A  MISSED  (forced)
+  residue  15 -> C37  asked <=  4.1 A, got  13.37 A  MISSED  (forced)
+  residue  23 -> O26  asked <=  4.0 A, got  13.55 A  MISSED  (forced)
+  residue  25 -> C37  asked <=  4.5 A, got   8.97 A  MISSED  (forced)
+  residue  33 -> C29  asked <=  4.2 A, got   9.33 A  MISSED  (forced)
+
+s3_esm1_f12
+  residue   1 -> C33  asked <=  4.4 A, got   6.43 A  MISSED  (forced)
+  residue   4 -> C37  asked <=  4.1 A, got   6.54 A  MISSED  (forced)
+  residue   6 -> C33  asked <=  4.6 A, got   4.91 A  MISSED  (forced)
+  residue   8 -> C31  asked <=  4.5 A, got   6.49 A  MISSED  (forced)
+  residue  12 -> C42  asked <=  4.8 A, got   7.21 A  MISSED  (forced)
+  residue  16 -> C37  asked <=  5.2 A, got  13.39 A  MISSED  (forced)
+  residue  21 -> C41  asked <=  5.1 A, got   5.87 A  MISSED  (forced)
+  residue  24 -> O25  asked <=  3.9 A, got   9.12 A  MISSED  (forced)
+  residue  27 -> C35  asked <=  4.6 A, got   6.99 A  MISSED  (forced)
+  residue  29 -> O27  asked <=  4.2 A, got   3.52 A  ok  (forced)
+  residue  32 -> C37  asked <=  4.5 A, got   7.51 A  MISSED  (forced)
+  residue  34 -> O26  asked <=  4.0 A, got  11.31 A  MISSED  (forced)
+
+s3_esm1_f4
+  residue   4 -> C37  asked <=  4.1 A, got   6.90 A  MISSED  (forced)
+  residue  24 -> O25  asked <=  3.9 A, got   5.89 A  MISSED  (forced)
+  residue  29 -> O27  asked <=  4.2 A, got   4.06 A  ok  (forced)
+  residue  34 -> O26  asked <=  4.0 A, got   7.88 A  MISSED  (forced)
+
+s3_esm1_f8
+  residue   1 -> C33  asked <=  4.4 A, got   5.42 A  MISSED  (forced)
+  residue   4 -> C37  asked <=  4.1 A, got   5.23 A  MISSED  (forced)
+  residue   8 -> C31  asked <=  4.5 A, got  10.62 A  MISSED  (forced)
+  residue  24 -> O25  asked <=  3.9 A, got   7.63 A  MISSED  (forced)
+  residue  27 -> C35  asked <=  4.6 A, got  10.32 A  MISSED  (forced)
+  residue  29 -> O27  asked <=  4.2 A, got   4.63 A  MISSED  (forced)
+  residue  32 -> C37  asked <=  4.5 A, got   3.14 A  ok  (forced)
+  residue  34 -> O26  asked <=  4.0 A, got   7.31 A  MISSED  (forced)
+
+s3_esm2_f12
+  residue   1 -> C33  asked <=  4.4 A, got   7.68 A  MISSED  (forced)
+  residue   4 -> C37  asked <=  4.1 A, got   5.99 A  MISSED  (forced)
+  residue   6 -> C33  asked <=  4.6 A, got   7.67 A  MISSED  (forced)
+  residue   8 -> C31  asked <=  4.5 A, got   5.40 A  MISSED  (forced)
+  residue  12 -> C42  asked <=  4.8 A, got   4.98 A  MISSED  (forced)
+  residue  16 -> C37  asked <=  5.2 A, got  13.04 A  MISSED  (forced)
+  residue  21 -> C41  asked <=  5.1 A, got   8.60 A  MISSED  (forced)
+  residue  24 -> O25  asked <=  3.9 A, got   6.35 A  MISSED  (forced)
+  residue  27 -> C35  asked <=  4.6 A, got  10.19 A  MISSED  (forced)
+  residue  29 -> O27  asked <=  4.2 A, got   6.78 A  MISSED  (forced)
+  residue  32 -> C37  asked <=  4.5 A, got   6.20 A  MISSED  (forced)
+  residue  34 -> O26  asked <=  4.0 A, got   8.60 A  MISSED  (forced)
+
+s3_esm2_f4
+  residue   4 -> C37  asked <=  4.1 A, got   8.35 A  MISSED  (forced)
+  residue  24 -> O25  asked <=  3.9 A, got   5.56 A  MISSED  (forced)
+  residue  29 -> O27  asked <=  4.2 A, got   6.22 A  MISSED  (forced)
+  residue  34 -> O26  asked <=  4.0 A, got   7.13 A  MISSED  (forced)
+
+s3_esm2_f8
+  residue   1 -> C33  asked <=  4.4 A, got   7.63 A  MISSED  (forced)
+  residue   4 -> C37  asked <=  4.1 A, got   8.22 A  MISSED  (forced)
+  residue   8 -> C31  asked <=  4.5 A, got   9.89 A  MISSED  (forced)
+  residue  24 -> O25  asked <=  3.9 A, got   7.38 A  MISSED  (forced)
+  residue  27 -> C35  asked <=  4.6 A, got   8.43 A  MISSED  (forced)
+  residue  29 -> O27  asked <=  4.2 A, got   6.64 A  MISSED  (forced)
+  residue  32 -> C37  asked <=  4.5 A, got   5.51 A  MISSED  (forced)
+  residue  34 -> O26  asked <=  4.0 A, got   7.63 A  MISSED  (forced)
+
+s3_orig_f12
+  residue   1 -> C33  asked <=  4.4 A, got   7.60 A  MISSED  (forced)
+  residue   4 -> C37  asked <=  4.1 A, got   7.92 A  MISSED  (forced)
+  residue   6 -> C33  asked <=  4.6 A, got   7.03 A  MISSED  (forced)
+  residue   8 -> C31  asked <=  4.5 A, got   7.75 A  MISSED  (forced)
+  residue  12 -> C42  asked <=  4.8 A, got   7.53 A  MISSED  (forced)
+  residue  16 -> C37  asked <=  5.2 A, got   9.24 A  MISSED  (forced)
+  residue  21 -> C41  asked <=  5.1 A, got   4.08 A  ok  (forced)
+  residue  24 -> O25  asked <=  3.9 A, got   3.91 A  MISSED  (forced)
+  residue  27 -> C35  asked <=  4.6 A, got   5.79 A  MISSED  (forced)
+  residue  29 -> O27  asked <=  4.2 A, got   6.99 A  MISSED  (forced)
+  residue  32 -> C37  asked <=  4.5 A, got   4.11 A  ok  (forced)
+  residue  34 -> O26  asked <=  4.0 A, got  10.52 A  MISSED  (forced)
+
+s3_orig_f4
+  residue   4 -> C37  asked <=  4.1 A, got   3.54 A  ok  (forced)
+  residue  24 -> O25  asked <=  3.9 A, got   4.18 A  MISSED  (forced)
+  residue  29 -> O27  asked <=  4.2 A, got   8.29 A  MISSED  (forced)
+  residue  34 -> O26  asked <=  4.0 A, got  14.24 A  MISSED  (forced)
+
+s3_orig_f8
+  residue   1 -> C33  asked <=  4.4 A, got   4.16 A  ok  (forced)
+  residue   4 -> C37  asked <=  4.1 A, got   5.92 A  MISSED  (forced)
+  residue   8 -> C31  asked <=  4.5 A, got   7.74 A  MISSED  (forced)
+  residue  24 -> O25  asked <=  3.9 A, got   8.67 A  MISSED  (forced)
+  residue  27 -> C35  asked <=  4.6 A, got  12.11 A  MISSED  (forced)
+  residue  29 -> O27  asked <=  4.2 A, got   7.05 A  MISSED  (forced)
+  residue  32 -> C37  asked <=  4.5 A, got   8.14 A  MISSED  (forced)
+  residue  34 -> O26  asked <=  4.0 A, got  13.67 A  MISSED  (forced)
+
+structure                           enclosed  wrapped  engaged  cent sep  closest         hints
+s3_orig_f12                             0.96     1.00    20/20       3.6     2.65          2/12
+orig_f12                                0.96     1.00    20/20       4.2     2.44          0/12
+esm2_f12                                0.91     1.00    20/20       7.1     2.65          0/12
+s3_esm1_f12                             0.88     0.90    18/20       4.3     2.78          1/12
+s3_orig_f8                              0.88     0.85    17/20       7.9     2.49           1/8
+s2_esm2_f8                              0.86     0.95    19/20       9.5     2.97           0/8
+s3_esm1_f8                              0.85     0.95    19/20       5.3     2.57           1/8
+s3_esm2_f4                              0.80     0.90    18/20       7.0     3.05           0/4
+s3_esm2_f8                              0.80     0.80    16/20       6.3     3.08           0/8
+s3_esm1_f4                              0.79     0.70    14/20       6.5     2.42           1/4
+esm1_f12                                0.76     0.80    16/20       3.4     3.12          1/12
+s3_esm1_control                         0.76     0.85    17/20       5.0     2.76  none applied
+esm1_f8                                 0.75     0.90    18/20       4.1     3.45           1/8
+s3_orig_control                         0.73     0.80    16/20       9.5     2.00  none applied
+s2_orig_f12                             0.70     0.85    17/20       7.2     2.66          1/12
+s2_esm1_f12                             0.68     0.90    18/20       5.9     3.30          3/12
+s2_esm1_f8                              0.67     0.80    16/20       5.5     3.07           1/8
+s3_orig_f4                              0.66     0.80    16/20       7.2     3.23           1/4
+s2_esm1_f4                              0.64     0.80    16/20       6.8     3.31           1/4
+s3_esm2_f12                             0.64     0.75    15/20       6.3     3.27          0/12
+esm2_f8                                 0.62     0.75    15/20      10.4     2.88           0/8
+s2_orig_f4                              0.62     0.85    17/20       2.9     2.82           0/4
+s2_esm2_f12                             0.61     0.75    15/20       5.9     3.08          2/12
+esm1_f4                                 0.60     0.65    13/20       6.6     3.29           0/4
+s2_orig_control                         0.60     1.00    20/20       7.7     3.14  none applied
+orig_f4                                 0.59     0.85    17/20       7.1     2.66           3/4
+RGGDGGKGGGGLGGGGKGIGEGWGGDGSGGEGS_      0.53     0.40     8/20       7.7     3.60  none applied
+orig_f8                                 0.52     0.65    13/20       8.4     2.56           1/8
+s2_esm2_control                         0.51     0.85    17/20       6.7     3.42  none applied
+s2_esm2_f4                              0.50     0.55    11/20      16.0     3.07           0/4
+RGGDGGKGGGGLGGGGKGIGEGWGGDGSGGEGS_      0.49     0.75    15/20      20.9     2.80  none applied
+esm2_f4                                 0.46     0.50    10/20      11.0     3.14           0/4
+RGGDGGKGGGGLGGGGKGIGEGWGGDGSGGEGS_      0.46     0.60    12/20       8.4     2.55  none applied
+s2_orig_f8                              0.43     0.85    17/20       9.6     2.44           1/8
+s2_esm1_control                         0.38     0.55    11/20      11.2     3.66  none applied
+s3_esm2_control                         0.36     0.45     9/20      13.6     3.49  none applied
+
+'enclosed' = fraction of directions out of the ligand that run into peptide: is it in a
+shell or against one face. 'wrapped' = fraction of ligand atoms with peptide within 4.5 A.
+They disagree usefully -- a fold can contact three quarters of the ligand while leaving it
+outside, which the centroid separation shows.
+
+results in runs/octinoxate/boltz/fold_check_shell3.csv
+
+11 fold(s) with enforced contacts satisfied none of them. Check the fold log says
+'--use_potentials': without it a forced contact is conditioning only, and the model may decline.
+
+9 fold(s) carried hints that Boltz discarded (force:false) -- treat these as unconstrained controls, not as failures.
+
+=== stage 5b: designed positions reproduced -- also free : 16:22:40 ===
+[16:22:41] WARNING: More than one matching pattern found - picking one
+
+s3_esm1_control              ligand RMSD  0.56 A   1/12 fragments within 3.0 A   median 11.27 A (any type  3.76 A)
+[16:22:41] WARNING: More than one matching pattern found - picking one
+
+                             per fragment: Y:13.6 D:15.2 F:13.6 K:8.1 L:2.1 K:15.3 L:7.6 W:11.5 E:11.0 S:8.1 W:12.3 S:6.4
+s3_esm1_f12                  ligand RMSD  0.57 A   1/12 fragments within 3.0 A   median  5.78 A (any type  2.81 A)
+[16:22:41] WARNING: More than one matching pattern found - picking one
+
+                             per fragment: Y:4.3 D:12.9 F:8.7 K:4.0 L:1.9 K:7.0 L:7.9 W:3.8 E:14.6 S:4.1 W:6.9 S:4.6
+s3_esm1_f4                   ligand RMSD  0.82 A   1/12 fragments within 3.0 A   median  9.46 A (any type  3.33 A)
+[16:22:41] WARNING: More than one matching pattern found - picking one
+
+                             per fragment: Y:9.7 D:7.0 F:9.9 K:10.4 L:9.7 K:16.9 L:5.1 W:8.6 E:12.1 S:1.3 W:7.6 S:9.2
+s3_esm1_f8                   ligand RMSD  0.63 A   1/12 fragments within 3.0 A   median  7.12 A (any type  4.13 A)
+[16:22:41] WARNING: More than one matching pattern found - picking one
+
+                             per fragment: Y:5.2 D:9.5 F:2.3 K:12.7 L:4.3 K:12.6 L:5.9 W:7.0 E:16.8 S:8.1 W:3.8 S:7.2
+s3_esm2_control              ligand RMSD  0.54 A   1/12 fragments within 3.0 A   median 12.89 A (any type  6.68 A)
+[16:22:41] WARNING: More than one matching pattern found - picking one
+
+                             per fragment: Y:20.7 D:38.9 F:14.7 K:13.9 L:7.3 K:18.3 L:12.2 W:13.6 E:8.2 S:7.6 W:5.3 S:2.9
+s3_esm2_f12                  ligand RMSD  0.56 A   0/12 fragments within 3.0 A   median  8.45 A (any type  3.97 A)
+[16:22:41] WARNING: More than one matching pattern found - picking one
+
+                             per fragment: Y:9.2 D:11.1 F:13.4 K:5.3 L:5.5 K:8.8 L:8.3 W:4.7 E:14.4 S:8.6 W:8.3 S:4.3
+s3_esm2_f4                   ligand RMSD  0.58 A   0/12 fragments within 3.0 A   median  9.33 A (any type  3.73 A)
+[16:22:42] WARNING: More than one matching pattern found - picking one
+
+                             per fragment: Y:7.6 D:13.7 F:8.7 K:17.0 L:10.3 K:18.6 L:8.5 W:7.6 E:17.7 S:8.6 W:9.9 S:8.0
+s3_esm2_f8                   ligand RMSD  0.58 A   0/12 fragments within 3.0 A   median  8.40 A (any type  3.15 A)
+[16:22:42] WARNING: More than one matching pattern found - picking one
+
+                             per fragment: Y:13.0 D:12.9 F:8.0 K:11.2 L:6.6 K:17.6 L:8.8 W:3.7 E:8.9 S:4.7 W:5.8 S:4.6
+s3_orig_control              ligand RMSD  0.74 A   2/12 fragments within 3.0 A   median 11.07 A (any type  4.79 A)
+[16:22:42] WARNING: More than one matching pattern found - picking one
+
+                             per fragment: Y:16.4 D:20.6 F:18.6 K:15.3 L:2.6 K:15.2 L:9.8 W:8.4 E:1.3 S:11.3 W:10.8 S:4.5
+s3_orig_f12                  ligand RMSD  0.58 A   0/12 fragments within 3.0 A   median  7.36 A (any type  4.24 A)
+[16:22:42] WARNING: More than one matching pattern found - picking one
+
+                             per fragment: Y:7.0 D:12.4 F:9.8 K:5.3 L:9.5 K:7.4 L:7.3 W:7.3 E:15.8 S:7.3 W:6.4 S:9.9
+s3_orig_f4                   ligand RMSD  0.65 A   1/12 fragments within 3.0 A   median  9.31 A (any type  4.78 A)
+[16:22:42] WARNING: More than one matching pattern found - picking one
+
+                             per fragment: Y:8.4 D:6.9 F:9.8 K:19.6 L:6.3 K:20.0 L:8.8 W:2.0 E:14.9 S:14.1 W:8.7 S:18.0
+s3_orig_f8                   ligand RMSD  0.55 A   0/12 fragments within 3.0 A   median  8.52 A (any type  4.53 A)
+                             per fragment: Y:5.3 D:7.2 F:7.4 K:12.7 L:13.4 K:9.2 L:19.8 W:4.4 E:20.0 S:7.9 W:7.3 S:14.3
+
+Results in runs/octinoxate/boltz/overlay_shell3.csv
+
+=== stage 6: score -- THE BOTTLENECK, 40-50 min each on CPU : 16:22:42 ===
+SKIP_SCORING=1: 12 structures left unscored, listed in runs/octinoxate/modal/shell3.txt
+
+  modal run code/modal_score.py --structures-file runs/octinoxate/modal/shell3.txt \
+      --out binding_shell3.csv --gpu L4
+
+then re-run this script to pick up from stage 5 with the scores in place.

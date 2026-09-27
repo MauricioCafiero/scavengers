@@ -9,3 +9,19 @@ runs/*
 # converged, and what it printed on the way. Regenerating one means re-running the hours of UMA
 # relaxation that produced it.
 !runs/*.log
+
+# MD artifacts too large for git, kept on disk beside the results they produced. The full
+# trajectories are the expensive part -- 2.1 GB of .dcd for four legs of orig_f12 -- and they are
+# never deleted, only left out of version control. What IS committed is enough to redo the analysis:
+# the wrapped solute trajectory (.xtc), the prmtops, the energy log and FINAL_RESULTS_MMPBSA.dat.
+# Rebuilding a system.xml from the committed protein_fixed.pdb and ligand_prepped.sdf takes minutes.
+runs/*/md/**/traj.dcd
+runs/*/md/**/traj.nc
+runs/*/md/**/checkpoint.chk
+runs/*/md/**/system.xml
+
+# AmberTools scratch. MMPBSA.py writes these into the working directory, so running `omd mmgbsa`
+# from the repository root leaves them here. They are scratch, not results, and one of them
+# (reference.frc) reached 1.9 GB.
+_MMPBSA_*
+reference.frc
