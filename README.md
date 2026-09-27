@@ -325,6 +325,7 @@ runs/octinoxate/
 │   └── *.png                    the renders reproduced in this README
 ├── modal/<tag>/                 staging for a rented-GPU run, before its logs and structures
 │                                are copied back into the paths above
+├── md/figures/                  the MD renders reproduced in this README, one per run
 └── md/<structure>/              dynamics and MM/GBSA, one directory per structure
     ├── protein_fixed.pdb        and ligand_prepped.sdf: the prepared inputs
     ├── system/                  the solvated, parameterised system
@@ -1156,11 +1157,31 @@ standard deviation of 0.5 Å. Side-chain packing alone keeps the hairpin shut fo
 is the closest this project has come to a designed tertiary arrangement being confirmed rather than
 merely predicted.
 
+### Figures: what 20 ns does to a designed pose
+
+Peptide in green, ligand in red, as in the static figures above — but these are frames from a
+trajectory, not predictions. Each is the medoid of a representative window: the single frame closest to
+that window's mean structure, written by `code/md_frames.py`. **The two on the left are the same
+designed fold, arrived at from different shells, and they are the whole argument of this section.**
+
+| `s3_orig_f12` at 18.3 ns | `orig_f12` at 11.0 ns | `s3_esm2_f4` at 19.4 ns | `s2_esm2_control` at 18.9 ns |
+|---|---|---|---|
+| ![s3_orig_f12](runs/octinoxate/md/figures/s3_orig_f12_medoid.png) | ![orig_f12](runs/octinoxate/md/figures/orig_f12_plateau_medoid.png) | ![s3_esm2_f4](runs/octinoxate/md/figures/s3_esm2_f4_medoid.png) | ![s2_esm2_control](runs/octinoxate/md/figures/s2_esm2_control_medoid.png) |
+| **ΔG −24.33** | **ΔG −13.71** | **ΔG −21.08** | **ΔG −16.25** |
+| 0.965 enclosed as predicted, and it **closed further** — separation 5.02 → 3.75 Å, contacts 50.7 → 60.8, never released | 0.960 enclosed as predicted, and the ligand **left** at 6 ns; shown on the plateau it held for twelve, at 9–10 Å | the **helical hairpin**, still 81% helical with its arms at 6.4 ± 0.5 Å, holding the ligand on side-chain packing alone | the 100% helical **rod**, ligand in a surface groove, sliding along it 8.6 → 11.4 Å without letting go |
+
+`orig_f12` is shown at 11.0 ns rather than at the end, because its last 2 ns are the only stretch where
+the ligand is back in the cavity and a frame from there would imply the enclosure held. It did not.
+That is the point of `md_frames.py --window-ns`: the end of a run is usually the settled part, and when
+it is not, saying so in the caption is better than picking the flattering frame.
+
+Two predictions at 0.960 and 0.965 enclosed, indistinguishable on every static geometric measure,
+ranked 52 kcal/mol apart by the static energies in the wrong direction — and one holds its ligand while
+the other does not. **No number computed at a single geometry could have told them apart.**
+
 Results across all legs are in `runs/octinoxate/md/mmgbsa_summary.csv`. `code/md_frames.py` writes the
-representative end-of-run PDBs each figure is rendered from — a ten-model ensemble superposed on the
-peptide, plus the single frame closest to the window mean. Use `--window-ns` where the trailing window
-misrepresents the run, as it does for `orig_f12`, whose last 2 ns are the only part where the ligand is
-back in the cavity.
+PDBs these are rendered from — the medoid above, and a ten-model ensemble superposed on the peptide for
+showing the spread instead of one frame.
 
 ---
 
