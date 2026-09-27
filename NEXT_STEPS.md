@@ -160,6 +160,31 @@ geometry and the hydrogen error cancels.
 
 All 24 existing folds were recomputed; `runs/octinoxate/boltz/strain_global.csv` holds the result.
 
+## Blocked on Modal credit: October 2026
+
+The Modal allocation is spent for September 2026 (about $4 across scoring and six 20 ns runs). When it
+renews in **October 2026**, in rough priority order:
+
+1. **More dynamics.** Six trajectories is what every conclusion in the README's dynamics section rests
+   on, and it is too few: the best predictor found, mean simultaneous side-chain engagement, moved from
+   +0.90 to +0.83 when the sixth was added and got that structure's pair backwards. The cheapest useful
+   additions are the remaining shell-3 rungs and a second shuffle seed, since a single design against a
+   single shuffle cannot put a number on what the ordering search is worth. Budget roughly $1 per 20 ns
+   run for a compact fold, $1.10 for an extended one.
+2. **A second ligand, whole pipeline, probably without scoring.** Every number in this repository comes
+   from octinoxate, so nothing here is known to transfer. The case for skipping UMA scoring is now
+   empirical rather than a matter of taste: across the four designs with MM/GBSA, interaction energy and
+   interaction-plus-strain both rank structures at Spearman **−0.80** against the free energy, while
+   costing 45–60 minutes per fold. Folding plus `check_fold.py` is free and ranks at +0.30 -- no better
+   than chance, but not actively inverted, and it does reliably identify the folds where the ligand is
+   not bound at all. So: design, fold, filter on geometry, and spend the compute on dynamics for the two
+   or three survivors rather than on scoring all of them. Keep `binding_energy.py` for the folds that go
+   to MD, where the decomposition is worth having beside the MM/GBSA one.
+
+Shell 4 (`isoleucine/2`) was the plan before this and is still unstarted; it needs no Modal credit for
+design and folding, only for dynamics. Shell 1's per-fold designed-position reproduction is also still
+unmeasured, and needs per-fold shell `.xyz` copies.
+
 ## Environment map
 
 Nothing extra is installed in this repo; each external tool is called from its own environment.

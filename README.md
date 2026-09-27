@@ -265,8 +265,10 @@ peptidebuilder/
 | `correlate.py` | joins every results CSV on structure name and correlates the properties against each other. `--group` reports each subset separately, because these correlations invert between binding mechanisms |
 | `make_figures.py` | flat filenames, a manifest, and a PyMOL loading script |
 | `cif_to_md.py` | splits a Boltz complex into the protein PDB and ligand SDF the OpenMM MD pipeline wants, assigning ligand bond orders from the run's SMILES. See [dynamics and MM/GBSA](#what-happens-after-this-pipeline-dynamics-and-mmgbsa) |
-| `md_contacts.py` | contacts, centroid separation and peptide Rg in windows across a trajectory: whether the designed pose survived, which one ΔG cannot tell you. Heavy atoms only, so the counts stay comparable with `fold_check*.csv` |
+| `md_contacts.py` | contacts, centroid separation, peptide Rg, residence and ligand-release episodes in windows across a trajectory: whether the designed pose survived, which one ΔG cannot tell you. Heavy atoms only, so counts stay comparable with `fold_check*.csv`, and release statistics are resampled to a common frame spacing because otherwise a finely saved run looks worse than a coarsely saved one |
 | `md_frames.py` | representative end-of-run frames as PDBs for figures — a ten-model ensemble superposed on the peptide, and the single frame nearest the window mean. `--window-ns` picks a different interval where the end of a run is unrepresentative |
+| `pair_contacts.py` | how many designed side-chain **pairs** reach the ligand over a trajectory, against the [n−1, n(n−1)/2] band. Mean simultaneous engagement is the best predictor of MM/GBSA ΔG measured here. Slots come from the parent design, so shells, ESM variants and shuffles all work |
+| `shuffle_control.py` | the null model: the same residues in a random arrangement, keeping the linker pattern, with one ESM2 variant. No scoring — it has no poses, and `sequences.csv` is left alone |
 
 ### Running a whole shell, and renting a GPU
 
@@ -1080,10 +1082,11 @@ That is also the flat answer to whether these two can be reconciled: **in water 
 remarkable.** −13.7 and −16.3 kcal/mol are ordinary millimolar-to-micromolar affinities, not the −45 to
 −75 the gas phase advertised.
 
-### Which metric was right: four structures in water
+### Which metric was right: the designs in water
 
 Two shell-3 structures were then run to 20 ns for the same cost as one of the above, chosen because the
-static pipeline ranked them at opposite extremes. `s3_orig_f12` is the tightest fold in the project and
+static pipeline ranked them at opposite extremes. Two null controls follow in the next section; this
+table is the four designs. `s3_orig_f12` is the tightest fold in the project and
 the *worst* static score of the four; `s3_esm2_f4` is the folded helical hairpin.
 
 | structure | ΔG bind | VDWAALS | EEL | EGB | UMA interaction | ligand strain | static sum | enclosed | contacts |
@@ -1156,6 +1159,178 @@ End-to-end never drifts back toward the unfolded rod's 49.8 Å, and the arms hol
 standard deviation of 0.5 Å. Side-chain packing alone keeps the hairpin shut for 20 ns at 300 K, which
 is the closest this project has come to a designed tertiary arrangement being confirmed rather than
 merely predicted.
+
+### Does the design beat a shuffle of itself?
+
+Every result above compares designs with designs. The null model asks what the *arrangement* is worth,
+by holding everything else fixed. `code/shuffle_control.py` takes a design and randomises which side
+chain occupies which slot, keeping the glycine linker pattern:
+
+```
+design   YGGDGFGKGGGLGGGKGGGGLGGWGGEGSGGWGS     side chains YDFKLKLWESWS
+control  SGGSGKGLGGGWGGGLGGGGEGGFGGKGWGGDGY     side chains SSKLWLEFKWDY
+```
+
+Identical composition, identical length, identical 22 glycines, identical spacer pattern, identical net
+charge of 0, and **0 of 12 side chains left in their designed slot**. Boltz even folds it to the same
+compactness, Rg 8.2 A against the design's 8.1. The linker pattern is kept deliberately: shuffling the
+whole string instead produces 4 to 5 adjacent side-chain pairs with no glycine between them, where the
+design has none, so it would randomise spacing as well as ordering and a worse result could not be
+attributed to either. This way there is one variable.
+
+There is no scoring, by design -- the control has no placed poses, so it has no fragment interaction
+energy, and `sequences.csv` is left untouched rather than given a fabricated one.
+
+| | `s3_orig_f12` (design) | `shuffle_control` (null) |
+|---|---|---|
+| enclosed / wrapped / engaged | 0.965 / 1.00 / 20-20 | 0.745 / 0.75 / 15-20 |
+| static contacts | 67 | 22 |
+| **MM/GBSA ΔG** | **−24.33 ± 0.08** | **−15.13 ± 0.13** |
+
+**The designed arrangement is worth 9.2 kcal/mol against its own shuffle.** That is the cleanest
+single-variable result here, and it says the ordering and spacer search do something that composition
+alone does not.
+
+**But a design can lose to the null.** `shuffle_control` at −15.13 is within noise of
+`s2_esm2_control` (−16.25) and better than `orig_f12` (−13.71) -- shell 1's flagship fold, which comes
+last of all six. The spread among designs is larger than the gap between the average design and the
+null, so "designed" is not sufficient; only the good designs are distinguishable from a shuffle. Taking
+both nulls and all four designs together: the two nulls land 4th and 5th of six, so design wins on
+average and loses in the particular case.
+
+**The averages hide the real difference, and release exposes it.** On mean behaviour the null and
+`orig_f12` are the same trajectory: mean contacts 35.3 against 34.3, mean separation 8.64 against
+8.45 A, identical Rg drift 8.5->10.0, identical 2.61 A closest approach. The difference is whether the
+ligand is ever actually let go, which has to be measured at matched frame spacing or it is an artifact
+of the save interval:
+
+| structure | ΔG | residence within 10 A | released frames | episodes | longest | when | kind |
+|---|---|---|---|---|---|---|---|
+| `s3_orig_f12` | −24.33 | **100.0%** | 0 | 0 | — | — | design |
+| `s3_esm2_f4` | −21.08 | **99.6%** | 0 | 0 | — | — | design |
+| `s2_esm2_control` | −16.25 | 59.6% | 1 | 1 | 10 ps | — | design |
+| `shuffle_control` | −15.13 | 75.9% | **13** | **5** | **70 ps** | **2nd half** | **null** |
+| `shuffle_control_esm0` | −14.32 | 80.2% | **9** | **5** | **40 ps** | **2nd half** | **null** |
+| `orig_f12` | −13.71 | 77.3% | 0 | 0 | — | — | design |
+
+Sampled every 1 ps, `orig_f12` shows 8 released frames; at the 10 ps spacing of the others it shows
+**zero**, because all eight were isolated single frames -- the ligand flickering past 4 A and returning.
+Finer sampling catches more brief excursions, so a 1 ps run cannot be compared with a 10 ps one
+directly, which is why `md_contacts.py` resamples to a common spacing. The null is then the only
+structure of the five that genuinely lets go, and it does so five times, for up to 70 ps, **entirely in
+the second half of the run**: progressive loss rather than thermal noise.
+
+**The release signature replicated across two unrelated architectures, which is what makes it a
+signature.** The second null, `shuffle_control_esm0`, is an ESM2 linker-filled variant of the same
+shuffle, and Boltz folds it into a 100% helical rod at Rg 15.0 -- the same architecture as the designed
+`s2_esm2_control` rather than the compact globule of its own parent. It releases the ligand **5 times,
+up to 40 ps, all in the second half**: the same pattern as the compact shuffle, in a completely
+different fold. Both designed structures in the matching architectures give zero or one isolated blip.
+So release tracks how the side chains are *ordered*, not whether the peptide is a globule or a rod, and
+it is the one measure that separates every design here from every null.
+
+**The pair, rendered.** Same twelve residues, same spacer pattern, same length, same net charge, folded
+to the same compactness. Medoid frames from 18-20 ns, written by `code/md_frames.py`.
+
+| `s3_orig_f12` — designed, 18.3 ns | `shuffle_control` — shuffled, 19.2 ns |
+|---|---|
+| ![s3_orig_f12](runs/octinoxate/md/figures/s3_orig_f12_medoid.png) | ![shuffle_control](runs/octinoxate/md/figures/shuffle_control_medoid.png) |
+| **ΔG −24.33 ± 0.08** | **ΔG −15.13 ± 0.13** |
+| ligand held at 3.75 A, 3.82 side chains engaged on average, 53/66 pairs realised, **0 releases in 2000 frames**, residence 100% | ligand at 8.39 A, 1.75 engaged, 18/66 pairs, **5 release episodes up to 70 ps, all in the second half**, residence 75.9% |
+
+And the second null, which Boltz folds into a rod rather than a globule — so the release signature can be
+checked against a designed structure of the *same* architecture:
+
+| `s2_esm2_control` — designed rod, 18.9 ns | `shuffle_control_esm0` — shuffled rod, 18.9 ns |
+|---|---|
+| ![s2_esm2_control](runs/octinoxate/md/figures/s2_esm2_control_medoid.png) | ![shuffle_control_esm0](runs/octinoxate/md/figures/shuffle_control_esm0_medoid.png) |
+| **ΔG −16.25 ± 0.08** | **ΔG −14.32 ± 0.10** |
+| 100% helix, Rg 15.0 A, ligand in a surface groove, **1 blip of 10 ps**, 10/66 pairs, 6 dead slots | 100% helix, Rg 15.0 A, **5 episodes up to 40 ps, all in the second half**, 12/66 pairs, 6 dead slots |
+
+The second row is the control on the first. Two rods, near-identical on every pair measure — 10/66 against
+12/66, six dead slots each, no long-range pair in either — and the designed one still holds its ligand
+while the shuffled one repeatedly lets go. Whatever the pair count is measuring, it is not what
+distinguishes these two.
+
+Residence within 10 A separates the two ΔG clusters cleanly -- 99.6 to 100% against 60 to 77%, no
+overlap, matching the 4.83 kcal/mol gap between −21.08 and −16.25 -- but it does not rank within either
+cluster, where it inverts.
+
+### What the construction actually delivers: pairwise contact options
+
+The pipeline does not deliver a structure, and it is a mistake to judge it as though it did.
+`s3_orig_f12` is the strongest binder measured and it reproduces **none of its twelve designed
+positions**. Asking how closely a fold matches the designed shell is therefore the wrong question.
+
+What the construction delivers is *n* positions each chosen to contact the ligand, and at *n* positions
+that is **n(n−1)/2 pairwise combinations**, each verified reachable by the spacer sweep. Chain
+connectivity hands over the n−1 adjacent pairs for free, so the informative band is
+**[n−1, n(n−1)/2]** -- for twelve slots, [11, 66] -- and the informative content is the non-adjacent
+pairs, which require the fold to bring sequence-distant slots onto the ligand together. A fold that
+abandons the designed shell can still cash in whichever of those options it can reach.
+
+`code/pair_contacts.py` measures this over a trajectory. Slots come from the parent design's
+non-glycine positions, so shells, ESM variants and shuffles are all handled without being told which is
+which.
+
+| structure | ΔG | mean side chains engaged | >=2 engaged | pairs realised | band position | held >=5% | long-range (gap>=7) | dead slots |
+|---|---|---|---|---|---|---|---|---|
+| **`s3_orig_f12`** | **−24.33** | **3.82** | **99%** | **53/66** | **76%** | **24** | **11/15** | **0** |
+| `s3_esm2_f4` | −21.08 | 2.11 | 72% | 32/66 | 38% | 12 | 6/15 | 2 |
+| `s2_esm2_control` | −16.25 | 1.45 | 43% | 10/66 | **−2%** | 2 | **0/15** | 6 |
+| `shuffle_control` | −15.13 | 1.75 | 62% | 18/66 | 13% | 8 | 1/15 | 3 |
+| `shuffle_control_esm0` | −14.32 | 1.73 | 58% | 12/66 | 2% | 7 | **0/15** | 6 |
+| `orig_f12` | −13.71 | 1.42 | 40% | 22/66 | 20% | 3 | 3/15 | 4 |
+
+Against its matched shuffle the design realises **53/66 pairs to the null's 18/66**, reaches every gap
+out to 11 -- both termini on the ligand at once -- where the null reaches nothing beyond gap 8, and
+sustains 24 pairs where the null sustains **8, below the free floor of 11**. The null does not even hold
+the adjacent pairs connectivity gives it.
+
+**And this is the best predictor of ΔG found anywhere in this project.** Spearman against binding
+strength, one convention, + meaning agreement:
+
+| measure | ρ (n=6) | ρ (n=5) | where it comes from |
+|---|---|---|---|
+| **mean side chains on the ligand** | **+0.83** | +0.90 | trajectory |
+| **% of frames with >=2 engaged** | **+0.83** | +0.90 | trajectory |
+| MM/GBSA VDWAALS | **+0.71** | +0.70 | trajectory |
+| pairs held >=5% of the run | +0.66 | +0.70 | trajectory |
+| dead slots, fewer better | +0.60 | +0.70 | trajectory |
+| pairs realised | +0.49 | +0.60 | trajectory |
+| `enclosed_fraction` | +0.30 | +0.30 | static, free |
+| `contacts_under_cutoff` | +0.30 | +0.30 | static, free |
+| **UMA interaction energy** | **−0.80** | −0.80 | static, 45–60 min per fold |
+| **UMA interaction + ligand strain** | **−0.80** | −0.80 | static, 45–60 min per fold |
+
+Note which form works: the combinatorial counts are +0.49, **mean simultaneous engagement +0.83**. The
+ceiling argument explains why a design has options; what tracks ΔG is how many it is cashing at any
+instant. That also explains release without further assumptions -- at 3.82 side chains engaged, losing
+one does not detach the ligand, while at 1.75 the ligand is often held by a single contact and is one
+fluctuation from release.
+
+**Both columns are shown because the sixth structure degraded the measure**, from +0.90 to +0.83, and it
+did so by getting a specific pair backwards: it ranks `shuffle_control_esm0` (1.73 engaged) above
+`s2_esm2_control` (1.45), where MM/GBSA has the designed rod ahead by 1.9 kcal/mol. A measure that moves
+this much on one added point is a hypothesis, not a validated metric.
+
+**The rod architecture defeats the framing entirely.** Designed and shuffled rods are indistinguishable
+on it -- 10/66 and 12/66 pairs, 1.45 and 1.73 engaged, 6 dead slots each, and **0/15 long-range pairs
+both** -- yet they score −16.25 and −14.32, mid-pack rather than last. A helical rod holds a ligand in a
+surface groove with a handful of side chains and does adequately without realising the designed pair set
+at all. So the measure diagnoses how a compact fold binds, and says nothing useful about a rod.
+
+The designed rod's 1.9 kcal/mol margin also cannot be cleanly attributed, because the two rods differ in
+net charge (+5 designed against 0 shuffled) as well as in arrangement. The decomposition argues against
+charge being the cause -- the designed rod wins on van der Waals (−19.12 against −17.64) and on
+desolvation (+8.17 against +11.72) while *losing* on electrostatics (−2.62 against −5.75), which is not
+what a charge advantage looks like -- but this pair cannot prove it.
+
+**Caveats.** One design against one shuffle, and five trajectories; a Spearman of +0.90 at n = 5 is one
+swapped pair from +1.0 and the pair it swaps (`s2_esm2_control` against `shuffle_control`) differ by
+1.1 kcal/mol with standard deviations of 3.45 and 5.85. The slot-pair comparison is only clean because
+the control preserves the spacer pattern, which means it tests ordering and not spacing. And every
+number here is one ligand.
 
 ### Figures: what 20 ns does to a designed pose
 
@@ -1400,7 +1575,17 @@ binding. See `archive/peptide_strain/` for the attempt and the evidence. It need
 meaningful, which puts it in MM/GBSA territory rather than here.
 
 **No experimental validation.** Nothing here has been synthesised or measured. The energies come from a
-machine learning potential in the gas phase, with no solvent, no entropy and no desolvation.
+machine learning potential in the gas phase, with no solvent, no entropy and no desolvation. The six
+MM/GBSA free energies are force-field estimates in implicit solvent, which is a better question than the
+gas-phase one but still not a measurement.
+
+**Six trajectories.** Everything in the dynamics section rests on six 20 ns runs: four designs and two
+null controls, one ligand. That is enough to show that the static energies rank structures backwards,
+that a designed arrangement beats a shuffle of itself by 9.2 kcal/mol, and that ligand release tracks
+arrangement across two architectures. It is not enough to establish any metric as a predictor -- the best
+one found, mean simultaneous side-chain engagement, fell from +0.90 to +0.83 when the sixth structure was
+added, and got that structure's pair backwards. Nor is one design against one shuffle enough to put a
+number on what the ordering search is worth in general.
 
 **The enclosure–energy relationship is not established across sequences.** Within the glycine design
 enclosure ordered the interaction energy perfectly across four structures. Across the three sequences it
