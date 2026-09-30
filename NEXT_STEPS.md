@@ -69,10 +69,16 @@ proposals below:
   same — Vina *scores* it 7th of 8 while MM/GBSA puts it 3rd, so the number is wrong while the pose
   agreement is right. Next test: three or four more structures with intermediate release, since three of
   the eight are still tied at zero episodes and one pair supplies both ends of the correlation.
-* **Fix the BoltzGen ligand stereocentre before pushing either pair further.** `bg33_3` and `bg33_4`
-  carry `[C@@H]` where the shared `ligand.xyz` and everything here carries `[C@H]`, so their MD, MM/GBSA
-  and docking numbers are all on the enantiomer at that carbon. Within-structure results are unaffected;
-  cross-structure comparison inherits a confound.
+* **Three folds of eight contain the mirror-image ligand, and it is not a BoltzGen quirk.** The source
+  `ligand.xyz` is **S** at the 2-ethylhexyl carbon; `shuffle_control_esm0` (this repository's own Boltz
+  run), `bg33_3` and `bg33_4` came out **R**, the other five kept S. The SDFs carry the fold geometry
+  unchanged to 0.0005 Å, so the folding models placed it that way. Within-structure results are
+  unaffected — every RMSD and wrapping number compares a pose to its own reference — but cross-structure
+  score and ΔG comparisons mix enantiomers, and anything chirality-aware applied later will be more
+  sensitive to it than Vina was. Worth checking the other 30 folds for how often this happens, which is
+  free: perceive the CIP label from each `.cif` ligand and compare against the source. Check the label,
+  not the canonical SMILES — the source carries `/C=C/` double-bond stereo that a cif-derived SDF does
+  not, so a string comparison flags all eight as different and hides the three that are.
 
 ## The information the code currently throws away
 

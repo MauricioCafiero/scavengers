@@ -1409,17 +1409,20 @@ straight from each structure's own SDF rather than re-embedded from SMILES, beca
 is an analogue of octinoxate and a SMILES round trip risks both losing its stereocentre and quietly
 docking a different molecule than MD scored.
 
-**The two BoltzGen structures carry the opposite configuration at the ligand's stereocentre**, and it
-has to be said before their numbers are read. The source `runs/octinoxate/ligand.xyz` and BoltzGen's
-`md/inputs/ligand.xyz` are byte-identical and perceive as `CCCC[C@H](CC)OC(=O)/C=C/c1ccc(OC)cc1`, which
-is what this repository's folds carry; both `bg33_3_ligand.sdf` and `bg33_4_ligand.sdf` perceive as
-`[C@@H]`. So the inversion happened in BoltzGen's own prep, not in the shared input, and the MM/GBSA
-numbers already in the table below were computed on the inverted ligand too. Each structure is docked
-against its own reference, so the RMSDs, wrapping and flip analysis are internally sound; it is the
-cross-structure comparison of scores that inherits a confound. A branched aliphatic centre is not where
-a shape-complementarity score is most sensitive, and commercial octinoxate is racemic at that carbon, so
-this is a caveat rather than a disqualification — but it is not nothing, and it should be fixed before
-either pair is pushed further.
+**Three of the eight folds contain the mirror-image ligand**, and it has to be said before any of the
+numbers are read. The source `runs/octinoxate/ligand.xyz` and BoltzGen's `md/inputs/ligand.xyz` are
+byte-identical and both have the **S** configuration at the 2-ethylhexyl carbon. Five folds kept it;
+`shuffle_control_esm0`, `bg33_3` and `bg33_4` came out **R**. The ligand SDFs carry the fold geometry
+unchanged, verified to 0.0005 Å against the `.cif`, so the inversion is in what the folding models
+placed rather than in any prep step — and one of the three is from this repository's own Boltz runs, so
+it is not a BoltzGen quirk. The MM/GBSA numbers in the table below were computed on whichever enantiomer
+that fold contains.
+
+Each structure is docked against its own reference, so every RMSD, wrapping and flip number here is
+internally sound; it is the cross-structure comparison of scores that inherits a confound. A branched
+aliphatic centre is not where a shape-complementarity score is most sensitive, and commercial octinoxate
+is racemic at that carbon, so this is a caveat rather than a disqualification. It matters more for
+anything chirality-aware applied later — a CNN rescorer, for instance.
 
 **What this can and cannot establish.** Both folders placed the ligand *inside* the peptide, so the
 pocket is the ligand's own imprint and a rigid copy of it should be the easiest possible redocking
@@ -1428,16 +1431,16 @@ the peptide would bind the ligand de novo, and with no `--flex` side chains ther
 
 ### One structure out of eight actually redocks
 
-| structure | source | MM/GBSA ΔG | Vina | pose 1 RMSD | closest pose (rank) |
-|---|---|---|---|---|---|
-| `s3_orig_f12` | this repo | −24.33 | **−7.3** | 4.08 | 3.49 (8) |
-| `s3_esm2_f4` | this repo | −21.08 | −6.0 | 7.41 | 3.21 (9) |
-| **`bg33_4`** | BoltzGen | **−19.66** | −4.7 | 4.07 | **1.30 (6)** |
-| `s2_esm2_control` | this repo | −16.25 | −5.0 | 9.89 | 5.13 (6) |
-| `shuffle_control` (null) | this repo | −15.13 | −5.1 | 8.38 | 6.37 (9) |
-| `shuffle_control_esm0` (null) | this repo | −14.32 | −4.5 | 7.02 | 3.90 (9) |
-| `orig_f12` | this repo | −13.71 | −6.0 | 5.96 | 5.52 (6) |
-| `bg33_3` | BoltzGen | −11.86 | −4.2 | 5.94 | 4.47 (9) |
+| structure | source | ligand | MM/GBSA ΔG | Vina | pose 1 RMSD | closest pose (rank) |
+|---|---|---|---|---|---|---|
+| `s3_orig_f12` | this repo | S | −24.33 | **−7.3** | 4.08 | 3.49 (8) |
+| `s3_esm2_f4` | this repo | S | −21.08 | −6.0 | 7.41 | 3.21 (9) |
+| **`bg33_4`** | BoltzGen | **R** | **−19.66** | −4.7 | 4.07 | **1.30 (6)** |
+| `s2_esm2_control` | this repo | S | −16.25 | −5.0 | 9.89 | 5.13 (6) |
+| `shuffle_control` (null) | this repo | S | −15.13 | −5.1 | 8.38 | 6.37 (9) |
+| `shuffle_control_esm0` (null) | this repo | **R** | −14.32 | −4.5 | 7.02 | 3.90 (9) |
+| `orig_f12` | this repo | S | −13.71 | −6.0 | 5.96 | 5.52 (6) |
+| `bg33_3` | BoltzGen | **R** | −11.86 | −4.2 | 5.94 | 4.47 (9) |
 
 Across the six from this repository, best-scoring-pose RMSD runs 4.1–9.9 Å against the 2 Å that counts
 as a successful redock, and the closest of nine poses never gets below 3.2 Å. **`bg33_4` is the single
@@ -1679,13 +1682,20 @@ hides both.
 
 These cost time to find. They are recorded here so they cost no one else any.
 
-**BoltzGen's ligand prep inverts the stereocentre, and nothing raises.** The shared input
-`ligand.xyz` perceives as `CCCC[C@H](CC)OC(=O)/C=C/c1ccc(OC)cc1`, and this repository's folds keep that;
-`boltzgen_local/md/bg33_*/bg33_*_ligand.sdf` both perceive as `[C@@H]`. Same formula, same constitution,
-same 20 heavy atoms and same bond graph, so every check that compares composition passes and the
-difference survives into the MD and the MM/GBSA numbers. Assert the perceived SMILES against the source,
-not just the formula, whenever a ligand crosses between the two projects — this is a third silent format
-trap to go with the two in `boltzgen_local`'s own README.
+**The folding models sometimes place the mirror-image ligand, and nothing raises.** The source
+`runs/octinoxate/ligand.xyz` has the **S** configuration at the 2-ethylhexyl carbon. Three of the eight
+folds taken to dynamics came out **R**: `shuffle_control_esm0` from this repository's own Boltz runs, and
+both of BoltzGen's, `bg33_3` and `bg33_4`. The other five kept S. The ligand SDFs carry the fold geometry
+unchanged — verified to 0.0005 Å against the `.cif` — so this is what the folder placed, not something a
+prep step did, and it is not specific to either tool.
+
+Same formula, same constitution, same 20 heavy atoms, same bond graph, so every check that compares
+composition passes and the inversion survives into the MD and the MM/GBSA numbers. Two things follow.
+Check the **CIP label**, not the canonical SMILES and not the formula: the source SMILES carries `/C=C/`
+double-bond stereo that a cif-derived SDF does not, so a whole-string comparison reports every structure
+as different and hides the one difference that is real. And when a chirality-sensitive method is applied
+across structures — a CNN scorer, a force field with improper torsions — group by configuration before
+reading the spread.
 
 **Open Babel's `pdbqt` → `sdf` loses valence, so RDKit cannot match the docked pose to its own
 reference.** Carbons come back bracketed, `[C]`, with no implicit hydrogens, and `CalcRMS`,
@@ -1786,8 +1796,11 @@ anchored at both ends by the same BoltzGen pair. It is a lead, not a result, and
 suggests — redock and measure agreement, no dynamics needed — has been tested on eight structures with
 release episodes at (0, 0, 0, 0, 1, 5, 5, 18), three of them tied at zero.
 
-**The two BoltzGen structures carry the inverted ligand stereocentre**, so cross-structure comparisons
-that include them mix enantiomers at that carbon. Within-structure numbers are unaffected.
+**Three of the eight structures carry the mirror-image ligand** — `shuffle_control_esm0`, `bg33_3` and
+`bg33_4` are R at the 2-ethylhexyl carbon where the source geometry and the other five are S — so any
+comparison across the eight mixes enantiomers. Within-structure numbers are unaffected, and that
+includes every RMSD, wrapping and flip measurement here, since each pose is compared only against its
+own reference. What it touches is the cross-structure score and ΔG columns.
 
 **The redocking rests on a rigid receptor and one scoring function.** AutoDock Vina 1.1.2 was
 parameterised on globular protein–ligand complexes, not on 12–33-mer peptides with this much exposed
