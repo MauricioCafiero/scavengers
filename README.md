@@ -26,6 +26,7 @@ be co-folded with the ligand, and the fold checked against what was asked for.
 - [Second worked example: a different shell around the same ligand](#second-worked-example-a-different-shell-around-the-same-ligand)
 - [Third worked example: testing the selection criterion itself](#third-worked-example-testing-the-selection-criterion-itself)
 - [What happens after this pipeline: dynamics and MM/GBSA](#what-happens-after-this-pipeline-dynamics-and-mmgbsa)
+- [An independent check on the pose: redocking](#an-independent-check-on-the-pose-redocking)
 - [What the metrics mean](#what-the-metrics-mean)
 - [Traps](#traps)
 - [Limitations](#limitations)
@@ -181,7 +182,7 @@ huggingface-cli login
 
 The default checkpoint is `uma-s-1p2p1`. Pass `--model` to change it.
 
-### Boltz-2, the one external dependency
+### Boltz-2, the main external dependency
 
 Boltz-2 does the co-folding. It is heavy and GPU-bound, so it may live in its own environment rather
 than this one — but nothing here assumes where. `code/boltz_env.py` resolves how to run it, first
@@ -194,6 +195,20 @@ match winning:
 5. an MPS wrapper beside the venv, if that layout happens to exist
 
 If none match, the error lists these options rather than failing obscurely.
+
+The only other external tool is optional and used by the redocking scripts alone: `vina_redock.py` and
+`dock_compare.py` call AutoDock Vina and Open Babel out of a sibling repository,
+`~/python_mac/dock_assist`, where they already exist — Vina as the copy vendored in `dockstring`, Open
+Babel from the `openbabel-wheel` package. Nothing is installed here for them, and they are run with
+that repository's interpreter rather than this one's:
+
+```bash
+~/python_mac/dock_assist/dock-env/bin/python code/vina_redock.py --all
+~/python_mac/dock_assist/dock-env/bin/python code/dock_compare.py --all
+```
+
+Everything else in this repository runs without them; only the [redocking
+section](#an-independent-check-on-the-pose-redocking) needs them.
 
 **No Boltz at all?** `code/boltz_offline.py export` writes every input into one folder with the
 command to run, you fold them anywhere — a GPU box, Colab, a cluster queue — and `import` puts the
@@ -269,6 +284,9 @@ peptidebuilder/
 | `md_frames.py` | representative end-of-run frames as PDBs for figures — a ten-model ensemble superposed on the peptide, and the single frame nearest the window mean. `--window-ns` picks a different interval where the end of a run is unrepresentative |
 | `pair_contacts.py` | how many designed side-chain **pairs** reach the ligand over a trajectory, against the [n−1, n(n−1)/2] band. Mean simultaneous engagement is the best predictor of MM/GBSA ΔG measured here. Slots come from the parent design, so shells, ESM variants and shuffles all work |
 | `shuffle_control.py` | the null model: the same residues in a random arrangement, keeping the linker pattern, with one ESM2 variant. No scoring — it has no poses, and `sequences.csv` is left alone |
+| `vina_redock.py` | redocks the ligand into its own folded peptide with AutoDock Vina, from the receptor and reference ligand the MD prep already wrote. `--md-root` adds structures prepared outside this repository — BoltzGen's two go in with `--md-root ~/python_mac/boltzgen_local/md` — so they land in the same tables and compare directly; a `source` column records where each came from. Vina and Open Babel come from `~/python_mac/dock_assist`; nothing is installed here. Reports Vina's score, symmetry-corrected RMSD to the Boltz pose, and `check_fold.py`'s wrapping and enclosure on every pose, so a docked pose and a fold are measured by identical cutoffs. See [redocking](#an-independent-check-on-the-pose-redocking) |
+| `dock_compare.py` | splits each pose difference into its parts — rigid-body translation and rotation from a Kabsch fit, internal torsion change as the RMSD left after that fit, and the angle between the two poses' head→tail vectors — then asks separately, by contact-residue Jaccard, whether it is even the same pocket. Writes a `compare.pml` per structure |
+| `dock_vs_md.py` | superposes each MD medoid's peptide onto the docking receptor and asks whether the ligand ended nearer the Boltz pose or a docked one. Reports the peptide's own superposition RMSD, because when that is as large as the pose differences the comparison cannot settle anything |
 
 ### Running a whole shell, and renting a GPU
 
@@ -335,6 +353,14 @@ runs/octinoxate/
     │   ├── frames_last.pdb      ten end-of-run models, and frame_medoid.pdb, for figures
     │   └── mmgbsa/              FINAL_RESULTS_MMPBSA.dat and its prmtops
     └── mmgbsa_summary.csv       every leg's decomposition in one table (at md/ root)
+└── dock/                        redocking, one directory per structure, plus three tables
+    ├── dock_summary.csv         per structure: source, score, RMSD to the predicted pose, and
+    │                            wrapping and enclosure for the reference, pose 1 and closest pose
+    ├── dock_poses.csv           every pose's geometry; pose 0 is the Boltz reference
+    ├── pose_differences.csv     translation, rotation, internal RMSD, head/tail angle, Jaccard
+    ├── md_vs_dock.csv           which pose the dynamics ended nearer
+    └── <structure>/             receptor and ligand PDBQT, poses.pdbqt, poses.sdf, vina.log,
+                                 and compare.pml to look at the poses against the reference
 ```
 
 `load_folds.pml` loads and superposes; it does not style. Run `@style.pml` beside it for the
@@ -1358,6 +1384,186 @@ Results across all legs are in `runs/octinoxate/md/mmgbsa_summary.csv`. `code/md
 PDBs these are rendered from — the medoid above, and a ten-model ensemble superposed on the peptide for
 showing the spread instead of one frame.
 
+These six are also the six that can be redocked, since the receptor and ligand the MD prep wrote are
+exactly what a docking run needs. That check is in [the next
+section](#an-independent-check-on-the-pose-redocking), and it is where the release measure above turns
+out to have a static predictor.
+
+---
+
+## An independent check on the pose: redocking
+
+Every complex in this repository was produced either by the shell search, which places fragments
+around a fixed ligand, or by Boltz co-folding, which places peptide and ligand jointly. Neither is a
+pose search. So the ligand's position had never been questioned by anything that could put it
+somewhere else, and that is what `vina_redock.py` does: it hands the ligand back to AutoDock Vina and
+asks it to find the site again in a rigid copy of the same peptide.
+
+The inputs are the ones the MD prep already wrote — `<structure>_protein.pdb` with the ligand stripped
+and `<structure>_ligand.sdf` in the predicted pose — so the structures that can be redocked are the
+ones with dynamics, which is also the useful set: each score lands beside an independent MM/GBSA ΔG for
+the same geometry. That is six from this repository plus **`bg33_4` and `bg33_3` from
+[`boltzgen_local`](../boltzgen_local)**, the two BoltzGen designs taken through this protocol, reached
+with `--md-root ~/python_mac/boltzgen_local/md`. Eight structures, 72 poses. The ligand is converted
+straight from each structure's own SDF rather than re-embedded from SMILES, because the built-in ligand
+is an analogue of octinoxate and a SMILES round trip risks both losing its stereocentre and quietly
+docking a different molecule than MD scored.
+
+**The two BoltzGen structures carry the opposite configuration at the ligand's stereocentre**, and it
+has to be said before their numbers are read. The source `runs/octinoxate/ligand.xyz` and BoltzGen's
+`md/inputs/ligand.xyz` are byte-identical and perceive as `CCCC[C@H](CC)OC(=O)/C=C/c1ccc(OC)cc1`, which
+is what this repository's folds carry; both `bg33_3_ligand.sdf` and `bg33_4_ligand.sdf` perceive as
+`[C@@H]`. So the inversion happened in BoltzGen's own prep, not in the shared input, and the MM/GBSA
+numbers already in the table below were computed on the inverted ligand too. Each structure is docked
+against its own reference, so the RMSDs, wrapping and flip analysis are internally sound; it is the
+cross-structure comparison of scores that inherits a confound. A branched aliphatic centre is not where
+a shape-complementarity score is most sensitive, and commercial octinoxate is racemic at that carbon, so
+this is a caveat rather than a disqualification — but it is not nothing, and it should be fixed before
+either pair is pushed further.
+
+**What this can and cannot establish.** Both folders placed the ligand *inside* the peptide, so the
+pocket is the ligand's own imprint and a rigid copy of it should be the easiest possible redocking
+target. Agreement is therefore weak evidence and disagreement is strong. It says nothing about whether
+the peptide would bind the ligand de novo, and with no `--flex` side chains there is no induced fit.
+
+### One structure out of eight actually redocks
+
+| structure | source | MM/GBSA ΔG | Vina | pose 1 RMSD | closest pose (rank) |
+|---|---|---|---|---|---|
+| `s3_orig_f12` | this repo | −24.33 | **−7.3** | 4.08 | 3.49 (8) |
+| `s3_esm2_f4` | this repo | −21.08 | −6.0 | 7.41 | 3.21 (9) |
+| **`bg33_4`** | BoltzGen | **−19.66** | −4.7 | 4.07 | **1.30 (6)** |
+| `s2_esm2_control` | this repo | −16.25 | −5.0 | 9.89 | 5.13 (6) |
+| `shuffle_control` (null) | this repo | −15.13 | −5.1 | 8.38 | 6.37 (9) |
+| `shuffle_control_esm0` (null) | this repo | −14.32 | −4.5 | 7.02 | 3.90 (9) |
+| `orig_f12` | this repo | −13.71 | −6.0 | 5.96 | 5.52 (6) |
+| `bg33_3` | BoltzGen | −11.86 | −4.2 | 5.94 | 4.47 (9) |
+
+Across the six from this repository, best-scoring-pose RMSD runs 4.1–9.9 Å against the 2 Å that counts
+as a successful redock, and the closest of nine poses never gets below 3.2 Å. **`bg33_4` is the single
+exception in the whole set**: its pose 6 sits at **1.30 Å** with a 0.52 Å translation, a 7° rotation and
+a 7° head/tail change — the predicted pose, found. Vina ranked it 6th of 9, behind poses 4–9 Å away,
+which is the same failure of ranking seen everywhere else; but the pose is there to be found, and in the
+other seven structures it is not.
+
+That is worth holding against what `bg33_4` is. It is the BoltzGen design that held its ligand perfectly
+in MD — 100% residence, zero releases, contacts *rising* 20.5 → 25.2 over 20 ns — and the only structure
+besides `s3_orig_f12` to manage that. Its partner `bg33_3` has the worst residence measured anywhere in
+either project (41.0%, 18 release episodes) and does not redock (4.47 Å). The pair that brackets the
+retention range also brackets the redocking result.
+
+**The docked poses are still not worse by the design objective.** Measured with `check_fold.py`'s own
+cutoffs, they remain as wrapped or better, and packed slightly tighter:
+
+| structure | wrapped, predicted → docked mean | enclosed, predicted → docked mean | mean ligand distance |
+|---|---|---|---|
+| `orig_f12` | 1.00 → 0.98 | 0.960 → 0.961 | 3.49 → 3.57 |
+| `s2_esm2_control` | 0.85 → **0.92** | 0.510 → **0.697** | 4.07 → **3.81** |
+| `s3_esm2_f4` | 0.90 → **0.98** | 0.795 → **0.923** | 3.80 → **3.64** |
+| `s3_orig_f12` | 1.00 → 0.97 | 0.965 → 0.899 | 3.39 → 3.66 |
+| `shuffle_control` | 0.75 → **0.94** | 0.745 → **0.816** | 4.02 → **3.76** |
+| `shuffle_control_esm0` | 0.85 → **0.94** | 0.535 → 0.591 | 4.14 → **3.81** |
+| `bg33_4` | 0.95 → 0.95 | 0.590 → **0.622** | 3.99 → **3.79** |
+| `bg33_3` | 1.00 → 0.94 | 0.480 → **0.545** | 3.76 → 3.79 |
+
+The BoltzGen rows reproduce that project's own `fold_check` values exactly — `bg33_4` at 0.95 wrapped
+and 0.590 enclosed, `bg33_3` at 1.00 and 0.480 — which is the check that `check_fold.geometry` means the
+same thing across the two repositories. And the comparison is not independent evidence in Vina's favour:
+its poses were *selected* for close packing against a rigid receptor, so packing well is what they were
+chosen for. What it shows is that a pose 8 Å away can satisfy the design objective just as completely,
+so the objective does not pick out one pose.
+
+### The difference is the ligand turning round, in the same pocket
+
+`dock_compare.py` separates the parts. No superposition is involved: a docked pose and its reference
+already share a frame, because the receptor Vina was given is the file the reference came from.
+
+The ligand keeps its shape and moves. After the Kabsch transform is removed, the residual RMSD is
+0.94–2.99 Å (mean 1.87) against a total of 1.30–11.05 Å (mean 7.49) — internal conformation is a median
+24% of the difference, which across nine rotatable torsions is the alkyl tail breathing, not refolding.
+
+Ranking what predicts the RMSD says what the motion is:
+
+| descriptor | ρ vs in-place RMSD | p |
+|---|---|---|
+| **head→tail angle** | **+0.667** | 1.6 × 10⁻¹⁰ |
+| translation | +0.582 | 8.3 × 10⁻⁸ |
+| rotation angle | +0.551 | 5.4 × 10⁻⁷ |
+| internal RMSD | −0.029 | 0.81 |
+
+Octinoxate is amphiphilic — a methoxyphenyl head, a branched alkyl tail — and **26 of 72 poses are
+turned end for end** (head→tail angle above 120°, symmetry-corrected so the para-ring flip is not
+miscounted). Internal conformation explains nothing at all.
+
+Yet it is the same site: contact-residue Jaccard runs 0.27–0.89, mean 0.60, and **60 of 72 poses share
+at least half** the reference's contact residues. And the decisive number, **flipped poses score −4.85
+and unflipped −5.07 kcal/mol** — 0.22 apart, against a 3.1 kcal/mol spread across structures. **The
+peptide grips the ligand but does not orient it.** The slot accepts the chromophore head and the alkyl
+tail about equally, and neither the RMSD nor the wrapping metric exposes that, because wrapping
+saturates whichever way round the ligand lies.
+
+Per structure, contact-set conservation orders the set about as well as anything here does:
+
+| structure | RMSD | internal | translation | rotation | head/tail | flipped | Jaccard |
+|---|---|---|---|---|---|---|---|
+| `s3_esm2_f4` | 6.16 | 1.88 | 2.83 | 126° | 96° | 4/9 | **0.77** |
+| `s3_orig_f12` | 5.76 | 1.84 | 3.17 | 128° | **68°** | **1/9** | 0.70 |
+| `orig_f12` | 8.57 | 1.86 | 5.88 | 142° | 94° | 2/9 | 0.61 |
+| `s2_esm2_control` | 8.29 | 1.81 | 4.60 | 130° | 105° | 4/9 | 0.61 |
+| `bg33_4` | 7.51 | 1.71 | 4.65 | 122° | 96° | 3/9 | 0.59 |
+| `shuffle_control_esm0` | 7.40 | 1.75 | 4.78 | 128° | 80° | 1/9 | 0.54 |
+| `bg33_3` | 7.99 | **2.31** | 4.14 | 141° | 115° | 5/9 | 0.53 |
+| `shuffle_control` (null) | 8.26 | 1.80 | 4.77 | **150°** | **116°** | **6/9** | **0.42** |
+
+The shuffle is still the most promiscuous on every column that measures it, and `bg33_3` is second — the
+two structures with the worst retention. Note that `bg33_4`'s mean RMSD of 7.51 Å is unremarkable: its
+success is one pose out of nine, not a tighter distribution.
+
+### Which pose is right, and what docking is a proxy for
+
+**The predicted pose, on the evidence that exists.** It is the only one with dynamical support and that
+support is positive: `s3_orig_f12` and `bg33_4` both hold 100% residence with zero releases, and
+`s3_esm2_f4` is 99.6% with zero. The docked poses have never been relaxed or run. `dock_vs_md.py` puts
+the MD medoid nearer a docked pose in 6 of 8, but that comparison cannot carry the weight, because the
+peptide superposition RMSD is 1.5–9.3 Å — as large as the pose differences it would have to resolve, and
+reported for exactly that reason. The two cleanest superpositions are the BoltzGen pair, and they say
+opposite things: `bg33_4` ends 3.63 Å from its predicted pose and 2.67 Å from a docked one, near both,
+while `bg33_3` ends 9.49 Å from its predicted pose, having genuinely left.
+
+There is no contradiction between a ligand held for 20 ns and a ligand that sits either way round.
+Residence and contact counts do not constrain orientation. Both are true, and together they say the grip
+is real and the orientation is unspecified.
+
+**Docking is not a proxy for the binding energy. It is a fair proxy for retention** — and the BoltzGen
+pair is what made that testable, because `bg33_3`'s 18 release episodes break a variable that was
+otherwise almost binary. Release episodes across the eight are now (0, 0, 0, 0, 1, 5, 5, 18):
+
+| | vs MM/GBSA ΔG | vs release episodes | vs residence |
+|---|---|---|---|
+| Vina score | ρ = +0.61, p = 0.11 | **ρ = +0.732, p = 0.039** | ρ = −0.47, p = 0.24 |
+| pose-1 `enclosed_fraction` | ρ = −0.38, p = 0.35 | **ρ = −0.713, p = 0.047** | ρ = +0.31, p = 0.45 |
+| **closest-pose RMSD** | ρ = +0.60, p = 0.12 | ρ = +0.47, p = 0.24 | **ρ = −0.743, p = 0.035** |
+
+Three things changed by going from six structures to eight. **The release correlations weakened but
+survived** — Vina's score fell from +0.845 to +0.732 and enclosure from −0.833 to −0.713, both still
+under p = 0.05. That is the expected direction: at n = 6 those correlations were carried by a
+design-versus-null split, and a graded third level costs them some of that. **The ΔG correlations
+improved** without reaching significance, +0.49 → +0.61 for the Vina score. And **a new measure appeared
+that could not have been seen at n = 6**: how well the closest docked pose reproduces the predicted one
+correlates −0.743 with residence, the strongest single relationship in the table. `bg33_4` at 1.30 Å and
+100% residence and `bg33_3` at 4.47 Å and 41% anchor it, and neither end existed in this repository's
+own six.
+
+If that holds, it is a more useful screen than the Vina score, and it is nearly free: dock the predicted
+pose back into its own fold, and how closely the best pose reproduces it predicts whether the ligand will
+stay put — without running any dynamics. It also separates two signals that `bg33_4` shows are not the
+same thing. Vina *scores* it 7th of 8 at −4.7 while MM/GBSA puts it 3rd at −19.66, so the score gets it
+badly wrong; Vina's *pose agreement* gets it exactly right. Reproducibility of the pose is the signal,
+not the number attached to it.
+
+The caveat: n = 8, three structures still sit at zero episodes, and one pair supplies both extremes of
+the new correlation. This wants a fourth and fifth level of release before it is leaned on.
+
 ---
 
 ## What the metrics mean
@@ -1370,6 +1576,11 @@ whether the ligand sits in a shell or against a face.
 
 **`wrapped`** — the fraction of the ligand's heavy atoms with a peptide heavy atom within 4.5 Å. This
 asks how much of the ligand is in contact.
+
+Both are computed by `check_fold.geometry`, which takes two coordinate arrays rather than a file, so a
+Boltz fold read from a `.cif` and a docked pose read from a `.pdbqt` are measured by one definition and
+one set of cutoffs. Anything that holds a peptide and a ligand in a shared frame can be measured the
+same way, and the numbers stay comparable across the two.
 
 They disagree usefully. `orig_control` contacts three quarters of the ligand's atoms while enclosing
 less than half of the directions out of it, because the ligand is stuck to one face. Reporting wrapping
@@ -1468,6 +1679,32 @@ hides both.
 
 These cost time to find. They are recorded here so they cost no one else any.
 
+**BoltzGen's ligand prep inverts the stereocentre, and nothing raises.** The shared input
+`ligand.xyz` perceives as `CCCC[C@H](CC)OC(=O)/C=C/c1ccc(OC)cc1`, and this repository's folds keep that;
+`boltzgen_local/md/bg33_*/bg33_*_ligand.sdf` both perceive as `[C@@H]`. Same formula, same constitution,
+same 20 heavy atoms and same bond graph, so every check that compares composition passes and the
+difference survives into the MD and the MM/GBSA numbers. Assert the perceived SMILES against the source,
+not just the formula, whenever a ligand crosses between the two projects — this is a third silent format
+trap to go with the two in `boltzgen_local`'s own README.
+
+**Open Babel's `pdbqt` → `sdf` loses valence, so RDKit cannot match the docked pose to its own
+reference.** Carbons come back bracketed, `[C]`, with no implicit hydrogens, and `CalcRMS`,
+`GetBestRMS` and even `AssignBondOrdersFromTemplate` all fail with "No sub-structure match found
+between the reference and probe mol" — so every pose RMSD silently comes back empty. Do not try to
+repair the perception. Vina preserves the atom order of the input ligand PDBQT in its output poses, and
+that PDBQT was built from the reference SDF without touching coordinates, so the mapping is recoverable
+exactly by coordinate identity with no chemical perception at all. `vina_redock.ref_order_poses` does
+this and asserts the mapping is bijective.
+
+**RMSD between a docked pose and its reference must not be superimposed.** They already share a frame,
+so `GetBestRMS` would align away precisely the displacement being measured and report a ligand that
+moved 8 Å as barely changed. Use `CalcRMS`, or an explicit automorphism minimum as here, and keep the
+superposed value as a separate column measuring internal conformation.
+
+**A docked pose packing better than the predicted one is not evidence it is better.** Vina selects
+poses for close packing against a rigid receptor, so they score well on wrapping and enclosure by
+construction. The comparison is circular, and only dynamics or an independent energy can break it.
+
 **A Boltz contact constraint with `force: false` is discarded, not softened.** The featurizer skips it
 outright, so a "hinted" fold with unforced constraints is an unconstrained fold. Set `force: true`.
 
@@ -1535,6 +1772,27 @@ assumed.
 ---
 
 ## Limitations
+
+**The ligand's orientation in the pocket is unconstrained, and nothing in the design objective asks
+about it.** Redocking turns the ligand end for end in 18 of 54 poses while keeping the same contact
+residues, and the flipped and unflipped poses score the same to within 0.12 kcal/mol. Wrapping and
+enclosure saturate either way round, so both the design criterion and the fold check are blind to
+which way the chromophore faces. If head placement matters for a photostabiliser, it is not currently
+being designed for.
+
+**The one redocking success is a single pose in a single structure.** `bg33_4` is the only one of eight
+whose predicted pose Vina reproduces (1.30 Å), and the retention correlation that follows from it is
+anchored at both ends by the same BoltzGen pair. It is a lead, not a result, and the promising screen it
+suggests — redock and measure agreement, no dynamics needed — has been tested on eight structures with
+release episodes at (0, 0, 0, 0, 1, 5, 5, 18), three of them tied at zero.
+
+**The two BoltzGen structures carry the inverted ligand stereocentre**, so cross-structure comparisons
+that include them mix enantiomers at that carbon. Within-structure numbers are unaffected.
+
+**The redocking rests on a rigid receptor and one scoring function.** AutoDock Vina 1.1.2 was
+parameterised on globular protein–ligand complexes, not on 12–33-mer peptides with this much exposed
+surface, and no side chains were left flexible. That the docked poses have never been relaxed or run is
+the reason the pose question is settled by the dynamics rather than by the docking.
 
 **One ligand.** Every number here comes from octinoxate. Whether the spacer thresholds, the enclosure
 relationship or the constraint behaviour transfer to other ligands is untested.

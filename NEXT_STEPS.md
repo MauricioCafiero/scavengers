@@ -41,6 +41,39 @@ interaction energies of -16.2, -12.5, -10.1, -7.2 kcal/mol (mean -11.5) and five
 the same length give -40.8, -9.5, -7.7, -5.1, +12.1 (mean -10.2). n is far too small for
 significance, but the best random peptide is 2.5x better than the best design.
 
+## What redocking already settled, and what it did not
+
+Added 2026-09-30. The six structures with dynamics have now been redocked with AutoDock Vina
+(README, [redocking](README.md#an-independent-check-on-the-pose-redocking)). Two findings bear on the
+proposals below:
+
+* **The pocket does not specify the ligand's orientation.** 18 of 54 docked poses are turned end for
+  end while keeping the same contact residues, and flipped and unflipped poses score −5.18 against
+  −5.30 kcal/mol. Wrapping and enclosure saturate either way round, so the design objective is blind to
+  it. If either proposal below is meant to place the chromophore head specifically, the objective needs
+  a term that distinguishes the two ends.
+* **A static score predicts retention, though not energy.** Across all eight redocked structures —
+  the six here plus BoltzGen's `bg33_4` and `bg33_3` — Vina's score correlates +0.732 (p = 0.039) with
+  release episodes and +0.61 (p = 0.11) with MM/GBSA ΔG, and the docked pose's enclosure correlates
+  −0.713 (p = 0.047) with release. Both release correlations fell when the BoltzGen pair was added
+  (+0.845 and −0.833 at n = 6), which is the expected cost of breaking a nearly binary variable, and
+  both survived.
+* **The measure worth pursuing is pose reproducibility, not the score.** How closely the closest docked
+  pose reproduces the predicted one correlates **−0.743 (p = 0.035) with residence**, the strongest
+  single relationship found. `bg33_4` redocks to 1.30 Å — the only structure of eight that redocks at
+  all by the 2 Å standard — and holds 100% residence with zero releases; `bg33_3` redocks to 4.47 Å and
+  has the worst residence measured in either project, 41.0% with 18 episodes. Neither extreme existed in
+  this repository's own six, so this could not have been seen before the BoltzGen pair was added. If it
+  holds it is a free screen: dock the predicted pose back into its own fold and ask how well the best
+  pose reproduces it, with no dynamics needed. It also separates two things `bg33_4` shows are not the
+  same — Vina *scores* it 7th of 8 while MM/GBSA puts it 3rd, so the number is wrong while the pose
+  agreement is right. Next test: three or four more structures with intermediate release, since three of
+  the eight are still tied at zero episodes and one pair supplies both ends of the correlation.
+* **Fix the BoltzGen ligand stereocentre before pushing either pair further.** `bg33_3` and `bg33_4`
+  carry `[C@@H]` where the shared `ligand.xyz` and everything here carries `[C@H]`, so their MD, MM/GBSA
+  and docking numbers are all on the enantiomer at that carbon. Within-structure results are unaffected;
+  cross-structure comparison inherits a confound.
+
 ## The information the code currently throws away
 
 Each fragment is a side-chain analogue capped where the backbone would attach — the capping
@@ -181,6 +214,30 @@ renews in **October 2026**, in rough priority order:
    or three survivors rather than on scoring all of them. Keep `binding_energy.py` for the folds that go
    to MD, where the decomposition is worth having beside the MM/GBSA one.
 
+3. **Dynamics on the docked poses.** This is the one experiment that would settle which pose is right,
+   and it is cheap. Redocking (README, [redocking](README.md#an-independent-check-on-the-pose-redocking))
+   puts the ligand 3–10 Å from where Boltz put it, mostly by turning it end for end in the same pocket,
+   and the docked poses are as wrapped and as enclosed as the predicted ones. That comparison is
+   circular — Vina selected them for close packing against a rigid receptor — so it cannot be resolved
+   statically. Run each structure's best-scoring docked pose through the same MD and MM/GBSA path the
+   Boltz poses took and compare residence, release episodes and ΔG against the numbers already in
+   `md/mmgbsa_summary.csv`. Three outcomes, all informative: the docked pose holds as well or better, in
+   which case the orientation genuinely does not matter and the pocket is degenerate as the static
+   analysis suggests; it is released quickly, in which case Boltz's orientation is right and Vina's
+   score is not reading anything real about this system; or it drifts into the Boltz pose, which would
+   be the strongest possible confirmation of the prediction.
+
+   Start with **`bg33_4`**, which is now the obvious first case: it is the only structure of eight whose
+   predicted pose Vina reproduces (1.30 Å, its pose 6), so it is the one place where "run the docked
+   pose" and "run the predicted pose" are nearly the same experiment and any difference in retention is
+   attributable to the 0.52 Å and 7° between them rather than to a different binding mode. Then
+   `s3_orig_f12` and `shuffle_control` — the design/null pair already rendered side by side, the two
+   extremes of docked-pose promiscuity (1/9 flipped at Jaccard 0.70 against 6/9 at 0.42), and the pair
+   whose residence numbers differ most (100% with zero releases against 75.9% with five episodes). `cif_to_md.py` will not do the input prep here, because the input is a pose in a
+   `.pdbqt` rather than a Boltz `.cif`: write the docked pose out as an SDF in the reference's atom
+   order with `vina_redock.ref_order_poses`, and reuse the existing `protein_fixed.pdb`, which is the
+   same receptor. Two 20 ns runs, roughly $2 of Modal credit, or locally as `orig_f12`'s was.
+
 Shell 4 (`isoleucine/2`) was the plan before this and is still unstarted; it needs no Modal credit for
 design and folding, only for dynamics. Shell 1's per-fold designed-position reproduction is also still
 unmeasured, and needs per-fold shell `.xyz` copies.
@@ -196,6 +253,7 @@ Nothing extra is installed in this repo; each external tool is called from its o
 | pdbfixer (adds H to the peptide) | `~/python_mac/pocket_assist/venv`, `--fixer-venv` |
 | ESM2 / transformers | `~/python_mac/GenMaskFill/.venv`, `--genmask-venv` |
 | SMILES to 3D recipe this follows | `~/python_mac/mace/code/mace_calc.py` (`smiles_to_atoms`) |
+| AutoDock Vina + Open Babel (redocking only) | `~/python_mac/dock_assist/dock-env`, run as `dock-env/bin/python code/vina_redock.py`. Vina is the x86_64 build vendored in `dockstring`, which needs Rosetta on Apple silicon; `obabel` comes from `openbabel-wheel` in that venv, so nothing is installed system-wide |
 
 ## Traps
 
