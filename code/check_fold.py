@@ -111,28 +111,27 @@ def secondary_structure(pep_atoms):
     }
 
 
-def check(cif_path, boltz_dir, contact=4.0, wrap=4.5):
-    name = os.path.basename(cif_path).replace("_model_0.cif", "")
-    pep, lig = parse_cif(cif_path)
-    P = np.array([a["xyz"] for a in pep])
-    L = np.array([a["xyz"] for a in lig])
-    d = np.linalg.norm(P[:, None, :] - L[None, :, :], axis=-1)
-    row = {"name": name, "closest_approach": round(float(d.min()), 2),
-           "contacts_under_cutoff": int((d < contact).sum()),
-           "bound": int(d.min() < contact)}
+def geometry(ph, lh, wrap=4.5):
+    """Wrapping and enclosure of a ligand by a peptide, from heavy-atom coordinates alone.
 
-    # How much of the ligand the peptide actually wraps. This is the design objective, and it is
-    # not implied by the others: the forced-contact folds satisfied almost none of their hints while
-    # engaging 100% of the ligand, and the ESM2 variants matched the original on summed energy while
-    # engaging 60% and 40% against its 75%. Per ligand heavy atom, is there a peptide heavy atom
-    # within `wrap` angstroms.
-    ph = np.array([a["xyz"] for a in pep if a["element"] != "H"])
-    lh = np.array([a["xyz"] for a in lig if a["element"] != "H"])
+    Split out of `check` so that anything holding two coordinate arrays can be measured the same
+    way -- a Boltz fold read from a cif, or a docked pose read from a pdbqt. One definition, one set
+    of cutoffs, so the numbers stay comparable across the two.
+
+    `ph`, `lh`: (n, 3) peptide and ligand heavy-atom coordinates, in a shared frame.
+
+    Wrapping is the design objective, and it is not implied by the others: the forced-contact folds
+    satisfied almost none of their hints while engaging 100% of the ligand, and the ESM2 variants
+    matched the original on summed energy while engaging 60% and 40% against its 75%. Per ligand
+    heavy atom, is there a peptide heavy atom within `wrap` angstroms.
+
+    Enclosure asks the different question of whether the peptide is *around* the ligand or pressed
+    against one face of it. Wrapping alone does not tell you -- the unconstrained glycine fold
+    contacts 75% of the ligand's atoms while enclosing only 49% of the directions out of it, with
+    the two centroids 20.9 A apart. Sample outward directions from the ligand centre and ask which
+    ones run into peptide.
+    """
     per_ligand = np.linalg.norm(lh[:, None, :] - ph[None, :, :], axis=-1).min(axis=1)
-    # Enclosure: is the peptide *around* the ligand, or pressed against one face of it? Wrapping
-    # alone does not tell you -- the unconstrained glycine fold contacts 75% of the ligand's atoms
-    # while enclosing only 49% of the directions out of it, with the two centroids 20.9 A apart.
-    # Sample outward directions from the ligand centre and ask which ones run into peptide.
     n_dir = 200
     idx = np.arange(n_dir) + 0.5
     polar = np.arccos(1 - 2 * idx / n_dir)
@@ -143,15 +142,37 @@ def check(cif_path, boltz_dir, contact=4.0, wrap=4.5):
     along = v @ dirs.T
     across = np.sqrt(np.maximum((v ** 2).sum(1)[:, None] - along ** 2, 0.0))
     reached = ((along > 0) & (along < 12.0) & (across < 3.0)).any(axis=0)
-    row["enclosed_fraction"] = round(float(reached.mean()), 3)
-    row["centroid_separation"] = round(float(np.linalg.norm(centre - ph.mean(axis=0))), 1)
-    row["peptide_rg"] = round(float(np.sqrt(((ph - ph.mean(axis=0)) ** 2).sum(1).mean())), 1)
-    row.update(secondary_structure(pep))
+    return {
+        "enclosed_fraction": round(float(reached.mean()), 3),
+        "centroid_separation": round(float(np.linalg.norm(centre - ph.mean(axis=0))), 1),
+        "peptide_rg": round(float(np.sqrt(((ph - ph.mean(axis=0)) ** 2).sum(1).mean())), 1),
+        "ligand_heavy_atoms": len(lh),
+        "engaged": int((per_ligand < wrap).sum()),
+        "wrapped_fraction": round(float((per_ligand < wrap).mean()), 3),
+        "mean_ligand_distance": round(float(per_ligand.mean()), 2),
+    }
 
-    row["ligand_heavy_atoms"] = len(lh)
-    row["engaged"] = int((per_ligand < wrap).sum())
-    row["wrapped_fraction"] = round(float((per_ligand < wrap).mean()), 3)
-    row["mean_ligand_distance"] = round(float(per_ligand.mean()), 2)
+
+def check(cif_path, boltz_dir, contact=4.0, wrap=4.5):
+    name = os.path.basename(cif_path).replace("_model_0.cif", "")
+    pep, lig = parse_cif(cif_path)
+    P = np.array([a["xyz"] for a in pep])
+    L = np.array([a["xyz"] for a in lig])
+    d = np.linalg.norm(P[:, None, :] - L[None, :, :], axis=-1)
+    row = {"name": name, "closest_approach": round(float(d.min()), 2),
+           "contacts_under_cutoff": int((d < contact).sum()),
+           "bound": int(d.min() < contact)}
+
+    ph = np.array([a["xyz"] for a in pep if a["element"] != "H"])
+    lh = np.array([a["xyz"] for a in lig if a["element"] != "H"])
+    g = geometry(ph, lh, wrap=wrap)
+    # Key order here is fold_check.csv's column order; keep it as it is so the existing files and
+    # the figures that read them stay comparable.
+    for k in ("enclosed_fraction", "centroid_separation", "peptide_rg"):
+        row[k] = g[k]
+    row.update(secondary_structure(pep))
+    for k in ("ligand_heavy_atoms", "engaged", "wrapped_fraction", "mean_ligand_distance"):
+        row[k] = g[k]
 
     hints = read_hints(os.path.join(boltz_dir, name + ".yaml"))
     by_atom = {a["name"]: np.array(a["xyz"]) for a in lig}
