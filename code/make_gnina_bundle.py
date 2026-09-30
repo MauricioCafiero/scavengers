@@ -93,6 +93,8 @@ def build(structure, dock_root, out_root):
             scores.append(float(m.group(1)))
 
     rows = []
+    # The predicted pose on its own as well as in the bundle: --autobox_ligand needs a single molecule
+    # to build the search box from, and it is also the reference any docked pose is scored against.
     writer = Chem.SDWriter(os.path.join(dest, "poses_with_reference.sdf"))
     for i, xyz in enumerate([ref_xyz] + poses):
         mol = Chem.RWMol(ref_h)
@@ -111,6 +113,10 @@ def build(structure, dock_root, out_root):
         vina = "" if i == 0 else f"{scores[i - 1]:.1f}"
         out.SetProp("vina_score", vina)
         writer.write(out)
+        if i == 0:
+            w0 = Chem.SDWriter(os.path.join(dest, "ref_pose.sdf"))
+            w0.write(out)
+            w0.close()
         rows.append(dict(structure=structure, pose=i, is_reference=int(i == 0),
                          rmsd_to_reference_A=round(r, 3), vina_score=vina,
                          **REFERENCE.get(structure, {})))
@@ -140,7 +146,7 @@ def main(argv=None):
     rows = []
     for n in names:
         rows.extend(build(n, dock_root, out_root))
-        print(f"  {n}: receptor + 10 poses")
+        print(f"  {n}: receptor + 10 poses + ref_pose.sdf")
 
     ref_csv = os.path.join(out_root, "reference.csv")
     with open(ref_csv, "w", newline="") as fh:

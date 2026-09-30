@@ -96,3 +96,34 @@ Per structure, from `reference.csv`:
 The measure that did best across the eight was not a score at all: how closely the closest docked pose
 reproduces the predicted one correlates **−0.743 (p = 0.035)** with residence. If GNINA's CNN ranks the
 predicted pose well, that is the same signal reached more cheaply.
+
+## The AutoDock Vina scores GNINA is being compared against
+
+Per pose, as **Vina score / RMSD to the predicted pose (Å)**. Poses are in Vina's own ranking order, so
+these are also the ranks in `poses_with_reference.sdf` after pose 0. Pose 0 itself has no Vina score —
+it was never scored by Vina, only used as the reference the search started from.
+
+| structure | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 |
+|---|---|---|---|---|---|---|---|---|---|
+| `s3_orig_f12` | −7.3 / 4.08 | −6.6 / 7.79 | −6.5 / 7.70 | −6.4 / 4.04 | −6.4 / 3.55 | −6.3 / 8.25 | −6.3 / 8.89 | **−6.2 / 3.49** | −6.1 / 4.08 |
+| `s3_esm2_f4` | −6.0 / 7.41 | −5.7 / 8.53 | −5.7 / 8.29 | −5.5 / 8.78 | −5.5 / 3.64 | −5.1 / 3.56 | −5.1 / 3.31 | −5.0 / 8.69 | **−4.9 / 3.21** |
+| `bg33_4` | −4.7 / 4.07 | −4.5 / 7.42 | −4.4 / 8.76 | −4.4 / 9.28 | −4.4 / 9.64 | **−4.4 / 1.30** | −4.4 / 9.30 | −4.3 / 8.41 | −4.3 / 9.38 |
+| `s2_esm2_control` | −5.0 / 9.89 | −5.0 / 7.72 | −4.9 / 7.82 | −4.9 / 9.12 | −4.9 / 8.76 | **−4.6 / 5.13** | −4.6 / 8.79 | −4.5 / 8.90 | −4.5 / 8.51 |
+| `shuffle_control` | −5.1 / 8.38 | −5.0 / 8.75 | −5.0 / 8.76 | −4.9 / 8.71 | −4.8 / 9.20 | −4.7 / 8.60 | −4.7 / 8.58 | −4.6 / 6.98 | **−4.6 / 6.37** |
+| `shuffle_control_esm0` | −4.5 / 7.01 | −4.4 / 6.81 | −4.3 / 7.58 | −4.3 / 8.79 | −4.3 / 7.75 | −4.2 / 8.82 | −4.2 / 8.58 | −4.2 / 7.33 | **−4.1 / 3.90** |
+| `orig_f12` | −6.0 / 5.96 | −6.0 / 9.80 | −5.9 / 10.10 | −5.9 / 10.26 | −5.9 / 7.63 | **−5.8 / 5.52** | −5.7 / 11.05 | −5.7 / 6.90 | −5.6 / 9.90 |
+| `bg33_3` | −4.2 / 5.93 | −4.1 / 9.25 | −4.0 / 7.86 | −4.0 / 8.99 | −3.9 / 9.43 | −3.8 / 8.78 | −3.8 / 7.44 | −3.8 / 9.74 | **−3.7 / 4.47** |
+
+The bolded cell in each row is the pose closest to the prediction. Read down that column and the whole
+problem is visible: **it is never pose 1, and never better than 6th.** Ranks are 8, 9, 6, 6, 9, 9, 6, 9.
+Vina's scores across the nine span 1.2 kcal/mol at most — `s3_orig_f12` runs −7.3 to −6.1 — while the
+RMSDs span 3.5 to 11 Å, so the score is nearly flat across poses that are structurally very different.
+That flatness is the thing to beat: a rescorer only has to reorder within about 1 kcal/mol.
+
+The authoritative values for every pose are in `reference.csv` and in each pose's `vina_score` and
+`rmsd_to_reference_A` SDF tags, which is what `collect_gnina.py` joins against. This table is generated
+from that file, not typed.
+
+Worth noting what Vina's score does *not* separate. Flipped and unflipped poses — the ligand turned end
+for end in the pocket — score within 0.22 kcal/mol of each other across all 72 poses (−4.85 against
+−5.07). If GNINA's CNN can tell those apart it would be the first thing here that can.
