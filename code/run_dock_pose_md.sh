@@ -15,7 +15,11 @@
 # code/modal_md.py imports openmm_md.dynamics.run rather than reimplementing it, so the integrator and
 # equilibration are the same code on both.
 #
-# 5,615 particles. bg33_3 at 5,088 ran 1.11 ms/step for 156 ns/day, so expect roughly 3.3 h.
+# 5,615 particles, measured at 1.44 ms/step on OpenCL: 12 min/ns, 120 ns/day, 4.0 h for the 20 ns.
+# Do not estimate this from another system's rate. bg33_3 at 5,088 particles ran 1.11 ms/step and
+# bg33_4 at 7,231 ran 1.71, and interpolating those for 5,615 predicts 1.26 -- 13% optimistic against
+# the 1.44 actually measured here. The rate is not linear in particle count, so measure it from
+# energy.csv once the run is going rather than borrowing a number from a different box.
 #
 # Every stage is guarded by its own output, so re-running resumes rather than restarts. `omd run`
 # itself cannot resume -- dynamics.py writes a checkpoint but nothing loads it -- so an interrupted
