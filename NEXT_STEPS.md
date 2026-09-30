@@ -58,6 +58,17 @@ proposals below:
   −0.713 (p = 0.047) with release. Both release correlations fell when the BoltzGen pair was added
   (+0.845 and −0.833 at n = 6), which is the expected cost of breaking a nearly binary variable, and
   both survived.
+* **GNINA's `CNNaffinity` is the first static measure here that predicts the binding energy.** Rescoring
+  the eight structures' poses with GNINA v1.3.3 (`--score_only`, so the CNN sees exactly Vina's
+  coordinates) gives ρ = **−0.857, p = 0.007** against MM/GBSA ΔG on the predicted pose, strengthening to
+  −0.900 on the five S-configuration structures alone. Vina's score manages +0.61 (p = 0.11), nesso
+  +0.14, and the static UMA energy ranks backwards. The pose-ranking improvement is smaller than it
+  looks: GNINA puts the predicted pose 1st to 4th where Vina put it 6th to 9th, but in `bg33_4` it ranks
+  a pose 9.3 Å away above the one 1.3 Å away, so part of the gain is that a co-folded geometry looks like
+  a crystal structure. Controlling for that by using docked poses only, a real but modest position signal
+  survives — `CNNaffinity` ρ = −0.400 (p = 0.0005) against RMSD, where Vina had none — and it is the CNN,
+  not the empirical term, that carries it. The flip degeneracy survives both scorers: GNINA separates
+  flipped from unflipped at p = 0.283.
 * **The measure worth pursuing is pose reproducibility, not the score.** How closely the closest docked
   pose reproduces the predicted one correlates **−0.743 (p = 0.035) with residence**, the strongest
   single relationship found. `bg33_4` redocks to 1.30 Å — the only structure of eight that redocks at
@@ -220,29 +231,40 @@ renews in **October 2026**, in rough priority order:
    or three survivors rather than on scoring all of them. Keep `binding_energy.py` for the folds that go
    to MD, where the decomposition is worth having beside the MM/GBSA one.
 
-3. **Dynamics on the docked poses.** This is the one experiment that would settle which pose is right,
-   and it is cheap. Redocking (README, [redocking](README.md#an-independent-check-on-the-pose-redocking))
-   puts the ligand 3–10 Å from where Boltz put it, mostly by turning it end for end in the same pocket,
-   and the docked poses are as wrapped and as enclosed as the predicted ones. That comparison is
-   circular — Vina selected them for close packing against a rigid receptor — so it cannot be resolved
-   statically. Run each structure's best-scoring docked pose through the same MD and MM/GBSA path the
-   Boltz poses took and compare residence, release episodes and ΔG against the numbers already in
-   `md/mmgbsa_summary.csv`. Three outcomes, all informative: the docked pose holds as well or better, in
-   which case the orientation genuinely does not matter and the pocket is degenerate as the static
-   analysis suggests; it is released quickly, in which case Boltz's orientation is right and Vina's
-   score is not reading anything real about this system; or it drifts into the Boltz pose, which would
-   be the strongest possible confirmation of the prediction.
+3. **Dynamics on a docked pose — done for `s3_orig_f12`, 2026-09-30.** Vina's best-scoring pose was run
+   for 20 ns under an identical protocol and binds **3.55 kcal/mol worse** than the predicted pose
+   (−20.79 ± 0.04 against −24.33 ± 0.08), holding about eighteen fewer contacts and loosening over the
+   run where the predicted pose tightens. Both keep the ligand: no releases either way. Full account in
+   the README, [redocking](README.md#dynamics-on-a-docked-pose-the-predicted-pose-binds-better).
 
-   Start with **`bg33_4`**, which is now the obvious first case: it is the only structure of eight whose
-   predicted pose Vina reproduces (1.30 Å, its pose 6), so it is the one place where "run the docked
-   pose" and "run the predicted pose" are nearly the same experiment and any difference in retention is
-   attributable to the 0.52 Å and 7° between them rather than to a different binding mode. Then
-   `s3_orig_f12` and `shuffle_control` — the design/null pair already rendered side by side, the two
-   extremes of docked-pose promiscuity (1/9 flipped at Jaccard 0.70 against 6/9 at 0.42), and the pair
-   whose residence numbers differ most (100% with zero releases against 75.9% with five episodes). `cif_to_md.py` will not do the input prep here, because the input is a pose in a
-   `.pdbqt` rather than a Boltz `.cif`: write the docked pose out as an SDF in the reference's atom
-   order with `vina_redock.ref_order_poses`, and reuse the existing `protein_fixed.pdb`, which is the
-   same receptor. Two 20 ns runs, roughly $2 of Modal credit, or locally as `orig_f12`'s was.
+   Three things that run left open. The estimate was **still moving at 20 ns** (+0.97 kcal/mol over the
+   last 5 ns, 24× its standard error), so −20.79 is an upper bound and a longer run would tighten the
+   comparison. The predicted pose's own value came from a Modal production leg with no windows, so its
+   convergence is unknown — a 30 or 40 ns leg on both poses would fix both problems at once. And **where
+   the ligand ends up cannot be measured on this system**: the peptide superposition RMSD is 5.89 Å,
+   larger than the ligand distances being compared, and the control is decisive — the predicted-pose run
+   reads 6.57 Å from its own starting pose. Do not spend more effort on that measure here.
+
+4. **Run the pose GNINA picks, not the pose Vina picks.** This is the obvious follow-up and it is one
+   20 ns run. GNINA and Vina disagree about the best docked pose in **8 of 8 structures**: Vina's pick is
+   always its own pose 1, GNINA's are poses 9, 6, 7, 6, 7, 9, 5 and 6. The pose already simulated,
+   `s3_orig_f12` pose 1, is GNINA's **7th of 10** — so the experiment so far tested the pose the better
+   scorer thinks is poor.
+
+   For `s3_orig_f12`, GNINA's pick is **pose 9**: `CNNscore` 0.733 and `CNNaffinity` 5.166, both the best
+   of the nine docked poses, against pose 1's 0.401 and 5.010. It sits 4.08 Å from the prediction, almost
+   exactly as far as pose 1's 4.09 Å, but differs in how it got there — 110° of rigid-body rotation
+   against pose 1's 167°, and 48° of head/tail change against 64°. So the comparison is close to
+   controlled: near-identical displacement, different orientation, and the two scorers disagree about
+   which is better. If pose 9 beats pose 1's −20.79 the CNN's pose preference is worth something beyond
+   its ΔG correlation; if it does not, `CNNaffinity` predicts affinity without preferring poses, which is
+   still useful but a narrower claim.
+
+   Everything needed is in place: `code/dock_pose_to_sdf.py s3_orig_f12 --pose 9` writes the input, the
+   receptor is the same `protein_fixed.pdb`, and `code/run_dock_pose_md.sh` needs only its `N` changed.
+   Roughly 4.5 h locally, or an hour of Modal credit. Worth pairing with **pose 8** if there is budget:
+   at 3.49 Å and only 27° of rotation it is the mild-perturbation control that would separate how much of
+   the 3.55 kcal/mol penalty is reorientation and how much is displacement.
 
 Shell 4 (`isoleucine/2`) was the plan before this and is still unstarted; it needs no Modal credit for
 design and folding, only for dynamics. Shell 1's per-fold designed-position reproduction is also still

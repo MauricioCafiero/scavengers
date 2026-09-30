@@ -1522,50 +1522,156 @@ The shuffle is still the most promiscuous on every column that measures it, and 
 two structures with the worst retention. Note that `bg33_4`'s mean RMSD of 7.51 Å is unremarkable: its
 success is one pose out of nine, not a tighter distribution.
 
+### Rescoring with GNINA: the CNN reorders what Vina could not
+
+Vina failed at the one thing that mattered — in all eight structures it ranked the pose closest to the
+prediction 6th to 9th of nine. Recognising near-native poses is what GNINA's CNN is trained for, so the
+eight structures were bundled (`code/make_gnina_bundle.py`, `runs/octinoxate/gnina/`) and rescored
+elsewhere with GNINA v1.3.3 on CPU: `--score_only`, no search and no minimisation, so the CNN sees
+exactly the coordinates Vina produced. Ten ligands per structure — the predicted pose as pose 0, then
+Vina's nine in rank order. Results are in `runs/octinoxate/gnina/results_*/gnina_scores.csv`.
+
+**The best static predictor of ΔG this project has produced**, by a wide margin:
+
+| | ρ vs MM/GBSA ΔG | p |
+|---|---|---|
+| **GNINA `CNNaffinity`, predicted pose** | **−0.857** | **0.007** |
+| GNINA `CNNaffinity`, best docked pose | −0.738 | 0.037 |
+| Vina score | +0.61 | 0.11 |
+| GNINA `CNNscore`, predicted pose | −0.38 | 0.35 |
+
+It strengthens to ρ = −0.900 (p = 0.037) on the five S-configuration structures alone, so the mixed
+ligand chirality is not what is driving it. For scale: nesso managed +0.14 and the static UMA
+interaction energy ranks structures backwards.
+
+**On pose ranking the improvement is real but partly an artefact of provenance.** GNINA puts the
+predicted pose at ranks 1, 2, 3, 3, 3, 3, 4 and 1 by `CNNscore`, against Vina's 6 to 9. But `bg33_4` is
+the control that spoils the clean reading:
+
+| rank | pose | RMSD to prediction | `CNNscore` |
+|---|---|---|---|
+| 1 | 0 | 0.00 | 0.597 |
+| 2 | 7 | **9.30** | 0.390 |
+| 3 | 6 | **1.30** | 0.378 |
+
+GNINA ranks a pose 9.3 Å from the prediction above the one 1.3 Å from it. Pose 0 is a co-folded
+geometry and the CNN was trained on crystal structures, so some of its advantage is that it looks like
+a real complex rather than that it is in the right place.
+
+Restricting to the 72 docked poses, which all share one provenance, removes that confound — and a
+genuine position signal survives where Vina had none:
+
+| | ρ vs RMSD to prediction | p |
+|---|---|---|
+| GNINA `CNNaffinity` | −0.400 | 0.0005 |
+| GNINA `CNNscore` | −0.328 | 0.005 |
+| GNINA `minimizedAffinity` | +0.206 | 0.08 |
+| Vina score | +0.164 | 0.17 |
+
+Modest, correctly signed, and cleanly attributable to the CNN rather than the empirical term:
+`minimizedAffinity` behaves like Vina's score. **The flip degeneracy survives a second scorer** —
+`CNNscore` is 0.348 for flipped poses against 0.386 for unflipped, Mann-Whitney p = 0.283. A
+chirality-aware CNN cannot tell the orientations apart either.
+
+Two practical findings. Receptor hydrogens barely matter: the protonated receptor changes `CNNscore`
+by at most 0.034 and does not reorder any structure. And `--minimize` does not help — it weakens the ΔG
+correlation to −0.786 and the residence one to +0.587 — so `--score_only` on the heavy-atom receptor is
+the pass to quote.
+
+**GNINA and Vina never agree on which docked pose is best: 8 structures, 8 disagreements.** Vina's pick
+is always its own pose 1 by construction; GNINA's picks are poses 9, 6, 7, 6, 7, 9, 5 and 6.
+
+### Dynamics on a docked pose: the predicted pose binds better
+
+`NEXT_STEPS` asked for the one experiment that could settle which pose is right, since no static measure
+can: Vina selected its poses for packing, so their packing is not evidence. `s3_orig_f12`, the best
+binder measured here, was run again from Vina's **best-scoring** pose — pose 1, −7.3 kcal/mol, 4.09 Å
+from the prediction as a 2.57 Å translation and a 167° rigid-body rotation, though only 64° of head/tail
+change. `code/dock_pose_to_sdf.py` wrote the pose for the MD prep, and
+`code/run_dock_pose_md.sh` held the protocol identical to the run it is compared with: same
+`protein_fixed.pdb`, same `omd` code, same timestep, dodecahedral box, 20 ns and MM/GBSA windows. 5,615
+particles, 1.44–1.59 ms/step on OpenCL, 4 h 21 m.
+
+The convergence series, each window a leading slice from t = 0, computed by
+`code/run_windows_live.sh` as the trajectory passed each mark rather than afterwards:
+
+| window | ΔG | step |
+|---|---|---|
+| 5 ns | −27.00 ± 0.05 | — |
+| 10 ns | −24.04 ± 0.05 | +2.96 |
+| 15 ns | −21.76 ± 0.05 | +2.28 |
+| 20 ns | **−20.79 ± 0.04** | +0.97 |
+
+**Still moving at 20 ns**, monotonically less negative, +6.22 kcal/mol across the range. The steps
+decelerate but the last is still 24× the standard error, so −20.79 is an upper bound on how
+unfavourable this pose is rather than a converged value.
+
+At matched 20 ns against the predicted pose of the same fold:
+
+| | predicted pose | docked pose 1 |
+|---|---|---|
+| ΔG | **−24.33 ± 0.08** | **−20.79 ± 0.04** |
+| residence within 10 Å | 100.0% | 98.7% |
+| release episodes | 0 | 0 |
+| mean contacts | 56.6 | 38.9 |
+| contacts, start → end | 50.7 → **60.8** | 42.6 → 41.5 |
+| separation, start → end | 5.02 → **3.75** Å (max 7.03) | 5.6 → 6.49 Å (max 11.35) |
+| closest heavy-atom approach | 2.62 Å | 2.46 Å |
+
+**The docked pose binds 3.55 kcal/mol worse, and the trajectories say why.** The predicted pose
+*tightens* over the run — contacts rise 50.7 → 60.8 and the centroids close 5.02 → 3.75 Å — while the
+docked pose loosens slightly and holds about eighteen fewer contacts throughout. Both keep the ligand:
+no release episodes either way, residence 98.7% against 100%. So this is not the "same energy, different
+pose" outcome the static analysis allowed for. The energies differ, in the direction that favours the
+folding model's placement.
+
+**Where the ligand ended up is inconclusive, and the control shows why.** The docked run's medoid ligand
+sits 4.85 Å from the predicted pose and 4.90 Å from its own starting pose — equidistant within noise,
+having moved away from both — with a peptide superposition RMSD of 5.89 Å, larger than either ligand
+distance. Running the same analysis on the predicted-pose trajectory puts its ligand **6.57 Å from the
+pose it started in**, at 7.49 Å peptide RMSD. When a run's own starting pose reads 6.6 Å away, a
+4.85-against-4.90 difference carries no information. Neither genuine degeneracy nor convergence on the
+predicted pose is established by this measure, and on this system it probably cannot be: the peptide
+moves as much as the poses differ.
+
+Two limits worth stating. Only the 20 ns point is comparable, because the predicted pose's run was a
+Modal production leg with no windows, so its own degree of convergence is unknown. And pose 1 is Vina's
+best by *score*, not its closest to the prediction — pose 8 is nearer at 3.49 Å with only 27° of
+rotation. What was tested is a substantially reoriented binding mode that scores well; how much of the
+3.55 kcal/mol penalty comes from reorientation rather than displacement is not separated here.
+
 ### Which pose is right, and what docking is a proxy for
 
-**The predicted pose, on the evidence that exists.** It is the only one with dynamical support and that
-support is positive: `s3_orig_f12` and `bg33_4` both hold 100% residence with zero releases, and
-`s3_esm2_f4` is 99.6% with zero. The docked poses have never been relaxed or run. `dock_vs_md.py` puts
-the MD medoid nearer a docked pose in 6 of 8, but that comparison cannot carry the weight, because the
-peptide superposition RMSD is 1.5–9.3 Å — as large as the pose differences it would have to resolve, and
-reported for exactly that reason. The two cleanest superpositions are the BoltzGen pair, and they say
-opposite things: `bg33_4` ends 3.63 Å from its predicted pose and 2.67 Å from a docked one, near both,
-while `bg33_3` ends 9.49 Å from its predicted pose, having genuinely left.
+**The predicted pose, and now on direct evidence rather than inference.** The dynamics above gives it a
+3.55 kcal/mol advantage over Vina's best-scoring pose in the same fold under an identical protocol, and
+it is the pose that tightens rather than loosens over 20 ns. `s3_orig_f12` and `bg33_4` both hold 100%
+residence with zero releases, and `s3_esm2_f4` is 99.6% with zero.
 
 There is no contradiction between a ligand held for 20 ns and a ligand that sits either way round.
-Residence and contact counts do not constrain orientation. Both are true, and together they say the grip
-is real and the orientation is unspecified.
+Residence and contact counts do not constrain orientation, and neither Vina nor GNINA can separate the
+flipped poses. Both are true: the grip is real, the orientation is unspecified by every score tried, and
+the energy nonetheless prefers the predicted placement.
 
-**Docking is not a proxy for the binding energy. It is a fair proxy for retention** — and the BoltzGen
-pair is what made that testable, because `bg33_3`'s 18 release episodes break a variable that was
-otherwise almost binary. Release episodes across the eight are now (0, 0, 0, 0, 1, 5, 5, 18):
+**Docking is not a proxy for the binding energy; GNINA's CNN is the first thing here that is.** Ranked
+across the eight structures:
 
 | | vs MM/GBSA ΔG | vs release episodes | vs residence |
 |---|---|---|---|
-| Vina score | ρ = +0.61, p = 0.11 | **ρ = +0.732, p = 0.039** | ρ = −0.47, p = 0.24 |
-| pose-1 `enclosed_fraction` | ρ = −0.38, p = 0.35 | **ρ = −0.713, p = 0.047** | ρ = +0.31, p = 0.45 |
-| **closest-pose RMSD** | ρ = +0.60, p = 0.12 | ρ = +0.47, p = 0.24 | **ρ = −0.743, p = 0.035** |
+| GNINA `CNNaffinity` (predicted pose) | **−0.857, p = 0.007** | — | +0.719, p = 0.045 |
+| Vina score | +0.61, p = 0.11 | **+0.732, p = 0.039** | −0.47, p = 0.24 |
+| pose-1 `enclosed_fraction` | −0.38, p = 0.35 | **−0.713, p = 0.047** | +0.31, p = 0.45 |
+| GNINA `CNNscore` (predicted pose) | −0.38, p = 0.35 | — | **+0.731, p = 0.040** |
+| closest-pose RMSD | +0.60, p = 0.12 | +0.47, p = 0.24 | **−0.743, p = 0.035** |
 
-Three things changed by going from six structures to eight. **The release correlations weakened but
-survived** — Vina's score fell from +0.845 to +0.732 and enclosure from −0.833 to −0.713, both still
-under p = 0.05. That is the expected direction: at n = 6 those correlations were carried by a
-design-versus-null split, and a graded third level costs them some of that. **The ΔG correlations
-improved** without reaching significance, +0.49 → +0.61 for the Vina score. And **a new measure appeared
-that could not have been seen at n = 6**: how well the closest docked pose reproduces the predicted one
-correlates −0.743 with residence, the strongest single relationship in the table. `bg33_4` at 1.30 Å and
-100% residence and `bg33_3` at 4.47 Å and 41% anchor it, and neither end existed in this repository's
-own six.
+Release episodes themselves barely track ΔG (ρ = +0.37, p = 0.47), so these are not two routes to one
+quantity. Vina's score and the docked pose's enclosure read the **escape** axis, which is what a
+rigid-pocket shape-complementarity score should capture. GNINA's `CNNaffinity` reads the **energy** axis.
+And how well the closest docked pose reproduces the predicted one reads **retention**.
 
-If that holds, it is a more useful screen than the Vina score, and it is nearly free: dock the predicted
-pose back into its own fold, and how closely the best pose reproduces it predicts whether the ligand will
-stay put — without running any dynamics. It also separates two signals that `bg33_4` shows are not the
-same thing. Vina *scores* it 7th of 8 at −4.7 while MM/GBSA puts it 3rd at −19.66, so the score gets it
-badly wrong; Vina's *pose agreement* gets it exactly right. Reproducibility of the pose is the signal,
-not the number attached to it.
-
-The caveat: n = 8, three structures still sit at zero episodes, and one pair supplies both extremes of
-the new correlation. This wants a fourth and fifth level of release before it is leaned on.
+The caveats compound rather than cancel: n = 8, release episodes are (0, 0, 0, 0, 1, 5, 5, 18) so that
+variable is nearly a design/null split, one BoltzGen pair supplies both ends of the retention
+correlation, and three of the eight folds carry the mirror-image ligand. Every one of these wants more
+structures before it is leaned on.
 
 ---
 
