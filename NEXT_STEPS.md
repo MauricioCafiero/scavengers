@@ -477,7 +477,8 @@ The September 2026 allocation was spent (about $4 across scoring and six 20 ns r
    baselines (`s3_orig_f12` at −24.33, `s3_esm2_f4` at −21.08) alike; `bg33_4`'s co-folded run already
    has windows, and `bg33_4_dock6` was windowed on 2026-10-01 (−16.72, −16.90, −16.36, −16.53 — flat,
    which is how we know it is a converged measurement of a *different* pose rather than one caught
-   mid-drift).
+   mid-drift). Those three window rows reached `mmgbsa_summary.csv` on 2026-10-02, and their directories
+   were renamed `win_Nns` → `first_Nns` to match the convention `orig_f12` and `s3_orig_f12_dock1` use.
 
    The value is that the shape survives what the endpoint does not: a series still walking away from its
    start at 20 ns was not at equilibrium, whatever its absolute number turns out to be. Free, and it can
