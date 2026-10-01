@@ -40,7 +40,7 @@ from rdkit.Geometry import Point3D
 HERE = os.path.dirname(os.path.abspath(__file__))
 REPO = os.path.dirname(HERE)
 sys.path.insert(0, HERE)
-sys.path.insert(0, os.path.expanduser("~/python_mac/dock_assist/code"))
+sys.path.insert(0, os.path.expanduser(os.environ.get("DOCK_ASSIST", "~/python_mac/dock_assist") + "/code"))
 
 from vina_redock import ref_order_poses  # noqa: E402
 

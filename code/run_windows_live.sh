@@ -17,10 +17,12 @@
 #
 #   code/run_windows_live.sh <structure> [total_ns]
 set -u
-cd /Users/cafierom/python_mac/peptidebuilder
-OMD=~/miniforge3/envs/openmm-md/bin/omd
-PY=~/miniforge3/envs/openmm-md/bin/python
-ROOT=$PWD
+REPO=${0:A:h:h}
+cd $REPO
+OMD_ENV=${OMD_ENV:-$HOME/miniforge3/envs/openmm-md}   # override if the conda env is elsewhere
+OMD=$OMD_ENV/bin/omd
+PY=$OMD_ENV/bin/python
+ROOT=$REPO
 
 n=${1:?usage: run_windows_live.sh <structure> [total_ns]}
 TOTAL=${2:-20}

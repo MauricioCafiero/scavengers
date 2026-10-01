@@ -25,10 +25,12 @@
 # itself cannot resume -- dynamics.py writes a checkpoint but nothing loads it -- so an interrupted
 # trajectory restarts from zero, and that is the one stage worth not interrupting.
 set -u
-cd /Users/cafierom/python_mac/peptidebuilder
-OMD=~/miniforge3/envs/openmm-md/bin/omd
-PY=~/miniforge3/envs/openmm-md/bin/python
-ROOT=$PWD
+REPO=${0:A:h:h}
+cd $REPO
+OMD_ENV=${OMD_ENV:-$HOME/miniforge3/envs/openmm-md}   # override if the conda env is elsewhere
+OMD=$OMD_ENV/bin/omd
+PY=$OMD_ENV/bin/python
+ROOT=$REPO
 N=s3_orig_f12_dock1
 M=runs/octinoxate/md/$N
 P=$M/prod_20ns
