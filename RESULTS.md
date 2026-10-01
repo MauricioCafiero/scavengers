@@ -1497,6 +1497,36 @@ is undone by desolvation, +12.90 of EGB inside a +10.14 solvation penalty, buryi
 co-folded pose leaves solvated. A single scalar dG hides that distinction, which is what the
 decomposition is for.
 
+### Contacts, computed 2026-10-02
+
+`md_contacts.py` and `md_frames.py` are part of the dynamics pipeline and were missed on all nine legs
+run 2026-10-01; they were backfilled from the trajectories on disk. The contact traces add an
+independent check on the dG ordering, because they measure something a single scalar free energy cannot:
+how much of the ligand stays in touch with the peptide, averaged over the run.
+
+| peptide | Vina p1 contacts | GNINA top contacts | better dG |
+|---|---|---|---|
+| `s3_esm2_f4` | 20.5 | **27.7** | Vina (row excluded for drift) |
+| `bg33_4` | 16.5 | **18.1** | GNINA |
+| `s2_esm2_control` | 18.8 | **22.2** | GNINA |
+| `bg33_3` | 10.9 | **14.7** | GNINA |
+
+**GNINA's pick holds more contacts than Vina's in all four pairs**, and contacts agree with the free
+energy in three of the four. The single disagreement is `s3_esm2_f4`, the row already set aside because
+all three of its legs lost their starting pose. So the two measures corroborate each other wherever the
+geometry was retained, which is the strongest internal consistency check available in this section.
+
+The traces also confirm the exclusions independently of the drift figures. `s2_esm2_control_dock1` has a
+mean ligand-peptide separation of **14.6 A** across its run -- the ligand spent 20 ns well off the
+peptide, which is why its -15.49 says nothing about the pose Vina chose. `bg33_3_dock1` at 10.9 contacts
+and 11.2 A is the loosest leg in the set, consistent with `bg33_3` being the worst-retained structure in
+the project.
+
+Mean separations for the full set, in the same order: 9.0 A (`s3_orig_f12_dock9`), 6.5 and 9.9
+(`s3_esm2_f4` p1/p6), 9.4 and 7.2 (`bg33_4` p1/p6), 14.6 and 9.4 (`s2_esm2_control` p1/p6), 11.2 and 9.6
+(`bg33_3` p1/p6). Per-leg traces are in each leg's `md_contacts.csv`, and `frames_last.pdb` plus
+`frame_medoid.pdb` give the end-of-run ensemble and its representative frame for figures.
+
 ### What cannot be read off it
 
 Any explanation that invokes the geometry of the input pose. The flip, the roll and the matched
