@@ -1,0 +1,192 @@
+Thu  1 Oct 2026 14:49:28 BST
+### row 4: bg33_3 both poses, then shuffle_control p1 if time
+
+=== bg33_3_dock1  (bg33_3 pose 1) ===
+Thu  1 Oct 2026 14:49:28 BST
+wrote runs/octinoxate/md/bg33_3_dock1/bg33_3_dock1_ligand.sdf
+  SMILES    CCCC[C@@H](CC)OC(=O)C=Cc1ccc(OC)cc1
+  reference CCCC[C@@H](CC)OC(=O)C=Cc1ccc(OC)cc1
+  match     True
+[prep-ligand] SDF passthrough -> runs/octinoxate/md/bg33_3_dock1/ligand_prepped.sdf
+[build] hetero discovery (resname | HETNAM | min dist to ligand | action):
+[build] 7384 particles, 2273 waters -> runs/octinoxate/md/bg33_3_dock1/system/system.xml, runs/octinoxate/md/bg33_3_dock1/system/complex.pdb
+✓ Initialized. View run at 
+https://modal.com/apps/mauriciocafiero/main/ap-EvIayPjHN2qTbG4Vqs4NAl
+✓ Created objects.
+├── 🔨 Created mount /Users/cafierom/python_mac/peptidebuilder/code/modal_md.py
+├── 🔨 Created mount /Users/cafierom/python_mac/openmm/src
+├── 🔨 Created function _push.
+├── 🔨 Created function _fetch.
+├── 🔨 Created function _ls.
+├── 🔨 Created function _probe.
+├── 🔨 Created function _produce.
+└── 🔨 Created function _strip.
+pushing 2.5 MB for bg33_3_dock1
+on the volume: ['complex.pdb', 'system.xml']
+Stopping app - local entrypoint completed.
+Runner terminated.
+✓ App completed. View run at 
+https://modal.com/apps/mauriciocafiero/main/ap-EvIayPjHN2qTbG4Vqs4NAl
+✓ Initialized. View run at 
+https://modal.com/apps/mauriciocafiero/main/ap-p8YfjG6TKExY6eak0QSleM
+✓ Created objects.
+├── 🔨 Created mount /Users/cafierom/python_mac/peptidebuilder/code/modal_md.py
+├── 🔨 Created mount /Users/cafierom/python_mac/openmm/src
+├── 🔨 Created function _push.
+├── 🔨 Created function _fetch.
+├── 🔨 Created function _ls.
+├── 🔨 Created function _probe.
+├── 🔨 Created function _produce.
+└── 🔨 Created function _strip.
+[run] restraining 249 protein heavy atoms
+[run] platform: CUDA
+[run] minimizing ...
+[run] equilibrating 5000 steps (restraints on) on CUDA ...
+[run] production 10000000 steps (restraints off) on CUDA ...
+[run] done. trajectory: /state/bg33_3_dock1/prod_L1/traj.dcd  final: /state/bg33_3_dock1/prod_L1/final.pdb
+dcdplugin) detected standard 32-bit DCD file of native endianness
+dcdplugin) CHARMM format DCD file (also NAMD 2.1 and later)
+{
+  "gpu": "A10G",
+  "steps": 10000000,
+  "leg": "L1",
+  "minutes": 39.0,
+  "usd": 0.72,
+  "ms_per_step": 0.2342,
+  "wrapped": {
+    "frames": 2000,
+    "atoms": 551,
+    "stride": 10
+  }
+}
+files on the volume: ['checkpoint.chk', 'energy.csv', 'final.pdb', 'traj.dcd', 'traj_wrapped.pdb', 'traj_wrapped.xtc']
+  wrote runs/octinoxate/md/bg33_3_dock1/prod_L1_modal/traj_wrapped.xtc (4.3 MB)
+  wrote runs/octinoxate/md/bg33_3_dock1/prod_L1_modal/traj_wrapped.pdb (0.0 MB)
+  wrote runs/octinoxate/md/bg33_3_dock1/prod_L1_modal/energy.csv (2.7 MB)
+
+wall 39.6 min. Next, locally:
+  ~/miniforge3/envs/openmm-md/bin/omd mmgbsa --protein runs/octinoxate/md/bg33_3_dock1/protein_fixed.pdb \
+      --ligand runs/octinoxate/md/bg33_3_dock1/ligand_prepped.sdf \
+      --traj runs/octinoxate/md/bg33_3_dock1/prod_L1_modal/traj_wrapped.xtc --topology runs/octinoxate/md/bg33_3_dock1/prod_L1_modal/traj_wrapped.pdb \
+      --out-dir runs/octinoxate/md/bg33_3_dock1/prod_L1_modal/mmgbsa --no-auto-cofactors --run
+Stopping app - local entrypoint completed.
+✓ App completed. View run at 
+https://modal.com/apps/mauriciocafiero/main/ap-p8YfjG6TKExY6eak0QSleM
+Thu  1 Oct 2026 15:32:33 BST
+/Users/cafierom/miniforge3/envs/openmm-md/lib/python3.11/site-packages/mdtraj/formats/netcdf.py:154: UserWarning: Warning: The 'netCDF4' Python package is not installed. MDTraj is using the 'scipy' implementation to read and write netCDF files,which can be significantly slower.
+For improved performance, consider installing netCDF4. See installation instructions at:
+https://unidata.github.io/netcdf4-python/#quick-install
+  warnings.warn(warning_message)
+[build] hetero discovery (resname | HETNAM | min dist to ligand | action):
+[mmgbsa] cofactor residues to re-add: 0 ([])
+[mmgbsa] solute modeller: 551 atoms
+[mmgbsa] prmtop + inpcrd -> mmgbsa/complex.prmtop (551 atoms, radii=['H(N)-modified Bondi radii (mbondi2)'])
+[mmgbsa] receptor + ligand prmtops -> mmgbsa/receptor.prmtop, mmgbsa/ligand.prmtop
+[mmgbsa] trajectory -> mmgbsa/traj.nc (551 atoms, 2000 frames)
+[mmgbsa] MMPBSA.py input -> mmgbsa/mmgbsa.in
+[mmgbsa] prmtop atoms: 551; ligand residue present: True
+[mmgbsa] MMPBSA.py done -> mmgbsa/FINAL_RESULTS_MMPBSA.dat
+Thu  1 Oct 2026 15:34:30 BST
+Traceback (most recent call last):
+  File "<stdin>", line 1, in <module>
+ModuleNotFoundError: No module named 'mdtraj'
+--- bg33_3_dock1 result ---
+DELTA TOTAL                -10.8385                2.7759              0.0621
+
+=== bg33_3_dock6  (bg33_3 pose 6) ===
+Thu  1 Oct 2026 15:34:30 BST
+wrote runs/octinoxate/md/bg33_3_dock6/bg33_3_dock6_ligand.sdf
+  SMILES    CCCC[C@@H](CC)OC(=O)C=Cc1ccc(OC)cc1
+  reference CCCC[C@@H](CC)OC(=O)C=Cc1ccc(OC)cc1
+  match     True
+[prep-ligand] SDF passthrough -> runs/octinoxate/md/bg33_3_dock6/ligand_prepped.sdf
+[build] hetero discovery (resname | HETNAM | min dist to ligand | action):
+[build] 7339 particles, 2258 waters -> runs/octinoxate/md/bg33_3_dock6/system/system.xml, runs/octinoxate/md/bg33_3_dock6/system/complex.pdb
+✓ Initialized. View run at 
+https://modal.com/apps/mauriciocafiero/main/ap-jnttJ3PjjrtlsffwRbB981
+✓ Created objects.
+├── 🔨 Created mount /Users/cafierom/python_mac/peptidebuilder/code/modal_md.py
+├── 🔨 Created mount /Users/cafierom/python_mac/openmm/src
+├── 🔨 Created function _push.
+├── 🔨 Created function _fetch.
+├── 🔨 Created function _ls.
+├── 🔨 Created function _probe.
+├── 🔨 Created function _produce.
+└── 🔨 Created function _strip.
+pushing 2.5 MB for bg33_3_dock6
+on the volume: ['complex.pdb', 'system.xml']
+Stopping app - local entrypoint completed.
+✓ App completed. View run at 
+https://modal.com/apps/mauriciocafiero/main/ap-jnttJ3PjjrtlsffwRbB981
+✓ Initialized. View run at 
+https://modal.com/apps/mauriciocafiero/main/ap-GVpHZzv5V7M6BCaLaQI603
+✓ Created objects.
+├── 🔨 Created mount /Users/cafierom/python_mac/peptidebuilder/code/modal_md.py
+├── 🔨 Created mount /Users/cafierom/python_mac/openmm/src
+├── 🔨 Created function _push.
+├── 🔨 Created function _fetch.
+├── 🔨 Created function _ls.
+├── 🔨 Created function _probe.
+├── 🔨 Created function _produce.
+└── 🔨 Created function _strip.
+[run] restraining 249 protein heavy atoms
+[run] platform: CUDA
+[run] minimizing ...
+[run] equilibrating 5000 steps (restraints on) on CUDA ...
+[run] production 10000000 steps (restraints off) on CUDA ...
+[run] done. trajectory: /state/bg33_3_dock6/prod_L1/traj.dcd  final: /state/bg33_3_dock6/prod_L1/final.pdb
+dcdplugin) detected standard 32-bit DCD file of native endianness
+dcdplugin) CHARMM format DCD file (also NAMD 2.1 and later)
+{
+  "gpu": "A10G",
+  "steps": 10000000,
+  "leg": "L1",
+  "minutes": 39.1,
+  "usd": 0.72,
+  "ms_per_step": 0.2344,
+  "wrapped": {
+    "frames": 2000,
+    "atoms": 551,
+    "stride": 10
+  }
+}
+files on the volume: ['checkpoint.chk', 'energy.csv', 'final.pdb', 'traj.dcd', 'traj_wrapped.pdb', 'traj_wrapped.xtc']
+  wrote runs/octinoxate/md/bg33_3_dock6/prod_L1_modal/traj_wrapped.xtc (4.3 MB)
+  wrote runs/octinoxate/md/bg33_3_dock6/prod_L1_modal/traj_wrapped.pdb (0.0 MB)
+  wrote runs/octinoxate/md/bg33_3_dock6/prod_L1_modal/energy.csv (2.7 MB)
+
+wall 39.9 min. Next, locally:
+  ~/miniforge3/envs/openmm-md/bin/omd mmgbsa --protein runs/octinoxate/md/bg33_3_dock6/protein_fixed.pdb \
+      --ligand runs/octinoxate/md/bg33_3_dock6/ligand_prepped.sdf \
+      --traj runs/octinoxate/md/bg33_3_dock6/prod_L1_modal/traj_wrapped.xtc --topology runs/octinoxate/md/bg33_3_dock6/prod_L1_modal/traj_wrapped.pdb \
+      --out-dir runs/octinoxate/md/bg33_3_dock6/prod_L1_modal/mmgbsa --no-auto-cofactors --run
+Stopping app - local entrypoint completed.
+✓ App completed. View run at 
+https://modal.com/apps/mauriciocafiero/main/ap-GVpHZzv5V7M6BCaLaQI603
+Thu  1 Oct 2026 16:15:35 BST
+/Users/cafierom/miniforge3/envs/openmm-md/lib/python3.11/site-packages/mdtraj/formats/netcdf.py:154: UserWarning: Warning: The 'netCDF4' Python package is not installed. MDTraj is using the 'scipy' implementation to read and write netCDF files,which can be significantly slower.
+For improved performance, consider installing netCDF4. See installation instructions at:
+https://unidata.github.io/netcdf4-python/#quick-install
+  warnings.warn(warning_message)
+[build] hetero discovery (resname | HETNAM | min dist to ligand | action):
+[mmgbsa] cofactor residues to re-add: 0 ([])
+[mmgbsa] solute modeller: 551 atoms
+[mmgbsa] prmtop + inpcrd -> mmgbsa/complex.prmtop (551 atoms, radii=['H(N)-modified Bondi radii (mbondi2)'])
+[mmgbsa] receptor + ligand prmtops -> mmgbsa/receptor.prmtop, mmgbsa/ligand.prmtop
+[mmgbsa] trajectory -> mmgbsa/traj.nc (551 atoms, 2000 frames)
+[mmgbsa] MMPBSA.py input -> mmgbsa/mmgbsa.in
+[mmgbsa] prmtop atoms: 551; ligand residue present: True
+[mmgbsa] MMPBSA.py done -> mmgbsa/FINAL_RESULTS_MMPBSA.dat
+Thu  1 Oct 2026 16:17:25 BST
+Traceback (most recent call last):
+  File "<stdin>", line 1, in <module>
+ModuleNotFoundError: No module named 'mdtraj'
+--- bg33_3_dock6 result ---
+DELTA TOTAL                -13.0906                3.1689              0.0709
+
+=== shuffle_control_dock1  (shuffle_control pose 1) ===
+Thu  1 Oct 2026 16:17:25 BST
+  past cutoff 1605 (now 1617) -- not starting shuffle_control_dock1
+
+ROW4_DONE
+Thu  1 Oct 2026 16:17:25 BST

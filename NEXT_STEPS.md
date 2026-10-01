@@ -44,7 +44,7 @@ significance, but the best random peptide is 2.5x better than the best design.
 ## What redocking already settled, and what it did not
 
 Added 2026-09-30. The six structures with dynamics have now been redocked with AutoDock Vina
-(README, [redocking](README.md#an-independent-check-on-the-pose-redocking)). Two findings bear on the
+(RESULTS, [redocking](RESULTS.md#an-independent-check-on-the-pose-redocking)). Two findings bear on the
 proposals below:
 
 * **The pocket does not specify the ligand's orientation.** 18 of 54 docked poses are turned end for
@@ -210,10 +210,10 @@ geometry and the hydrogen error cancels.
 
 All 24 existing folds were recomputed; `runs/octinoxate/boltz/strain_global.csv` holds the result.
 
-## Blocked on Modal credit: October 2026
+## Queued on Modal credit: renewed October 2026
 
-The Modal allocation is spent for September 2026 (about $4 across scoring and six 20 ns runs). When it
-renews in **October 2026**, in rough priority order:
+The September 2026 allocation was spent (about $4 across scoring and six 20 ns runs). Credit renewed
+**2026-10-01**; item 5 is the first thing drawing on it. In rough priority order:
 
 1. **More dynamics.** Six trajectories is what every conclusion in the README's dynamics section rests
    on, and it is too few: the best predictor found, mean simultaneous side-chain engagement, moved from
@@ -231,11 +231,15 @@ renews in **October 2026**, in rough priority order:
    or three survivors rather than on scoring all of them. Keep `binding_energy.py` for the folds that go
    to MD, where the decomposition is worth having beside the MM/GBSA one.
 
-3. **Dynamics on a docked pose — done for `s3_orig_f12`, 2026-09-30.** Vina's best-scoring pose was run
+3. **Dynamics on a docked pose — done for `s3_orig_f12`, 2026-09-30; superseded by item 5.** The
+   +3.55 below is measured between two runs whose ligands moved 2.51 Å and 2.78 Å before production
+   began (item 6), so it compares two relaxed positions rather than a docked pose against a predicted
+   one. Comparable drift makes this the best case in the set, not a clean one. The window series
+   survives better than the endpoint. Vina's best-scoring pose was run
    for 20 ns under an identical protocol and binds **3.55 kcal/mol worse** than the predicted pose
    (−20.79 ± 0.04 against −24.33 ± 0.08), holding about eighteen fewer contacts and loosening over the
    run where the predicted pose tightens. Both keep the ligand: no releases either way. Full account in
-   the README, [redocking](README.md#dynamics-on-a-docked-pose-the-predicted-pose-binds-better).
+   RESULTS, [redocking](RESULTS.md#dynamics-on-a-docked-pose-the-predicted-pose-binds-better).
 
    Three things that run left open. The estimate was **still moving at 20 ns** (+0.97 kcal/mol over the
    last 5 ns, 24× its standard error), so −20.79 is an upper bound and a longer run would tighten the
@@ -245,8 +249,9 @@ renews in **October 2026**, in rough priority order:
    larger than the ligand distances being compared, and the control is decisive — the predicted-pose run
    reads 6.57 Å from its own starting pose. Do not spend more effort on that measure here.
 
-4. **Run the pose GNINA picks, not the pose Vina picks.** This is the obvious follow-up and it is one
-   20 ns run. GNINA and Vina disagree about the best docked pose in **8 of 8 structures**: Vina's pick is
+4. **Run the pose GNINA picks, not the pose Vina picks.** Superseded by item 5, which widens this to
+   three structures and both scorers; the reasoning below still stands for the `s3_orig_f12` cell.
+   GNINA and Vina disagree about the best docked pose in **8 of 8 structures**: Vina's pick is
    always its own pose 1, GNINA's are poses 9, 6, 7, 6, 7, 9, 5 and 6. The pose already simulated,
    `s3_orig_f12` pose 1, is GNINA's **7th of 10** — so the experiment so far tested the pose the better
    scorer thinks is poor.
@@ -266,9 +271,217 @@ renews in **October 2026**, in rough priority order:
    at 3.49 Å and only 27° of rotation it is the mild-perturbation control that would separate how much of
    the 3.55 kcal/mol penalty is reorientation and how much is displacement.
 
-Shell 4 (`isoleucine/2`) was the plan before this and is still unstarted; it needs no Modal credit for
-design and folding, only for dynamics. Shell 1's per-fold designed-position reproduction is also still
-unmeasured, and needs per-fold shell `.xyz` copies.
+5. **Starting-pose selection: the two-scorer matrix — RUN 2026-10-01, results in
+   [RESULTS.md](RESULTS.md#the-two-scorer-pose-matrix).** Item 4 is folded into this. Five 20 ns legs on
+   Modal with MM/GBSA local. Extended the same day to `bg33_3` and `s2_esm2_control`: nine legs in all,
+   **$10.10** of GPU, 23 rows in `mmgbsa_summary.csv`. Of that, ~$0.89 went to a preempted leg that
+   restarted from zero and ~$1.30 to cubic boxes (see traps).
+
+   **This is methodology, not a result about the designs.** It asks which starting pose is worth 20 ns
+   for a peptide you already have. Which peptides are worth having is the MM/GBSA-and-retention
+   comparison in [RESULTS](RESULTS.md#what-the-pipelines-deliver-mmgbsa-and-retention), where this
+   pipeline's four designs average −18.84 kcal/mol at 84.1% retention with one release, against
+   BoltzGen's two at −15.76, 70.5% and eighteen. Nothing in this item bears on that.
+
+   Each cell measures where a given starting pose leads under 20 ns, not whether one pose geometry is
+   better than another — the geometric labels below (flip, roll) describe the inputs and do not survive
+   equilibration (item 6). **Five rows are now run, and ordered by the co-folded pose's ligand retention
+   they give a usable rule.** Where the co-folded pose holds the ligand completely, co-folding is the
+   better start; where it holds it poorly, a docked start wins, by a margin that grows as retention falls:
+
+   | peptide | retention | best route | margin over co-folding |
+   |---|---|---|---|
+   | `s3_orig_f12` | 100% | co-folded | — |
+   | `bg33_4` | 100% | co-folded | — |
+   | `s2_esm2_control` | 59.6% | GNINA p6 | **0.84** |
+   | `bg33_3` | 41% | GNINA p6 | **1.23** |
+
+   `s3_esm2_f4` is excluded: all three of its legs moved 7.7–15.1 Å before production. So is
+   `s2_esm2_control`'s Vina cell, at 12.6 Å. `s2_esm2_control`'s GNINA cell is the strongest in the set
+   on its own terms — 1.58 Å of drift, the best-held docked start anywhere here — so its −17.09 against
+   the co-folded −16.25 is attributable to the pose rather than to where it wandered.
+
+   **Working rule: dock only when the co-folded pose is poorly retained.** Four supporting cells, no
+   counterexample among legs that held their poses. Caveat: two structures each side, and the two
+   co-folded winners are also the two best binders, so retention and binding strength are not separated.
+
+   What the item does establish is about the scorers: GNINA's `CNNaffinity` ranks structures against
+   MM/GBSA at rho = −0.857, and across five rows its pick beats Vina's in four of them. It is still not
+   dependable: its one failure is on `s3_orig_f12`, the project's best binder, where its pick lands 7.56
+   kcal/mol below the pose it ranked 7th of 10 — the largest gap in the table.
+
+   The original plan, kept because the reasoning still applies to the cells:
+
+   The picks are unambiguous. Vina chooses its own pose 1 in all three structures, which is what
+   ranking by the score the poses were sorted on amounts to. GNINA's picks by `CNNaffinity` are poses
+   9, 6 and 6, and they are stable: the `score_only` and `minimize` passes agree on all three, and
+   `CNNscore` agrees except for `bg33_4` under `score_only`, where it prefers pose 7 by 0.012.
+
+   `bg33_4`'s GNINA cell is a replicate, and is run anyway — deliberately, as the matrix's one
+   reproducibility control. Measured against the predicted pose it sits 0.52 Å away by centroid, 8.0° in
+   head-to-tail direction, and 14.2° of rigid-body rotation — the same binding mode by every measure, on
+   a ligand whose long axis is 12.9 Å, so the ends move about 1.6 Å. Equilibration erases that in
+   picoseconds. The 1.301 Å symmetry-minimised RMSD that made it look like a distinct pose is barely
+   below the plain atom-indexed 1.43 Å, so no automorphism was hiding a difference either. What it
+   therefore measures is not a pose comparison but agreement between two independent paths to the same
+   geometry: `bg33_4`'s predicted pose gives −19.66 ± 0.02 kcal/mol from BoltzGen's co-folded structure
+   on Modal, and this run reaches the same pose by docking, prepares it in this repository, and runs it
+   under the matrix protocol. How far apart those two numbers land is the error bar that belongs on every
+   other cell, and nothing else in the project supplies it. It goes last, because it is the one cell
+   whose result can be anticipated.
+
+   What the six cells are, measured against each structure's predicted pose:
+
+   | run | centroid | head-to-tail | rigid rotation | what it tests |
+   |---|---|---|---|---|
+   | `s3_esm2_f4` pose 1 (Vina) | 2.48 Å | **152.2°** | 167.0° | the flip, under dynamics |
+   | `bg33_4` pose 1 (Vina) | 2.27 Å | 8.6° | 104.5° | orientation alone: a pure roll |
+   | `s3_esm2_f4` pose 6 (GNINA) | 2.20 Å | 34.2° | 149.6° | the flip's unflipped partner |
+   | `s3_orig_f12` pose 9 (GNINA) | 3.04 Å | 26.5° | 118.4° | item 4's controlled comparison |
+   | `bg33_4` pose 6 (GNINA) | 0.52 Å | 8.0° | 14.2° | replicate: protocol reproducibility |
+   | `s3_orig_f12` pose 1 (Vina) | 2.57 Å | 17.8° | 164.9° | **done**: −20.79 against −24.33 |
+
+   Run the five in that order, which is by information gained rather than by structure. The first two are
+   the ones that answer something no static measure can. `s3_esm2_f4`'s two picks are an end-for-end
+   flipped pose and an unflipped one at nearly the same displacement, which is a direct test of the
+   degeneracy GNINA could not separate statically (p = 0.283) and that redocking showed the design
+   objective is blind to. `bg33_4` pose 1 holds position and head-to-tail direction nearly fixed and
+   rolls the molecule ~105° about its own long axis, which is the cleanest available test of whether
+   orientation by itself costs binding energy.
+
+   Head-to-tail is the angle between the vectors joining the ligand's two most distant atoms (indices
+   6 and 17 of the 20 heavy atoms); it detects an end-for-end flip, which RMSD on a molecule this
+   elongated partly absorbs. Rigid rotation is the Kabsch angle after centering, which detects a roll
+   about the long axis that head-to-tail cannot see. Neither is in the bundle CSVs; both are computed
+   from `runs/octinoxate/gnina/<structure>/poses_with_reference.sdf`, whose poses share atom indexing
+   with the reference, so the comparison needs no matching.
+
+   These do not match item 4's angles for the same two poses, and the discrepancy is unresolved. Item 4
+   reports 110° and 167° of rigid-body rotation for `s3_orig_f12` poses 9 and 1 where the Kabsch
+   measure above gives 118.4° and 164.9°, and 48° and 64° of head/tail change where the two-most-distant-
+   atoms measure gives 26.5° and 17.8°. The rotation figures are close enough to be an alignment or
+   hydrogen-inclusion difference; the head/tail figures are far enough apart to be a different
+   definition, and item 4's was not recorded. Before either set is quoted outside this file, find item
+   4's definition and keep one. The displacements agree (4.08 and 4.09 Å, both the symmetry-minimised
+   RMSD in `reference.csv`), so nothing in the pose selection depends on this.
+
+   **Split execution: dynamics on Modal, MM/GBSA local.** The trajectories go to Modal — October credit
+   has renewed, and at roughly $1 per 20 ns run the four cost about what six did in September. MM/GBSA
+   runs here afterwards on the downloaded trajectories, as `s3_orig_f12_dock1` did. Two things that
+   follow from splitting it. The production leg has to come back whole, not just its summary: anything
+   expensive to recompute gets downloaded, and a ΔG with no trajectory behind it cannot be rewindowed.
+   And MMPBSA.py writes `reference.frc` plus a `_MMPBSA_*` set into the working directory, about 6 GB
+   per structure, so run each in its own scratch directory and check staged files by size rather than
+   by extension before cleaning up.
+
+   One prep trap: `bg33_4`'s inputs are split across two repositories. Its docked poses are here in
+   `runs/octinoxate/dock/bg33_4/`, but its predicted-pose MD lives in
+   `~/python_mac/boltzgen_local/md/bg33_4/` under that repository's system preparation. Holding the
+   protocol identical across the matrix means preparing it here from `dock_pose_to_sdf.py` like the
+   others, not reusing that run's system.
+
+   **Recommended first, and not yet decided: backfill windows on the two Modal baselines.** Two of the
+   three predicted-pose ΔG values have no drift estimate, because Modal runs skip the time checks:
+   `s3_orig_f12` (−24.33) and `s3_esm2_f4` (−21.08). `bg33_4` is not among them — it ran locally in
+   `boltzgen_local` and has all four, and they matter, because they show what a converged run on this
+   system looks like: **−19.18, −18.89, −19.43, −19.66**, a range of 0.77 kcal/mol over 20 ns and only
+   −0.23 over the last 5 ns.
+
+   Set that against `s3_orig_f12_dock1`: **−27.00, −24.04, −21.76, −20.79**, monotone, 6.2 kcal/mol of
+   drift over 20 ns and +0.97 in the last 5. So 20 ns is not too short for this system in general, and
+   the drift is a property of the docked starting pose rather than of the protocol — a docked pose starts
+   over-contacted and decays toward equilibrium, a co-folded pose starts at it. That makes the shape of
+   the window series a result in its own right, not just a convergence check: if the five new runs drift
+   the way `dock1` did and the one replicate does not, the drift is diagnostic of a pose that was never
+   at equilibrium.
+
+   Backfilling the two Modal baselines is feasible: their wrapped trajectories hold the solute MM/GBSA
+   needs (421 and 670 atoms) across 2000 frames over the full 20 ns, so it is MM/GBSA on frame subsets
+   of files already on disk, no new dynamics. The frame density is lower than a local run's 15,000, which
+   costs roughly 0.11 kcal/mol of standard error against `dock1`'s 0.039 — negligible beside a 3.55
+   effect. `run_windows_live.sh` does it.
+
+   **Where the rows go: six rows, one per cell.** A Modal run gets MM/GBSA on the production leg only,
+   not the four time checks, so each cell contributes a single row to
+   `runs/octinoxate/md/mmgbsa_summary.csv` and the matrix is six rows. The windowed four-row shape
+   belongs to the local runs (`orig_f12`, `s3_orig_f12_dock1`, and `bg33_4` in `boltzgen_local`), which
+   is why the existing Modal rows all read `prod_L1_modal` and stand alone. New rows take
+   `prod_L1_modal` too, since the leg names where the trajectory came from.
+
+   Structure names follow the existing `{structure}_dock{pose}` convention, giving `s3_esm2_f4_dock1`,
+   `s3_esm2_f4_dock6`, `bg33_4_dock1`, `bg33_4_dock6` and `s3_orig_f12_dock9`. The pose number is in the
+   name; which scorer picked it is not, and the table above is the only place that mapping is written
+   down. `s3_orig_f12_dock1`'s four rows were missing from the CSV and were added 2026-10-01 from its own
+   `FINAL_RESULTS_MMPBSA.dat` files; its `prod_20ns` row is the −20.7851 quoted in item 3, and it is the
+   row to compare against, not its windows.
+
+   Append each row as its run finishes rather than batching all five at the end. Nothing prevents a
+   batch — the file is flat and no code parses it — but a ΔG that exists only in a MMPBSA output
+   directory is one cleanup away from being gone, and the runs are hours apart.
+
+   Because MM/GBSA runs locally here, windows are available for any of these cells after the fact, at
+   the cost of three more MM/GBSA passes over a trajectory already on disk. They are not part of the
+   plan, but the option survives the run in a way it does not when MM/GBSA happens on Modal.
+
+   **The duplication trap.** Nothing reads `mmgbsa_summary.csv`. `make_gnina_bundle.py` names it in a
+   comment but carries the numbers in a hardcoded `REFERENCE` dict, so the CSV and that dict are two
+   hand-maintained copies of the same values and can drift silently. A new row has to be added in both
+   places, or the next GNINA bundle will be built against stale ΔG values. Worth collapsing: have
+   `make_gnina_bundle.py` read the CSV, and the problem disappears.
+
+   Also from item 3, now qualified: 20 ns converges a co-folded pose on this system but did not converge
+   the one docked pose tried, so read a drifting cell as a ranking rather than a free energy, and check
+   the window shape before quoting any of them as converged.
+
+6. **The ligand is unrestrained during equilibration, and what that means for reading item 5.** Found
+   2026-10-01 while checking the replicate. Not a bug: `openmm_md/dynamics.py:144` builds the positional
+   restraint from `protein_heavy_indices(topology)`, so the receptor is pinned and the ligand and solvent
+   relax. That is a deliberate and conventional choice, and for most of this project's dynamics it is the
+   right one — a docked pose is scored by a docking function, not by this force field, and freezing it
+   would be worse.
+
+   What it costs is the ability to attribute a result to the geometry of the input pose. Measured from
+   each system's input to its production frame 0, superposed on the peptide:
+
+   | run | peptide RMSD | ligand RMSD, input → production start |
+   |---|---|---|
+   | `bg33_4` co-folded | 0.88 Å | **1.15 Å** |
+   | `bg33_4_dock1` | 0.85 Å | 2.30 Å |
+   | `s3_orig_f12_dock1` | 1.15 Å | 2.51 Å |
+   | `s3_orig_f12` co-folded | 1.51 Å | 2.78 Å |
+   | `s3_orig_f12_dock9` | 2.12 Å | 4.24 Å |
+   | `bg33_4_dock6` | 1.26 Å | **4.82 Å** |
+   | `s3_esm2_f4` co-folded | 1.17 Å | **7.66 Å** |
+   | `s3_esm2_f4_dock1` | 1.73 Å | **11.05 Å** |
+   | `s3_esm2_f4_dock6` | 2.24 Å | **15.11 Å** |
+
+   The peptide barely moves, so this is the ligand sliding, not the receptor refolding; minimum
+   ligand–peptide distance stays near 2 Å, so nothing unbinds and no periodic image jumps.
+
+   So the matrix compares **starting points and where they lead**, which is exactly what a dock-then-MD
+   workflow does and is the practically useful question. Every cell remains a valid measurement of that.
+   What cannot be read off it is any claim of the form "the flipped pose binds better than the unflipped
+   one", because the flip does not survive to production — the geometric labels in item 5's table
+   describe the inputs, not the trajectories.
+
+   **Do not change the equilibration to fix this.** Fifteen runs on disk all ran with the ligand free,
+   and their value is being comparable to each other; a restrained leg would not belong in the same
+   table. What is worth doing is recording input → production ligand RMSD on each leg as a diagnostic.
+   It changes nothing about how a leg runs and tells you afterwards whether a cell is worth reading —
+   which is how `s2_esm2_control_dock1` at 12.57 Å came to be discounted rather than taken at face
+   value.
+
+7. **Window the trajectories already on disk. Nice to have, after other exploratory work.** One item,
+   not two: MM/GBSA over the leading 5, 10 and 15 ns of a trajectory, which is three more passes over
+   frames already here and no new dynamics. It applies to the five matrix legs and to the two Modal
+   baselines (`s3_orig_f12` at −24.33, `s3_esm2_f4` at −21.08) alike; `bg33_4`'s co-folded run already
+   has windows, and `bg33_4_dock6` was windowed on 2026-10-01 (−16.72, −16.90, −16.36, −16.53 — flat,
+   which is how we know it is a converged measurement of a *different* pose rather than one caught
+   mid-drift).
+
+   The value is that the shape survives what the endpoint does not: a series still walking away from its
+   start at 20 ns was not at equilibrium, whatever its absolute number turns out to be. Free, and it can
+   wait.
 
 ## Environment map
 
@@ -282,8 +495,52 @@ Nothing extra is installed in this repo; each external tool is called from its o
 | ESM2 / transformers | `~/python_mac/GenMaskFill/.venv`, `--genmask-venv` |
 | SMILES to 3D recipe this follows | `~/python_mac/mace/code/mace_calc.py` (`smiles_to_atoms`) |
 | AutoDock Vina + Open Babel (redocking only) | `~/python_mac/dock_assist/dock-env`, run as `dock-env/bin/python code/vina_redock.py`. Vina is the x86_64 build vendored in `dockstring`, which needs Rosetta on Apple silicon; `obabel` comes from `openbabel-wheel` in that venv, so nothing is installed system-wide |
+| **MD build / run / analyze / MM/GBSA** | `~/miniforge3/envs/openmm-md`, as `~/miniforge3/envs/openmm-md/bin/omd`. Code lives in `~/python_mac/openmm/src/openmm_md`. This **must be conda**, not a venv: `omd build` needs the OpenFF/GAFF2 stack to parameterise the ligand and `omd mmgbsa` needs AmberTools, and neither is pip-installable. Also provides the `mdtraj` used by every drift/QC calculation — `.venv` does not have it |
+| **Modal GPU dynamics** | `code/modal_md.py`, entrypoints `push` / `probe` / `produce` / `fetch`. Needs a Modal token (`~/.modal.toml`) and creates the Volume `peptidebuilder-md-state` on first use. It mounts `~/python_mac/openmm/src` from the local disk, so that repo must be present even though the GPU work is remote |
+| **BoltzGen designs (`bg33_*`)** | `~/python_mac/boltzgen_local`. Their receptors (`md/bg33_*/protein_fixed.pdb`) and co-folded baseline trajectories live there, not here — `prep_matrix_poses.sh` and `run_row4_md.sh` read them by absolute path |
+
+### Resuming on a different machine
+
+Checked 2026-10-02, when this was about to be cloned onto a laptop with a better GPU.
+
+* **Paths are now derived, not hardcoded** (fixed 2026-10-02). Every `code/run_*.sh` and
+  `prep_matrix_poses.sh` takes the repo root from its own location (`REPO=${0:A:h:h}`) and reads the
+  externals from overridable variables: `OMD_ENV` (default `~/miniforge3/envs/openmm-md`),
+  `BOLTZGEN_ROOT` (default `~/python_mac/boltzgen_local`), and `DOCK_ASSIST` (default
+  `~/python_mac/dock_assist`, used by `dock_pose_to_sdf.py` and `make_gnina_bundle.py`). The scripts
+  check `OMD_ENV` exists and exit with a readable message rather than failing midway. So a clone works
+  from wherever it lands, and only the three env vars need setting if the companion repos are not in
+  `~/python_mac/`.
+* **Full trajectories do not travel.** `.gitignore` excludes `traj.dcd` / `traj.nc`, by design. What is
+  committed is the wrapped solute trajectory (2,000 frames), the prmtops, `energy.csv` and
+  `FINAL_RESULTS_MMPBSA.dat` — enough to redo any MM/GBSA or window analysis, not enough for a warm
+  restart. The full `.dcd` files also still sit on the Modal Volume, so they can be re-fetched there.
+* **A better GPU changes the economics.** Everything so far split dynamics onto Modal because this
+  laptop has no CUDA. Measured rates for comparison: A10G ran 0.264 ms/step at 14,105 particles and
+  0.362 at 23,142; this laptop's OpenCL managed 1.44 ms/step at 5,615. If the new machine beats the
+  A10G, `omd run --platform CUDA` locally removes the $1-per-leg cost, the preemption risk, and the
+  2,000-frame stride that the Modal return path imposes.
+* **What is ready to run immediately:** `shuffle_control`, `shuffle_control_esm0` and `orig_f12` all have
+  tracked docking inputs and receptors, so their Vina p1 and GNINA top cells need no new preparation.
+  GNINA's picks for them are p8, p9 and p5 by `CNNaffinity`.
 
 ## Traps
+
+**`omd build` defaults to a cube; every baseline here is dodecahedral.** Pass
+`--box-shape dodecahedron` explicitly. The seven legs run 2026-10-01 inherited the cube default while
+six of the seven co-folded runs they are compared against were built dodecahedral — same physics and no
+effect on MM/GBSA, which strips to the solute, but ~30% more waters and about $1.30 of avoidable GPU
+across them. The waste scales with how elongated the solute is and was invisible on the compact systems:
+$0.09 a leg on `bg33_3` at 7,384 atoms, $0.41 on `s2_esm2_control`, whose solute spans 47.6 Å in one
+dimension and built to 33,057 atoms cubic against 23,142 dodecahedral. Unlike the equilibration
+restraints, switching to dodecahedral *restores* comparability with the baselines rather than breaking it,
+so it is safe to fix. Done in `prep_matrix_poses.sh`, `run_row4_md.sh` and `run_row5_md.sh`.
+
+**Modal leg progress is unobservable mid-run.** The volume's `energy.csv` is a stale early flush and the
+container prints nothing between start and finish, so there is no way to read a step count while a leg
+runs. Any "percent complete" is a guess. Cost is observable — `modal billing report --for today
+--show-resources` gives accrued spend per app — and the leg prints its own `minutes` and `usd` when it
+finishes.
 
 - **fairchem 2.22+ refuses the UMA 1.0 checkpoint** (`uma-s-1`), telling you to install
   `fairchem-core<=2.21.0`. `uma-s-1.pt` is cached in `~/.cache/fairchem` if you ever need it; the

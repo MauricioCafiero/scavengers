@@ -1,0 +1,231 @@
+Thu  1 Oct 2026 21:17:15 BST
+### row 5: s2_esm2_control, Vina p1 and GNINA p6
+
+=== s2_esm2_control_dock1  (s2_esm2_control pose 1) ===
+Thu  1 Oct 2026 21:17:15 BST
+wrote runs/octinoxate/md/s2_esm2_control_dock1/s2_esm2_control_dock1_ligand.sdf
+  SMILES    CCCC[C@H](CC)OC(=O)C=Cc1ccc(OC)cc1
+  reference CCCC[C@H](CC)OC(=O)C=Cc1ccc(OC)cc1
+  match     True
+[prep-ligand] SDF passthrough -> runs/octinoxate/md/s2_esm2_control_dock1/ligand_prepped.sdf
+[build] hetero discovery (resname | HETNAM | min dist to ligand | action):
+[build] 33057 particles, 10782 waters -> runs/octinoxate/md/s2_esm2_control_dock1/system/system.xml, runs/octinoxate/md/s2_esm2_control_dock1/system/complex.pdb
+✓ Initialized. View run at 
+https://modal.com/apps/mauriciocafiero/main/ap-PCI1QTT292UMupuxSHMuYS
+✓ Created objects.
+├── 🔨 Created mount /Users/cafierom/python_mac/peptidebuilder/code/modal_md.py
+├── 🔨 Created mount /Users/cafierom/python_mac/openmm/src
+├── 🔨 Created function _push.
+├── 🔨 Created function _fetch.
+├── 🔨 Created function _ls.
+├── 🔨 Created function _probe.
+├── 🔨 Created function _produce.
+└── 🔨 Created function _strip.
+pushing 9.6 MB for s2_esm2_control_dock1
+on the volume: ['complex.pdb', 'system.xml']
+Stopping app - local entrypoint completed.
+✓ App completed. View run at 
+https://modal.com/apps/mauriciocafiero/main/ap-PCI1QTT292UMupuxSHMuYS
+✓ Initialized. View run at 
+https://modal.com/apps/mauriciocafiero/main/ap-DlqTihq2qH3egYejgJMZ3W
+✓ Created objects.
+├── 🔨 Created mount /Users/cafierom/python_mac/peptidebuilder/code/modal_md.py
+├── 🔨 Created mount /Users/cafierom/python_mac/openmm/src
+├── 🔨 Created function _push.
+├── 🔨 Created function _fetch.
+├── 🔨 Created function _ls.
+├── 🔨 Created function _probe.
+├── 🔨 Created function _produce.
+└── 🔨 Created function _strip.
+[run] restraining 287 protein heavy atoms
+[run] platform: CUDA
+[run] minimizing ...
+[run] equilibrating 5000 steps (restraints on) on CUDA ...
+[run] production 10000000 steps (restraints off) on CUDA ...
+WARNING: Logs may not be continuous
+WARNING: Logs may not be continuous
+WARNING: Logs may not be continuous
+WARNING: Logs may not be continuous
+WARNING: Logs may not be continuous
+WARNING: Logs may not be continuous
+WARNING: Logs may not be continuous
+WARNING: Logs may not be continuous
+WARNING: Logs may not be continuous
+WARNING: Logs may not be continuous
+WARNING: Logs may not be continuous
+WARNING: Logs may not be continuous
+WARNING: Logs may not be continuous
+WARNING: Logs may not be continuous
+WARNING: Logs may not be continuous
+WARNING: Logs may not be continuous
+WARNING: Logs may not be continuous
+WARNING: Logs may not be continuous
+WARNING: Logs may not be continuous
+WARNING: Logs may not be continuous
+WARNING: Logs may not be continuous
+WARNING: Logs may not be continuous
+WARNING: Logs may not be continuous
+WARNING: Logs may not be continuous
+WARNING: Logs may not be continuous
+WARNING: Logs may not be continuous
+WARNING: Logs may not be continuous
+WARNING: Logs may not be continuous
+WARNING: Logs may not be continuous
+WARNING: Logs may not be continuous
+WARNING: Logs may not be continuous
+WARNING: Logs may not be continuous
+WARNING: Logs may not be continuous
+WARNING: Logs may not be continuous
+WARNING: Logs may not be continuous
+WARNING: Logs may not be continuous
+WARNING: Logs may not be continuous
+WARNING: Logs may not be continuous
+WARNING: Logs may not be continuous
+WARNING: Logs may not be continuous
+WARNING: Logs may not be continuous
+WARNING: Logs may not be continuous
+WARNING: Logs may not be continuous
+WARNING: Logs may not be continuous
+WARNING: Logs may not be continuous
+WARNING: Logs may not be continuous
+WARNING: Logs may not be continuous
+WARNING: Logs may not be continuous
+WARNING: Logs may not be continuous
+WARNING: Logs may not be continuous
+WARNING: Logs may not be continuous
+WARNING: Logs may not be continuous
+WARNING: Logs may not be continuous
+WARNING: Logs may not be continuous
+[run] done. trajectory: /state/s2_esm2_control_dock1/prod_L1/traj.dcd  final: /state/s2_esm2_control_dock1/prod_L1/final.pdb
+dcdplugin) detected standard 32-bit DCD file of native endianness
+dcdplugin) CHARMM format DCD file (also NAMD 2.1 and later)
+{
+  "gpu": "A10G",
+  "steps": 10000000,
+  "leg": "L1",
+  "minutes": 84.5,
+  "usd": 1.55,
+  "ms_per_step": 0.5071,
+  "wrapped": {
+    "frames": 2000,
+    "atoms": 648,
+    "stride": 10
+  }
+}
+files on the volume: ['checkpoint.chk', 'energy.csv', 'final.pdb', 'traj.dcd', 'traj_wrapped.pdb', 'traj_wrapped.xtc']
+  wrote runs/octinoxate/md/s2_esm2_control_dock1/prod_L1_modal/traj_wrapped.xtc (5.1 MB)
+  wrote runs/octinoxate/md/s2_esm2_control_dock1/prod_L1_modal/traj_wrapped.pdb (0.1 MB)
+  wrote runs/octinoxate/md/s2_esm2_control_dock1/prod_L1_modal/energy.csv (2.7 MB)
+
+wall 85.2 min. Next, locally:
+  ~/miniforge3/envs/openmm-md/bin/omd mmgbsa --protein runs/octinoxate/md/s2_esm2_control_dock1/protein_fixed.pdb \
+      --ligand runs/octinoxate/md/s2_esm2_control_dock1/ligand_prepped.sdf \
+      --traj runs/octinoxate/md/s2_esm2_control_dock1/prod_L1_modal/traj_wrapped.xtc --topology runs/octinoxate/md/s2_esm2_control_dock1/prod_L1_modal/traj_wrapped.pdb \
+      --out-dir runs/octinoxate/md/s2_esm2_control_dock1/prod_L1_modal/mmgbsa --no-auto-cofactors --run
+Stopping app - local entrypoint completed.
+✓ App completed. View run at 
+https://modal.com/apps/mauriciocafiero/main/ap-DlqTihq2qH3egYejgJMZ3W
+Thu  1 Oct 2026 22:43:42 BST
+/Users/cafierom/miniforge3/envs/openmm-md/lib/python3.11/site-packages/mdtraj/formats/netcdf.py:154: UserWarning: Warning: The 'netCDF4' Python package is not installed. MDTraj is using the 'scipy' implementation to read and write netCDF files,which can be significantly slower.
+For improved performance, consider installing netCDF4. See installation instructions at:
+https://unidata.github.io/netcdf4-python/#quick-install
+  warnings.warn(warning_message)
+[build] hetero discovery (resname | HETNAM | min dist to ligand | action):
+[mmgbsa] cofactor residues to re-add: 0 ([])
+[mmgbsa] solute modeller: 648 atoms
+[mmgbsa] prmtop + inpcrd -> mmgbsa/complex.prmtop (648 atoms, radii=['H(N)-modified Bondi radii (mbondi2)'])
+[mmgbsa] receptor + ligand prmtops -> mmgbsa/receptor.prmtop, mmgbsa/ligand.prmtop
+[mmgbsa] trajectory -> mmgbsa/traj.nc (648 atoms, 2000 frames)
+[mmgbsa] MMPBSA.py input -> mmgbsa/mmgbsa.in
+[mmgbsa] prmtop atoms: 648; ligand residue present: True
+[mmgbsa] MMPBSA.py done -> mmgbsa/FINAL_RESULTS_MMPBSA.dat
+Thu  1 Oct 2026 22:45:53 BST
+[qc] ligand RMSD input -> production start: 12.57 A
+--- s2_esm2_control_dock1 result ---
+DELTA TOTAL                -15.4897                3.2002              0.0716
+
+=== s2_esm2_control_dock6  (s2_esm2_control pose 6) ===
+Thu  1 Oct 2026 22:45:54 BST
+✓ Initialized. View run at 
+https://modal.com/apps/mauriciocafiero/main/ap-OPxhsbYzf2y03IA6GafOMP
+✓ Created objects.
+├── 🔨 Created mount /Users/cafierom/python_mac/peptidebuilder/code/modal_md.py
+├── 🔨 Created mount /Users/cafierom/python_mac/openmm/src
+├── 🔨 Created function _push.
+├── 🔨 Created function _fetch.
+├── 🔨 Created function _ls.
+├── 🔨 Created function _probe.
+├── 🔨 Created function _produce.
+└── 🔨 Created function _strip.
+pushing 6.9 MB for s2_esm2_control_dock6
+on the volume: ['complex.pdb', 'system.xml']
+Stopping app - local entrypoint completed.
+✓ App completed. View run at 
+https://modal.com/apps/mauriciocafiero/main/ap-OPxhsbYzf2y03IA6GafOMP
+✓ Initialized. View run at 
+https://modal.com/apps/mauriciocafiero/main/ap-dLvizTQckWEMgdDWHYYfhh
+✓ Created objects.
+├── 🔨 Created mount /Users/cafierom/python_mac/peptidebuilder/code/modal_md.py
+├── 🔨 Created mount /Users/cafierom/python_mac/openmm/src
+├── 🔨 Created function _push.
+├── 🔨 Created function _fetch.
+├── 🔨 Created function _ls.
+├── 🔨 Created function _probe.
+├── 🔨 Created function _produce.
+└── 🔨 Created function _strip.
+[run] restraining 287 protein heavy atoms
+[run] platform: CUDA
+[run] minimizing ...
+[run] equilibrating 5000 steps (restraints on) on CUDA ...
+[run] production 10000000 steps (restraints off) on CUDA ...
+[run] done. trajectory: /state/s2_esm2_control_dock6/prod_L1/traj.dcd  final: /state/s2_esm2_control_dock6/prod_L1/final.pdb
+dcdplugin) detected standard 32-bit DCD file of native endianness
+dcdplugin) CHARMM format DCD file (also NAMD 2.1 and later)
+{
+  "gpu": "A10G",
+  "steps": 10000000,
+  "leg": "L1",
+  "minutes": 60.4,
+  "usd": 1.11,
+  "ms_per_step": 0.3622,
+  "wrapped": {
+    "frames": 2000,
+    "atoms": 648,
+    "stride": 10
+  }
+}
+files on the volume: ['checkpoint.chk', 'energy.csv', 'final.pdb', 'traj.dcd', 'traj_wrapped.pdb', 'traj_wrapped.xtc']
+  wrote runs/octinoxate/md/s2_esm2_control_dock6/prod_L1_modal/traj_wrapped.xtc (5.1 MB)
+  wrote runs/octinoxate/md/s2_esm2_control_dock6/prod_L1_modal/traj_wrapped.pdb (0.1 MB)
+  wrote runs/octinoxate/md/s2_esm2_control_dock6/prod_L1_modal/energy.csv (2.7 MB)
+
+wall 61.3 min. Next, locally:
+  ~/miniforge3/envs/openmm-md/bin/omd mmgbsa --protein runs/octinoxate/md/s2_esm2_control_dock6/protein_fixed.pdb \
+      --ligand runs/octinoxate/md/s2_esm2_control_dock6/ligand_prepped.sdf \
+      --traj runs/octinoxate/md/s2_esm2_control_dock6/prod_L1_modal/traj_wrapped.xtc --topology runs/octinoxate/md/s2_esm2_control_dock6/prod_L1_modal/traj_wrapped.pdb \
+      --out-dir runs/octinoxate/md/s2_esm2_control_dock6/prod_L1_modal/mmgbsa --no-auto-cofactors --run
+Stopping app - local entrypoint completed.
+✓ App completed. View run at 
+https://modal.com/apps/mauriciocafiero/main/ap-dLvizTQckWEMgdDWHYYfhh
+Thu  1 Oct 2026 23:47:23 BST
+/Users/cafierom/miniforge3/envs/openmm-md/lib/python3.11/site-packages/mdtraj/formats/netcdf.py:154: UserWarning: Warning: The 'netCDF4' Python package is not installed. MDTraj is using the 'scipy' implementation to read and write netCDF files,which can be significantly slower.
+For improved performance, consider installing netCDF4. See installation instructions at:
+https://unidata.github.io/netcdf4-python/#quick-install
+  warnings.warn(warning_message)
+[build] hetero discovery (resname | HETNAM | min dist to ligand | action):
+[mmgbsa] cofactor residues to re-add: 0 ([])
+[mmgbsa] solute modeller: 648 atoms
+[mmgbsa] prmtop + inpcrd -> mmgbsa/complex.prmtop (648 atoms, radii=['H(N)-modified Bondi radii (mbondi2)'])
+[mmgbsa] receptor + ligand prmtops -> mmgbsa/receptor.prmtop, mmgbsa/ligand.prmtop
+[mmgbsa] trajectory -> mmgbsa/traj.nc (648 atoms, 2000 frames)
+[mmgbsa] MMPBSA.py input -> mmgbsa/mmgbsa.in
+[mmgbsa] prmtop atoms: 648; ligand residue present: True
+[mmgbsa] MMPBSA.py done -> mmgbsa/FINAL_RESULTS_MMPBSA.dat
+Thu  1 Oct 2026 23:49:25 BST
+[qc] ligand RMSD input -> production start: 1.58 A
+--- s2_esm2_control_dock6 result ---
+DELTA TOTAL                -17.0937                2.5749              0.0576
+
+ROW5_DONE
+Thu  1 Oct 2026 23:49:25 BST
+./code/run_row5_md.sh:106: parse error near `)'
