@@ -392,12 +392,13 @@ these cost 45 to 60 minutes each to produce, so they are written rather than der
 away. And `figures/` exists because the folded structures are otherwise buried at
 `boltz/boltz_results_<name>/predictions/<name>/<name>_model_0.cif`, which is tedious to load twelve of.
 
-The full trajectories are not here. The large full-system files `.gitignore` keeps off git —
-`traj.dcd`, `traj_ext.dcd`, the MMPBSA `traj.nc`, the `checkpoint*.chk` — are also kept off this
-drive: they live on **iCloud Drive at `Dynamics_trajectories/peptidebuilder_POC/<leg>/<run>/`**,
-mirroring the names under `md/`, evicted locally to save space and never deleted. The committed
-`traj_wrapped.xtc`, prmtops, `energy.csv` and `FINAL_RESULTS_MMPBSA.dat` are enough to redo the
-analysis; pull a leg's folder back from iCloud only to re-window or re-score from the full trajectory.
+The large full-system trajectories are not here. The big `.dcd` files `.gitignore` keeps off git —
+`traj.dcd` and the `traj_ext.dcd` — are also kept off this drive: they live on **iCloud Drive at
+`Dynamics_trajectories/peptidebuilder_POC/<leg>/<run>/`**, mirroring the names under `md/`, evicted
+locally to save space and never deleted. Only the big `.dcd` moved; the small `traj.nc` and
+`checkpoint*.chk` stay here. The committed `traj_wrapped.xtc`, prmtops, `energy.csv` and
+`FINAL_RESULTS_MMPBSA.dat` are enough to redo the analysis; pull a leg's folder back from iCloud only
+to re-window or re-score from the full trajectory.
 
 ---
 
