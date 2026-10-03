@@ -53,12 +53,122 @@ patterns are already visible and both are developed below. Where the co-folded p
 well (`s3_orig_f12`, `bg33_4` at 100%), co-folding is the best start and the docked poses are worse.
 Where it holds poorly (`orig_f12` at 77.3%, released to the surface at 6 ns), a docked start can be far
 better — `orig_f12`'s top-AutoDock pose reaches **−22.11 at 100% retention** against the co-folded
-−13.71. The empty `shuffle_control`/`shuffle_control_esm0` docked cells and `orig_f12`'s top-GNINA cell
-are the legs still queued or running.
+−13.71. The docked cells of `shuffle_control` and `shuffle_control_esm0` — all four — are the legs in flight
+(launched 2026-10-03 from the poses Vina and GNINA selected); rows in the tables below backfill as
+they finish.
+
+### Window convergence, every leg
+
+The series behind each headline number. The 5/10/15 ns columns are leading slices of the same 20 ns
+trajectory (`run_windows_live.sh` computed them as the run passed each mark); the 20 ns column is the
+headline value. Blank cells are windows not computed; the `shuffle_control` docked rows are the legs
+still in flight. Two shapes repeat, and the body sections argue over them: docked poses often start
+over-packed and decay (`s3_orig_f12` Vina p1: −27.00 → −20.79), while four legs are still moving at
+20 ns — `s3_orig_f12_dock1` (+0.97 over the last 5 ns), `bg33_4_dock1` (+1.40), `orig_f12` GNINA p5
+(+3.47) and `shuffle_control`'s co-folded leg (+2.12) — so their endpoints are upper bounds on how
+unfavourable the pose is rather than converged values.
+
+| peptide | pose | 5 ns | 10 ns | 15 ns | 20 ns |
+|---|---|---|---|---|---|
+| `s3_orig_f12` | co-folded | −23.31 | −25.16 | −25.02 | **−24.33** |
+| | Vina p1 | −27.00 | −24.04 | −21.76 | −20.79 |
+| | GNINA p9 | −17.69 | −15.18 | −12.97 | −13.23 |
+| `s3_esm2_f4` | co-folded | −18.99 | −20.66 | −20.80 | −21.08 |
+| | Vina p1 | −23.41 | −22.67 | −22.74 | −22.42 |
+| | GNINA p6 | −14.71 | −17.50 | −18.79 | −19.55 |
+| `bg33_4` | co-folded | −19.18 | −18.89 | −19.43 | −19.66 |
+| | Vina p1 | −17.12 | −17.95 | −16.21 | −14.81 |
+| | GNINA p6 | −16.72 | −16.90 | −16.36 | −16.53 |
+| `s2_esm2_control` | co-folded | −14.60 | −15.82 | −16.33 | −16.25 |
+| | Vina p1 | −13.76 | −14.78 | −14.99 | −15.49 |
+| | GNINA p6 | −16.83 | −16.78 | −17.12 | −17.09 |
+| `shuffle_control` (null) | co-folded | −21.78 | −19.06 | −17.25 | −15.13 |
+| | Vina p1 | −24.06 | −23.13 | −18.73 | *(in flight)* |
+| | GNINA p9 | | | | *(queued)* |
+| `shuffle_control_esm0` (null) | co-folded | −11.76 | −12.18 | −14.10 | −14.32 |
+| `orig_f12` | co-folded | −21.52 | −16.86 | −14.61 | −13.71 |
+| | Vina p1 | −24.04 | −23.25 | −22.20 | −22.11 |
+| | GNINA p5 | −24.58 | −23.44 | −20.64 | −17.17 |
+| `bg33_3` | co-folded | −12.46 | −11.33 | −11.50 | −11.86 |
+| | Vina p1 | −12.64 | −11.66 | −11.43 | −10.84 |
+| | GNINA p6 | −14.44 | −14.55 | −13.64 | −13.09 |
+
+### Residue-pair contacts, every leg
+
+What the construction delivers over a trajectory, from `pair_contacts.py`: the design's non-glycine
+positions as slots, and how many pairs of slots the fold brings onto the ligand — total realised,
+of which the adjacent pairs (which chain connectivity gives for free) and the non-adjacent ones
+(which it must earn). peptidebuilder designs have 12 slots, so the denominator band is [11, 66];
+the BoltzGen designs have 11, so [10, 55], and their cells are not pooled with the others.
+
+| peptide | pose | pairs realised | adjacent | non-adjacent |
+|---|---|---|---|---|
+| `s3_orig_f12` | co-folded | **53/66** | 10/11 | **43/55** |
+| | Vina p1 | 41/66 | 6/11 | 35/55 |
+| | GNINA p9 | 24/66 | 3/11 | 21/55 |
+| `s3_esm2_f4` | co-folded | 32/66 | 6/11 | 26/55 |
+| | Vina p1 | 32/66 | 6/11 | 26/55 |
+| | GNINA p6 | 17/66 | 3/11 | 14/55 |
+| `bg33_4` | co-folded | **14/55** | 1/10 | **13/45** |
+| | Vina p1 | 9/55 | 2/10 | 7/45 |
+| | GNINA p6 | 5/55 | 0/10 | 5/45 |
+| `s2_esm2_control` | co-folded | 10/66 | 3/11 | 7/55 |
+| | Vina p1 | 5/66 | 2/11 | 3/55 |
+| | GNINA p6 | 10/66 | 3/11 | 7/55 |
+| `shuffle_control` (null) | co-folded | 18/66 | 5/11 | 13/55 |
+| | Vina p1 | *(in flight)* | | |
+| `shuffle_control_esm0` (null) | co-folded | 12/66 | 4/11 | 8/55 |
+| `orig_f12` | co-folded | 22/66 | 4/11 | 18/55 |
+| | Vina p1 | 32/66 | 6/11 | 26/55 |
+| | GNINA p5 | 30/66 | 6/11 | 24/55 |
+| `bg33_3` | co-folded | 3/55 | 1/10 | 2/45 |
+| | Vina p1 | 13/55 | 5/10 | 8/45 |
+| | GNINA p6 | 3/55 | 1/10 | 2/45 |
+
+### Residence and release, every leg
+
+Residence within 10 Å of the peptide centroid over the 20 ns run, with the release record behind it,
+from `md_contacts.py` at the common 10 ps sampling (a 1 ps run cannot be compared with a 10 ps one
+directly: `orig_f12` shows 8 released frames of 20,000 when finely sampled and 0 at this spacing).
+The `late` column is the share of released frames in the second half of the run -- 1.0 means every
+release was late, progressive loss rather than thermal flicker. In the six co-folded legs it is the
+signature that separated the designs from the nulls (see [does the design beat a shuffle of
+itself?](#does-the-design-beat-a-shuffle-of-itself)); across the docked legs it no longer sorts
+cleanly -- `orig_f12`'s GNINA p5 leg releases 21 times for 1.34 ns in total, longest episode 560 ps,
+all of it late -- so read the column against that section's caveats rather than as a classifier.
+
+| peptide | pose | residence ≤10 Å | released frames | episodes | longest episode | releases late |
+|---|---|---|---|---|---|---|
+| `s3_orig_f12` | co-folded | **100.0%** | 0 | 0 | — | — |
+| | Vina p1 | **98.7%** | 0 | 0 | — | — |
+| | GNINA p9 | 70.5% | 5 | 4 | 20 ps | 100% |
+| `s3_esm2_f4` | co-folded | **99.6%** | 0 | 0 | — | — |
+| | Vina p1 | **99.9%** | 0 | 0 | — | — |
+| | GNINA p6 | 59.6% | 1 | 1 | 10 ps | 0% |
+| `bg33_4` | co-folded | **100.0%** | 0 | 0 | — | — |
+| | Vina p1 | 59.3% | 6 | 4 | 30 ps | 100% |
+| | GNINA p6 | **97.2%** | 0 | 0 | — | — |
+| `s2_esm2_control` | co-folded | 59.6% | 1 | 1 | 10 ps | 0% |
+| | Vina p1 | **0.0%** | 5 | 5 | 10 ps | 0% |
+| | GNINA p6 | 50.3% | 0 | 0 | — | — |
+| `shuffle_control` (null) | co-folded | 75.9% | 13 | 5 | 70 ps | 100% |
+| | Vina p1 | *(in flight)* | | | | |
+| `shuffle_control_esm0` (null) | co-folded | 80.2% | 9 | 5 | 40 ps | 100% |
+| `orig_f12` | co-folded | 77.3% | 0 \* | 0 | — | — |
+| | Vina p1 | **100.0%** | 0 | 0 | — | — |
+| | GNINA p5 | 83.3% | 134 | 21 | 560 ps | 100% |
+| `bg33_3` | co-folded | 41.0% | 20 | 18 | 20 ps | 25% |
+| | Vina p1 | 25.7% | 6 | 6 | 10 ps | 67% |
+| | GNINA p6 | 77.6% | 25 | 7 | 160 ps | 96% |
+
+\* 8 release frames of 20,000 at 1 ps sampling, all isolated single frames.
 
 ## Contents
 
 - [The table to read first: MM/GBSA by starting pose](#the-table-to-read-first-mmgbsa-by-starting-pose)
+- [Window convergence, every leg](#window-convergence-every-leg)
+- [Residue-pair contacts, every leg](#residue-pair-contacts-every-leg)
+- [Residence and release, every leg](#residence-and-release-every-leg)
 
 - [Worked example: octinoxate](#worked-example-octinoxate)
 - [Second worked example: a different shell around the same ligand](#second-worked-example-a-different-shell-around-the-same-ligand)
@@ -904,18 +1014,10 @@ average and loses in the particular case.
 
 **The averages hide the real difference, and release exposes it.** On mean behaviour the null and
 `orig_f12` are the same trajectory: mean contacts 35.3 against 34.3, mean separation 8.64 against
-8.45 A, identical Rg drift 8.5->10.0, identical 2.61 A closest approach. The difference is whether the
-ligand is ever actually let go, which has to be measured at matched frame spacing or it is an artifact
-of the save interval:
-
-| structure | ΔG | residence within 10 A | released frames | episodes | longest | when | kind |
-|---|---|---|---|---|---|---|---|
-| `s3_orig_f12` | −24.33 | **100.0%** | 0 | 0 | — | — | design |
-| `s3_esm2_f4` | −21.08 | **99.6%** | 0 | 0 | — | — | design |
-| `s2_esm2_control` | −16.25 | 59.6% | 1 | 1 | 10 ps | — | design |
-| `shuffle_control` | −15.13 | 75.9% | **13** | **5** | **70 ps** | **2nd half** | **null** |
-| `shuffle_control_esm0` | −14.32 | 80.2% | **9** | **5** | **40 ps** | **2nd half** | **null** |
-| `orig_f12` | −13.71 | 77.3% | 0 | 0 | — | — | design |
+8.45 A, identical Rg drift 8.5->10.0, identical 2.61 A closest approach. The difference is whether
+the ligand is ever actually let go, which has to be measured at matched frame spacing or it is an
+artifact of the save interval; the per-leg release record for these and every other leg is in the
+residence table under [the headline comparison](#the-table-to-read-first-mmgbsa-by-starting-pose).
 
 Sampled every 1 ps, `orig_f12` shows 8 released frames; at the 10 ps spacing of the others it shows
 **zero**, because all eight were isolated single frames -- the ligand flickering past 4 A and returning.
@@ -1270,15 +1372,9 @@ change. `code/dock_pose_to_sdf.py` wrote the pose for the MD prep, and
 `protein_fixed.pdb`, same `omd` code, same timestep, dodecahedral box, 20 ns and MM/GBSA windows. 5,615
 particles, 1.44–1.59 ms/step on OpenCL, 4 h 21 m.
 
-The convergence series, each window a leading slice from t = 0, computed by
-`code/run_windows_live.sh` as the trajectory passed each mark rather than afterwards:
-
-| window | ΔG | step |
-|---|---|---|
-| 5 ns | −27.00 ± 0.05 | — |
-| 10 ns | −24.04 ± 0.05 | +2.96 |
-| 15 ns | −21.76 ± 0.05 | +2.28 |
-| 20 ns | **−20.79 ± 0.04** | +0.97 |
+The convergence series (−27.00, −24.04, −21.76, −20.79 over 5-20 ns, steps +2.96, +2.28, +0.97) is the
+`Vina p1` row of the window table under [the headline comparison](#the-table-to-read-first-mmgbsa-by-starting-pose),
+computed by `code/run_windows_live.sh` as the trajectory passed each mark rather than afterwards.
 
 **Still moving at 20 ns**, monotonically less negative, +6.22 kcal/mol across the range. The steps
 decelerate but the last is still 24× the standard error, so −20.79 is an upper bound on how
@@ -1583,13 +1679,10 @@ but still a comparison of two relaxed positions.
 
 ### The window series is the more robust signal
 
-The one structure with convergence windows on both a predicted and a docked pose separates them cleanly,
-and does so without depending on either absolute value:
-
-| | 5 ns | 10 ns | 15 ns | 20 ns | drift over last 5 ns |
-|---|---|---|---|---|---|
-| `bg33_4` predicted (co-folded) | -19.18 | -18.89 | -19.43 | -19.66 | **-0.23** |
-| `s3_orig_f12_dock1` (docked) | -27.00 | -24.04 | -21.76 | -20.79 | **+0.97** |
+The one structure with convergence windows on both a predicted and a docked pose separates them
+cleanly, and does so without depending on either absolute value -- the rows are `bg33_4` (co-folded:
+−19.18, −18.89, −19.43, −19.66, last-5-ns drift **−0.23**) and `s3_orig_f12` Vina p1 (+0.97) in the
+window table under [the headline comparison](#the-table-to-read-first-mmgbsa-by-starting-pose).
 
 A co-folded pose converges on this system at 20 ns, within 0.77 kcal/mol across the whole series. The
 docked pose drifts 6.2 kcal/mol monotonically and is still moving when the run stops. So 20 ns is not too
