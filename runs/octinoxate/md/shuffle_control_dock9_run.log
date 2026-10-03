@@ -1,0 +1,77 @@
+Sat  3 Oct 2026 19:32:13 BST
+### shuffle_control_dock9: 20 ns on pose 9 of shuffle_control (box=dodecahedron)
+--- building shuffle_control_dock9 (dodecahedron) ---
+wrote runs/octinoxate/md/shuffle_control_dock9/shuffle_control_dock9_ligand.sdf
+  SMILES    CCCC[C@H](CC)OC(=O)C=Cc1ccc(OC)cc1
+  reference CCCC[C@H](CC)OC(=O)C=Cc1ccc(OC)cc1
+  match     True
+[prep-ligand] SDF passthrough -> runs/octinoxate/md/shuffle_control_dock9/ligand_prepped.sdf
+[build] hetero discovery (resname | HETNAM | min dist to ligand | action):
+[build] 7339 particles, 2302 waters -> runs/octinoxate/md/shuffle_control_dock9/system/system.xml, runs/octinoxate/md/shuffle_control_dock9/system/complex.pdb
+BUILD_EXIT=0
+particles: 7339
+CRYST1   48.206   48.206   48.206  60.00  60.00  90.00 P 1           1 
+Sat  3 Oct 2026 19:32:45 BST
+[run] restraining 203 protein heavy atoms
+[run] OpenCL(single) can't run restrained equilibration; equilibrating on CPU, producing on OpenCL
+[run] minimizing ...
+[run] equilibrating 5000 steps (restraints on) on CPU ...
+[run] production 10000000 steps (restraints off) on OpenCL ...
+[run] done. trajectory: runs/octinoxate/md/shuffle_control_dock9/prod_20ns/traj.dcd  final: runs/octinoxate/md/shuffle_control_dock9/prod_20ns/final.pdb
+RUN_EXIT=0
+Sun  4 Oct 2026 00:20:52 BST
+[analyze] wrote wrapped/centered solute trajectory (421 atoms, 20000 frames) -> runs/octinoxate/md/shuffle_control_dock9/prod_20ns/traj_wrapped.xtc (+ traj_wrapped.pdb topology)
+[analyze] 20000 frames. protein CA RMSD 0.528 nm, ligand RMSD 3.873 nm (vs frame 0). -> runs/octinoxate/md/shuffle_control_dock9/prod_20ns/analysis.png
+dcdplugin) detected standard 32-bit DCD file of native endianness
+dcdplugin) CHARMM format DCD file (also NAMD 2.1 and later)
+ANALYZE_EXIT=0
+/Users/cafierom/miniforge3/envs/openmm-md/lib/python3.11/site-packages/mdtraj/formats/netcdf.py:154: UserWarning: Warning: The 'netCDF4' Python package is not installed. MDTraj is using the 'scipy' implementation to read and write netCDF files,which can be significantly slower.
+For improved performance, consider installing netCDF4. See installation instructions at:
+https://unidata.github.io/netcdf4-python/#quick-install
+  warnings.warn(warning_message)
+[build] hetero discovery (resname | HETNAM | min dist to ligand | action):
+[mmgbsa] cofactor residues to re-add: 0 ([])
+[mmgbsa] solute modeller: 421 atoms
+[mmgbsa] prmtop + inpcrd -> mmgbsa/complex.prmtop (421 atoms, radii=['H(N)-modified Bondi radii (mbondi2)'])
+[mmgbsa] receptor + ligand prmtops -> mmgbsa/receptor.prmtop, mmgbsa/ligand.prmtop
+[mmgbsa] trajectory -> mmgbsa/traj.nc (421 atoms, 20000 frames)
+[mmgbsa] MMPBSA.py input -> mmgbsa/mmgbsa.in
+[mmgbsa] prmtop atoms: 421; ligand residue present: True
+[mmgbsa] MMPBSA.py done -> mmgbsa/FINAL_RESULTS_MMPBSA.dat
+MMGBSA_EXIT=0
+Sun  4 Oct 2026 00:26:01 BST
+
+=== runs/octinoxate/md/shuffle_control_dock9/prod_20ns
+20000 frames, 203 peptide / 20 ligand heavy atoms
+     ns  contacts   sep A  pep Rg
+    2.0      62.9    6.03    8.53
+    4.0      50.6    6.50    8.60
+    6.0      13.1   11.13    8.34
+    8.0      26.4   10.95    8.46
+   10.0      33.1    9.06    8.20
+   12.0      28.5    8.73    8.11
+   14.0      17.5   10.29    8.20
+   16.0       0.7   22.11    8.49
+   18.0       0.0   23.63    8.40
+   20.0       1.6   21.33    8.59
+whole run: contacts 62.9 -> 1.6 (mean 23.4), separation 6.03 -> 21.33 A (max 33.06), closest heavy-atom approach 2.53 A
+  residence within 10 A: 46.4% of the run
+  release (at 10.0 ps spacing): 533 frames (26.65%) in 10 episodes, longest 4450.0 ps, 5.33 ns detached, 99% of it in the second half
+
+wrote runs/octinoxate/md/shuffle_control_dock9/md_contacts.csv
+
+=== runs/octinoxate/md/shuffle_control_dock9/prod_20ns
+  20000 frames total; window 18.0-20.0 ns
+  runs/octinoxate/md/shuffle_control_dock9/prod_20ns/frames_last.pdb  (10 models)
+  runs/octinoxate/md/shuffle_control_dock9/prod_20ns/frame_medoid.pdb  (frame at 18.74 ns, 1.14 A from the window mean; window spread 1.62 A)
+
+in PyMOL, for the ensemble:
+  load frames_last.pdb, ens
+  set all_states, on
+  hide everything; show cartoon, polymer; show sticks, not polymer
+  color grey70, polymer; color red, not polymer
+
+or for a single clean frame:
+  load frame_medoid.pdb, best
+DONE shuffle_control_dock9
+Sun  4 Oct 2026 00:26:05 BST
