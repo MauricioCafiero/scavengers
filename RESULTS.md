@@ -3,6 +3,10 @@
 Everything this pipeline has actually measured, for the built-in `octinoxate` ligand. The README
 describes what the code does and how to run it; this file is the record of what came out.
 
+For the short version — the current pipeline, every peptide in both projects, the comparison that
+matters and what is still open — read [PROJECT.md](PROJECT.md) first. This file is the long-form
+evidence behind it, ordered as the work was done.
+
 One caveat governs the whole document, and it is worth reading before any number in it. The ligand is
 **C17H24O3, one CH2 short of real octinoxate** (2-ethylhexyl 4-methoxycinnamate, C18H26O3) -- its SMILES,
 perceived from the stored geometry, is `CCCC[C@H](CC)OC(=O)/C=C/c1ccc(OC)cc1`, with the ester oxygen
@@ -16,7 +20,45 @@ The two sections at the end are the ones to read first if you only read one thin
 deliver, measured as MM/GBSA free energy and ligand retention, and -- kept deliberately separate because
 it is methodology rather than a result about the designs -- which starting pose is worth simulating.
 
+## The table to read first: MM/GBSA by starting pose
+
+Every peptide taken through dynamics, with MM/GBSA ΔG (and ligand retention, residence within 10 A
+over 20 ns) for each of the three starting poses it can be run from: the **co-folded** pose the folding
+model produced, the **top-AutoDock** pose (Vina's rank-1), and the **top-GNINA** pose (best
+`CNNaffinity`, pose number given). All values are 20 ns, kcal/mol. A blank cell is a pose not yet
+simulated; the convergence windows behind each number are in the dynamics sections below.
+
+| peptide | source | co-folded ΔG (ret.) | top-AutoDock p1 ΔG (ret.) | top-GNINA ΔG (ret., pose) |
+|---|---|---|---|---|
+| `s3_orig_f12` | peptidebuilder | **−24.33** (100.0%) | −20.79 (98.7%) | −13.23 (70.5%, p9) |
+| `s3_esm2_f4` | peptidebuilder | −21.08 (99.6%) | −22.42 (99.9%) \* | −19.55 (59.6%, p6) \* |
+| `bg33_4` | boltzgen | −19.66 (100.0%) | −14.81 (59.3%) | −16.53 (97.2%, p6) |
+| `s2_esm2_control` | peptidebuilder | −16.25 (59.6%) | −15.49 (0.0%) † | −17.09 (50.3%, p6) |
+| `shuffle_control` | pb (null) | −15.13 (75.9%) | | |
+| `shuffle_control_esm0` | pb (null) | −14.32 (80.2%) | | |
+| `orig_f12` | peptidebuilder | −13.71 (77.3%) | −22.11 (100.0%) | −17.17 (83.3%, p5) |
+| `bg33_3` | boltzgen | −11.86 (41.0%) | −10.84 (25.7%) | −13.09 (77.6%, p6) |
+
+\* `s3_esm2_f4`'s docked legs and `s2_esm2_control`'s Vina-p1 leg lost their starting pose during
+equilibration (ligand drift 11.0–15.1 A for `s3_esm2_f4`, 12.6 A for `s2_esm2_control` p1), so those
+cells measure where the start wandered to over 20 ns, not the docked pose as placed. See
+[what these cells actually compare](#what-these-cells-actually-compare-starting-points-not-pose-geometries).
+
+† `s2_esm2_control` top-AutoDock drifted 12.6 A to 0.0% residence; the number is retained for
+completeness but says nothing about the pose Vina chose.
+
+**How to read it.** The co-folded column is the primary deliverable (which peptides bind); the two
+docked columns are the pose-selection question (given a peptide, which start is worth the GPU). Two
+patterns are already visible and both are developed below. Where the co-folded pose holds the ligand
+well (`s3_orig_f12`, `bg33_4` at 100%), co-folding is the best start and the docked poses are worse.
+Where it holds poorly (`orig_f12` at 77.3%, released to the surface at 6 ns), a docked start can be far
+better — `orig_f12`'s top-AutoDock pose reaches **−22.11 at 100% retention** against the co-folded
+−13.71. The empty `shuffle_control`/`shuffle_control_esm0` docked cells and `orig_f12`'s top-GNINA cell
+are the legs still queued or running.
+
 ## Contents
+
+- [The table to read first: MM/GBSA by starting pose](#the-table-to-read-first-mmgbsa-by-starting-pose)
 
 - [Worked example: octinoxate](#worked-example-octinoxate)
 - [Second worked example: a different shell around the same ligand](#second-worked-example-a-different-shell-around-the-same-ligand)

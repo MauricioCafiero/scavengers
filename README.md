@@ -12,6 +12,12 @@ being discovered to be wrong after an expensive folding calculation.
 The result is a sequence with the right number of spacer residues in the right places, which can then
 be co-folded with the ligand, and the fold checked against what was asked for.
 
+**Start with [PROJECT.md](PROJECT.md)** if you want the state of the project rather than the tool: it
+is the one document that holds the pipeline as it runs now, every peptide in both this repository and
+[`../boltzgen_local`](../boltzgen_local), the MM/GBSA and retention comparison between them, and what
+is still open. This README is the tool — install it, run it, what each file does, what the metrics
+mean, and where it goes wrong.
+
 ---
 
 ## Contents
