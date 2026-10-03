@@ -499,6 +499,16 @@ and `results_*/gnina_scores.csv`. `uma_logs/` and `logs/` are split by whether U
 UMA log is the only record of how an energy was arrived at and regenerating one means re-running the
 hours that produced it.
 
+**Full trajectories are off this drive, on iCloud.** The large full-system trajectory files — every
+`traj.dcd`, `traj_ext.dcd`, the MMPBSA `traj.nc` intermediates and the `checkpoint*.chk` (13 GB, each
+hours of GPU) — were moved to **iCloud Drive at `Dynamics_trajectories/peptidebuilder_POC/`**, in
+subfolders mirroring the run names here (e.g. `peptidebuilder_POC/orig_f12_dock5/prod_20ns/traj.dcd`),
+then evicted locally to free space. They are never in git (`.gitignore` excludes them) and were never
+deleted. What stays in the repo is enough to redo any analysis without them: the wrapped solute
+trajectory (`traj_wrapped.xtc`), the prmtops, `energy.csv`, `FINAL_RESULTS_MMPBSA.dat` and the frame
+PDBs. To re-run MM/GBSA or re-window a leg from the full trajectory, pull its folder back from iCloud
+first (in Finder, or `brctl download`).
+
 ### Why this file did not exist until now
 
 Worth recording, because the cause will recur. Every document above was written for the *next
