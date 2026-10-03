@@ -481,8 +481,41 @@ The September 2026 allocation was spent (about $4 across scoring and six 20 ns r
    were renamed `win_Nns` → `first_Nns` to match the convention `orig_f12` and `s3_orig_f12_dock1` use.
 
    The value is that the shape survives what the endpoint does not: a series still walking away from its
-   start at 20 ns was not at equilibrium, whatever its absolute number turns out to be. Free, and it can
-   wait.
+   start at 20 ns was not at equilibrium, whatever its absolute number turns out to be. No GPU and no new
+   dynamics -- a few minutes of local CPU per window on the strided trajectories -- so it can wait, but
+   it should happen before any matrix cell is quoted.
+
+8. **The first MM/GBSA replicate. Not now -- after more data points.** Added 2026-10-02, and recorded
+   here so the reason survives: nothing in this project has ever been run twice from the same input, so
+   there is no run-to-run error bar on any MM/GBSA number. Every comparison rests on single legs and the
+   differences being read are 3 to 4 kcal/mol -- four designs averaging −18.84 against BoltzGen's two at
+   −15.76 and the two nulls at −14.73. The only two near-identical starting points ever run, `bg33_4`
+   co-folded and `bg33_4_dock6` at 0.52 Å apart, ended **3.13 kcal/mol** apart, which bounds how finely
+   two *poses* can be told apart by one leg each but says nothing about protocol noise, because those two
+   genuinely relaxed into different basins (1.15 Å against 4.82 Å of pre-production drift). MM/GBSA's own
+   standard errors, 0.04 to 0.10, measure frames inside one trajectory and are not uncertainty on a
+   comparison.
+
+   The legs available now are better spent on new structures, which is why this waits. When it runs, run
+   it on **`s3_orig_f12`** -- the structure every headline number is anchored to, and the cheapest
+   replicate available:
+
+   ```sh
+   modal run code/modal_md.py::ls      --structure s3_orig_f12   # confirm the Volume still has it
+   modal run code/modal_md.py::produce --structure s3_orig_f12 --leg L2
+   ```
+
+   `_produce` reuses the `system.xml` and `complex.pdb` already on the Volume, so there is no `omd
+   build`: box, water count and the 5,615 particles are identical to the original leg, which removes the
+   one thing that would otherwise differ between them. `dynamics.py` passes no seed to
+   `LangevinMiddleIntegrator` or to `setVelocitiesToTemperature`, so velocities and the Langevin stream
+   are independent and the result is a genuine repeat rather than a rerun. About $0.68 and an hour, then
+   MM/GBSA locally as with any Modal leg; the row goes in `mmgbsa_summary.csv` as `prod_L2_modal`.
+
+   What it decides: whether a 3 kcal/mol pipeline difference is a result or a single-leg artifact. Within
+   about 1 kcal/mol of −24.33 and the comparisons already written stand; 3 or more and they have to be
+   restated as what one leg each showed.
+
 
 ## Environment map
 

@@ -31,14 +31,48 @@ OMD_ENV=${OMD_ENV:-$HOME/miniforge3/envs/openmm-md}   # override if the conda en
 OMD=$OMD_ENV/bin/omd
 PY=$OMD_ENV/bin/python
 ROOT=$REPO
-N=s3_orig_f12_dock1
+# Parameters, env-overridable. Defaults reproduce the original s3_orig_f12 pose-1 behaviour, so an
+# unparameterised call is unchanged. STRUCT is the cofolded structure whose docked pose this is; POSE
+# is the 1-based pose rank dock_pose_to_sdf.py pulls from runs/<sys>/dock/<STRUCT>/. BOX defaults to
+# dodecahedron now -- the co-folded baselines are dodecahedral and omd build defaults to cube, so an
+# explicit shape is the one thing that must not be left to the default (CLAUDE.md). Box shape does not
+# affect MM/GBSA, which strips to the solute, so a dodecahedral docked leg stays comparable to a
+# cubic cofolded one.
+STRUCT=${STRUCT:-s3_orig_f12}
+POSE=${POSE:-1}
+SYSNAME=${SYSNAME:-octinoxate}
+BOX=${BOX:-dodecahedron}
+BUILD_ONLY=${BUILD_ONLY:-0}   # stop after the build, to read the particle count before the 20 ns
+N=${STRUCT}_dock${POSE}
 M=runs/octinoxate/md/$N
+SRC=runs/octinoxate/md/$STRUCT   # the cofolded leg: supplies the already-prepped, frame-matched receptor
 P=$M/prod_20ns
-STEPS=10000000            # 20 ns at 2 fs
+STEPS=${STEPS:-10000000}         # 20 ns at 2 fs
 
 caffeinate -w $$ &        # dies with this script; holds off idle sleep for the whole run
 date
-echo "### $N: 20 ns on the docked pose"
+echo "### $N: 20 ns on pose $POSE of $STRUCT (box=$BOX)"
+mkdir -p $M
+
+# Build stage. Docked systems are not prebuilt, unlike the cofolded ones. Guarded by system.xml so a
+# resume skips it. The receptor is copied from the cofolded leg rather than re-prepped: it is the same
+# peptide, in the same frame the poses were docked into, so re-prepping could only drift it.
+if [[ ! -f $M/system/system.xml ]]; then
+    echo "--- building $N ($BOX) ---"
+    [[ -f $M/protein_fixed.pdb ]] || cp $SRC/protein_fixed.pdb $M/protein_fixed.pdb
+    [[ -f $M/${N}_ligand.sdf ]] || \
+        $PY $ROOT/code/dock_pose_to_sdf.py $STRUCT --pose $POSE --system $SYSNAME \
+            --out $M/${N}_ligand.sdf
+    [[ -f $M/ligand_prepped.sdf ]] || \
+        $OMD prep-ligand --sdf $M/${N}_ligand.sdf --out $M/ligand_prepped.sdf
+    $OMD build --protein $M/protein_fixed.pdb --ligand $M/ligand_prepped.sdf \
+               --out-dir $M/system --no-auto-cofactors --box-shape $BOX
+    echo "BUILD_EXIT=$?"
+    grep -c "^ATOM\|^HETATM" $M/system/complex.pdb | xargs echo "particles:"
+    grep -m1 "^CRYST1" $M/system/complex.pdb
+    date
+fi
+[[ $BUILD_ONLY == 1 ]] && { echo "BUILD_ONLY set, stopping after build"; exit 0; }
 
 if [[ ! -f $P/traj.dcd ]]; then
     $OMD run --system $M/system/system.xml --topology $M/system/complex.pdb \
