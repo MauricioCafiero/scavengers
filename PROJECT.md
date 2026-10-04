@@ -211,18 +211,21 @@ to spend GPU time.
 | `shuffle_control_esm0` | peptidebuilder (null) | −14.32 | 80.2% | 5 | −4.5 | 4.50 | 3.90 Å |
 | `orig_f12` | peptidebuilder | −13.71 | 77.3% | 0 | −6.0 | 4.04 | 5.52 Å |
 | `bg33_3` | boltzgen | **−11.86** | **41.0%** | **18** | −4.2 | 4.20 | 4.47 Å |
+| `bg33_2` | boltzgen | −8.02 | 50.9% | 9 | — | — | — |
 
 | group | n | mean ΔG | best | worst | mean retention | releases |
 |---|---|---|---|---|---|---|
 | **peptidebuilder (designs)** | 4 | **−18.84** | **−24.33** | −13.71 | **84.1%** | **1** |
-| boltzgen | 2 | −15.76 | −19.66 | −11.86 | 70.5% | 18 |
+| boltzgen | 3 | −13.18 | −19.66 | −8.02 | 64.0% | 27 |
 | peptidebuilder (nulls) | 2 | −14.73 | −15.13 | −14.32 | 78.1% | 10 |
 
 **The designs from this pipeline come out ahead on every measure available**: best binder by 4.67
-kcal/mol, better mean free energy, higher mean retention, one release episode against eighteen. The
-worst structure in either project on energy *and* retention simultaneously is a BoltzGen design.
+kcal/mol, better mean free energy, higher mean retention, one release episode against twenty-seven.
+The worst retention in either project is still a BoltzGen design (`bg33_3`, 41.0%), while the worst
+energy is now `bg33_2` (−8.02), which bound well for 15 ns and then lost the ligand entirely —
+99% of its detached time is in the second half and the final 5 ns is fully released.
 
-Three qualifications, none of which changes the ordering. n is 4 against 2, so nothing here
+Three qualifications, none of which changes the ordering. n is 4 against 3, so little here
 characterises BoltzGen as a method. Both BoltzGen structures carry the **R** ligand where all four
 peptidebuilder designs carry **S**, so pipeline and configuration are confounded —
 `shuffle_control_esm0` is the only peptidebuilder structure that came out R and is the one available
@@ -299,7 +302,9 @@ In descending order of how much weight each can carry.
    read −25.37, −21.52, −16.86, −14.61, −13.71 at 40 ps through 20 ns: successive changes halving,
    every window tight, every short one too negative, because they are all still measuring the
    predicted pose rather than the ensemble. Replicated on `bg33_3` (2.7 kcal/mol of drift) and
-   `s3_orig_f12_dock1` (+6.22, still moving at 20 ns).
+   `s3_orig_f12_dock1` (+6.22, still moving at 20 ns), and a third shape on `bg33_2`: its windows
+   read −11.18/−11.32/−10.70 against a whole-run −8.02, part drift and part a full release in the
+   final 5 ns.
 2. **The designed arrangement is worth 9.2 kcal/mol against its own shuffle**, single-variable.
 3. **A co-folded pose converges where a docked pose drifts.** `bg33_4` predicted: −19.18, −18.89,
    −19.43, −19.66 across the series, 0.77 kcal/mol total. `s3_orig_f12_dock1` docked: −27.00 →

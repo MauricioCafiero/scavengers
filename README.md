@@ -413,13 +413,14 @@ how to install it, what each file is for, what the metrics mean, and where it go
 
 Shortest useful summary, with the detail and the caveats in RESULTS.md:
 
-* **The designs from this pipeline are the best binders measured here.** Across eight structures with
+* **The designs from this pipeline are the best binders measured here.** Across nine structures with
   20 ns of dynamics and MM/GBSA, the four peptidebuilder designs average **-18.84 kcal/mol** with 84.1%
-  mean ligand retention and one release episode between them; the two BoltzGen structures average
-  **-15.76** with 70.5% retention and eighteen releases. The best design, `s3_orig_f12` at **-24.33**,
-  leads the best BoltzGen structure by 4.67 kcal/mol, and the worst structure on both energy and
-  retention is BoltzGen's `bg33_3`. n is 4 against 2 and the two pipelines' ligands differ in
-  configuration, so this characterises these structures rather than the methods.
+  mean ligand retention and one release episode between them; the three BoltzGen structures average
+  **-13.18** with 64.0% retention and twenty-seven releases. The best design, `s3_orig_f12` at **-24.33**,
+  leads the best BoltzGen structure by 4.67 kcal/mol; the worst retention is BoltzGen's `bg33_3` and
+  the worst energy is BoltzGen's `bg33_2` (-8.02, bound well for 15 ns then fully released). n is 4 against 3
+  and the two pipelines' ligands differ in configuration, so this characterises these structures
+  rather than the methods.
 * **A design does not reliably beat a shuffle of itself.** The nulls average -14.73, but
   `shuffle_control` at -15.13 outscores the design `orig_f12` at -13.71. This is the sharpest standing
   criticism of the design method.

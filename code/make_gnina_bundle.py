@@ -64,6 +64,7 @@ REFERENCE = {
                                  gnina_p9_dg=-14.76, gnina_p9_residence=90.5, gnina_p9_releases=8),
     "orig_f12":             dict(dg=-13.71, dg_err=0.04, residence=77.3,  releases=0,  source="peptidebuilder"),
     "bg33_3":               dict(dg=-11.86, dg_err=0.02, residence=41.0,  releases=18, source="boltzgen"),
+    "bg33_2":               dict(dg=-8.02,  dg_err=0.04, residence=50.9,  releases=9,  source="boltzgen"),
 }
 
 

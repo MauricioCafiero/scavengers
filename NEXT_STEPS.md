@@ -446,6 +446,7 @@ The September 2026 allocation was spent (about $4 across scoring and six 20 ns r
    | run | peptide RMSD | ligand RMSD, input → production start |
    |---|---|---|
    | `bg33_4` co-folded | 0.88 Å | **1.15 Å** |
+   | `bg33_2` co-folded | 0.82 Å | 1.68 Å |
    | `bg33_4_dock1` | 0.85 Å | 2.30 Å |
    | `s3_orig_f12_dock1` | 1.15 Å | 2.51 Å |
    | `s3_orig_f12` co-folded | 1.51 Å | 2.78 Å |
