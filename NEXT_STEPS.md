@@ -295,13 +295,22 @@ The September 2026 allocation was spent (about $4 across scoring and six 20 ns r
    | `bg33_4` | 100% | co-folded | — |
    | `s2_esm2_control` | 59.6% | GNINA p6 | **0.84** |
    | `bg33_3` | 41% | GNINA p6 | **1.23** |
+   | `bg33_1` (racc) | 14.5% | GNINA p2 | **1.24** |
+
+   `bg33_1`'s cells ran on the Reading ARC (free) rather than Modal, 2026-10-04: the co-folded start
+   reads −11.31 with the project's worst residence (14.5%), and GNINA's pick (pose 2, `CNNaffinity`
+   5.40 — the max in all three passes, `minimizedAffinity` −3.65 the argmin) reads **−12.55 ± 0.02 at 42.5% residence** — a fifth supporting row for the rule, and the
+   largest retention change of the set (14.5% → 42.5%). Its docked start also drifts least before
+   production (0.38 Å, table in item 6), so the cell is attributable to the pose to a degree the
+   others are not. Its window series is mildly non-convergent (−10.29 → −11.58 → −11.79 → −12.55,
+   drifting down 2.3 over the run), so the margin could still move with a longer leg.
 
    `s3_esm2_f4` is excluded: all three of its legs moved 7.7–15.1 Å before production. So is
    `s2_esm2_control`'s Vina cell, at 12.6 Å. `s2_esm2_control`'s GNINA cell is the strongest in the set
    on its own terms — 1.58 Å of drift, the best-held docked start anywhere here — so its −17.09 against
    the co-folded −16.25 is attributable to the pose rather than to where it wandered.
 
-   **Working rule: dock only when the co-folded pose is poorly retained.** Four supporting cells, no
+   **Working rule: dock only when the co-folded pose is poorly retained.** Five supporting cells, no
    counterexample among legs that held their poses. Caveat: two structures each side, and the two
    co-folded winners are also the two best binders, so retention and binding strength are not separated.
 
@@ -445,6 +454,7 @@ The September 2026 allocation was spent (about $4 across scoring and six 20 ns r
 
    | run | peptide RMSD | ligand RMSD, input → production start |
    |---|---|---|
+   | `bg33_1_dock2` (GNINA p2, racc) | 0.08 Å | **0.38 Å** |
    | `bg33_4` co-folded | 0.88 Å | **1.15 Å** |
    | `bg33_2` co-folded | 0.82 Å | 1.68 Å |
    | `bg33_4_dock1` | 0.85 Å | 2.30 Å |

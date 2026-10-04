@@ -38,6 +38,8 @@ simulated; the convergence windows behind each number are in the dynamics sectio
 | `shuffle_control_esm0` | pb (null) | −14.32 (80.2%) | −15.50 (76.1%) | **−14.76 (90.5%, p9)** | |
 | `orig_f12` | peptidebuilder | −13.71 (77.3%) | −22.11 (100.0%) | −17.17 (83.3%, p5) | |
 | `bg33_3` | boltzgen | −11.86 (41.0%) | −10.84 (25.7%) | −13.09 (77.6%, p6) | |
+| `bg33_1` | boltzgen | −11.31 (14.5%) | | **−12.55 (42.5%, p2)** | |
+| `bg33_2` | boltzgen | −8.02 (50.9%) | | | |
 
 \* `s3_esm2_f4`'s docked legs and `s2_esm2_control`'s Vina-p1 leg lost their starting pose during
 equilibration (ligand drift 11.0–15.1 A for `s3_esm2_f4`, 12.6 A for `s2_esm2_control` p1), so those
