@@ -43,6 +43,10 @@ POSE=${POSE:-1}
 SYSNAME=${SYSNAME:-octinoxate}
 BOX=${BOX:-dodecahedron}
 BUILD_ONLY=${BUILD_ONLY:-0}   # stop after the build, to read the particle count before the 20 ns
+# Honor the documented invocation `run_dock_pose_md.sh BUILD_ONLY=1` as a positional argument too:
+# only reading the env var let a bare positional word through and the "build-only" launch ran a full
+# 20 ns (2026-10-04, two accidental runs). `set -u` is set; loop over "$@" explicitly.
+for a in "$@"; do [[ $a == BUILD_ONLY=1 ]] && BUILD_ONLY=1; done
 N=${STRUCT}_dock${POSE}
 M=runs/octinoxate/md/$N
 SRC=${SRC:-runs/octinoxate/md/$STRUCT}   # the cofolded leg: supplies the already-prepped, frame-matched receptor

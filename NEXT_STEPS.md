@@ -285,7 +285,7 @@ The September 2026 allocation was spent (about $4 across scoring and six 20 ns r
 
    Each cell measures where a given starting pose leads under 20 ns, not whether one pose geometry is
    better than another — the geometric labels below (flip, roll) describe the inputs and do not survive
-   equilibration (item 6). **Five rows are now run, and ordered by the co-folded pose's ligand retention
+   equilibration (item 6). **Six rows are now run, and ordered by the co-folded pose's ligand retention
    they give a usable rule.** Where the co-folded pose holds the ligand completely, co-folding is the
    better start; where it holds it poorly, a docked start wins, by a margin that grows as retention falls:
 
@@ -294,6 +294,7 @@ The September 2026 allocation was spent (about $4 across scoring and six 20 ns r
    | `s3_orig_f12` | 100% | co-folded | — |
    | `bg33_4` | 100% | co-folded | — |
    | `s2_esm2_control` | 59.6% | GNINA p6 | **0.84** |
+   | `bg33_2` (racc) | 50.9% | GNINA p4 | **1.30** |
    | `bg33_3` | 41% | GNINA p6 | **1.23** |
    | `bg33_1` (racc) | 14.5% | GNINA p2 | **1.24** |
 
@@ -310,9 +311,12 @@ The September 2026 allocation was spent (about $4 across scoring and six 20 ns r
    on its own terms — 1.58 Å of drift, the best-held docked start anywhere here — so its −17.09 against
    the co-folded −16.25 is attributable to the pose rather than to where it wandered.
 
-   **Working rule: dock only when the co-folded pose is poorly retained.** Five supporting cells, no
-   counterexample among legs that held their poses. Caveat: two structures each side, and the two
-   co-folded winners are also the two best binders, so retention and binding strength are not separated.
+   **Working rule: dock only when the co-folded pose is poorly retained.** Six supporting cells (bg33_2
+   joined 2026-10-04: co-fold −8.02 at 50.9% vs GNINA p4 **−10.44 ± 0.05 at 57.2%**, margin 1.30), no
+   counterexample among legs that held their poses. Caveat in force: the cells ran on two platforms
+   (racc legs are local-unstrided; Modal legs strided), run-to-run variation exceeds MM/GBSA standard
+   errors, and the three co-folded winners are also three of its best binders, so retention and binding
+   strength are not separated.
 
    What the item does establish is about the scorers: GNINA's `CNNaffinity` ranks structures against
    MM/GBSA at rho = −0.857, and across five rows its pick beats Vina's in four of them. It is still not
@@ -455,6 +459,7 @@ The September 2026 allocation was spent (about $4 across scoring and six 20 ns r
    | run | peptide RMSD | ligand RMSD, input → production start |
    |---|---|---|
    | `bg33_1_dock2` (GNINA p2, racc) | 0.08 Å | **0.38 Å** |
+   | `bg33_2_dock4` (GNINA p4, racc) | 0.54 Å | **2.30 Å** |
    | `bg33_4` co-folded | 0.88 Å | **1.15 Å** |
    | `bg33_2` co-folded | 0.82 Å | 1.68 Å |
    | `bg33_4_dock1` | 0.85 Å | 2.30 Å |

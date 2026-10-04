@@ -39,7 +39,7 @@ simulated; the convergence windows behind each number are in the dynamics sectio
 | `orig_f12` | peptidebuilder | −13.71 (77.3%) | −22.11 (100.0%) | −17.17 (83.3%, p5) | |
 | `bg33_3` | boltzgen | −11.86 (41.0%) | −10.84 (25.7%) | −13.09 (77.6%, p6) | |
 | `bg33_1` | boltzgen | −11.31 (14.5%) | | **−12.55 (42.5%, p2)** | |
-| `bg33_2` | boltzgen | −8.02 (50.9%) | | | |
+| `bg33_2` | boltzgen | −8.02 (50.9%) | | −10.44 (57.2%, p4) | |
 
 \* `s3_esm2_f4`'s docked legs and `s2_esm2_control`'s Vina-p1 leg lost their starting pose during
 equilibration (ligand drift 11.0–15.1 A for `s3_esm2_f4`, 12.6 A for `s2_esm2_control` p1), so those
@@ -67,9 +67,10 @@ The series behind each headline number. The 5/10/15 ns columns are leading slice
 trajectory (`run_windows_live.sh` computed them as the run passed each mark); the 20 ns column is the
 headline value. Blank rows are legs not run. Two shapes repeat, and the body sections argue
 over them: docked poses often start
-over-packed and decay (`s3_orig_f12` Vina p1: −27.00 → −20.79), while five legs are still moving at
+over-packed and decay (`s3_orig_f12` Vina p1: −27.00 → −20.79), while seven legs are still moving at
 20 ns — `s3_orig_f12_dock1` (+0.97 over the last 5 ns), `bg33_4_dock1` (+1.40), `orig_f12` GNINA p5
-(+3.47), `shuffle_control`'s co-folded leg (+2.12) and `shuffle_control`'s GNINA p9 (+3.58) — so
+(+3.47), `shuffle_control`'s co-folded leg (+2.12), `shuffle_control`'s GNINA p9 (+3.58), `bg33_2`'s
+co-folded leg (+2.32) and `bg33_2`'s GNINA p4 (+1.91) — so
 their endpoints are upper bounds on how
 unfavourable the pose is rather than converged values.
 
@@ -100,6 +101,10 @@ unfavourable the pose is rather than converged values.
 | `bg33_3` | co-folded | −12.46 | −11.33 | −11.50 | −11.86 |
 | | Vina p1 | −12.64 | −11.66 | −11.43 | −10.84 |
 | | GNINA p6 | −14.44 | −14.55 | −13.64 | −13.09 |
+| `bg33_2` | co-folded | −11.18 | −11.32 | −10.70 | −8.02 |
+| | GNINA p4 | −4.39 | −6.23 | −8.53 | −10.44 |
+| `bg33_1` | co-folded | −7.11 | −10.02 | −11.30 | −11.31 |
+| | GNINA p2 | −10.29 | −11.58 | −11.79 | −12.55 |
 
 ### Residue-pair contacts, every leg
 
@@ -176,8 +181,17 @@ all of it late -- so read the column against that section's caveats rather than 
 | `bg33_3` | co-folded | 41.0% | 20 | 18 | 20 ps | 25% |
 | | Vina p1 | 25.7% | 6 | 6 | 10 ps | 67% |
 | | GNINA p6 | 77.6% | 25 | 7 | 160 ps | 96% |
+| `bg33_2` | co-folded | 50.9% | 611 | 9 | 6030 ps | 99% |
+| | GNINA p4 | 57.2% | 452 | 2 | 4290 ps | 0% |
+| `bg33_1` | co-folded | 14.5% | 19 | 16 | 30 ps | 0% |
+| | GNINA p2 | 42.5% | 14 | 11 | 30 ps | 57% |
 
 \* 8 release frames of 20,000 at 1 ps sampling, all isolated single frames.
+
+The four legs the two-scorer matrix's racc campaign added (`bg33_1`/`bg33_2` co-folded and GNINA
+docked) were not run through `pair_contacts.py`, so they have no rows in the pairs table above -- the
+slot denominators are defined against that script's output. Their plain contact counts are in
+`runs/octinoxate/md/md_contacts_racc_docked.csv` and `md_contacts_racc_cofold.csv`.
 
 ### Peptide structural stability, every leg
 
