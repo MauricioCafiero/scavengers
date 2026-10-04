@@ -229,17 +229,25 @@ every 10 ps against 1 ps locally — so read `max` as an upper-bound figure.
 | `bg33_3` | co-folded | 0.6 | 1.8 | 8.7 → 8.7 |
 | | Vina p1 | 0.8 | 1.9 | 8.7 → 8.6 |
 | | GNINA p6 | 1.0 | 1.5 | 8.6 → 8.7 |
+| `bg33_2` | co-folded | 3.7 | 5.4 | 15.0 → 14.3 |
+| | GNINA p4 | 9.5 | 12.5 | 15.0 → 10.0 |
+| `bg33_1` | co-folded | 5.2 | 7.7 | 14.8 → 14.9 |
+| | GNINA p2 | 8.8 | 8.9 | 14.7 → 12.4 |
 
-No leg unravels: every Rg holds within about 1.5 A and every fold keeps its contact network, so the
-headline comparison of ΔG and residence above is not measuring decayed structures — the peptide
-always stays the peptide. The one loosening worth noting is not a docked pose: the two co-folded
+No leg unravels: every fold keeps its contact network and no Rg climbs — the peptide always stays the
+peptide — but the two racc GNINA-docked extended designs do the opposite of loosening, they compact:
+`bg33_1`'s docked start closes 14.7 → 12.4 A and `bg33_2`'s 15.0 → 10.0 A (the largest Rg change in
+the table, Cα RMSD 9.5 A — the docked pose pulls the rod into a different fold). The one loosening
+worth noting is not a docked pose: the two co-folded
 compact globules (`orig_f12`, `shuffle_control`) open by 1.3–1.5 A over their runs, while the docked
 starting points of the same peptides sit tighter and flatter (Rg change ≤ 0.5 A, final RMSD 3.7–6.5
 A). `bg33_3` barely moves at all in every starting pose (≤ 1.0 A final RMSD), which makes it the
 most rigid of these folds and is consistent with its weak, open binding (41.0% best residence). The
 two extended nulls are the same story at opposite geometry: the `*esm2*`/`esm0` variants start at
 ~15.3 A Rg and hold it flat in every pose (Rg change ≤ 0.6 A, final RMSD ≤ 2.6 A) — they are rods
-that never folded, not globules that opened.
+that never folded, not globules that opened. The bg33_1/bg33_2 docked legs are the exception that
+proves the difference: starting from a pose the fold was not made around, the extended rod folds up
+around the bound ligand.
 
 ## Contents
 
