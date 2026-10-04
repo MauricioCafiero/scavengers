@@ -516,6 +516,34 @@ The September 2026 allocation was spent (about $4 across scoring and six 20 ns r
    about 1 kcal/mol of −24.33 and the comparisons already written stand; 3 or more and they have to be
    restated as what one leg each showed.
 
+9. **Test `CNNscore` as the pose picker.** Added 2026-10-04. The switch to `CNNaffinity` was made
+   because it tracked the co-folded MM/GBSA ranking, but the newest legs undercut it: `shuffle_control`'s
+   top-affinity pose 9 (`CNNaffinity` 3.97, best of poses 1–9) bound **worst** of that peptide's three
+   starts (−11.15 at 46.4% residence, against −16.15 for Vina p1 and −15.13 co-folded, 2026-10-04), and
+   `orig_f12`'s GNINA p5 leg releases more than the nulls do (RESULTS, residence table). Two cheap ways
+   to test the other CNN head on data partly in hand:
+   - Tabulate `CNNscore` against the 20 ns ΔG of every docked leg already simulated (five structures ×
+     poses in `gnina_scores.csv` + `mmgbsa_summary.csv`) — no new compute, and it answers whether
+     `CNNscore`'s ordering is any better a predictor than `CNNaffinity`'s before any new leg is paid for.
+   - Run the one structure where the two heads disagree on their pick: `shuffle_control`, whose
+     `CNNscore` best is **pose 7** (0.460, against pose 9's 0.425) and pose 7 has never been simulated.
+     `dock_pose_to_sdf.py shuffle_control --pose 7 --system octinoxate` then the usual leg. If pose 7
+     relaxes to a better ΔG than pose 9's −11.15, the CNN heads disagree in the direction `CNNscore`
+     suggests and the picker should change; if not, `CNNaffinity` keeps the job and the failures go in
+     the "what CNNaffinity gets wrong" list.
+
+10. **A new molecule, through both pipelines.** Added 2026-10-04. Everything in this repo is built on
+    the octinoxate analogue, so the next question is transfer, and it needs both design paths on the same
+    new ligand: the peptidebuilder shell design (peptide_builder) and the BoltzGen co-folding design
+    (`~/python_mac/boltzgen_local`), on the same molecule, same target metric set as octinoxate got —
+    co-fold, dock (Vina + GNINA), dynamics on the top poses by the criterion item 9 settles. This
+    concretises the earlier "second ligand, probably without scoring" plan above: skip the UMA scoring
+    stage (it ranks backwards), spend the budget on dynamics for the two or three folds whose geometry
+    survives `check_fold.py`. The ligand choice is the one real decision: small, flexible, a couple of
+    acceptors — different enough from the ester chain that transfer is being tested, similar enough that
+    the docking box setup transfers. Everything else (dodecahedron, windows, MM/GBSA locally) follows the
+    now-fixed recipe.
+
 
 ## Environment map
 
