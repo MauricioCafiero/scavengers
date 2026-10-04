@@ -553,6 +553,17 @@ The September 2026 allocation was spent (about $4 across scoring and six 20 ns r
     the docking box setup transfers. Everything else (dodecahedron, windows, MM/GBSA locally) follows the
     now-fixed recipe.
 
+    **Ligand chosen 2026-10-04: oxybenzone** (benzophenone-3,
+    `COc1cc(C(=O)c2ccccc2)ccc1O`). The first repo hard-coded four built-in ligands — octinoxate,
+    octocrylene, oxybenzone, avobenzone — and the choice between them was made on Morgan fingerprints
+    (radius 2, 2048 bits) against the octinoxate analogue the project actually uses
+    (`CCCC[C@H](CC)OC(=O)/C=C/c1ccc(OC)cc1`): oxybenzone **0.17**, octocrylene **0.19**, avobenzone
+    **0.28**. Oxybenzone wins on the transfer logic too — no ester, no long chain, rigid and planar
+    (3 rotatable bonds) against octinoxate's flexible 2-ethylhexyl ester, one phenol donor alongside
+    the three acceptors, MW 228 against 276 — while staying small enough that the docking box and the
+    MD recipe transfer unchanged. Rigid rather than flexible, which trades half the stated criterion;
+    tested transfer is the point, so the rigidity is the feature.
+
 
 ## Environment map
 
