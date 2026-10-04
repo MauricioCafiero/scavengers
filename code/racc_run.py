@@ -13,10 +13,12 @@ Launch (from ~/remote_work/openmm, in an activated env):
     STEPS=100000 submit_gpu.sh racc_run.py 10   # smoke
 """
 import os
+import shutil
 import subprocess
 
 LEG = os.environ.get("LEG", "shuffle_control_dock7")
 WORKROOT = os.path.expanduser(os.environ.get("WORKROOT", "~/remote_work/openmm"))
+DCD_DIR = "/scratch5/gaussian/io927423/dcd"
 STEPS = os.environ.get("STEPS", "10000000")
 OMD = os.path.expanduser("~/.conda/envs/openmm-md/bin/omd")
 base = os.path.join(WORKROOT, "runs/octinoxate/md", LEG)
@@ -30,3 +32,11 @@ subprocess.run([OMD, "run",
                 "--out-dir", f"{base}/prod_20ns",
                 "--steps", STEPS,
                 "--platform", "OpenCL"], check=True)
+
+# The dcd is ~1.8 GB per leg and home NFS is quota-tight (a full run filled it and killed both
+# 2026-10-04 legs), so the trajectory moves to scratch the moment it is written. Named by leg — the
+# workspace copy is always traj.dcd — and the fetch on the Mac side reads it back from here.
+dcd = os.path.join(base, "prod_20ns", "traj.dcd")
+if os.path.exists(dcd):
+    os.makedirs(DCD_DIR, exist_ok=True)
+    shutil.move(dcd, os.path.join(DCD_DIR, f"{LEG}.dcd"))

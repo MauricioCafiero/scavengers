@@ -107,6 +107,12 @@ foreground sleep loops. Partition is `gpuscavenger`: free, preemptible, and — 
 preempted leg restarts from zero, so a long leg is not protected; check `sacct` before assuming one
 is still the run it was.
 
+**Large trajectories go to scratch the moment a run ends.** The dcd is 1.8–5 GB per leg (it carries
+every particle) and the home quota filled mid-write on 2026-10-04, killing both legs at once —
+`racc_run.py` moves the finished `traj.dcd` to `/scratch5/gaussian/io927423/dcd/<leg>.dcd` as its
+final step, and the fetch reads it from there, named by leg. Never leave a dcd in the home
+workspace longer than the run that wrote it.
+
 ## MM/GBSA housekeeping
 
 Run it from inside the leg directory: MMPBSA.py scatters `reference.frc` plus a `_MMPBSA_*` set into the
