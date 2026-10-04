@@ -15,6 +15,7 @@ Launch (from ~/remote_work/openmm, in an activated env):
 import os
 import shutil
 import subprocess
+import sys
 
 LEG = os.environ.get("LEG", "shuffle_control_dock7")
 WORKROOT = os.path.expanduser(os.environ.get("WORKROOT", "~/remote_work/openmm"))
@@ -22,6 +23,29 @@ DCD_DIR = "/scratch5/gaussian/io927423/dcd"
 STEPS = os.environ.get("STEPS", "10000000")
 OMD = os.path.expanduser("~/.conda/envs/openmm-md/bin/omd")
 base = os.path.join(WORKROOT, "runs/octinoxate/md", LEG)
+
+# Preflight, before the GPU does anything: the 2026-10-04 quota fill killed both in-flight legs 70
+# minutes into a launch, which a first-line check turns into an instant SLURM failure with no GPU
+# time billed. The particle count comes off the serialized system (seconds on CPU); the dcd carries
+# all of it, 3 float coords per particle per strided frame (stride 500).
+sysxml = open(f"{base}/system/system.xml").read()
+from openmm import XmlSerializer  # noqa: E402  -- the env's openmm, imported after the path is known
+n_particles = XmlSerializer.deserialize(sysxml).getNumParticles()
+dcd_bytes = int(n_particles * (int(STEPS) / 500 + 1) * 12 * 1.05)
+
+
+def free_gb(path):
+    return shutil.disk_usage(os.path.expanduser(path)).free / 2**30
+
+
+need_home = 2.0                     # checkpoints, energy.csv and the leg dir also write home
+need_dcd = dcd_bytes / 2**30 * 1.2  # the dcd lands on scratch; 20% headroom over projection
+if free_gb(WORKROOT) < need_home or free_gb(DCD_DIR) < need_dcd:
+    print(f"ABORTING {LEG}: projected dcd {dcd_bytes / 2**30:.1f} GB; free "
+          f"home {free_gb(WORKROOT):.1f} (need {need_home:.0f}), "
+          f"scratch {free_gb(DCD_DIR):.1f} (need {need_dcd:.1f})")
+    sys.exit(1)
+print(f"[preflight] {n_particles} particles, projected dcd {dcd_bytes / 2**30:.1f} GB, OK")
 
 # Same invocation as run_dock_pose_md.sh's dynamics stage, platform OpenCL: the conda-forge OpenMM
 # build has no CUDA platform (RACC.md), and the platform string matches the OpenCL legs everywhere
