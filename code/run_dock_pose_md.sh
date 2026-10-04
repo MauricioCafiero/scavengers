@@ -45,7 +45,9 @@ BOX=${BOX:-dodecahedron}
 BUILD_ONLY=${BUILD_ONLY:-0}   # stop after the build, to read the particle count before the 20 ns
 N=${STRUCT}_dock${POSE}
 M=runs/octinoxate/md/$N
-SRC=runs/octinoxate/md/$STRUCT   # the cofolded leg: supplies the already-prepped, frame-matched receptor
+SRC=${SRC:-runs/octinoxate/md/$STRUCT}   # the cofolded leg: supplies the already-prepped, frame-matched receptor
+                                         # boltzgen cofolds live under boltzgen_local/md/<STRUCT>; pass
+                                         # SRC=/Users/cafierom/python_mac/boltzgen_local/md/<STRUCT>
 P=$M/prod_20ns
 STEPS=${STEPS:-10000000}         # 20 ns at 2 fs
 

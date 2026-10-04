@@ -416,9 +416,10 @@ Shortest useful summary, with the detail and the caveats in RESULTS.md:
 * **The designs from this pipeline are the best binders measured here.** Across nine structures with
   20 ns of dynamics and MM/GBSA, the four peptidebuilder designs average **-18.84 kcal/mol** with 84.1%
   mean ligand retention and one release episode between them; the three BoltzGen structures average
-  **-13.18** with 64.0% retention and twenty-seven releases. The best design, `s3_orig_f12` at **-24.33**,
-  leads the best BoltzGen structure by 4.67 kcal/mol; the worst retention is BoltzGen's `bg33_3` and
-  the worst energy is BoltzGen's `bg33_2` (-8.02, bound well for 15 ns then fully released). n is 4 against 3
+  **-12.71** with 51.6% retention and forty-three releases. The best design, `s3_orig_f12` at **-24.33**,
+  leads the best BoltzGen structure by 4.67 kcal/mol; the worst retention is BoltzGen's `bg33_1`
+  (14.5% within 10 Å — but it kept ligand contact the whole run, a surface roamer) and the worst
+  energy is BoltzGen's `bg33_2` (-8.02, bound well for 15 ns then fully released). n is 4 against 4
   and the two pipelines' ligands differ in configuration, so this characterises these structures
   rather than the methods.
 * **A design does not reliably beat a shuffle of itself.** The nulls average -14.73, but

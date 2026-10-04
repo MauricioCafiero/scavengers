@@ -450,6 +450,7 @@ The September 2026 allocation was spent (about $4 across scoring and six 20 ns r
    | `bg33_4_dock1` | 0.85 Å | 2.30 Å |
    | `s3_orig_f12_dock1` | 1.15 Å | 2.51 Å |
    | `s3_orig_f12` co-folded | 1.51 Å | 2.78 Å |
+   | `bg33_1` co-folded | 0.84 Å | 3.46 Å |
    | `s3_orig_f12_dock9` | 2.12 Å | 4.24 Å |
    | `bg33_4_dock6` | 1.26 Å | **4.82 Å** |
    | `s3_esm2_f4` co-folded | 1.17 Å | **7.66 Å** |

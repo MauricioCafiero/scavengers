@@ -212,24 +212,30 @@ to spend GPU time.
 | `orig_f12` | peptidebuilder | −13.71 | 77.3% | 0 | −6.0 | 4.04 | 5.52 Å |
 | `bg33_3` | boltzgen | **−11.86** | **41.0%** | **18** | −4.2 | 4.20 | 4.47 Å |
 | `bg33_2` | boltzgen | −8.02 | 50.9% | 9 | — | — | — |
+| `bg33_1` | boltzgen | −11.31 | 14.5% | 16 | — | — | — |
 
 | group | n | mean ΔG | best | worst | mean retention | releases |
 |---|---|---|---|---|---|---|
 | **peptidebuilder (designs)** | 4 | **−18.84** | **−24.33** | −13.71 | **84.1%** | **1** |
-| boltzgen | 3 | −13.18 | −19.66 | −8.02 | 64.0% | 27 |
+| boltzgen | 4 | −12.71 | −19.66 | −8.02 | 51.6% | 43 |
 | peptidebuilder (nulls) | 2 | −14.73 | −15.13 | −14.32 | 78.1% | 10 |
 
 **The designs from this pipeline come out ahead on every measure available**: best binder by 4.67
-kcal/mol, better mean free energy, higher mean retention, one release episode against twenty-seven.
-The worst retention in either project is still a BoltzGen design (`bg33_3`, 41.0%), while the worst
-energy is now `bg33_2` (−8.02), which bound well for 15 ns and then lost the ligand entirely —
-99% of its detached time is in the second half and the final 5 ns is fully released.
+kcal/mol, better mean free energy, higher mean retention, one release episode against forty-three.
+The retention floor and the energy floor are both BoltzGen designs now: `bg33_1` holds the ligand
+in contact the whole run but its centroid sits within 10 Å only 14.5% of the time — a surface
+roamer, sliding along the peptide (separation 20.6 → 11.7 Å) rather than one that fully leaves —
+and `bg33_2` (−8.02) bound well for 15 ns and then lost the ligand entirely, 99% of its detached
+time in the second half.
 
-Three qualifications, none of which changes the ordering. n is 4 against 3, so little here
-characterises BoltzGen as a method. Both BoltzGen structures carry the **R** ligand where all four
+Three qualifications, none of which changes the ordering. n is 4 against 4 now, so sample size no
+longer favours either pipeline, though it still characterises these structures and not the
+methods. Three of the four BoltzGen structures carry the **R** ligand where all four
 peptidebuilder designs carry **S**, so pipeline and configuration are confounded —
 `shuffle_control_esm0` is the only peptidebuilder structure that came out R and is the one available
-lever on that. And `shuffle_control` at −15.13 beats the design `orig_f12` at −13.71, so a shuffle
+lever on that. CIP-read from each leg's prepared SDF (2026-10-04), including the new pair: `bg33_1`
+carries **S**, which makes it the one BoltzGen structure on the peptidebuilder configuration rather
+than a confound — and its retention (14.5%) is what a same-configuration BoltzGen fold does. And `shuffle_control` at −15.13 beats the design `orig_f12` at −13.71, so a shuffle
 of a sequence still beats a real design outright in one of four cases: "designed" is not sufficient,
 only the good designs are distinguishable from their own shuffle.
 
@@ -304,7 +310,8 @@ In descending order of how much weight each can carry.
    predicted pose rather than the ensemble. Replicated on `bg33_3` (2.7 kcal/mol of drift) and
    `s3_orig_f12_dock1` (+6.22, still moving at 20 ns), and a third shape on `bg33_2`: its windows
    read −11.18/−11.32/−10.70 against a whole-run −8.02, part drift and part a full release in the
-   final 5 ns.
+   final 5 ns. `bg33_1` reads the lesson from the other side: its 5 ns window under-reads (−7.11)
+   and the run converges upward to −11.31, dead-on the 15 ns window.
 2. **The designed arrangement is worth 9.2 kcal/mol against its own shuffle**, single-variable.
 3. **A co-folded pose converges where a docked pose drifts.** `bg33_4` predicted: −19.18, −18.89,
    −19.43, −19.66 across the series, 0.77 kcal/mol total. `s3_orig_f12_dock1` docked: −27.00 →
@@ -340,8 +347,8 @@ In descending order of how much weight each can carry.
 - **Every correlation in section 5 is n = 8 or smaller**, release episodes are (0, 0, 0, 0, 1, 5, 5,
   18) so that variable is nearly a design/null split, and one BoltzGen pair supplies both ends of the
   retention correlation.
-- **Three of eight folds contain the mirror-image ligand.** The source is **S**;
-  `shuffle_control_esm0`, `bg33_3` and `bg33_4` came out **R**, placed that way by the folding
+- **Four of nine folds contain the mirror-image ligand.** The source is **S**;
+  `shuffle_control_esm0`, `bg33_3`, `bg33_4` and (new, 2026-10-04) `bg33_2` came out **R**, placed that way by the folding
   models (SDFs verified against the CIFs to 0.0005 Å). Within-structure numbers are unaffected;
   cross-structure score comparisons mix enantiomers. Checking the other 30 folds is an RDKit pass
   over the CIFs — perceive the CIP label, not the canonical SMILES, which carries double-bond stereo
