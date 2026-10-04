@@ -28,16 +28,16 @@ model produced, the **top-AutoDock** pose (Vina's rank-1), and the **top-GNINA**
 `CNNaffinity`, pose number given). All values are 20 ns, kcal/mol. A blank cell is a pose not yet
 simulated; the convergence windows behind each number are in the dynamics sections below.
 
-| peptide | source | co-folded ΔG (ret.) | top-AutoDock p1 ΔG (ret.) | top-GNINA ΔG (ret., pose) |
-|---|---|---|---|---|
-| `s3_orig_f12` | peptidebuilder | **−24.33** (100.0%) | −20.79 (98.7%) | −13.23 (70.5%, p9) |
-| `s3_esm2_f4` | peptidebuilder | −21.08 (99.6%) | −22.42 (99.9%) \* | −19.55 (59.6%, p6) \* |
-| `bg33_4` | boltzgen | −19.66 (100.0%) | −14.81 (59.3%) | −16.53 (97.2%, p6) |
-| `s2_esm2_control` | peptidebuilder | −16.25 (59.6%) | −15.49 (0.0%) † | −17.09 (50.3%, p6) |
-| `shuffle_control` | pb (null) | −15.13 (75.9%) | −16.15 (57.8%) | −11.15 (46.4%, p9) |
-| `shuffle_control_esm0` | pb (null) | −14.32 (80.2%) | −15.50 (76.1%) | **−14.76 (90.5%, p9)** |
-| `orig_f12` | peptidebuilder | −13.71 (77.3%) | −22.11 (100.0%) | −17.17 (83.3%, p5) |
-| `bg33_3` | boltzgen | −11.86 (41.0%) | −10.84 (25.7%) | −13.09 (77.6%, p6) |
+| peptide | source | co-folded ΔG (ret.) | top-AutoDock p1 ΔG (ret.) | top-GNINA ΔG (ret., pose) | CNNscore-top ΔG (ret.) |
+|---|---|---|---|---|---|
+| `s3_orig_f12` | peptidebuilder | **−24.33** (100.0%) | −20.79 (98.7%) | −13.23 (70.5%, p9) | |
+| `s3_esm2_f4` | peptidebuilder | −21.08 (99.6%) | −22.42 (99.9%) \* | −19.55 (59.6%, p6) \* | |
+| `bg33_4` | boltzgen | −19.66 (100.0%) | −14.81 (59.3%) | −16.53 (97.2%, p6) | |
+| `s2_esm2_control` | peptidebuilder | −16.25 (59.6%) | −15.49 (0.0%) † | −17.09 (50.3%, p6) | |
+| `shuffle_control` | pb (null) | −15.13 (75.9%) | −16.15 (57.8%) | −11.15 (46.4%, p9) | −8.40 (22.4%) ‡ |
+| `shuffle_control_esm0` | pb (null) | −14.32 (80.2%) | −15.50 (76.1%) | **−14.76 (90.5%, p9)** | |
+| `orig_f12` | peptidebuilder | −13.71 (77.3%) | −22.11 (100.0%) | −17.17 (83.3%, p5) | |
+| `bg33_3` | boltzgen | −11.86 (41.0%) | −10.84 (25.7%) | −13.09 (77.6%, p6) | |
 
 \* `s3_esm2_f4`'s docked legs and `s2_esm2_control`'s Vina-p1 leg lost their starting pose during
 equilibration (ligand drift 11.0–15.1 A for `s3_esm2_f4`, 12.6 A for `s2_esm2_control` p1), so those
@@ -46,6 +46,10 @@ cells measure where the start wandered to over 20 ns, not the docked pose as pla
 
 † `s2_esm2_control` top-AutoDock drifted 12.6 A to 0.0% residence; the number is retained for
 completeness but says nothing about the pose Vina chose.
+
+‡ The CNNscore-top leg exists only for `shuffle_control` (pose 7, the one structure where the two GNINA
+heads disagree) and it is the worst cell in the table: −8.40 at 22.4% residence beats or matches nothing,
+and it loses to the same structure's affinity-top p9 on both metrics (see the CNNscore section).
 
 **How to read it.** The co-folded column is the primary deliverable (which peptides bind); the two
 docked columns are the pose-selection question (given a peptide, which start is worth the GPU). Two
@@ -84,6 +88,7 @@ unfavourable the pose is rather than converged values.
 | `shuffle_control` (null) | co-folded | −21.78 | −19.06 | −17.25 | −15.13 |
 | | Vina p1 | −24.06 | −23.13 | −18.73 | −16.15 |
 | | GNINA p9 | −20.27 | −16.39 | −14.73 | −11.15 |
+| | CNNscore p7 | −12.49 | −9.56 | −8.99 | −8.40 |
 | `shuffle_control_esm0` (null) | co-folded | −11.76 | −12.18 | −14.10 | −14.32 |
 | | Vina p1 | −18.68 | −17.58 | −16.43 | −15.50 |
 | | GNINA p9 | −15.05 | −14.56 | −14.66 | −14.76 |
@@ -119,6 +124,7 @@ the BoltzGen designs have 11, so [10, 55], and their cells are not pooled with t
 | `shuffle_control` (null) | co-folded | 18/66 | 5/11 | 13/55 |
 | | Vina p1 | 23/66 | 6/11 | 17/55 |
 | | GNINA p9 | 18/66 | 5/11 | 13/55 |
+| | CNNscore p7 | 31/66 | 5/11 | 26/55 |
 | `shuffle_control_esm0` (null) | co-folded | 12/66 | 4/11 | 8/55 |
 | | Vina p1 | 9/66 | 4/11 | 5/55 |
 | | GNINA p9 | 13/66 | 4/11 | 9/55 |
@@ -158,6 +164,7 @@ all of it late -- so read the column against that section's caveats rather than 
 | `shuffle_control` (null) | co-folded | 75.9% | 13 | 5 | 70 ps | 100% |
 | | Vina p1 | 57.8% | 59 | 19 | 200 ps | 100% |
 | | GNINA p9 | 46.4% | 533 | 10 | 4450 ps | 99% |
+| | CNNscore p7 | 22.4% | 242 | 24 | 1060 ps | 43% |
 | `shuffle_control_esm0` (null) | co-folded | 80.2% | 9 | 5 | 40 ps | 100% |
 | | Vina p1 | 76.1% | 6 | 6 | 10 ps | 100% |
 | | GNINA p9 | 90.5% | 6 | 8 | 20 ps | 0% |
@@ -196,6 +203,7 @@ every 10 ps against 1 ps locally — so read `max` as an upper-bound figure.
 | `shuffle_control` (null) | co-folded | 8.4 | 9.1 | 8.5 → 10.0 |
 | | Vina p1 | 6.5 | 9.6 | 8.7 → 8.5 |
 | | GNINA p9 | 5.3 | 6.1 | 8.5 → 8.6 |
+| | CNNscore p7 | 4.0 | 5.3 | 8.8 → 8.6 |
 | `shuffle_control_esm0` (null) | co-folded | 2.3 | 5.6 | 15.5 → 15.8 |
 | | Vina p1 | 2.2 | 4.7 | 15.5 → 15.6 |
 | | GNINA p9 | 2.4 | 6.8 | 15.7 → 15.2 |
@@ -1690,23 +1698,30 @@ is undone by desolvation, +12.90 of EGB inside a +10.14 solvation penalty, buryi
 co-folded pose leaves solvated. A single scalar dG hides that distinction, which is what the
 decomposition is for.
 
-### CNNscore has never actually been the test -- until the queued p7 leg
+### CNNscore vs CNNaffinity: the p7 leg settled it -- 2026-10-04
 
 Tabulated 2026-10-04 against all three GNINA scoring sets (`score_only`, `h_score_only`,
 `minimize`). On **7 of 8** structures, the pose that `CNNscore` ranks best of 1–9 is the same pose
 `CNNaffinity` ranks best, in all three sets -- so every docked leg run so far is *also* the CNNscore-top
 pose, which means the two selectors are indistinguishable on existing data and cannot be compared from
 it. The one robust disagreement is `shuffle_control`: pose 7 is CNNscore-top in **all three** sets
-(0.460 / 0.461 / 0.485) while ranking near-last on CNNaffinity (3.57), and its affinity-top, p9, is
-already measured at **−11.15 / 46.4%** -- the worst-retained start anywhere in the project. Note that
-the minimize set's affinity-top for this structure is p8 (4.085), neither of the other two; p9 was
-selected on the score-only sets, so the p9 leg itself sits on a set-dependent pick. The queued p7 leg is
-therefore the only discriminating cell: if CNNscore's pick beats p9's −11.15 at 46.4%, the CNN dimension
-is a pose-picker that works where the affinity one failed; if it lands no better, CNNscore and
-CNNaffinity are interchangeable for this system and the score-only history matters no further.
-Cross-peptide, CNNscore correlates with measured ΔG at r = −0.50 (n = 8) -- but that is between peptides
-(the high scores are the four designs' poses, 0.67–0.83, the low ones the nulls'), so it weights design
-quality, not pose choice; the p7 leg is the within-peptide test that number cannot be.
+(0.460 / 0.461 / 0.485) while ranking near-last on CNNaffinity (3.57), and its affinity-top, p9, was
+already measured at **−11.15 / 46.4%**. Note that the minimize set's affinity-top for this structure
+is p8 (4.085), neither of the other two; the p9 leg sits on a score-only-set pick. Cross-peptide,
+CNNscore correlates with measured ΔG at r = −0.50 (n = 8) -- but that is between peptides (the high
+scores are the four designs' poses, 0.67–0.83, the low ones the nulls'), so it weights design
+quality, not pose choice.
+
+**The p7 leg has now run (racc, 2026-10-04), and CNNscore's pick loses on every metric.** Pose 7 as a
+starting pose: ΔG **−8.40** (windows −12.49 → −9.56 → −8.99, the walk-away-from-the-first-window shape
+every wrong pose shows), residence **22.4%** -- the worst of the structure's four starts on both, below
+co-folded (−15.13 / 75.9%), Vina p1 (−16.15 / 57.8%) and affinity-top p9 (−11.15 / 46.4%). The ligand
+spells 2.42 ns detached in 24 episodes (longest 1.06 ns); the 31/66 pair contacts are made while the
+ligand drifts across the peptide surface, which pairs-realised alone would read as a good pose -- one
+more instance of a proxy needing the residence column to be read at all. Verdict: on this fold the
+CNN dimension is *not* a pose-picker that works where affinity failed, the two heads are not
+interchangeable (CNNscore actively worse), and the project's standing practice -- pose per GNINA
+CNNaffinity, CNNscore as a cross-check only -- is supported by the one cell that could have broken it.
 
 ### Contacts, computed 2026-10-02
 
