@@ -107,11 +107,13 @@ foreground sleep loops. Partition is `gpuscavenger`: free, preemptible, and — 
 preempted leg restarts from zero, so a long leg is not protected; check `sacct` before assuming one
 is still the run it was.
 
-**Large trajectories go to scratch the moment a run ends.** The dcd is 1.8–5 GB per leg (it carries
-every particle) and the home quota filled mid-write on 2026-10-04, killing both legs at once —
-`racc_run.py` moves the finished `traj.dcd` to `/scratch5/gaussian/io927423/dcd/<leg>.dcd` as its
-final step, and the fetch reads it from there, named by leg. Never leave a dcd in the home
-workspace longer than the run that wrote it.
+**Large trajectories are written to scratch from the first byte.** The dcd is 1.8–5 GB per leg (it
+carries every particle) and the home quota filled mid-write on 2026-10-04, killing both legs at
+once — so `racc_run.py` points `--out-dir` at a scratch directory through a symlink in the leg dir
+(`prod_20ns -> /scratch5/gaussian/io927423/dcd/<leg>_prod`): the dcd lands on scratch from frame
+one, home never carries it, and every path reading `<leg>/prod_20ns` — the Mac-side fetch included
+(`dcd/<leg>_prod/traj.dcd`) — stays unchanged. A move-at-end was tried first and is wrong: it saves
+nothing from the kill that happens mid-write.
 
 ## MM/GBSA housekeeping
 

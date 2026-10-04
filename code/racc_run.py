@@ -23,6 +23,7 @@ DCD_DIR = "/scratch5/gaussian/io927423/dcd"
 STEPS = os.environ.get("STEPS", "10000000")
 OMD = os.path.expanduser("~/.conda/envs/openmm-md/bin/omd")
 base = os.path.join(WORKROOT, "runs/octinoxate/md", LEG)
+prod = os.path.join(base, "prod_20ns")
 
 # Preflight, before the GPU does anything: the 2026-10-04 quota fill killed both in-flight legs 70
 # minutes into a launch, which a first-line check turns into an instant SLURM failure with no GPU
@@ -38,14 +39,28 @@ def free_gb(path):
     return shutil.disk_usage(os.path.expanduser(path)).free / 2**30
 
 
-need_home = 2.0                     # checkpoints, energy.csv and the leg dir also write home
-need_dcd = dcd_bytes / 2**30 * 1.2  # the dcd lands on scratch; 20% headroom over projection
-if free_gb(WORKROOT) < need_home or free_gb(DCD_DIR) < need_dcd:
-    print(f"ABORTING {LEG}: projected dcd {dcd_bytes / 2**30:.1f} GB; free "
-          f"home {free_gb(WORKROOT):.1f} (need {need_home:.0f}), "
-          f"scratch {free_gb(DCD_DIR):.1f} (need {need_dcd:.1f})")
+need_scratch = dcd_bytes / 2**30 * 1.2  # 20% headroom over the projection
+if free_gb(DCD_DIR) < need_scratch:
+    print(f"ABORTING {LEG}: projected dcd {dcd_bytes / 2**30:.1f} GB; "
+          f"scratch {free_gb(DCD_DIR):.1f} GB free (need {need_scratch:.1f})")
     sys.exit(1)
 print(f"[preflight] {n_particles} particles, projected dcd {dcd_bytes / 2**30:.1f} GB, OK")
+
+# The trajectory is WRITTEN to scratch, not written home and moved at the end: home's quota killed
+# two legs mid-write on 2026-10-04, and an end-of-run move saves nothing when the kill is what
+# happens mid-write. omd's `--out-dir` is pointed at a scratch directory via a symlink in the leg
+# dir, so the dcd lands on scratch from its first byte while every path reading `<leg>/prod_20ns`
+# (racc_run elsewhere, the Mac-side fetch, run_dock_pose_md.sh's tail) stays unchanged. The small
+# out-dir residents (energy.csv, checkpoint.chk, final.pdb) ride along to scratch; home stays at
+# staging + system size, a few MB.
+os.makedirs(DCD_DIR, exist_ok=True)
+scratch_prod = os.path.join(DCD_DIR, f"{LEG}_prod")
+if os.path.lexists(prod) and not os.path.islink(prod):
+    # a real prod dir means a legacy/failed run's leftovers; set them aside rather than delete
+    os.replace(prod, prod + "_home_old")
+os.makedirs(scratch_prod, exist_ok=True)
+if not os.path.islink(prod):
+    os.symlink(scratch_prod, prod)
 
 # Same invocation as run_dock_pose_md.sh's dynamics stage, platform OpenCL: the conda-forge OpenMM
 # build has no CUDA platform (RACC.md), and the platform string matches the OpenCL legs everywhere
@@ -53,14 +68,9 @@ print(f"[preflight] {n_particles} particles, projected dcd {dcd_bytes / 2**30:.1
 subprocess.run([OMD, "run",
                 "--system", f"{base}/system/system.xml",
                 "--topology", f"{base}/system/complex.pdb",
-                "--out-dir", f"{base}/prod_20ns",
+                "--out-dir", prod,
                 "--steps", STEPS,
                 "--platform", "OpenCL"], check=True)
 
-# The dcd is ~1.8 GB per leg and home NFS is quota-tight (a full run filled it and killed both
-# 2026-10-04 legs), so the trajectory moves to scratch the moment it is written. Named by leg — the
-# workspace copy is always traj.dcd — and the fetch on the Mac side reads it back from here.
-dcd = os.path.join(base, "prod_20ns", "traj.dcd")
-if os.path.exists(dcd):
-    os.makedirs(DCD_DIR, exist_ok=True)
-    shutil.move(dcd, os.path.join(DCD_DIR, f"{LEG}.dcd"))
+# Fetched from the Mac side as `dcd/<LEG>_prod/traj.dcd`; nothing needs moving here.
+print(f"[racc_run] trajectory at {scratch_prod}/traj.dcd")
