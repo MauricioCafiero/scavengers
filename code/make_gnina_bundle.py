@@ -53,7 +53,11 @@ REFERENCE = {
     "s3_esm2_f4":           dict(dg=-21.08, dg_err=0.08, residence=99.6,  releases=0,  source="peptidebuilder"),
     "bg33_4":               dict(dg=-19.66, dg_err=0.02, residence=100.0, releases=0,  source="boltzgen"),
     "s2_esm2_control":      dict(dg=-16.25, dg_err=0.08, residence=59.6,  releases=1,  source="peptidebuilder"),
-    "shuffle_control":      dict(dg=-15.13, dg_err=0.13, residence=75.9,  releases=5,  source="peptidebuilder (null)"),
+    # flat docked-leg fields ride along with the pose rows (REFERENCE values would otherwise
+    # describe only the co-folded start); measured 2026-10-04, from mmgbsa_summary.csv + md_contacts
+    "shuffle_control":      dict(dg=-15.13, dg_err=0.13, residence=75.9,  releases=5,  source="peptidebuilder (null)",
+                                 vina_p1_dg=-16.15, vina_p1_residence=57.8, vina_p1_releases=19,
+                                 gnina_p9_dg=-11.15, gnina_p9_residence=46.4, gnina_p9_releases=10),
     "shuffle_control_esm0": dict(dg=-14.32, dg_err=0.10, residence=80.2,  releases=5,  source="peptidebuilder (null)"),
     "orig_f12":             dict(dg=-13.71, dg_err=0.04, residence=77.3,  releases=0,  source="peptidebuilder"),
     "bg33_3":               dict(dg=-11.86, dg_err=0.02, residence=41.0,  releases=18, source="boltzgen"),
