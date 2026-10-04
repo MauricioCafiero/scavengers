@@ -79,6 +79,34 @@ the particle count off the build before quoting a time.
 an unstrided local leg takes ~8, and the standard error is ~0.07 against ~0.04. Same 20 ns, uniform
 subsample, so the mean is unbiased. The full `.dcd` stays on the volume if more frames are ever wanted.
 
+## Reading ARC cluster (racc)
+
+The second compute lane, for legs Modal would bill. RACC.md (untracked) holds the access recipe
+(two user-typed ControlMaster commands), paths, quotas and the account facts; the workflow here:
+
+**Stage with tar, drive with the socket.** Every command is `ssh -o ControlPath=~/.ssh/cm-racc
+racc.rdg.ac.uk '<cmd>'` and must be wrapped in a login shell (`bash -lc "module load anaconda;
+source activate openmm-md; ..."` — non-interactive ssh has no module init). Send legs with
+tar-over-ssh into `~/remote_work/openmm/runs/octinoxate/md/<leg>/` mirroring the repo layout; rsync
+and scp -r both fail through the tunnel. Build locally (`run_dock_pose_md.sh BUILD_ONLY=1`), run
+there: `submit_gpu.sh racc_run.py` from inside an activated env (sbatch exports it; a
+`python3.12 -> python` symlink in the env covers the script's hardcoded interpreter)
+
+**Platform is OpenCL, and the first run's wall time is kernel compile.** The conda-forge OpenMM
+build has no CUDA platform (user declined the CUDA-variant env 2026-10-04); OpenCL works on the
+H100 NVL nodes. A smoke run's total wall time is JIT-dominated — 100k steps cost 6:47 while the
+live rate is 0.45 ms/step — so **measure the rate from the live `energy.csv`, never from a smoke's
+wall time**, and expect the real leg to be several times faster than the smoke suggested.
+
+**energy.csv flushes continuously here, unlike on Modal** — mid-run progress and ms/step are
+readable any time (row cadence 500 steps) without contacting produce. Use it to revise estimates
+within the first 20 minutes instead of waiting for completion to find out.
+
+Waits go in background watchers that poll sacct (`--format=State --noheader | tail -1`), never
+foreground sleep loops. Partition is `gpuscavenger`: free, preemptible, and — like on Modal — a
+preempted leg restarts from zero, so a long leg is not protected; check `sacct` before assuming one
+is still the run it was.
+
 ## MM/GBSA housekeeping
 
 Run it from inside the leg directory: MMPBSA.py scatters `reference.frc` plus a `_MMPBSA_*` set into the
