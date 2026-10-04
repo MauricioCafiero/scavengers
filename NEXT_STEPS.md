@@ -530,14 +530,16 @@ The September 2026 allocation was spent (about $4 across scoring and six 20 ns r
      peptides, `CNNscore` vs ΔG is r = −0.50 (n = 8), but that weights design-vs-null geometry, not pose
      choice; it does not license or condemn either head as a picker.
    - Run the one robust disagreement: `shuffle_control`, whose `CNNscore` best is **pose 7** in all
-     three sets (0.460 / 0.461 / 0.485) while its affinity ranks near-last (3.57) — and its affinity-top
-     p9 is already measured at −11.15 / 46.4%. (The minimise set's affinity-top for this structure is
-     p8, 4.085 — p9 was picked on the score-only sets; a p8 leg would additionally test the set-choice,
-     optional.)
-     `dock_pose_to_sdf.py shuffle_control --pose 7 --system octinoxate` then the usual leg. If pose 7
-     relaxes to a better ΔG than pose 9's −11.15, the CNN heads disagree in the direction `CNNscore`
-     suggests and the picker should change; if not, `CNNaffinity` keeps the job and the failures go in
-     the "what CNNaffinity gets wrong" list.
+     three sets (0.460 / 0.461 / 0.485) while its affinity ranks near-last (3.57) — **done
+     2026-10-04, second half of this item** — and its affinity-top p9 was already measured at
+     −11.15 / 46.4%. The p7 leg ran on the Reading ARC (first cluster leg, job 490801): ΔG −8.40
+     (windows −12.49 / −9.56 / −8.99, the wrong-pose shape), residence **22.4%**, 24 episodes,
+     2.42 ns detached — worst of the structure's four starts on both metrics. **Item closed:
+     `CNNaffinity` keeps the picker job, `CNNscore` is a cross-check that on this fold actively
+     picks worse than affinity (not interchangeable — worse).** The failures also add one more
+     "proxy to not read alone": p7 makes 31/66 pair contacts (the structure's best) while the
+     ligand drifts across the peptide surface. (The minimise set's affinity-top p8, 4.085, remains
+     an optional parked leg — nothing left unsettled by it that this test would change.)
 
 10. **A new molecule, through both pipelines.** Added 2026-10-04. Everything in this repo is built on
     the octinoxate analogue, so the next question is transfer, and it needs both design paths on the same
