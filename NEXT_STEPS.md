@@ -522,11 +522,18 @@ The September 2026 allocation was spent (about $4 across scoring and six 20 ns r
    starts (−11.15 at 46.4% residence, against −16.15 for Vina p1 and −15.13 co-folded, 2026-10-04), and
    `orig_f12`'s GNINA p5 leg releases more than the nulls do (RESULTS, residence table). Two cheap ways
    to test the other CNN head on data partly in hand:
-   - Tabulate `CNNscore` against the 20 ns ΔG of every docked leg already simulated (five structures ×
-     poses in `gnina_scores.csv` + `mmgbsa_summary.csv`) — no new compute, and it answers whether
-     `CNNscore`'s ordering is any better a predictor than `CNNaffinity`'s before any new leg is paid for.
-   - Run the one structure where the two heads disagree on their pick: `shuffle_control`, whose
-     `CNNscore` best is **pose 7** (0.460, against pose 9's 0.425) and pose 7 has never been simulated.
+   - Tabulate `CNNscore` against the 20 ns ΔG of every docked leg already simulated — **done
+     2026-10-04, first half of this item** (`results_receptor_{minimize,h_score_only,score_only}/
+     gnina_scores.csv` × `mmgbsa_summary.csv`). Finding: on **7 of 8** structures the `CNNscore`-top
+     pose of 1–9 *is* the `CNNaffinity`-top pose in all three sets — every docked leg run so far is
+     already a `CNNscore`-top pose, so the two heads are indistinguishable on existing data. Across
+     peptides, `CNNscore` vs ΔG is r = −0.50 (n = 8), but that weights design-vs-null geometry, not pose
+     choice; it does not license or condemn either head as a picker.
+   - Run the one robust disagreement: `shuffle_control`, whose `CNNscore` best is **pose 7** in all
+     three sets (0.460 / 0.461 / 0.485) while its affinity ranks near-last (3.57) — and its affinity-top
+     p9 is already measured at −11.15 / 46.4%. (The minimise set's affinity-top for this structure is
+     p8, 4.085 — p9 was picked on the score-only sets; a p8 leg would additionally test the set-choice,
+     optional.)
      `dock_pose_to_sdf.py shuffle_control --pose 7 --system octinoxate` then the usual leg. If pose 7
      relaxes to a better ΔG than pose 9's −11.15, the CNN heads disagree in the direction `CNNscore`
      suggests and the picker should change; if not, `CNNaffinity` keeps the job and the failures go in

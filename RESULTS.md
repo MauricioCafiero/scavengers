@@ -1690,6 +1690,24 @@ is undone by desolvation, +12.90 of EGB inside a +10.14 solvation penalty, buryi
 co-folded pose leaves solvated. A single scalar dG hides that distinction, which is what the
 decomposition is for.
 
+### CNNscore has never actually been the test -- until the queued p7 leg
+
+Tabulated 2026-10-04 against all three GNINA scoring sets (`score_only`, `h_score_only`,
+`minimize`). On **7 of 8** structures, the pose that `CNNscore` ranks best of 1–9 is the same pose
+`CNNaffinity` ranks best, in all three sets -- so every docked leg run so far is *also* the CNNscore-top
+pose, which means the two selectors are indistinguishable on existing data and cannot be compared from
+it. The one robust disagreement is `shuffle_control`: pose 7 is CNNscore-top in **all three** sets
+(0.460 / 0.461 / 0.485) while ranking near-last on CNNaffinity (3.57), and its affinity-top, p9, is
+already measured at **−11.15 / 46.4%** -- the worst-retained start anywhere in the project. Note that
+the minimize set's affinity-top for this structure is p8 (4.085), neither of the other two; p9 was
+selected on the score-only sets, so the p9 leg itself sits on a set-dependent pick. The queued p7 leg is
+therefore the only discriminating cell: if CNNscore's pick beats p9's −11.15 at 46.4%, the CNN dimension
+is a pose-picker that works where the affinity one failed; if it lands no better, CNNscore and
+CNNaffinity are interchangeable for this system and the score-only history matters no further.
+Cross-peptide, CNNscore correlates with measured ΔG at r = −0.50 (n = 8) -- but that is between peptides
+(the high scores are the four designs' poses, 0.67–0.83, the low ones the nulls'), so it weights design
+quality, not pose choice; the p7 leg is the within-peptide test that number cannot be.
+
 ### Contacts, computed 2026-10-02
 
 `md_contacts.py` and `md_frames.py` are part of the dynamics pipeline and were missed on all nine legs
