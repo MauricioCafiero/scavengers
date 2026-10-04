@@ -1,0 +1,14 @@
+
+=== runs/octinoxate/md/shuffle_control_esm0_dock1/prod_L1_modal
+  2000 frames total; window 18.0-19.99 ns
+  runs/octinoxate/md/shuffle_control_esm0_dock1/prod_L1_modal/frames_last.pdb  (10 models)
+  runs/octinoxate/md/shuffle_control_esm0_dock1/prod_L1_modal/frame_medoid.pdb  (frame at 19.03 ns, 1.17 A from the window mean; window spread 2.04 A)
+
+in PyMOL, for the ensemble:
+  load frames_last.pdb, ens
+  set all_states, on
+  hide everything; show cartoon, polymer; show sticks, not polymer
+  color grey70, polymer; color red, not polymer
+
+or for a single clean frame:
+  load frame_medoid.pdb, best

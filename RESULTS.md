@@ -35,7 +35,7 @@ simulated; the convergence windows behind each number are in the dynamics sectio
 | `bg33_4` | boltzgen | −19.66 (100.0%) | −14.81 (59.3%) | −16.53 (97.2%, p6) |
 | `s2_esm2_control` | peptidebuilder | −16.25 (59.6%) | −15.49 (0.0%) † | −17.09 (50.3%, p6) |
 | `shuffle_control` | pb (null) | −15.13 (75.9%) | −16.15 (57.8%) | −11.15 (46.4%, p9) |
-| `shuffle_control_esm0` | pb (null) | −14.32 (80.2%) | | |
+| `shuffle_control_esm0` | pb (null) | −14.32 (80.2%) | −15.50 (76.1%) | **−14.76 (90.5%, p9)** |
 | `orig_f12` | peptidebuilder | −13.71 (77.3%) | −22.11 (100.0%) | −17.17 (83.3%, p5) |
 | `bg33_3` | boltzgen | −11.86 (41.0%) | −10.84 (25.7%) | −13.09 (77.6%, p6) |
 
@@ -53,16 +53,13 @@ patterns are already visible and both are developed below. Where the co-folded p
 well (`s3_orig_f12`, `bg33_4` at 100%), co-folding is the best start and the docked poses are worse.
 Where it holds poorly (`orig_f12` at 77.3%, released to the surface at 6 ns), a docked start can be far
 better — `orig_f12`'s top-AutoDock pose reaches **−22.11 at 100% retention** against the co-folded
-−13.71. The remaining in-flight legs are `shuffle_control_esm0`'s two docked cells (Vina's and
-GNINA's cells for `shuffle_control` landed 2026-10-04); rows in the tables below backfill as they
-finish.
+−13.71.
 
 ### Window convergence, every leg
 
 The series behind each headline number. The 5/10/15 ns columns are leading slices of the same 20 ns
 trajectory (`run_windows_live.sh` computed them as the run passed each mark); the 20 ns column is the
-headline value. Blank rows are legs not run (`shuffle_control_esm0`'s two docked poses are the only
-cells missing). Two shapes repeat, and the body sections argue
+headline value. Blank rows are legs not run. Two shapes repeat, and the body sections argue
 over them: docked poses often start
 over-packed and decay (`s3_orig_f12` Vina p1: −27.00 → −20.79), while five legs are still moving at
 20 ns — `s3_orig_f12_dock1` (+0.97 over the last 5 ns), `bg33_4_dock1` (+1.40), `orig_f12` GNINA p5
@@ -88,6 +85,8 @@ unfavourable the pose is rather than converged values.
 | | Vina p1 | −24.06 | −23.13 | −18.73 | −16.15 |
 | | GNINA p9 | −20.27 | −16.39 | −14.73 | −11.15 |
 | `shuffle_control_esm0` (null) | co-folded | −11.76 | −12.18 | −14.10 | −14.32 |
+| | Vina p1 | −18.68 | −17.58 | −16.43 | −15.50 |
+| | GNINA p9 | −15.05 | −14.56 | −14.66 | −14.76 |
 | `orig_f12` | co-folded | −21.52 | −16.86 | −14.61 | −13.71 |
 | | Vina p1 | −24.04 | −23.25 | −22.20 | −22.11 |
 | | GNINA p5 | −24.58 | −23.44 | −20.64 | −17.17 |
@@ -121,6 +120,8 @@ the BoltzGen designs have 11, so [10, 55], and their cells are not pooled with t
 | | Vina p1 | 23/66 | 6/11 | 17/55 |
 | | GNINA p9 | 18/66 | 5/11 | 13/55 |
 | `shuffle_control_esm0` (null) | co-folded | 12/66 | 4/11 | 8/55 |
+| | Vina p1 | 9/66 | 4/11 | 5/55 |
+| | GNINA p9 | 13/66 | 4/11 | 9/55 |
 | `orig_f12` | co-folded | 22/66 | 4/11 | 18/55 |
 | | Vina p1 | 32/66 | 6/11 | 26/55 |
 | | GNINA p5 | 30/66 | 6/11 | 24/55 |
@@ -158,6 +159,8 @@ all of it late -- so read the column against that section's caveats rather than 
 | | Vina p1 | 57.8% | 59 | 19 | 200 ps | 100% |
 | | GNINA p9 | 46.4% | 533 | 10 | 4450 ps | 99% |
 | `shuffle_control_esm0` (null) | co-folded | 80.2% | 9 | 5 | 40 ps | 100% |
+| | Vina p1 | 76.1% | 6 | 6 | 10 ps | 100% |
+| | GNINA p9 | 90.5% | 6 | 8 | 20 ps | 0% |
 | `orig_f12` | co-folded | 77.3% | 0 \* | 0 | — | — |
 | | Vina p1 | **100.0%** | 0 | 0 | — | — |
 | | GNINA p5 | 83.3% | 134 | 21 | 560 ps | 100% |
@@ -194,6 +197,8 @@ every 10 ps against 1 ps locally — so read `max` as an upper-bound figure.
 | | Vina p1 | 6.5 | 9.6 | 8.7 → 8.5 |
 | | GNINA p9 | 5.3 | 6.1 | 8.5 → 8.6 |
 | `shuffle_control_esm0` (null) | co-folded | 2.3 | 5.6 | 15.5 → 15.8 |
+| | Vina p1 | 2.2 | 4.7 | 15.5 → 15.6 |
+| | GNINA p9 | 2.4 | 6.8 | 15.7 → 15.2 |
 | `orig_f12` | co-folded | 8.9 | 9.4 | 8.7 → 10.0 |
 | | Vina p1 | 5.1 | 5.7 | 8.9 → 8.4 |
 | | GNINA p5 | 3.7 | 4.9 | 8.8 → 8.6 |
@@ -207,7 +212,10 @@ always stays the peptide. The one loosening worth noting is not a docked pose: t
 compact globules (`orig_f12`, `shuffle_control`) open by 1.3–1.5 A over their runs, while the docked
 starting points of the same peptides sit tighter and flatter (Rg change ≤ 0.5 A, final RMSD 3.7–6.5
 A). `bg33_3` barely moves at all in every starting pose (≤ 1.0 A final RMSD), which makes it the
-most rigid of these folds and is consistent with its weak, open binding (41.0% best residence).
+most rigid of these folds and is consistent with its weak, open binding (41.0% best residence). The
+two extended nulls are the same story at opposite geometry: the `*esm2*`/`esm0` variants start at
+~15.3 A Rg and hold it flat in every pose (Rg change ≤ 0.6 A, final RMSD ≤ 2.6 A) — they are rods
+that never folded, not globules that opened.
 
 ## Contents
 

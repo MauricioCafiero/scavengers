@@ -1,0 +1,45 @@
+Note that running a local entrypoint in detached mode only keeps the last triggered Modal function alive after the parent process has been killed or disconnected.
+✓ Initialized. View run at 
+https://modal.com/apps/mauriciocafiero/main/ap-2kwu5hSw0CfLC7728pMXBI
+✓ Created objects.
+├── 🔨 Created mount /Users/cafierom/python_mac/peptidebuilder/code/modal_md.py
+├── 🔨 Created mount /Users/cafierom/python_mac/openmm/src
+├── 🔨 Created function _push.
+├── 🔨 Created function _fetch.
+├── 🔨 Created function _ls.
+├── 🔨 Created function _probe.
+├── 🔨 Created function _produce.
+└── 🔨 Created function _strip.
+[run] restraining 300 protein heavy atoms
+[run] platform: CUDA
+[run] minimizing ...
+[run] equilibrating 5000 steps (restraints on) on CUDA ...
+[run] production 10000000 steps (restraints off) on CUDA ...
+[run] done. trajectory: /state/shuffle_control_esm0_dock9/prod_L1/traj.dcd  final: /state/shuffle_control_esm0_dock9/prod_L1/final.pdb
+dcdplugin) detected standard 32-bit DCD file of native endianness
+dcdplugin) CHARMM format DCD file (also NAMD 2.1 and later)
+{
+  "gpu": "A10G",
+  "steps": 10000000,
+  "leg": "L1",
+  "minutes": 59.4,
+  "usd": 1.09,
+  "ms_per_step": 0.3562,
+  "wrapped": {
+    "frames": 2000,
+    "atoms": 649,
+    "stride": 10
+  }
+}
+files on the volume: ['checkpoint.chk', 'energy.csv', 'final.pdb', 'traj.dcd', 'traj_wrapped.pdb', 'traj_wrapped.xtc']
+  wrote runs/octinoxate/md/shuffle_control_esm0_dock9/prod_L1_modal/traj_wrapped.xtc (5.1 MB)
+  wrote runs/octinoxate/md/shuffle_control_esm0_dock9/prod_L1_modal/traj_wrapped.pdb (0.1 MB)
+  wrote runs/octinoxate/md/shuffle_control_esm0_dock9/prod_L1_modal/energy.csv (2.7 MB)
+
+wall 60.0 min. Next, locally:
+  ~/miniforge3/envs/openmm-md/bin/omd mmgbsa --protein runs/octinoxate/md/shuffle_control_esm0_dock9/protein_fixed.pdb \
+      --ligand runs/octinoxate/md/shuffle_control_esm0_dock9/ligand_prepped.sdf \
+      --traj runs/octinoxate/md/shuffle_control_esm0_dock9/prod_L1_modal/traj_wrapped.xtc --topology runs/octinoxate/md/shuffle_control_esm0_dock9/prod_L1_modal/traj_wrapped.pdb \
+      --out-dir runs/octinoxate/md/shuffle_control_esm0_dock9/prod_L1_modal/mmgbsa --no-auto-cofactors --run
+✓ App completed. View run at 
+https://modal.com/apps/mauriciocafiero/main/ap-2kwu5hSw0CfLC7728pMXBI

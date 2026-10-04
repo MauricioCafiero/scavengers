@@ -32,6 +32,13 @@ is worth reading.
 
 ## Modal
 
+**Launch every `modal run` through `code/modal_run.sh` — it is not optional.** The client stays
+attached for the whole leg even with `--detach`, and when the Mac sleeps the client drops and Modal
+cancels the in-flight leg at full price. The script `exec`s the run under `caffeinate -i`, which holds
+an idle-sleep assertion for exactly the client's lifetime, so the guard is self-cleaning and covers the
+whole leg (2026-10-04: two cancelled legs, $1.06, for skipping this). There is no warm restart: `omd run`
+writes `checkpoint.chk` but nothing loads it.
+
 **Leg progress is unobservable mid-run.** The volume's `energy.csv` is a stale early flush and the
 container prints nothing between start and finish. Any percent-complete figure is a guess; say so rather
 than offering scaled arithmetic as data. What *is* observable: `modal billing report --for today
