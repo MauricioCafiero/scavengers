@@ -2,6 +2,13 @@
 
 Written 2026-10-02 after a day in which every rule below was learned by breaking it.
 
+**Use the scripts that already exist; parameterise, don't reimplement.** The established flow for a
+docked Modal leg is: `run_dock_pose_md.sh BUILD_ONLY=1` → `modal push` → `probe` → `produce` →
+`md_window_modal.sh` → whole-run `omd mmgbsa` → `md_contacts.py` → `md_frames.py` → `pair_contacts.py`,
+each invoked directly. On 2026-10-04 an orchestration driver for this was drafted twice and rejected
+twice — the tools each hold one step of the tacit knowledge, and gluing them into a new driver is where
+steps silently drop.
+
 ## Dynamics runs
 
 **Use `code/run_dock_pose_md.sh`. Do not write a new driver.** It is the one MD driver and it already
@@ -37,7 +44,21 @@ attached for the whole leg even with `--detach`, and when the Mac sleeps the cli
 cancels the in-flight leg at full price. The script `exec`s the run under `caffeinate -i`, which holds
 an idle-sleep assertion for exactly the client's lifetime, so the guard is self-cleaning and covers the
 whole leg (2026-10-04: two cancelled legs, $1.06, for skipping this). There is no warm restart: `omd run`
-writes `checkpoint.chk` but nothing loads it.
+writes `checkpoint.chk` but nothing loads it. The guard protects a *launch*, not a day of work: any
+instruction to release sleep inhibitors is scoped to the work that motivated it — before resuming any
+work after a release (e.g. an overnight laptop sleep), verify one is armed with `pgrep -f caffeinate`
+before launching anything.
+
+**One Modal leg at a time.** Run one leg, verify every stage of it (probe rate, fetched files, MM/GBSA
+row) before launching the next — a repeated error across parallel legs doubles the loss, and 2026-10-04
+cost $1.06 the exact way single-leg checking exists to prevent.
+
+**When a run cancels, pull both sides' logs before relaunching.** The service side (`modal billing
+report --for today --show-resources`) and the machine side (`pmset -g log` sleep/wake timeline — this
+Mac also does normal 45 s–2 min dark wakes for maintenance and TCP keepalive, which look like noise but
+are what kill an unguarded client). On 2026-10-04 billing alone left the cause "unexplained" for an
+hour; the power log dated the cancellations to the exact sleep events. Diagnose, then relaunch — a
+guessed relaunch into the same failure pays for the leg twice.
 
 **Leg progress is unobservable mid-run.** The volume's `energy.csv` is a stale early flush and the
 container prints nothing between start and finish. Any percent-complete figure is a guess; say so rather
@@ -62,13 +83,29 @@ subsample, so the mean is unbiased. The full `.dcd` stays on the volume if more 
 
 Run it from inside the leg directory: MMPBSA.py scatters `reference.frc` plus a `_MMPBSA_*` set into the
 working directory, ~300 MB a leg, and `reference.frc` reached 1.9 GB once when run from the repo root.
+**The shell's cwd at launch decides where the scratch lands** — on 2026-10-04 leg 2's whole-run
+MM/GBSA ran with the shell at the repo root and scattered a 272 MB `reference.frc` there even though
+`--out-dir` pointed into the leg. `cd` into the leg directory in the same command that launches it, do
+not trust the session's cwd. Before staging a leg for commit, verify the strip is complete with
+`find <leg> repo-root -name 'reference.frc' -o -name '_MMPBSA_*'` — a zsh glob that matches nothing
+silently aborts a multi-path `rm` and leaves the old files in place.
 **Keep what the September legs keep:** no `reference.frc` and no `_MMPBSA_*` anywhere;
 `FINAL_RESULTS_MMPBSA.dat`, the prmtops, `energy.csv`, `traj_wrapped.*`, `frame_medoid.pdb` and
-`frames_last.pdb` stay. Window directories are named `first_Nns`.
+`frames_last.pdb` stay. Window directories are named `first_Nns`; window legs get `first_Nns` rows in
+the summary CSV with their full component set (parse the `Differences (Complex - Receptor - Ligand)`
+block, not the complex section — a naive grep of `VDWAALS`/`EEL` returns the complex's −hundreds).
 
 Every result goes in `runs/octinoxate/md/mmgbsa_summary.csv` **as it is computed**, not in a batch at the
 end. Nothing reads that file — `make_gnina_bundle.py` carries the same numbers in a hardcoded `REFERENCE`
 dict — so a new row has to be added in both places or the next GNINA bundle is built on stale values.
+When a peptide's docked legs land, extend its `REFERENCE` entry with the flat `vina_p1_*`/`gnina_p9_*`
+fields, as both shuffle peers now have.
+
+A leg is not done until `protein_stability.csv` has its row: `md_stability.py` takes the leg list from
+argv, so a **no-argument run writes nothing** — pass the full glob
+(`runs/octinoxate/md/*/prod_20ns runs/octinoxate/md/*/prod_L1_modal ~/python_mac/boltzgen_local/md/*/prod_20ns`),
+never a single leg (a single-leg pass *overwrites* the file with one row). zsh also aborts the whole
+launch if one glob in the list matches nothing (`boltzgen_local` has no `prod_L1_modal` legs).
 
 ## Reporting results
 
