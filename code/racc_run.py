@@ -72,5 +72,20 @@ subprocess.run([OMD, "run",
                 "--steps", STEPS,
                 "--platform", "OpenCL"], check=True)
 
-# Fetched from the Mac side as `dcd/<LEG>_prod/traj.dcd`; nothing needs moving here.
-print(f"[racc_run] trajectory at {scratch_prod}/traj.dcd")
+# Strip to the wrapped solute HERE, on the cluster -- mirroring modal_md.py::produce. The full-system
+# dcd (21k+ atoms, ~5 GB) stays on scratch for a possible re-strip/warm restart, and only the ~100 MB
+# solute-only traj_wrapped.{xtc,pdb} is fetched to the Mac. That Mac has 8 GB of RAM and mdtraj loads a
+# trajectory whole, so fetching the full box and stripping *locally* (as the racc lane did before) OOM'd
+# the analyze step at ~4-5 GB. This is the SAME `omd analyze` run_dock_pose_md.sh runs locally
+# (its line 93), so the wrapped solute is produced by identical code on both lanes; left unstrided so the
+# frame count matches the other racc legs (bg33_1_dock2 etc.) rather than modal's strided 2,000.
+subprocess.run([OMD, "analyze",
+                "--traj", f"{prod}/traj.dcd",
+                "--topology", f"{base}/system/complex.pdb",
+                "--out-dir", prod], check=True)
+
+# Fetched from the Mac side as `dcd/<LEG>_prod/traj_wrapped.{xtc,pdb}` (NOT the full dcd, which stays
+# here); run_dock_pose_md.sh's whole-run analyze guard then skips, and its window loop slices the
+# wrapped solute instead of the full box. Nothing needs moving.
+print(f"[racc_run] full trajectory at {scratch_prod}/traj.dcd (kept on scratch)")
+print(f"[racc_run] wrapped solute at {scratch_prod}/traj_wrapped.xtc -- fetch this, not the dcd")

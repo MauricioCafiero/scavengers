@@ -111,9 +111,17 @@ is still the run it was.
 carries every particle) and the home quota filled mid-write on 2026-10-04, killing both legs at
 once — so `racc_run.py` points `--out-dir` at a scratch directory through a symlink in the leg dir
 (`prod_20ns -> /scratch5/gaussian/io927423/dcd/<leg>_prod`): the dcd lands on scratch from frame
-one, home never carries it, and every path reading `<leg>/prod_20ns` — the Mac-side fetch included
-(`dcd/<leg>_prod/traj.dcd`) — stays unchanged. A move-at-end was tried first and is wrong: it saves
-nothing from the kill that happens mid-write.
+one, home never carries it, and every path reading `<leg>/prod_20ns` stays unchanged. A move-at-end
+was tried first and is wrong: it saves nothing from the kill that happens mid-write.
+
+**Strip to the solute on the cluster; fetch only the wrapped solute, never the full dcd (racc mirrors
+Modal).** After `omd run`, `racc_run.py` runs the same `omd analyze` the local tail runs to write
+`traj_wrapped.{xtc,pdb}` (solute-only, ~100 MB) beside the full dcd on scratch; the full `traj.dcd`
+stays on scratch. Fetch `dcd/<leg>_prod/traj_wrapped.{xtc,pdb}` + `energy.csv` + the small analyze
+outputs — **not** the 5 GB dcd. The Mac has 8 GB RAM and mdtraj loads a trajectory whole, so fetching
+the full box and stripping locally OOM'd the analyze at ~4–5 GB. With only the wrapped solute local,
+run_dock_pose_md.sh's whole-run analyze guard skips and its window loop slices the wrapped solute
+(no full-box load) — the Modal legs always worked this way, the racc lane just hadn't.
 
 ## MM/GBSA housekeeping
 

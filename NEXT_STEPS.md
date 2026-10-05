@@ -285,26 +285,30 @@ The September 2026 allocation was spent (about $4 across scoring and six 20 ns r
 
    Each cell measures where a given starting pose leads under 20 ns, not whether one pose geometry is
    better than another — the geometric labels below (flip, roll) describe the inputs and do not survive
-   equilibration (item 6). **Six rows are now run, and ordered by the co-folded pose's ligand retention
-   they give a usable rule.** Where the co-folded pose holds the ligand completely, co-folding is the
-   better start; where it holds it poorly, a docked start wins, by a margin that grows as retention falls:
+   equilibration (item 6). **The rows now run, ordered by the co-folded pose's ligand retention, give a
+   usable rule.** Where the co-folded pose holds the ligand completely, co-folding is the better start;
+   where it holds it poorly, a docked start wins. But the winning docked scorer is not always GNINA: on
+   the two BoltzGen extended designs the Vina rank-1 pose beats both co-folding and GNINA's pick, so the
+   margin does not fall cleanly with retention the way the GNINA-only rows had suggested:
 
    | peptide | retention | best route | margin over co-folding |
    |---|---|---|---|
    | `s3_orig_f12` | 100% | co-folded | — |
    | `bg33_4` | 100% | co-folded | — |
    | `s2_esm2_control` | 59.6% | GNINA p6 | **0.84** |
-   | `bg33_2` (racc) | 50.9% | GNINA p4 | **1.30** |
+   | `bg33_2` (racc) | 50.9% | Vina p1 | **3.80** |
    | `bg33_3` | 41% | GNINA p6 | **1.23** |
-   | `bg33_1` (racc) | 14.5% | GNINA p2 | **1.24** |
+   | `bg33_1` (racc) | 14.5% | Vina p1 | **2.16** |
 
-   `bg33_1`'s cells ran on the Reading ARC (free) rather than Modal, 2026-10-04: the co-folded start
-   reads −11.31 with the project's worst residence (14.5%), and GNINA's pick (pose 2, `CNNaffinity`
-   5.40 — the max in all three passes, `minimizedAffinity` −3.65 the argmin) reads **−12.55 ± 0.02 at 42.5% residence** — a fifth supporting row for the rule, and the
-   largest retention change of the set (14.5% → 42.5%). Its docked start also drifts least before
-   production (0.38 Å, table in item 6), so the cell is attributable to the pose to a degree the
-   others are not. Its window series is mildly non-convergent (−10.29 → −11.58 → −11.79 → −12.55,
-   drifting down 2.3 over the run), so the margin could still move with a longer leg.
+   `bg33_1` and `bg33_2` ran on the Reading ARC (free) rather than Modal, 2026-10-04/05. For `bg33_1`
+   the co-folded start reads −11.31 at the project's worst residence (14.5%); GNINA's pick (pose 2,
+   `CNNaffinity` 5.40, `minimizedAffinity` −3.65) reads −12.55 at 42.5%; and **Vina's rank-1 pose reads
+   −13.47 at 44.7% residence** — the best of the three, drifting only 1.52 Å before production (table in
+   item 6), so the cell is attributable to the pose. `bg33_2` runs the same order: co-folded −8.02,
+   GNINA p4 −10.44, **Vina p1 −11.82 at 43.1%** (1.50 Å drift). So on both BoltzGen extended designs a
+   docked start wins and Vina's rank-1 is the best docked pose — each also the steadiest fold of its
+   design's three legs (Cα RMSD 1.6–2.1 Å). The `bg33_1` Vina window series still climbs over the run
+   (−11.09 → −11.63 → −13.30 → −13.47), so its margin could move with a longer leg.
 
    `s3_esm2_f4` is excluded: all three of its legs moved 7.7–15.1 Å before production. So is
    `s2_esm2_control`'s Vina cell, at 12.6 Å. `s2_esm2_control`'s GNINA cell is the strongest in the set

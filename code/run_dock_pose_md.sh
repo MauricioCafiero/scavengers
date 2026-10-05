@@ -80,13 +80,16 @@ if [[ ! -f $M/system/system.xml ]]; then
 fi
 [[ $BUILD_ONLY == 1 ]] && { echo "BUILD_ONLY set, stopping after build"; exit 0; }
 
-if [[ ! -f $P/traj.dcd ]]; then
+# Skip the run if EITHER the full dcd (local/old legs) or the wrapped solute (racc legs stripped on
+# the cluster, whose full dcd never comes to this Mac) is already here -- both mean dynamics is done.
+# Without the traj_wrapped.xtc clause a stripped leg would launch a 20 ns run locally on the laptop.
+if [[ ! -f $P/traj.dcd && ! -f $P/traj_wrapped.xtc ]]; then
     $OMD run --system $M/system/system.xml --topology $M/system/complex.pdb \
              --out-dir $P --steps $STEPS --platform OpenCL
     echo "RUN_EXIT=$?"
     date
 else
-    echo "$P/traj.dcd exists, skipping the dynamics"
+    echo "trajectory present in $P (traj.dcd or traj_wrapped.xtc), skipping the dynamics"
 fi
 
 if [[ ! -f $P/traj_wrapped.xtc ]]; then
@@ -112,16 +115,33 @@ for ns in 5 10 15; do
     W=$M/first_${ns}ns
     [[ -f $W/mmgbsa/FINAL_RESULTS_MMPBSA.dat ]] && continue
     mkdir -p $W
-    if [[ ! -f $W/traj.dcd ]]; then
-        $PY -c "
+    # Two sources for the window's wrapped solute, depending on the lane. Local/Modal legs have the
+    # full-system $P/traj.dcd here, so slice it and wrap as before. Racc legs stripped on the cluster
+    # (racc_run.py) fetched only $P/traj_wrapped.xtc -- the full box never comes to this 8 GB Mac -- so
+    # slice the leading fraction of the already-wrapped solute directly, no full-box load, no OOM.
+    if [[ ! -f $W/traj_wrapped.xtc ]]; then
+        if [[ -f $P/traj.dcd ]]; then
+            if [[ ! -f $W/traj.dcd ]]; then
+                $PY -c "
 import mdtraj as md
 t = md.load('$P/traj.dcd', top='$M/system/complex.pdb')
 keep = t[: int(len(t) * $ns / 20)]
 keep.save_dcd('$W/traj.dcd')
 print(f'kept {len(keep)} of {len(t)} frames (leading $ns ns)')
 "
+            fi
+            $OMD analyze --traj $W/traj.dcd --topology $M/system/complex.pdb --out-dir $W
+        else
+            $PY -c "
+import mdtraj as md
+t = md.load('$P/traj_wrapped.xtc', top='$P/traj_wrapped.pdb')
+keep = t[: int(len(t) * $ns / 20)]
+keep.save_xtc('$W/traj_wrapped.xtc')
+keep[0].save_pdb('$W/traj_wrapped.pdb')
+print(f'kept {len(keep)} of {len(t)} frames (leading $ns ns, wrapped solute)')
+"
+        fi
     fi
-    $OMD analyze --traj $W/traj.dcd --topology $M/system/complex.pdb --out-dir $W
     ( cd $W && $OMD mmgbsa --protein $ROOT/$M/protein_fixed.pdb \
                            --ligand $ROOT/$M/ligand_prepped.sdf \
                            --traj traj_wrapped.xtc --topology traj_wrapped.pdb \

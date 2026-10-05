@@ -38,8 +38,8 @@ simulated; the convergence windows behind each number are in the dynamics sectio
 | `shuffle_control_esm0` | pb (null) | −14.32 (80.2%) | −15.50 (76.1%) | **−14.76 (90.5%, p9)** | |
 | `orig_f12` | peptidebuilder | −13.71 (77.3%) | −22.11 (100.0%) | −17.17 (83.3%, p5) | |
 | `bg33_3` | boltzgen | −11.86 (41.0%) | −10.84 (25.7%) | −13.09 (77.6%, p6) | |
-| `bg33_1` | boltzgen | −11.31 (14.5%) | | **−12.55 (42.5%, p2)** | |
-| `bg33_2` | boltzgen | −8.02 (50.9%) | | −10.44 (57.2%, p4) | |
+| `bg33_1` | boltzgen | −11.31 (14.5%) | **−13.47 (44.7%)** | −12.55 (42.5%, p2) | |
+| `bg33_2` | boltzgen | −8.02 (50.9%) | **−11.82 (43.1%)** | −10.44 (57.2%, p4) | |
 
 \* `s3_esm2_f4`'s docked legs and `s2_esm2_control`'s Vina-p1 leg lost their starting pose during
 equilibration (ligand drift 11.0–15.1 A for `s3_esm2_f4`, 12.6 A for `s2_esm2_control` p1), so those
@@ -102,8 +102,10 @@ unfavourable the pose is rather than converged values.
 | | Vina p1 | −12.64 | −11.66 | −11.43 | −10.84 |
 | | GNINA p6 | −14.44 | −14.55 | −13.64 | −13.09 |
 | `bg33_2` | co-folded | −11.18 | −11.32 | −10.70 | −8.02 |
+| | Vina p1 | −11.45 | −12.60 | −12.19 | −11.82 |
 | | GNINA p4 | −4.39 | −6.23 | −8.53 | −10.44 |
 | `bg33_1` | co-folded | −7.11 | −10.02 | −11.30 | −11.31 |
+| | Vina p1 | −11.09 | −11.63 | −13.30 | −13.47 |
 | | GNINA p2 | −10.29 | −11.58 | −11.79 | −12.55 |
 
 ### Residue-pair contacts, every leg
@@ -182,8 +184,10 @@ all of it late -- so read the column against that section's caveats rather than 
 | | Vina p1 | 25.7% | 6 | 6 | 10 ps | 67% |
 | | GNINA p6 | 77.6% | 25 | 7 | 160 ps | 96% |
 | `bg33_2` | co-folded | 50.9% | 611 | 9 | 6030 ps | 99% |
+| | Vina p1 | 43.1% | 2 | 2 | 10 ps | 0% |
 | | GNINA p4 | 57.2% | 452 | 2 | 4290 ps | 0% |
 | `bg33_1` | co-folded | 14.5% | 19 | 16 | 30 ps | 0% |
+| | Vina p1 | 44.7% | 9 | 7 | 20 ps | 0% |
 | | GNINA p2 | 42.5% | 14 | 11 | 30 ps | 57% |
 
 \* 8 release frames of 20,000 at 1 ps sampling, all isolated single frames.
@@ -230,14 +234,19 @@ every 10 ps against 1 ps locally — so read `max` as an upper-bound figure.
 | | Vina p1 | 0.8 | 1.9 | 8.7 → 8.6 |
 | | GNINA p6 | 1.0 | 1.5 | 8.6 → 8.7 |
 | `bg33_2` | co-folded | 3.7 | 5.4 | 15.0 → 14.3 |
+| | Vina p1 | 1.6 | 5.2 | 14.9 → 15.1 |
 | | GNINA p4 | 9.5 | 12.5 | 15.0 → 10.0 |
 | `bg33_1` | co-folded | 5.2 | 7.7 | 14.8 → 14.9 |
+| | Vina p1 | 2.1 | 11.0 | 14.8 → 14.8 |
 | | GNINA p2 | 8.8 | 8.9 | 14.7 → 12.4 |
 
 No leg unravels: every fold keeps its contact network and no Rg climbs — the peptide always stays the
 peptide — but the two racc GNINA-docked extended designs do the opposite of loosening, they compact:
 `bg33_1`'s docked start closes 14.7 → 12.4 A and `bg33_2`'s 15.0 → 10.0 A (the largest Rg change in
-the table, Cα RMSD 9.5 A — the docked pose pulls the rod into a different fold). The one loosening
+the table, Cα RMSD 9.5 A — the docked pose pulls the rod into a different fold). The Vina-p1 start on
+those same two designs does neither: it is the steadiest of the bg33 legs (Cα RMSD final 1.6–2.1 A, Rg
+flat to ±0.2 A), so it is the GNINA pose specifically — not docking as such — that reels the rod in,
+and the strongest-ΔG start for both designs (−13.47, −11.82) is also the one that holds its fold. The one loosening
 worth noting is not a docked pose: the two co-folded
 compact globules (`orig_f12`, `shuffle_control`) open by 1.3–1.5 A over their runs, while the docked
 starting points of the same peptides sit tighter and flatter (Rg change ≤ 0.5 A, final RMSD 3.7–6.5
@@ -1653,6 +1662,8 @@ peptide:
 | run | peptide RMSD | ligand RMSD, input -> production start |
 |---|---|---|
 | `bg33_4` co-folded | 0.88 A | **1.15 A** |
+| `bg33_2_dock1` | 0.44 A | 1.50 A |
+| `bg33_1_dock1` | 0.54 A | 1.52 A |
 | `bg33_4_dock1` | 0.85 A | 2.30 A |
 | `s3_orig_f12_dock1` | 1.15 A | 2.51 A |
 | `s3_orig_f12` co-folded | 1.51 A | 2.78 A |

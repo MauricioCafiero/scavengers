@@ -65,8 +65,10 @@ REFERENCE = {
     "orig_f12":             dict(dg=-13.71, dg_err=0.04, residence=77.3,  releases=0,  source="peptidebuilder"),
     "bg33_3":               dict(dg=-11.86, dg_err=0.02, residence=41.0,  releases=18, source="boltzgen"),
     "bg33_2":               dict(dg=-8.02,  dg_err=0.04, residence=50.9,  releases=9,  source="boltzgen",
+                                 vina_p1_dg=-11.82, vina_p1_residence=43.1, vina_p1_releases=2,
                                  gnina_p4_dg=-10.44, gnina_p4_residence=57.2, gnina_p4_releases=2),
     "bg33_1":               dict(dg=-11.31, dg_err=0.03, residence=14.5,  releases=16, source="boltzgen",
+                                 vina_p1_dg=-13.47, vina_p1_residence=44.7, vina_p1_releases=7,
                                  gnina_p2_dg=-12.55, gnina_p2_residence=42.5, gnina_p2_releases=11),
 }
 
