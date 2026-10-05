@@ -43,7 +43,10 @@ cd "${0:A:h:h}"          # repo root, from this script's own location -- no abso
 caffeinate -is -w $$ &
 
 PY=.venv/bin/python
-RUN=runs/octinoxate
+# RUN and LIGAND default to octinoxate but are overridable from the environment, so a second molecule
+# (e.g. RUN=runs/oxybenzone LIGAND=oxybenzone) runs the same pipeline without a forked script.
+RUN=${RUN:-runs/octinoxate}
+LIGAND=${LIGAND:-octinoxate}
 LOGS=$RUN/logs
 UMALOGS=$RUN/uma_logs
 mkdir -p $LOGS $UMALOGS
@@ -126,7 +129,7 @@ print -r -- "design: $SEQ"
 import sys, json
 sys.path.insert(0, 'code')
 from design_test import write_design_shell
-write_design_shell('$RUN', json.load(open('$RUN/$DESIGN')), 'octinoxate')
+write_design_shell('$RUN', json.load(open('$RUN/$DESIGN')), '$LIGAND')
 PYEOF
 
 # ---------------------------------------------------------------------------------------------

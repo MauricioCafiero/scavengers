@@ -75,6 +75,15 @@ def ligand_correspondence(design_symbols, design_xyz, boltz_lig, smiles, core_on
     query = Chem.MolFromSmarts(CORE_SMARTS) if core_only else Chem.MolFromSmiles(smiles)
     design_matches = design_mol.GetSubstructMatches(query, uniquify=False)
     boltz_matches = boltz_mol.GetSubstructMatches(query, uniquify=False)
+    if core_only and (not design_matches or not boltz_matches):
+        # CORE_SMARTS is octinoxate's methoxycinnamate core; other ligands (oxybenzone's benzophenone,
+        # octocrylene, avobenzone) do not contain it. Fall back to the whole ligand as the query -- the
+        # symmetry-equivalent mappings it produces are already resolved below by best fit, so the
+        # correspondence is still well defined for a rigid scaffold. Octinoxate is unaffected: its core
+        # still matches, so this branch never fires for it.
+        query = Chem.MolFromSmiles(smiles)
+        design_matches = design_mol.GetSubstructMatches(query, uniquify=False)
+        boltz_matches = boltz_mol.GetSubstructMatches(query, uniquify=False)
     if not design_matches or not boltz_matches:
         raise RuntimeError("the ligand core could not be matched in both structures")
 

@@ -980,11 +980,15 @@ def iterate_combinations(ligand: dict, frags: list, new_molecules: list, ies: li
     for record in results:
         row = {"sequence": ("cyclo-" if cyclic else "") + record["sequence"], "start_residue": record["start"],
                "n_fragments": str(record["n_fragments"]), "copies": str(copies),
-               "total_ie_kcal_mol": f"{record['total_ie']:.4f}"}
+               "total_ie_kcal_mol": f"{record['total_ie']:.4f}",
+               # the placed side-chain poses as frag:pose,... -- this is exactly condense.py's --poses
+               # spec, and it carries NO glycine spacers (those are added at sequence assembly, not
+               # placed), so condense grows its own backbone/linkers between these, as intended.
+               "poses": ",".join(f"{frags[i]['name']}:{p}" for i, p in record["selected"])}
         old_row = table.get(row["sequence"])
         if old_row is None or float(row["total_ie_kcal_mol"]) < float(old_row["total_ie_kcal_mol"]):
             table[row["sequence"]] = row
-    fields = ["sequence", "start_residue", "n_fragments", "copies", "total_ie_kcal_mol"]
+    fields = ["sequence", "start_residue", "n_fragments", "copies", "total_ie_kcal_mol", "poses"]
     with open(csv_path, "w", newline="") as f:
         writer = csv.DictWriter(f, fieldnames=fields)
         writer.writeheader()
