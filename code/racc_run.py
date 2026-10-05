@@ -19,10 +19,14 @@ import sys
 
 LEG = os.environ.get("LEG", "shuffle_control_dock7")
 WORKROOT = os.path.expanduser(os.environ.get("WORKROOT", "~/remote_work/openmm"))
+# RUNREL is the leg's parent path under WORKROOT; defaults to octinoxate but is overridable for a
+# second molecule (e.g. RUNREL=runs/oxybenzone/md). The scratch dcd dir keys on LEG only, so it needs
+# no change as long as leg names stay unique across systems.
+RUNREL = os.environ.get("RUNREL", "runs/octinoxate/md")
 DCD_DIR = "/scratch5/gaussian/io927423/dcd"
 STEPS = os.environ.get("STEPS", "10000000")
 OMD = os.path.expanduser("~/.conda/envs/openmm-md/bin/omd")
-base = os.path.join(WORKROOT, "runs/octinoxate/md", LEG)
+base = os.path.join(WORKROOT, RUNREL, LEG)
 prod = os.path.join(base, "prod_20ns")
 
 # Preflight, before the GPU does anything: the 2026-10-04 quota fill killed both in-flight legs 70

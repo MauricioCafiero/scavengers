@@ -48,8 +48,8 @@ BUILD_ONLY=${BUILD_ONLY:-0}   # stop after the build, to read the particle count
 # 20 ns (2026-10-04, two accidental runs). `set -u` is set; loop over "$@" explicitly.
 for a in "$@"; do [[ $a == BUILD_ONLY=1 ]] && BUILD_ONLY=1; done
 N=${STRUCT}_dock${POSE}
-M=runs/octinoxate/md/$N
-SRC=${SRC:-runs/octinoxate/md/$STRUCT}   # the cofolded leg: supplies the already-prepped, frame-matched receptor
+M=runs/${SYSNAME}/md/$N                   # SYSNAME parameterizes the run dir (was hardcoded octinoxate)
+SRC=${SRC:-runs/${SYSNAME}/md/$STRUCT}   # the cofolded leg: supplies the already-prepped, frame-matched receptor
                                          # boltzgen cofolds live under boltzgen_local/md/<STRUCT>; pass
                                          # SRC=/Users/cafierom/python_mac/boltzgen_local/md/<STRUCT>
 P=$M/prod_20ns

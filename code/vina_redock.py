@@ -85,8 +85,11 @@ def heavy_atom_coords(pdb_path):
 def pdbqt_models(path):
     """Heavy-atom coordinates of each MODEL in a PDBQT, in file order.
 
-    PDBQT from Open Babel is united-atom: non-polar hydrogens are already gone,
-    so every ATOM record is a heavy atom.
+    PDBQT from Open Babel is united-atom for NON-polar hydrogens, but it KEEPS polar hydrogens (a
+    hydroxyl's H, as in oxybenzone's 2-OH) because they matter for H-bonding during docking. So we
+    must drop H explicitly here rather than assume every ATOM record is heavy -- the AutoDock atom
+    type is the record's last field, and hydrogen types are `HD`/`H`. Octinoxate has no polar H, so
+    this changes nothing for it.
     """
     models, cur = [], []
     for line in open(path):
@@ -96,6 +99,8 @@ def pdbqt_models(path):
             models.append(np.array(cur))
             cur = []
         elif line.startswith(("ATOM", "HETATM")):
+            if line.split()[-1].startswith("H"):
+                continue
             cur.append([float(line[30:38]), float(line[38:46]), float(line[46:54])])
     if cur:
         models.append(np.array(cur))

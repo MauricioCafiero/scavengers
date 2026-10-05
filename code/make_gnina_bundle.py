@@ -84,7 +84,10 @@ def build(structure, dock_root, out_root):
     dest = os.path.join(out_root, structure)
     os.makedirs(dest, exist_ok=True)
     shutil.copy2(os.path.join(work, f"{structure}_protein.pdb"), os.path.join(dest, "receptor.pdb"))
-    for md_root in (os.path.join(REPO, "runs", "octinoxate", "md"),
+    # receptor_h.pdb (prep-protein, with H) is optional. Look in this run's own md/ first (out_root is
+    # runs/<system>/gnina, so its sibling md/ is runs/<system>/md), then the octinoxate/boltzgen roots.
+    for md_root in (os.path.join(os.path.dirname(out_root), "md"),
+                    os.path.join(REPO, "runs", "octinoxate", "md"),
                     os.path.expanduser("~/python_mac/boltzgen_local/md")):
         h = os.path.join(md_root, structure, "protein_fixed.pdb")
         if os.path.exists(h):
