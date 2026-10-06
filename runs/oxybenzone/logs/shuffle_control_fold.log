@@ -1,0 +1,64 @@
+=== started Tue  6 Oct 2026 07:26:34 BST
+design   FGRGKGGGDGEGIGGGLGGSGGWGD
+control  IGDGDGGGEGLGSGGGKGGWGGRGF
+  25 residues both, 15 glycines both
+  side chains FRKDEILSWD -> IDDELSKWRF
+  0/10 side chains left in their designed slot
+Loading weights:   0%|          | 0/203 [00:00<?, ?it/s]Loading weights: 100%|██████████| 203/203 [00:00<00:00, 7081.79it/s]
+  esm variant 0: ITDRDVLIEKLNSDETKKGWIDRFF  (15 linkers filled)
+
+wrote runs/oxybenzone/ox1_shuffle.csv (2 sequences); sequences.csv untouched
+
+ligand SMILES: COc1ccc(C(=O)c2ccccc2)c(O)c1
+
+folding ox1_shuffle (25 residues), no hints
+  Boltz via wrapper /Users/cafierom/python_mac/boltz_local/code/boltz_mps.py
+  pIC50 5.50, dG -7.50 kcal/mol, binder probability 0.20
+
+folding ox1_shuffle_esm0 (25 residues), no hints
+  Boltz via wrapper /Users/cafierom/python_mac/boltz_local/code/boltz_mps.py
+  pIC50 5.22, dG -7.12 kcal/mol, binder probability 0.51
+=== ox1 done Tue  6 Oct 2026 07:29:41 BST
+design   YGDGGRGFGGKGGGGEGIGGGLGGSGDGGGW
+control  RGEGGLGDGGYGGGGSGWGGGIGGDGKGGGF
+  31 residues both, 20 glycines both
+  side chains YDRFKEILSDW -> RELDYSWIDKF
+  0/11 side chains left in their designed slot
+Loading weights:   0%|          | 0/203 [00:00<?, ?it/s]Loading weights: 100%|██████████| 203/203 [00:00<00:00, 7920.78it/s]
+  esm variant 0: RLEGILDDSTYKAISSFWEKRIKSDIKEGDF  (20 linkers filled)
+
+wrote runs/oxybenzone/ox2_shuffle.csv (2 sequences); sequences.csv untouched
+
+ligand SMILES: COc1ccc(C(=O)c2ccccc2)c(O)c1
+
+folding ox2_shuffle (31 residues), no hints
+Traceback (most recent call last):
+  File "/Users/cafierom/python_mac/peptidebuilder/code/shuffle_control.py", line 120, in <module>
+    raise SystemExit(main())
+                     ^^^^^^
+  File "/Users/cafierom/python_mac/peptidebuilder/code/shuffle_control.py", line 107, in main
+    out = run_boltz(rec["name"], rec["sequence"], smiles, False, boltz_dir,
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/cafierom/python_mac/peptidebuilder/code/boltz_check.py", line 68, in run_boltz
+    f.write(YAML.format(sequence=sequence, smiles=smiles,
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+KeyError: 'properties'
+design   YGDGGRGFGGKGGGGEGIGGGLGGSGDGGGW
+control  RGEGGLGDGGYGGGGSGWGGGIGGDGKGGGF
+  31 residues both, 20 glycines both
+  side chains YDRFKEILSDW -> RELDYSWIDKF
+  0/11 side chains left in their designed slot
+Loading weights:   0%|          | 0/203 [00:00<?, ?it/s]Loading weights: 100%|██████████| 203/203 [00:00<00:00, 22072.42it/s]
+  esm variant 0: RLEGILDDSTYKAISSFWEKRIKSDIKEGDF  (20 linkers filled)
+
+wrote runs/oxybenzone/ox2_shuffle.csv (2 sequences); sequences.csv untouched
+
+ligand SMILES: COc1ccc(C(=O)c2ccccc2)c(O)c1
+
+folding ox2_shuffle (31 residues), no hints
+  Boltz via wrapper /Users/cafierom/python_mac/boltz_local/code/boltz_mps.py
+  folded -> boltz/boltz_results_ox2_shuffle/predictions/ox2_shuffle/ox2_shuffle_model_0.cif
+
+folding ox2_shuffle_esm0 (31 residues), no hints
+  Boltz via wrapper /Users/cafierom/python_mac/boltz_local/code/boltz_mps.py
+  folded -> boltz/boltz_results_ox2_shuffle_esm0/predictions/ox2_shuffle_esm0/ox2_shuffle_esm0_model_0.cif

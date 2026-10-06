@@ -30,7 +30,14 @@ sequences:
   - ligand:
       id: B
       smiles: '{smiles}'
-properties:
+{properties}"""
+
+# Requested only when a caller asks for it. The affinity head is off by default here for the same
+# reason `boltz_hints.py` omits it: it spans little across sequences of this size, it adds a second
+# pass, and its input goes through a standardisation that renames the ligand's atoms. The written
+# structure is unaffected either way -- an affinity-on fold and an affinity-off one give byte-identical
+# ligand atom naming in the cif -- so this changes what is computed, not what a fold is comparable to.
+AFFINITY = """properties:
   - affinity:
       binder: B
 """
@@ -48,8 +55,13 @@ def ligand_smiles(outdir: str):
 
 
 def run_boltz(name: str, sequence: str, smiles: str, cyclic: bool, boltz_dir: str,
-              boltz_repo: str = None, boltz_cmd: str = None, boltz_venv: str = None):
-    """Write the yaml for one peptide, co-fold it, and return its affinity results.
+              boltz_repo: str = None, boltz_cmd: str = None, boltz_venv: str = None,
+              affinity: bool = False):
+    """Write the yaml for one peptide and co-fold it.
+
+    Returns the path to the predicted structure, as `{"cif": path}`. With `affinity=True` the
+    affinity head is requested too and its results join that dict; see `AFFINITY` for why that is
+    not the default.
 
     `boltz_env.resolve_boltz` finds Boltz however it is installed here; `boltz_repo` is the old
     hardwired argument, honoured as a venv if a caller still passes one.
@@ -59,7 +71,8 @@ def run_boltz(name: str, sequence: str, smiles: str, cyclic: bool, boltz_dir: st
     yaml_path = os.path.join(boltz_dir, f"{name}.yaml")
     with open(yaml_path, "w") as f:
         f.write(YAML.format(sequence=sequence, smiles=smiles,
-                            cyclic="\n      cyclic: true" if cyclic else ""))
+                            cyclic="\n      cyclic: true" if cyclic else "",
+                            properties=AFFINITY if affinity else ""))
 
     log_path = os.path.join(boltz_dir, f"{name}.log")
     code = _run(yaml_path, boltz_dir, log_path, boltz_cmd=boltz_cmd,
@@ -69,7 +82,15 @@ def run_boltz(name: str, sequence: str, smiles: str, cyclic: bool, boltz_dir: st
         print(f"  {name}: boltz failed (exit {code}), see {log_path}")
         return None
 
-    path = os.path.join(boltz_dir, f"boltz_results_{name}", "predictions", name, f"affinity_{name}.json")
+    pred = os.path.join(boltz_dir, f"boltz_results_{name}", "predictions", name)
+    cif = os.path.join(pred, f"{name}_model_0.cif")
+    if not os.path.exists(cif):
+        print(f"  {name}: no structure written, see {log_path}")
+        return None
+    if not affinity:
+        return {"cif": cif}
+
+    path = os.path.join(pred, f"affinity_{name}.json")
     if not os.path.exists(path):
         print(f"  {name}: no affinity written, see {log_path}")
         return None
@@ -93,7 +114,16 @@ def main(argv=None):
                         help="venv with Boltz (or $PEPTIDEBUILDER_BOLTZ_VENV)")
     parser.add_argument("--boltz-cmd", default=os.environ.get("PEPTIDEBUILDER_BOLTZ_CMD"),
                         help="complete command that runs Boltz")
+    parser.add_argument("--affinity", action="store_true",
+                        help="request the affinity head, which this script's comparison table is "
+                             "made of. Off by default and must be asked for explicitly")
     args = parser.parse_args(argv)
+
+    if not args.affinity:
+        parser.error("this script's output is the affinity comparison table, and the affinity head "
+                     "is no longer requested by default. Pass --affinity to ask for it, or co-fold "
+                     "through boltz_hints.py (designs) or shuffle_control.py --fold (nulls), which "
+                     "write the structure alone.")
 
     with open(os.path.join(args.outdir, "sequences.csv")) as f:
         rows = list(csv.DictReader(f))
@@ -127,7 +157,8 @@ def main(argv=None):
         name = ("cyclo_" if cyclic else "") + sequence
         print(f"[{i}/{len(rows)}] {label} ({len(sequence)} residues){' cyclic' if cyclic else ''}", flush=True)
         out = run_boltz(name, sequence, smiles, cyclic, boltz_dir, args.boltz_repo,
-                        boltz_cmd=args.boltz_cmd, boltz_venv=args.boltz_venv)
+                        boltz_cmd=args.boltz_cmd, boltz_venv=args.boltz_venv,
+                        affinity=args.affinity)
         if out is None:
             continue
         results[label] = {"sequence": label, "n_residues": len(sequence),

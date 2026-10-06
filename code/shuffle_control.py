@@ -21,6 +21,8 @@ comparison is MM/GBSA against the designed folds.
 Usage:
     python code/shuffle_control.py runs/octinoxate --design design_shell3.json --seed 2
     python code/shuffle_control.py runs/octinoxate --design design_shell3.json --seed 2 --fold
+    python code/shuffle_control.py runs/oxybenzone --design design_shell2.json --seed 2 \
+        --name ox2_shuffle --fold      # one control per shell needs one --name per shell
 """
 import argparse
 import csv
@@ -51,6 +53,10 @@ def main(argv=None):
     p.add_argument("--design", default="design.json",
                    help="the design json to shuffle, relative to outdir (default design.json)")
     p.add_argument("--seed", type=int, default=2, help="shuffle seed (default 2)")
+    p.add_argument("--name", default="shuffle_control",
+                   help="name for this control, used for its records and its CSV (default "
+                        "shuffle_control). Give each shell's control its own name when a run has "
+                        "more than one, e.g. ox1_shuffle, or the second overwrites the first")
     p.add_argument("--variants", type=int, default=1, help="ESM2 linker-filled variants (default 1)")
     p.add_argument("--fold", action="store_true", help="co-fold the control and its variant in Boltz")
     p.add_argument("--boltz-repo", default=os.environ.get("PEPTIDEBUILDER_BOLTZ_REPO"))
@@ -70,7 +76,7 @@ def main(argv=None):
     if ctrl == design:
         sys.exit("the shuffle reproduced the design; choose another --seed")
 
-    records = [{"name": "shuffle_control", "sequence": ctrl, "source": f"{args.design} seed {args.seed}"}]
+    records = [{"name": args.name, "sequence": ctrl, "source": f"{args.design} seed {args.seed}"}]
 
     if args.variants:
         from fill_linkers import fill
@@ -80,10 +86,10 @@ def main(argv=None):
         for r in fill([ctrl], variants=args.variants, seed=args.seed):
             filled, j = r["filled"], r["variant"]
             print(f"  esm variant {j}: {filled}  ({len(r['steps'])} linkers filled)")
-            records.append({"name": f"shuffle_control_esm{j}", "sequence": filled,
-                            "source": f"esm2 fill of shuffle_control, seed {args.seed}"})
+            records.append({"name": f"{args.name}_esm{j}", "sequence": filled,
+                            "source": f"esm2 fill of {args.name}, seed {args.seed}"})
 
-    out_csv = os.path.join(args.outdir, "shuffle_control.csv")
+    out_csv = os.path.join(args.outdir, f"{args.name}.csv")
     with open(out_csv, "w", newline="") as fh:
         w = csv.DictWriter(fh, fieldnames=["name", "sequence", "source"])
         w.writeheader()
@@ -103,8 +109,8 @@ def main(argv=None):
             if out is None:
                 print(f"  {rec['name']}: Boltz produced nothing")
                 continue
-            print(f"  pIC50 {out['pIC50']:.2f}, dG {out['dG_kcal_mol']:.2f} kcal/mol, "
-                  f"binder probability {out['binder_probability']:.2f}")
+            # No affinity: the structure is the deliverable, and check_fold.py is what reads it.
+            print(f"  folded -> {os.path.relpath(out['cif'], args.outdir)}")
     else:
         print("\nre-run with --fold to co-fold these, or fold them however you prefer")
     return 0
