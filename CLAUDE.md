@@ -151,6 +151,43 @@ argv, so a **no-argument run writes nothing** — pass the full glob
 never a single leg (a single-leg pass *overwrites* the file with one row). zsh also aborts the whole
 launch if one glob in the list matches nothing (`boltzgen_local` has no `prod_L1_modal` legs).
 
+## GNINA rescoring (the `gnina_local` repo) — retrieving results
+
+GNINA CNNaffinity rescoring runs OUTSIDE this repo, on a GPU, through the user's **public** GitHub repo
+**`github.com/MauricioCafiero/gnina_local`** — it is not a local directory, not `dock_assist`, and must
+not be cloned. The flow: `make_gnina_bundle.py --system <mol>` writes `runs/<mol>/gnina/` (per structure:
+`receptor.pdb`, `receptor_h.pdb`, `poses_with_reference.sdf`, `ref_pose.sdf`, plus `reference.csv`) and
+that bundle is committed to scavengers; the user runs GNINA against it on the gnina_local side; the
+**results are committed back into `gnina_local`**, not here. So the recurring task is *retrieving* those
+results.
+
+**How to retrieve (this step has repeatedly cost me turns — follow it verbatim):**
+- gnina_local is a **public repo the user has told you to look in**: navigate it directly with the
+  GitHub API / raw URLs. Do NOT ask where it is, and do NOT treat exploring it as a banned "search" —
+  the never-search-the-disk rule is about the *local* filesystem only, not a public repo you were pointed at.
+- **Do not clone it.** `gh` is not installed; use raw URLs.
+- Layout: `rescoring/<molecule>/results_<mode>/`, `<mode>` ∈
+  {`receptor_h_score_only`, `receptor_score_only`, `receptor_minimize`}. Each dir holds
+  `gnina_scores.csv` (the result), `gnina_version.txt`, and per-structure `<name>.log` + `<name>_scored.sdf`.
+- **If unsure which files/modes to pull, mirror the previous molecule's `runs/<prev>/gnina/`.** Octinoxate
+  (the template) keeps **all three modes**, each a subdir `runs/<mol>/gnina/results_<mode>/` holding the
+  per-structure `*_scored.sdf` files and a `gnina_scores.csv`. Pull every structure's `*_scored.sdf` into
+  those subdirs (the script below needs the SDFs, not just the CSV):
+  `curl -sf https://raw.githubusercontent.com/MauricioCafiero/gnina_local/main/rescoring/<mol>/results_<mode>/<struct>_scored.sdf -o runs/<mol>/gnina/results_<mode>/<struct>_scored.sdf`
+- **Then USE the existing script — do NOT hand-roll the ranking or the pick** (project rule 1: use the
+  scripts that exist, don't reimplement). From `runs/<mol>/gnina/`, run `collect_gnina.py` (it lives at
+  `runs/octinoxate/gnina/collect_gnina.py`) once per mode:
+  `python <path>/collect_gnina.py results_<mode> --reference reference.csv`. It reads the scored SDFs,
+  (re)writes `results_<mode>/gnina_scores.csv`, and prints where GNINA ranks the predicted pose 0 by each
+  score. `gnina_scores.csv` IS this script's output, not a file to parse by hand.
+- **Primary mode is `receptor_score_only`** — heavy-atom receptor, `--score_only` (CNN scores the exact
+  pose, no minimisation), per octinoxate's gnina README; `receptor_h_score_only` and `receptor_minimize`
+  are second passes. Columns include `CNNscore`, `CNNaffinity`, `minimizedAffinity`.
+- **The GNINA-pick pose** (queued as a docked MD leg AFTER the Vina-p1 legs) is the docked pose (pose >= 1)
+  with the **max `CNNaffinity`, consistent across all three passes**, corroborated by `minimizedAffinity`
+  (argmin). It becomes `<struct>_dock<K>` via `run_dock_pose_md.sh STRUCT=<struct> POSE=<K>`; if the pick is
+  pose 1 it coincides with the Vina-p1 leg, so no new leg. This feeds the `gnina_p*` REFERENCE fields.
+
 ## Reporting results
 
 **Lead with MM/GBSA free energy and ligand retention, grouped by pipeline.** That is the comparison that

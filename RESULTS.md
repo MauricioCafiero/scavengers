@@ -258,6 +258,115 @@ that never folded, not globules that opened. The bg33_1/bg33_2 docked legs are t
 proves the difference: starting from a pose the fold was not made around, the extended rod folds up
 around the bound ligand.
 
+## Oxybenzone: a second molecule through the pipeline
+
+The transfer test (NEXT_STEPS item 10): the peptidebuilder shell pipeline run on **oxybenzone**
+(benzophenone-3), with its **own** set of the five headline tables and the same metrics octinoxate got.
+Three shells were chosen by chemistry — **charged** (`ox1`), **aromatic** (`ox2`), **hydrophilic**
+(`ox3`) — plus two ESM2 linker variants (`esm1` of the charged and aromatic shells). All MD on the
+Reading ARC, 20 ns, dodecahedral, UMA shell scoring excluded. The input→production ligand slide is
+≤ 2.3 Å on every one of the 13 legs, so every cell is attributable to its starting pose.
+
+**The aromatic shell wins decisively.** `ox2` co-folds at **−24.2 kcal/mol at 100% retention**, and its
+GNINA-pick docked pose matches it (−24.0, 100%); the hydrophilic shell is solid (~−19 to −20, full
+retention); the charged shell is weak (~−10) and the only one that lets the ligand go. Oxybenzone is a
+benzophenone, so aromatic side-chain stacking paying off is the expected chemistry — a clean transfer
+result distinct from octinoxate's.
+
+### Oxybenzone — MM/GBSA ΔG by starting pose
+
+ΔG (ligand retention over 20 ns), kcal/mol. `=p1` = GNINA's top pose is pose 1, the same leg as top-AutoDock.
+
+| peptide | shell | co-folded | top-AutoDock p1 | top-GNINA |
+|---|---|---|---|---|
+| `ox2_orig` | aromatic | **−24.21 (100%)** | −17.22 (99.9%) | **−24.00 (100%, p4)** |
+| `ox2_esm1` | aromatic·esm2 | −20.81 (100%) | −15.22 (80.5%) | −7.40 (33.9%, p3) |
+| `ox3_orig` | hydrophilic | −18.84 (100%) | −19.98 (94.2%) | =p1 |
+| `ox1_esm1` | charged·esm2 | −10.70 (75.0%) | −16.87 (98.5%) | =p1 |
+| `ox1_orig` | charged | −10.31 (49.1%) | −8.80 (51.0%) | −10.42 (77.2%, p4) |
+
+### Oxybenzone — window convergence
+
+Leading 5/10/15 ns slices and the full 20 ns. A series that drifts weaker with a rising spread is a leg
+that released late (cross-check the residence table).
+
+| leg | 5 ns | 10 ns | 15 ns | 20 ns |
+|---|---|---|---|---|
+| `ox2_orig_f8` (co-fold) | −23.50 | −23.89 | −24.03 | −24.21 |
+| `ox2_orig_f8_dock1` (Vina p1) | −15.98 | −15.26 | −15.91 | −17.22 |
+| `ox2_orig_f8_dock4` (GNINA p4) | −21.25 | −23.34 | −23.50 | −24.00 |
+| `ox2_esm1_f8` (co-fold) | −23.86 | −23.54 | −22.49 | −20.81 |
+| `ox2_esm1_f8_dock1` (Vina p1) | −6.32 | −10.59 | −13.61 | −15.22 |
+| `ox2_esm1_f8_dock3` (GNINA p3) | −15.70 | −11.89 | −9.03 | −7.40 |
+| `ox3_orig_f8` (co-fold) | −20.56 | −20.04 | −19.06 | −18.84 |
+| `ox3_orig_f8_dock1` (Vina p1) | −25.12 | −25.39 | −23.70 | −19.98 |
+| `ox1_esm1_f8` (co-fold) | −17.33 | −12.10 | −10.61 | −10.70 |
+| `ox1_esm1_f8_dock1` (Vina p1) | −19.51 | −19.09 | −17.97 | −16.87 |
+| `ox1_orig_f12` (co-fold) | −20.07 | −16.35 | −12.98 | −10.31 |
+| `ox1_orig_f12_dock1` (Vina p1) | −17.87 | −12.30 | −9.71 | −8.80 |
+| `ox1_orig_f12_dock4` (GNINA p4) | −19.31 | −12.81 | −11.35 | −10.42 |
+
+### Oxybenzone — residence and release
+
+Residence within 10 Å of the peptide centroid; `late` is the share of released frames in the second half.
+
+| leg | residence | released frames | episodes | longest | late |
+|---|---|---|---|---|---|
+| `ox2_orig_f8` | 100.0% | 0 | 0 | — | — |
+| `ox2_orig_f8_dock1` | 99.9% | 0 | 0 | — | — |
+| `ox2_orig_f8_dock4` | 100.0% | 0 | 0 | — | — |
+| `ox2_esm1_f8` | 100.0% | 0 | 0 | — | — |
+| `ox2_esm1_f8_dock1` | 80.5% | 7 | 6 | 20 ps | 0% |
+| `ox2_esm1_f8_dock3` | 33.9% | 503 | 25 | 1500 ps | 99% |
+| `ox3_orig_f8` | 100.0% | 0 | 0 | — | — |
+| `ox3_orig_f8_dock1` | 94.2% | 61 | 3 | 540 ps | 100% |
+| `ox1_esm1_f8` | 75.0% | 106 | 18 | 610 ps | 33% |
+| `ox1_esm1_f8_dock1` | 98.5% | 0 | 0 | — | — |
+| `ox1_orig_f12` | 49.1% | 225 | 36 | 350 ps | 100% |
+| `ox1_orig_f12_dock1` | 51.0% | 86 | 18 | 540 ps | 83% |
+| `ox1_orig_f12_dock4` | 77.2% | 57 | 8 | 420 ps | 12% |
+
+### Oxybenzone — peptide structural stability
+
+Cα RMSD (final, max) and Rg start→end, Å.
+
+| peptide | pose | Cα final | Cα max | Rg start→end |
+|---|---|---|---|---|
+| `ox2_orig_f8` | co-folded | 5.1 | 6.0 | 8.6 → 8.3 |
+| | Vina p1 | 8.0 | 9.4 | 9.0 → 9.1 |
+| | GNINA p4 | 4.2 | 4.4 | 8.8 → 9.1 |
+| `ox2_esm1_f8` | co-folded | 1.7 | 4.4 | 9.2 → 9.1 |
+| | Vina p1 | 2.4 | 4.2 | 8.7 → 8.9 |
+| | GNINA p3 | 5.0 | 7.1 | 9.1 → 9.8 |
+| `ox3_orig_f8` | co-folded | 4.1 | 5.4 | 8.4 → 8.2 |
+| | Vina p1 | 4.3 | 5.8 | 7.8 → 8.3 |
+| `ox1_esm1_f8` | co-folded | 5.1 | 5.9 | 9.2 → 10.2 |
+| | Vina p1 | 3.2 | 4.5 | 9.6 → 9.3 |
+| `ox1_orig_f12` | co-folded | 4.0 | 6.0 | 8.1 → 7.7 |
+| | Vina p1 | 6.3 | 7.6 | 8.5 → 8.5 |
+| | GNINA p4 | 5.5 | 6.5 | 8.1 → 7.7 |
+
+### Oxybenzone — residue-pair contacts
+
+Mean simultaneous designed side-chain **pairs** engaging the ligand (`sim`) and realised pairs against
+the [n−1, n(n−1)/2] band; `sim` is the best MM/GBSA predictor in the octinoxate work.
+
+| leg | slots | sim | pairs | band% |
+|---|---|---|---|---|
+| `ox2_orig_f8` | 11 | 0.89 | 10/55 | 0 |
+| `ox2_orig_f8_dock1` | 11 | 1.71 | 28/55 | 40 |
+| `ox2_orig_f8_dock4` | 11 | 0.65 | 5/55 | −11 |
+| `ox2_esm1_f8` | 11 | **4.53** | 36/55 | 58 |
+| `ox2_esm1_f8_dock1` | 11 | 2.47 | 22/55 | 27 |
+| `ox2_esm1_f8_dock3` | 11 | 1.71 | 34/55 | 53 |
+| `ox3_orig_f8` | 10 | 2.26 | 26/45 | 47 |
+| `ox3_orig_f8_dock1` | 10 | 2.46 | 21/45 | 33 |
+| `ox1_esm1_f8` | 10 | 1.97 | 30/45 | 58 |
+| `ox1_esm1_f8_dock1` | 10 | 2.89 | 26/45 | 47 |
+| `ox1_orig_f12` | 10 | 1.70 | 42/45 | 92 |
+| `ox1_orig_f12_dock1` | 10 | 1.84 | 39/45 | 83 |
+| `ox1_orig_f12_dock4` | 10 | 2.07 | 38/45 | 81 |
+
 ## Contents
 
 - [The table to read first: MM/GBSA by starting pose](#the-table-to-read-first-mmgbsa-by-starting-pose)

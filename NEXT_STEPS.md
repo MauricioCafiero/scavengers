@@ -585,6 +585,18 @@ The September 2026 allocation was spent (about $4 across scoring and six 20 ns r
     MD recipe transfer unchanged. Rigid rather than flexible, which trades half the stated criterion;
     tested transfer is the point, so the rigidity is the feature.
 
+    **Design generation to complete (added 2026-10-05).** The peptidebuilder side is done — three shells
+    (charged `ox1`, aromatic `ox2`, hydrophilic `ox3`), folded, with Vina + GNINA bundles and the
+    co-fold / Vina-p1 / GNINA-pick MD legs running on RACC. Still to generate, for the full two-pipeline
+    comparison on oxybenzone:
+    - **Four BoltzGen candidates** — co-folded designs via `~/python_mac/boltzgen_local` (MPS,
+      `precision=32` mandatory, ~100 s/design; four local patches), then taken through the same
+      co-fold -> dock (Vina + GNINA) -> dynamics matrix as the shells, so BoltzGen and peptidebuilder are
+      compared on identical metrics (as octinoxate's `bg33_*` were).
+    - **Two null candidates** — shuffle controls (`shuffle_control.py`: the same residues in a random
+      arrangement, keeping the linker pattern, one ESM2 variant), the null baseline every design is read
+      against, mirroring octinoxate's `shuffle_control` / `shuffle_control_esm0`.
+
 
 ## Environment map
 
