@@ -1,0 +1,88 @@
+Tue  6 Oct 2026 16:26:22 BST
+--- whole-run MM/GBSA ox2_shuffle_esm0
+/Users/cafierom/miniforge3/envs/openmm-md/lib/python3.11/site-packages/mdtraj/formats/netcdf.py:154: UserWarning: Warning: The 'netCDF4' Python package is not installed. MDTraj is using the 'scipy' implementation to read and write netCDF files,which can be significantly slower.
+For improved performance, consider installing netCDF4. See installation instructions at:
+https://unidata.github.io/netcdf4-python/#quick-install
+  warnings.warn(warning_message)
+[build] hetero discovery (resname | HETNAM | min dist to ligand | action):
+[mmgbsa] cofactor residues to re-add: 0 ([])
+[mmgbsa] solute modeller: 542 atoms
+[mmgbsa] prmtop + inpcrd -> mmgbsa/complex.prmtop (542 atoms, radii=['H(N)-modified Bondi radii (mbondi2)'])
+[mmgbsa] receptor + ligand prmtops -> mmgbsa/receptor.prmtop, mmgbsa/ligand.prmtop
+[mmgbsa] trajectory -> mmgbsa/traj.nc (542 atoms, 20000 frames)
+[mmgbsa] MMPBSA.py input -> mmgbsa/mmgbsa.in
+[mmgbsa] prmtop atoms: 542; ligand residue present: True
+[mmgbsa] MMPBSA.py done -> mmgbsa/FINAL_RESULTS_MMPBSA.dat
+DELTA TOTAL                -12.0365                3.3564              0.0237
+Tue  6 Oct 2026 16:32:48 BST
+--- windows ox2_shuffle
+[5 ns] kept 5000/20000 frames
+[5 ns] DELTA TOTAL                 -6.1445                2.5134              0.0355
+[10 ns] kept 10000/20000 frames
+[10 ns] DELTA TOTAL                 -5.0043                3.3392              0.0334
+[15 ns] kept 15000/20000 frames
+[15 ns] DELTA TOTAL                 -5.1279                3.4082              0.0278
+WINDOW_MODAL_DONE[ox2_shuffle]
+Tue  6 Oct 2026 16:38:23 BST
+--- windows ox2_shuffle_esm0
+[5 ns] kept 5000/20000 frames
+[5 ns] DELTA TOTAL                 -9.7061                2.4817              0.0351
+[10 ns] kept 10000/20000 frames
+[10 ns] DELTA TOTAL                -11.6531                3.3528              0.0335
+[15 ns] kept 15000/20000 frames
+[15 ns] DELTA TOTAL                -11.9304                3.2732              0.0267
+WINDOW_MODAL_DONE[ox2_shuffle_esm0]
+Tue  6 Oct 2026 16:48:33 BST
+--- frames ox2_shuffle
+
+=== /Users/cafierom/python_mac/peptidebuilder/runs/oxybenzone/md/ox2_shuffle/prod_20ns
+  20000 frames total; window 18.0-20.0 ns
+  /Users/cafierom/python_mac/peptidebuilder/runs/oxybenzone/md/ox2_shuffle/prod_20ns/frames_last.pdb  (10 models)
+  /Users/cafierom/python_mac/peptidebuilder/runs/oxybenzone/md/ox2_shuffle/prod_20ns/frame_medoid.pdb  (frame at 19.09 ns, 0.97 A from the window mean; window spread 1.86 A)
+
+in PyMOL, for the ensemble:
+  load frames_last.pdb, ens
+  set all_states, on
+  hide everything; show cartoon, polymer; show sticks, not polymer
+  color grey70, polymer; color red, not polymer
+
+or for a single clean frame:
+  load frame_medoid.pdb, best
+--- pair_contacts ox2_shuffle
+
+=== ox2_shuffle  (slots from design_shell2.json)
+  11 slots: R0 E2 L5 D7 Y10 S15 W17 I21 D24 K26 F30
+  simultaneous side chains on the ligand: mean 1.21, max 4, >=2 in 39% of frames
+  pairs realised 29/55 (53% of ceiling, 42% of the way up the [10, 55] band)
+  held >=5% of the run: 1   adjacent 7/10   non-adjacent 22/45 (49%)   long-range gap>=7 5/10
+  slots never in contact: 0
+
+wrote /Users/cafierom/python_mac/peptidebuilder/runs/oxybenzone/md/ox2_shuffle/pair_contacts.csv
+Tue  6 Oct 2026 16:48:45 BST
+--- frames ox2_shuffle_esm0
+
+=== /Users/cafierom/python_mac/peptidebuilder/runs/oxybenzone/md/ox2_shuffle_esm0/prod_20ns
+  20000 frames total; window 18.0-20.0 ns
+  /Users/cafierom/python_mac/peptidebuilder/runs/oxybenzone/md/ox2_shuffle_esm0/prod_20ns/frames_last.pdb  (10 models)
+  /Users/cafierom/python_mac/peptidebuilder/runs/oxybenzone/md/ox2_shuffle_esm0/prod_20ns/frame_medoid.pdb  (frame at 19.0 ns, 1.26 A from the window mean; window spread 2.36 A)
+
+in PyMOL, for the ensemble:
+  load frames_last.pdb, ens
+  set all_states, on
+  hide everything; show cartoon, polymer; show sticks, not polymer
+  color grey70, polymer; color red, not polymer
+
+or for a single clean frame:
+  load frame_medoid.pdb, best
+--- pair_contacts ox2_shuffle_esm0
+
+=== ox2_shuffle_esm0  (slots from design_shell2.json)
+  11 slots: R0 E2 L5 D7 Y10 S15 W17 I21 D24 K26 F30
+  simultaneous side chains on the ligand: mean 2.21, max 5, >=2 in 78% of frames
+  pairs realised 18/55 (33% of ceiling, 18% of the way up the [10, 55] band)
+  held >=5% of the run: 6   adjacent 4/10   non-adjacent 14/45 (31%)   long-range gap>=7 2/10
+  slots never in contact: 4
+
+wrote /Users/cafierom/python_mac/peptidebuilder/runs/oxybenzone/md/ox2_shuffle_esm0/pair_contacts.csv
+TAIL_DONE
+Tue  6 Oct 2026 16:48:57 BST

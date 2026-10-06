@@ -281,10 +281,27 @@ The `_f8`/`_f12` suffix is the fold version used for each peptide — `ox1_orig`
 | peptide | shell | co-folded | top-AutoDock p1 | top-GNINA |
 |---|---|---|---|---|
 | `ox2_orig_f8` | aromatic | **−24.21 (100%)** | −17.22 (99.9%) | **−24.00 (100%, p4)** |
+| `ox2_shuffle` | aromatic·**null** | −5.30 (7.1%) | −5.86 (26.2%) | −2.09 (1.2%, p4) |
 | `ox2_esm1_f8` | aromatic·esm2 | −20.81 (100%) | −15.22 (80.5%) | −7.40 (33.9%, p3) |
+| `ox2_shuffle_esm0` | aromatic·esm2·**null** | −12.04 (94.7%) | −12.78 (97.4%) | −11.87 (95.5%, p9) |
 | `ox3_orig_f8` | hydrophilic | −18.84 (100%) | −19.98 (94.2%) | =p1 |
 | `ox1_esm1_f8` | charged·esm2 | −10.70 (75.0%) | −16.87 (98.5%) | =p1 |
 | `ox1_orig_f12` | charged | −10.31 (49.1%) | −8.80 (51.0%) | −10.42 (77.2%, p4) |
+
+The two `shuffle` rows are the null: `shuffle_control.py` on `design_shell2.json`, the same 11 side
+chains in a random arrangement with the glycine spacer pattern held fixed and no side chain left in its
+designed slot, so the *ordering* is the only variable. **The designed arrangement is worth 18.9 kcal/mol
+on the glycine pair and 8.8 on the ESM2 pair**, and the null loses in all six cells — docking does not
+rescue it. That is the comparison octinoxate could not deliver, where `shuffle_control` outscored
+`orig_f12`; here it goes the design's way twice, on one molecule and one shell.
+
+The two pairs fail differently, and only the second is about the arrangement alone. `ox2_shuffle`'s fold
+never enclosed the ligand to begin with (enclosure 0.58, centroid separation 9.2 Å against the design's
+0.975 and 2.7 Å), and its input→production centroid shift was only 2.33 Å, so equilibration behaved and
+the ligand simply started outside and stayed there — the arrangement damaged the *fold*. `ox2_shuffle_esm0`
+is the sharper test: it holds the ligand 94.7–97.4% of the run with the highest simultaneous engagement
+anywhere in this set, and still scores ~8 kcal/mol worse than its design. Contact along a rod's surface
+is worth less than enclosure.
 
 ### Oxybenzone — window convergence
 
@@ -296,9 +313,15 @@ that released late (cross-check the residence table).
 | `ox2_orig_f8` (co-fold) | −23.50 | −23.89 | −24.03 | −24.21 |
 | `ox2_orig_f8_dock1` (Vina p1) | −15.98 | −15.26 | −15.91 | −17.22 |
 | `ox2_orig_f8_dock4` (GNINA p4) | −21.25 | −23.34 | −23.50 | −24.00 |
+| `ox2_shuffle` (null, co-fold) | −6.14 | −5.00 | −5.13 | −5.30 |
+| `ox2_shuffle_dock1` (null, Vina p1) | −4.63 | −5.89 | −5.92 | −5.86 |
+| `ox2_shuffle_dock4` (null, GNINA p4) | −2.96 | −1.69 | −1.33 | −2.09 |
 | `ox2_esm1_f8` (co-fold) | −23.86 | −23.54 | −22.49 | −20.81 |
 | `ox2_esm1_f8_dock1` (Vina p1) | −6.32 | −10.59 | −13.61 | −15.22 |
 | `ox2_esm1_f8_dock3` (GNINA p3) | −15.70 | −11.89 | −9.03 | −7.40 |
+| `ox2_shuffle_esm0` (null, co-fold) | −9.71 | −11.65 | −11.93 | −12.04 |
+| `ox2_shuffle_esm0_dock1` (null, Vina p1) | −11.95 | −12.63 | −12.20 | −12.78 |
+| `ox2_shuffle_esm0_dock9` (null, GNINA p9) | −13.12 | −11.79 | −11.17 | −11.87 |
 | `ox3_orig_f8` (co-fold) | −20.56 | −20.04 | −19.06 | −18.84 |
 | `ox3_orig_f8_dock1` (Vina p1) | −25.12 | −25.39 | −23.70 | −19.98 |
 | `ox1_esm1_f8` (co-fold) | −17.33 | −12.10 | −10.61 | −10.70 |
@@ -316,9 +339,15 @@ Residence within 10 Å of the peptide centroid; `late` is the share of released 
 | `ox2_orig_f8` | 100.0% | 0 | 0 | — | — |
 | `ox2_orig_f8_dock1` | 99.9% | 0 | 0 | — | — |
 | `ox2_orig_f8_dock4` | 100.0% | 0 | 0 | — | — |
+| `ox2_shuffle` (null) | 7.1% | 296 | 41 | 620 ps | 33% |
+| `ox2_shuffle_dock1` (null) | 26.2% | 293 | 40 | 950 ps | 17% |
+| `ox2_shuffle_dock4` (null) | 1.2% | 1233 | 35 | 3390 ps | 45% |
 | `ox2_esm1_f8` | 100.0% | 0 | 0 | — | — |
 | `ox2_esm1_f8_dock1` | 80.5% | 7 | 6 | 20 ps | 0% |
 | `ox2_esm1_f8_dock3` | 33.9% | 503 | 25 | 1500 ps | 99% |
+| `ox2_shuffle_esm0` (null) | 94.7% | 7 | 2 | 60 ps | 86% |
+| `ox2_shuffle_esm0_dock1` (null) | 97.4% | 0 | 0 | — | — |
+| `ox2_shuffle_esm0_dock9` (null) | 95.5% | 6 | 5 | 20 ps | 50% |
 | `ox3_orig_f8` | 100.0% | 0 | 0 | — | — |
 | `ox3_orig_f8_dock1` | 94.2% | 61 | 3 | 540 ps | 100% |
 | `ox1_esm1_f8` | 75.0% | 106 | 18 | 610 ps | 33% |
@@ -336,9 +365,15 @@ Cα RMSD (final, max) and Rg start→end, Å.
 | `ox2_orig_f8` | co-folded | 5.1 | 6.0 | 8.6 → 8.3 |
 | | Vina p1 | 8.0 | 9.4 | 9.0 → 9.1 |
 | | GNINA p4 | 4.2 | 4.4 | 8.8 → 9.1 |
+| `ox2_shuffle` (null) | co-folded | 4.6 | 7.6 | 8.3 → 8.2 |
+| | Vina p1 | 4.8 | 5.4 | 8.3 → 9.0 |
+| | GNINA p4 | 5.9 | 7.0 | 8.5 → 8.8 |
 | `ox2_esm1_f8` | co-folded | 1.7 | 4.4 | 9.2 → 9.1 |
 | | Vina p1 | 2.4 | 4.2 | 8.7 → 8.9 |
 | | GNINA p3 | 5.0 | 7.1 | 9.1 → 9.8 |
+| `ox2_shuffle_esm0` (null) | co-folded | 2.3 | 6.2 | 12.1 → 12.7 |
+| | Vina p1 | 2.9 | 6.1 | 12.2 → 12.7 |
+| | GNINA p9 | 4.1 | 5.7 | 12.2 → 12.3 |
 | `ox3_orig_f8` | co-folded | 4.1 | 5.4 | 8.4 → 8.2 |
 | | Vina p1 | 4.3 | 5.8 | 7.8 → 8.3 |
 | `ox1_esm1_f8` | co-folded | 5.1 | 5.9 | 9.2 → 10.2 |
@@ -357,9 +392,22 @@ the [n−1, n(n−1)/2] band; `sim` is the best MM/GBSA predictor in the octinox
 | `ox2_orig_f8` | 11 | 0.89 | 10/55 | 0 |
 | `ox2_orig_f8_dock1` | 11 | 1.71 | 28/55 | 40 |
 | `ox2_orig_f8_dock4` | 11 | 0.65 | 5/55 | −11 |
+| `ox2_shuffle` (null) | 11 | 1.21 | 29/55 | 42 |
+| `ox2_shuffle_dock1` (null) | 11 | 1.23 | 22/55 | 27 |
+| `ox2_shuffle_dock4` (null) | 11 | 0.47 | 9/55 | −2 |
 | `ox2_esm1_f8` | 11 | **4.53** | 36/55 | 58 |
 | `ox2_esm1_f8_dock1` | 11 | 2.47 | 22/55 | 27 |
 | `ox2_esm1_f8_dock3` | 11 | 1.71 | 34/55 | 53 |
+| `ox2_shuffle_esm0` (null) | 11 | 2.21 | 18/55 | 18 |
+| `ox2_shuffle_esm0_dock1` (null) | 11 | 2.73 | 15/55 | 11 |
+| `ox2_shuffle_esm0_dock9` (null) | 11 | 2.96 | 23/55 | 29 |
+
+The null breaks the engagement predictor. `sim` was the best MM/GBSA predictor in the octinoxate work,
+but the `esm0` null posts 2.21–2.96 — above its own design's cells on the Vina and GNINA rows — while
+scoring 8 kcal/mol worse, and `ox2_orig_f8` wins its pair on ΔG with the *lowest* `sim` of the four.
+Simultaneous engagement counts contacts without asking whether they surround the ligand, and a rod that
+grips along its length scores well on it. `dead_slots` is the clearer signal here: 3–5 of the esm0 null's
+11 slots never touch the ligand at all, against 0 for the glycine null.
 | `ox3_orig_f8` | 10 | 2.26 | 26/45 | 47 |
 | `ox3_orig_f8_dock1` | 10 | 2.46 | 21/45 | 33 |
 | `ox1_esm1_f8` | 10 | 1.97 | 30/45 | 58 |

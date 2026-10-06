@@ -70,6 +70,15 @@ REFERENCE = {
     "bg33_1":               dict(dg=-11.31, dg_err=0.03, residence=14.5,  releases=16, source="boltzgen",
                                  vina_p1_dg=-13.47, vina_p1_residence=44.7, vina_p1_releases=7,
                                  gnina_p2_dg=-12.55, gnina_p2_residence=42.5, gnina_p2_releases=11),
+    # Oxybenzone's nulls, measured 2026-10-06 on racc (runs/oxybenzone/md/mmgbsa_summary.csv +
+    # md_contacts). Both are shuffles of design_shell2.json, so they are read against ox2_orig_f8
+    # (-24.21) and ox2_esm1_f8 (-20.81): the arrangement is worth 18.9 and 8.8 kcal/mol here.
+    "ox2_shuffle":          dict(dg=-5.30,  dg_err=0.02, residence=7.1,   releases=41, source="peptidebuilder (null)",
+                                 vina_p1_dg=-5.86, vina_p1_residence=26.2, vina_p1_releases=40,
+                                 gnina_p4_dg=-2.09, gnina_p4_residence=1.2, gnina_p4_releases=35),
+    "ox2_shuffle_esm0":     dict(dg=-12.04, dg_err=0.02, residence=94.7,  releases=2,  source="peptidebuilder (null)",
+                                 vina_p1_dg=-12.78, vina_p1_residence=97.4, vina_p1_releases=0,
+                                 gnina_p9_dg=-11.87, gnina_p9_residence=95.5, gnina_p9_releases=5),
 }
 
 

@@ -1,0 +1,172 @@
+Tue  6 Oct 2026 20:52:06 BST: tail for ox2_shuffle_dock4
+Tue  6 Oct 2026 20:52:06 BST
+### ox2_shuffle_dock4: 20 ns on pose 4 of ox2_shuffle (box=dodecahedron)
+trajectory present in runs/oxybenzone/md/ox2_shuffle_dock4/prod_20ns (traj.dcd or traj_wrapped.xtc), skipping the dynamics
+
+=== runs/oxybenzone/md/ox2_shuffle_dock4/prod_20ns
+20000 frames, 185 peptide / 17 ligand heavy atoms
+     ns  contacts   sep A  pep Rg
+    2.0      11.4   14.15    8.53
+    4.0       6.4   16.46    8.22
+    6.0       0.3   21.56    8.86
+    8.0       0.0   23.79    8.53
+   10.0       2.7   20.52    8.49
+   12.0       4.0   19.41    8.41
+   14.0       0.0   19.97    8.52
+   16.0       7.0   16.08    8.90
+   18.0      17.1   12.51    8.53
+   20.0       4.6   20.88    8.81
+whole run: contacts 11.4 -> 4.6 (mean 5.3), separation 14.15 -> 20.88 A (max 32.86), closest heavy-atom approach 2.36 A
+  residence within 10 A: 1.2% of the run
+  release (at 10.0 ps spacing): 1233 frames (61.65%) in 35 episodes, longest 3390.0 ps, 12.33 ns detached, 45% of it in the second half
+
+wrote runs/oxybenzone/md/ox2_shuffle_dock4/md_contacts.csv
+
+=== runs/oxybenzone/md/ox2_shuffle_dock4/prod_20ns
+  20000 frames total; window 18.0-20.0 ns
+  runs/oxybenzone/md/ox2_shuffle_dock4/prod_20ns/frames_last.pdb  (10 models)
+  runs/oxybenzone/md/ox2_shuffle_dock4/prod_20ns/frame_medoid.pdb  (frame at 18.74 ns, 1.71 A from the window mean; window spread 2.75 A)
+
+in PyMOL, for the ensemble:
+  load frames_last.pdb, ens
+  set all_states, on
+  hide everything; show cartoon, polymer; show sticks, not polymer
+  color grey70, polymer; color red, not polymer
+
+or for a single clean frame:
+  load frame_medoid.pdb, best
+DONE ox2_shuffle_dock4
+Tue  6 Oct 2026 20:52:09 BST
+
+=== ox2_shuffle_dock4  (slots from design_shell2.json)
+  11 slots: R0 E2 L5 D7 Y10 S15 W17 I21 D24 K26 F30
+  simultaneous side chains on the ligand: mean 0.47, max 3, >=2 in 14% of frames
+  pairs realised 9/55 (16% of ceiling, -2% of the way up the [10, 55] band)
+  held >=5% of the run: 1   adjacent 3/10   non-adjacent 6/45 (13%)   long-range gap>=7 2/10
+  slots never in contact: 0
+
+wrote /Users/cafierom/python_mac/peptidebuilder/runs/oxybenzone/md/ox2_shuffle_dock4/pair_contacts.csv
+appended 4 rows
+  ox2_shuffle_dock4,first_10ns -> -1.6945
+  ox2_shuffle_dock4,first_15ns -> -1.3255
+  ox2_shuffle_dock4,first_5ns -> -2.9559
+  ox2_shuffle_dock4,prod_20ns -> -2.0876
+Tue  6 Oct 2026 20:52:20 BST: tail for ox2_shuffle_dock4 DONE
+Tue  6 Oct 2026 21:12:20 BST: tail for ox2_shuffle_esm0_dock9
+Tue  6 Oct 2026 21:12:20 BST
+### ox2_shuffle_esm0_dock9: 20 ns on pose 9 of ox2_shuffle_esm0 (box=dodecahedron)
+trajectory present in runs/oxybenzone/md/ox2_shuffle_esm0_dock9/prod_20ns (traj.dcd or traj_wrapped.xtc), skipping the dynamics
+/Users/cafierom/miniforge3/envs/openmm-md/lib/python3.11/site-packages/mdtraj/formats/netcdf.py:154: UserWarning: Warning: The 'netCDF4' Python package is not installed. MDTraj is using the 'scipy' implementation to read and write netCDF files,which can be significantly slower.
+For improved performance, consider installing netCDF4. See installation instructions at:
+https://unidata.github.io/netcdf4-python/#quick-install
+  warnings.warn(warning_message)
+[build] hetero discovery (resname | HETNAM | min dist to ligand | action):
+[mmgbsa] cofactor residues to re-add: 0 ([])
+[mmgbsa] solute modeller: 542 atoms
+[mmgbsa] prmtop + inpcrd -> mmgbsa/complex.prmtop (542 atoms, radii=['H(N)-modified Bondi radii (mbondi2)'])
+[mmgbsa] receptor + ligand prmtops -> mmgbsa/receptor.prmtop, mmgbsa/ligand.prmtop
+[mmgbsa] trajectory -> mmgbsa/traj.nc (542 atoms, 20000 frames)
+[mmgbsa] MMPBSA.py input -> mmgbsa/mmgbsa.in
+[mmgbsa] prmtop atoms: 542; ligand residue present: True
+[mmgbsa] MMPBSA.py done -> mmgbsa/FINAL_RESULTS_MMPBSA.dat
+MMGBSA_EXIT=0
+Tue  6 Oct 2026 21:18:59 BST
+kept 5000 of 20000 frames (leading 5 ns, wrapped solute)
+/Users/cafierom/miniforge3/envs/openmm-md/lib/python3.11/site-packages/mdtraj/formats/netcdf.py:154: UserWarning: Warning: The 'netCDF4' Python package is not installed. MDTraj is using the 'scipy' implementation to read and write netCDF files,which can be significantly slower.
+For improved performance, consider installing netCDF4. See installation instructions at:
+https://unidata.github.io/netcdf4-python/#quick-install
+  warnings.warn(warning_message)
+[build] hetero discovery (resname | HETNAM | min dist to ligand | action):
+[mmgbsa] cofactor residues to re-add: 0 ([])
+[mmgbsa] solute modeller: 542 atoms
+[mmgbsa] prmtop + inpcrd -> mmgbsa/complex.prmtop (542 atoms, radii=['H(N)-modified Bondi radii (mbondi2)'])
+[mmgbsa] receptor + ligand prmtops -> mmgbsa/receptor.prmtop, mmgbsa/ligand.prmtop
+[mmgbsa] trajectory -> mmgbsa/traj.nc (542 atoms, 5000 frames)
+[mmgbsa] MMPBSA.py input -> mmgbsa/mmgbsa.in
+[mmgbsa] prmtop atoms: 542; ligand residue present: True
+[mmgbsa] MMPBSA.py done -> mmgbsa/FINAL_RESULTS_MMPBSA.dat
+WINDOW_EXIT[5ns]=0
+Tue  6 Oct 2026 21:20:49 BST
+kept 10000 of 20000 frames (leading 10 ns, wrapped solute)
+/Users/cafierom/miniforge3/envs/openmm-md/lib/python3.11/site-packages/mdtraj/formats/netcdf.py:154: UserWarning: Warning: The 'netCDF4' Python package is not installed. MDTraj is using the 'scipy' implementation to read and write netCDF files,which can be significantly slower.
+For improved performance, consider installing netCDF4. See installation instructions at:
+https://unidata.github.io/netcdf4-python/#quick-install
+  warnings.warn(warning_message)
+[build] hetero discovery (resname | HETNAM | min dist to ligand | action):
+[mmgbsa] cofactor residues to re-add: 0 ([])
+[mmgbsa] solute modeller: 542 atoms
+[mmgbsa] prmtop + inpcrd -> mmgbsa/complex.prmtop (542 atoms, radii=['H(N)-modified Bondi radii (mbondi2)'])
+[mmgbsa] receptor + ligand prmtops -> mmgbsa/receptor.prmtop, mmgbsa/ligand.prmtop
+[mmgbsa] trajectory -> mmgbsa/traj.nc (542 atoms, 10000 frames)
+[mmgbsa] MMPBSA.py input -> mmgbsa/mmgbsa.in
+[mmgbsa] prmtop atoms: 542; ligand residue present: True
+[mmgbsa] MMPBSA.py done -> mmgbsa/FINAL_RESULTS_MMPBSA.dat
+WINDOW_EXIT[10ns]=0
+Tue  6 Oct 2026 21:24:15 BST
+kept 15000 of 20000 frames (leading 15 ns, wrapped solute)
+/Users/cafierom/miniforge3/envs/openmm-md/lib/python3.11/site-packages/mdtraj/formats/netcdf.py:154: UserWarning: Warning: The 'netCDF4' Python package is not installed. MDTraj is using the 'scipy' implementation to read and write netCDF files,which can be significantly slower.
+For improved performance, consider installing netCDF4. See installation instructions at:
+https://unidata.github.io/netcdf4-python/#quick-install
+  warnings.warn(warning_message)
+[build] hetero discovery (resname | HETNAM | min dist to ligand | action):
+[mmgbsa] cofactor residues to re-add: 0 ([])
+[mmgbsa] solute modeller: 542 atoms
+[mmgbsa] prmtop + inpcrd -> mmgbsa/complex.prmtop (542 atoms, radii=['H(N)-modified Bondi radii (mbondi2)'])
+[mmgbsa] receptor + ligand prmtops -> mmgbsa/receptor.prmtop, mmgbsa/ligand.prmtop
+[mmgbsa] trajectory -> mmgbsa/traj.nc (542 atoms, 15000 frames)
+[mmgbsa] MMPBSA.py input -> mmgbsa/mmgbsa.in
+[mmgbsa] prmtop atoms: 542; ligand residue present: True
+[mmgbsa] MMPBSA.py done -> mmgbsa/FINAL_RESULTS_MMPBSA.dat
+WINDOW_EXIT[15ns]=0
+Tue  6 Oct 2026 21:29:22 BST
+
+=== runs/oxybenzone/md/ox2_shuffle_esm0_dock9/prod_20ns
+20000 frames, 258 peptide / 17 ligand heavy atoms
+     ns  contacts   sep A  pep Rg
+    2.0      33.0    6.31   12.18
+    4.0      37.2    6.17   12.23
+    6.0      28.3    4.56   12.74
+    8.0      32.9    5.80   12.65
+   10.0      16.8    8.20   12.69
+   12.0      19.9    7.85   12.42
+   14.0      16.4    8.43   11.45
+   16.0      32.9    6.70   11.79
+   18.0      38.7    6.88   11.95
+   20.0      37.9    6.92   12.35
+whole run: contacts 33.0 -> 37.9 (mean 29.4), separation 6.31 -> 6.92 A (max 14.72), closest heavy-atom approach 2.4 A
+  residence within 10 A: 95.5% of the run
+  release (at 10.0 ps spacing): 6 frames (0.3%) in 5 episodes, longest 20.0 ps, 0.06 ns detached, 50% of it in the second half
+
+wrote runs/oxybenzone/md/ox2_shuffle_esm0_dock9/md_contacts.csv
+
+=== runs/oxybenzone/md/ox2_shuffle_esm0_dock9/prod_20ns
+  20000 frames total; window 18.0-20.0 ns
+  runs/oxybenzone/md/ox2_shuffle_esm0_dock9/prod_20ns/frames_last.pdb  (10 models)
+  runs/oxybenzone/md/ox2_shuffle_esm0_dock9/prod_20ns/frame_medoid.pdb  (frame at 18.48 ns, 1.33 A from the window mean; window spread 2.13 A)
+
+in PyMOL, for the ensemble:
+  load frames_last.pdb, ens
+  set all_states, on
+  hide everything; show cartoon, polymer; show sticks, not polymer
+  color grey70, polymer; color red, not polymer
+
+or for a single clean frame:
+  load frame_medoid.pdb, best
+DONE ox2_shuffle_esm0_dock9
+Tue  6 Oct 2026 21:29:27 BST
+
+=== ox2_shuffle_esm0_dock9  (slots from design_shell2.json)
+  11 slots: R0 E2 L5 D7 Y10 S15 W17 I21 D24 K26 F30
+  simultaneous side chains on the ligand: mean 2.96, max 5, >=2 in 95% of frames
+  pairs realised 23/55 (42% of ceiling, 29% of the way up the [10, 55] band)
+  held >=5% of the run: 13   adjacent 4/10   non-adjacent 19/45 (42%)   long-range gap>=7 4/10
+  slots never in contact: 3
+
+wrote /Users/cafierom/python_mac/peptidebuilder/runs/oxybenzone/md/ox2_shuffle_esm0_dock9/pair_contacts.csv
+appended 4 rows
+  ox2_shuffle_esm0_dock9,first_10ns -> -11.7857
+  ox2_shuffle_esm0_dock9,first_15ns -> -11.1701
+  ox2_shuffle_esm0_dock9,first_5ns -> -13.1203
+  ox2_shuffle_esm0_dock9,prod_20ns -> -11.8675
+Tue  6 Oct 2026 21:29:39 BST: tail for ox2_shuffle_esm0_dock9 DONE
+Tue  6 Oct 2026 21:31:39 BST: all six legs analysed, stopping

@@ -16,7 +16,10 @@ OMD=${OMD_ENV:-$HOME/miniforge3/envs/openmm-md}/bin/omd
 PY=${OMD_ENV:-$HOME/miniforge3/envs/openmm-md}/bin/python
 N=${1:?usage: md_window_modal.sh <structure> [total_ns] [leg]}
 TOTAL=${2:-20}; LEG=${3:-prod_L1_modal}
-M=runs/octinoxate/md/$N; P=$M/$LEG
+# SYSNAME parameterizes the run dir, which was hardcoded to octinoxate. A racc leg returns the same
+# wrapped-solute pair this slices, so the Modal path applies unchanged to oxybenzone's legs.
+SYSNAME=${SYSNAME:-octinoxate}
+M=runs/${SYSNAME}/md/$N; P=$M/$LEG
 for ns in 5 10 15; do
   W=$M/first_${ns}ns
   [[ -f $W/mmgbsa/FINAL_RESULTS_MMPBSA.dat ]] && { echo "[$ns ns] already done"; continue; }
