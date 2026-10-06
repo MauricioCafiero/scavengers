@@ -422,9 +422,13 @@ Shortest useful summary, with the detail and the caveats in RESULTS.md:
   energy is BoltzGen's `bg33_2` (-8.02, bound well for 15 ns then fully released). n is 4 against 4
   and the two pipelines' ligands differ in configuration, so this characterises these structures
   rather than the methods.
-* **A design does not reliably beat a shuffle of itself.** The nulls average -14.73, but
-  `shuffle_control` at -15.13 outscores the design `orig_f12` at -13.71. This is the sharpest standing
-  criticism of the design method.
+* **A design does not reliably beat a shuffle of itself — on octinoxate.** Its nulls average -14.73, but
+  `shuffle_control` at -15.13 outscores the design `orig_f12` at -13.71. That was the sharpest standing
+  criticism of the design method. **Oxybenzone answers it, twice:** two shuffles of `design_shell2.json`
+  lose to their designs by **18.9 and 8.8 kcal/mol** and lose in all six cells of the pose matrix, so
+  docking does not rescue them. Two matched pairs on one molecule and one shell, which does not make it
+  general — but the criticism no longer stands unopposed. See
+  [the oxybenzone tables](RESULTS.md#oxybenzone--mmgbsa-Δg-by-starting-pose).
 * **The shell cannot be reproduced by a folded peptide.** 8 of 225 designed side-chain positions land
   within 3 A, across every variant tried.
 * **Static scores do not rank these structures.** UMA interaction energy ranks against MM/GBSA at

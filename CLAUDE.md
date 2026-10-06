@@ -96,7 +96,11 @@ there: `submit_gpu.sh racc_run.py` from inside an activated env (sbatch exports 
 build has no CUDA platform (user declined the CUDA-variant env 2026-10-04); OpenCL works on the
 H100 NVL nodes. A smoke run's total wall time is JIT-dominated — 100k steps cost 6:47 while the
 live rate is 0.45 ms/step — so **measure the rate from the live `energy.csv`, never from a smoke's
-wall time**, and expect the real leg to be several times faster than the smoke suggested.
+wall time**, and expect the real leg to be several times faster than the smoke suggested. Measured
+across six oxybenzone null legs 2026-10-06: **0.29 ms/step at 5,425 particles** (10M steps, 47:57
+wall including equilibration), so a compact 20 ns leg is 46–48 min and a 12,800-particle one 56–66.
+The 0.45 figure came from one earlier leg and is pessimistic; quote whichever matches the particle
+count, and read that count off the build.
 
 **energy.csv flushes continuously here, unlike on Modal** — mid-run progress and ms/step are
 readable any time (row cadence 500 steps) without contacting produce. Use it to revise estimates
@@ -123,7 +127,27 @@ the full box and stripping locally OOM'd the analyze at ~4–5 GB. With only the
 run_dock_pose_md.sh's whole-run analyze guard skips and its window loop slices the wrapped solute
 (no full-box load) — the Modal legs always worked this way, the racc lane just hadn't.
 
+**Whole-table scripts rewrite their table: name every structure, not just the new one.**
+`vina_redock.py` and `make_gnina_bundle.py` write `dock_summary.csv`, `dock_poses.csv` and
+`reference.csv` wholesale, so a run naming only the new structures drops every other row — the same trap
+`md_stability.py` has. On 2026-10-06 docking two nulls cut `dock_summary.csv` from five structures to
+two. The repair is `git checkout` the tables and dock only the new structures, **not** re-docking
+everything: a re-dock is reproducible (seed 42 gave byte-identical rows) but it rewrites files belonging
+to legs whose GNINA and MD are already done and committed. `--all` is not the fix either — it silently
+pulled in an eighth structure that had never been in the docking matrix. Name the targets.
+
 ## MM/GBSA housekeeping
+
+**`run_dock_pose_md.sh` does not strip its own scatter — you must.** It runs `omd mmgbsa` for the whole
+run and for each window and leaves every `reference.frc` and `_MMPBSA_*` in place; only
+`md_window_modal.sh` carries the `rm`. On 2026-10-06 four docked legs tailed through the driver were
+holding **24 GB** (5.0–7.2 GB each, against 294–427 MB for two co-folded legs tailed through
+`md_window_modal.sh`). Strip with `find <leg> \( -name 'reference.frc' -o -name '_MMPBSA_*' \) -delete`
+— `find -delete` rather than a multi-path `rm`, whose zsh globs abort the whole command when one pattern
+matches nothing — and re-check `FINAL_RESULTS_MMPBSA.dat` afterwards. **Window `traj_wrapped.xtc` slices
+are not kept either**: the committed legs hold only `first_Nns/mmgbsa/` plus `traj_wrapped.pdb`, because
+a slice is two seconds of work off `prod_20ns`, which is kept. Leaving them in put 250 MB a leg into the
+staging area.
 
 Run it from inside the leg directory: MMPBSA.py scatters `reference.frc` plus a `_MMPBSA_*` set into the
 working directory, ~300 MB a leg, and `reference.frc` reached 1.9 GB once when run from the repo root.

@@ -593,9 +593,15 @@ The September 2026 allocation was spent (about $4 across scoring and six 20 ns r
       `precision=32` mandatory, ~100 s/design; four local patches), then taken through the same
       co-fold -> dock (Vina + GNINA) -> dynamics matrix as the shells, so BoltzGen and peptidebuilder are
       compared on identical metrics (as octinoxate's `bg33_*` were).
-    - **Two null candidates** — shuffle controls (`shuffle_control.py`: the same residues in a random
-      arrangement, keeping the linker pattern, one ESM2 variant), the null baseline every design is read
-      against, mirroring octinoxate's `shuffle_control` / `shuffle_control_esm0`.
+    - ~~**Two null candidates** — shuffle controls~~ **DONE 2026-10-06.** `ox2_shuffle` and
+      `ox2_shuffle_esm0`, from `design_shell2.json` (seed 4, 0 of 11 side chains left in their designed
+      slot), through the full matrix on racc: co-fold, Vina p1 and GNINA pick, six 20 ns legs, all five
+      oxybenzone tables filled. **The design wins both pairs — 18.9 kcal/mol on the glycine pair and 8.8
+      on the ESM2 pair, and the null loses in all six cells.** The two pairs fail differently and only the
+      second isolates the arrangement: `ox2_shuffle`'s fold never enclosed the ligand to begin with
+      (enclosure 0.58), while `ox2_shuffle_esm0` holds it 94.7–97.4% of the run, posts the highest
+      simultaneous engagement in the whole set, and still loses by 8 — so it also **breaks the `sim`
+      predictor**, which ranks that pair backwards. Use `dead_slots` instead (3–5 of 11 against 0).
 
 
 ## Environment map
