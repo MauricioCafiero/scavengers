@@ -276,14 +276,15 @@ result distinct from octinoxate's.
 ### Oxybenzone — MM/GBSA ΔG by starting pose
 
 ΔG (ligand retention over 20 ns), kcal/mol. `=p1` = GNINA's top pose is pose 1, the same leg as top-AutoDock.
+The `_f8`/`_f12` suffix is the fold version used for each peptide — `ox1_orig` is the only f12, the other four are f8.
 
 | peptide | shell | co-folded | top-AutoDock p1 | top-GNINA |
 |---|---|---|---|---|
-| `ox2_orig` | aromatic | **−24.21 (100%)** | −17.22 (99.9%) | **−24.00 (100%, p4)** |
-| `ox2_esm1` | aromatic·esm2 | −20.81 (100%) | −15.22 (80.5%) | −7.40 (33.9%, p3) |
-| `ox3_orig` | hydrophilic | −18.84 (100%) | −19.98 (94.2%) | =p1 |
-| `ox1_esm1` | charged·esm2 | −10.70 (75.0%) | −16.87 (98.5%) | =p1 |
-| `ox1_orig` | charged | −10.31 (49.1%) | −8.80 (51.0%) | −10.42 (77.2%, p4) |
+| `ox2_orig_f8` | aromatic | **−24.21 (100%)** | −17.22 (99.9%) | **−24.00 (100%, p4)** |
+| `ox2_esm1_f8` | aromatic·esm2 | −20.81 (100%) | −15.22 (80.5%) | −7.40 (33.9%, p3) |
+| `ox3_orig_f8` | hydrophilic | −18.84 (100%) | −19.98 (94.2%) | =p1 |
+| `ox1_esm1_f8` | charged·esm2 | −10.70 (75.0%) | −16.87 (98.5%) | =p1 |
+| `ox1_orig_f12` | charged | −10.31 (49.1%) | −8.80 (51.0%) | −10.42 (77.2%, p4) |
 
 ### Oxybenzone — window convergence
 
