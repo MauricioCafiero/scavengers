@@ -54,11 +54,17 @@ while (( remaining > 0 )); do
             break
         fi
 
-        # Newest job for this leg. %20 width would truncate longer names, so ask for the name only.
-        state=$(r "sacct --name=${leg}_run --format=State%20 -n -X 2>/dev/null | tail -1" | tr -d ' ')
-        if [[ -z $state ]]; then
-            remaining=$((remaining+1))   # not submitted yet; the feeder will get to it
-            continue
+        # Completion is judged by the leg's OWN output on scratch, not by a job state: a leg run
+        # inside a multi-leg batch job (racc_run.py's LEGS) has no `<leg>_run` job for sacct to find,
+        # so a state query would wait on it forever. traj_wrapped.xtc is the signal either way --
+        # racc_run.py writes it as the last thing it does for a leg.
+        if r "test -f $DCD/${leg}_prod/traj_wrapped.xtc" 2>/dev/null; then
+            state=COMPLETED
+        else
+            # Not finished. Only consult sacct to tell "still going / not yet started" from a leg
+            # whose own single-leg job died, which is worth flagging rather than waiting on.
+            state=$(r "sacct --name=${leg}_run --format=State%20 -n -X 2>/dev/null | tail -1" | tr -d ' ')
+            [[ -z $state ]] && state=PENDING    # not submitted yet, or it lives inside a batch job
         fi
 
         case $state in

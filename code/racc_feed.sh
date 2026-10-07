@@ -17,6 +17,13 @@
 set -u
 
 LEGFILE=${1:?usage: racc_feed.sh <legfile>}
+# BATCH=1 submits every leg in the file as ONE job (racc_run.py's LEGS), waiting only for a single
+# free slot. Use it for unattended stretches: gpuscavenger allows 3 submitted jobs and runs 1, so
+# one-leg-per-slot needs the ssh socket re-touched every ~50 minutes, and the socket needs a password
+# and TFA only the user can give -- a dropped network ends the campaign until they are back. A batch
+# banks the whole remainder in one slot and needs nothing afterwards. BATCH_NAME sets the job name.
+BATCH=${BATCH:-0}
+BATCH_NAME=${BATCH_NAME:-oxyb_batch}
 CEILING=${CEILING:-3}
 INTERVAL=${INTERVAL:-300}        # seconds between queue checks
 SOCK=$HOME/.ssh/cm-racc
@@ -37,7 +44,33 @@ while IFS= read -r line; do
     LEGS+=("${line##*:}")
 done < $LEGFILE
 
-log "feeder started: ${#LEGS} legs queued, ceiling $CEILING, interval ${INTERVAL}s"
+log "feeder started: ${#LEGS} legs queued, ceiling $CEILING, interval ${INTERVAL}s, batch=$BATCH"
+
+if [[ $BATCH == 1 ]]; then
+    # Stage every leg first (idempotent -- the tar just overwrites), then wait for one slot.
+    for i in {1..${#LEGS}}; do
+        src=${SRCS[$i]}; leg=${LEGS[$i]}
+        if [[ ! -f $src/system/system.xml ]]; then
+            log "ABORT: $leg is not built ($src/system/system.xml missing)"
+            exit 1
+        fi
+        log "staging $leg"
+        tar czf - -C $src . | r "mkdir -p ~/remote_work/openmm/$WORKREL/$leg && tar xzf - -C ~/remote_work/openmm/$WORKREL/$leg" \
+            || { log "ABORT: staging failed for $leg"; exit 1; }
+    done
+
+    legcsv=${(j:,:)LEGS}
+    log "waiting for a free slot to submit one batch job of ${#LEGS} legs: $legcsv"
+    while :; do
+        njobs=$(r 'squeue -u $USER -h | wc -l' 2>/dev/null | tr -d ' ')
+        [[ -n $njobs ]] && (( njobs < CEILING )) && break
+        sleep $INTERVAL
+    done
+    out=$(r "bash -lc 'module load anaconda >/dev/null 2>&1; source activate openmm-md; cd ~/remote_work/openmm; cp racc_run.py ${BATCH_NAME}_run.py; export LEGS=$legcsv RUNREL=$WORKREL; ~/bin/submit_gpu.sh ${BATCH_NAME}_run.py'" 2>&1 | tail -3)
+    log "batch submitted: $(print -r -- $out | tr '\n' ' ')"
+    log "feeder done (batch mode): nothing further needs the ssh socket"
+    exit 0
+fi
 
 i=1
 while (( i <= ${#LEGS} )); do
