@@ -79,6 +79,26 @@ REFERENCE = {
     "ox2_shuffle_esm0":     dict(dg=-12.04, dg_err=0.02, residence=94.7,  releases=2,  source="peptidebuilder (null)",
                                  vina_p1_dg=-12.78, vina_p1_residence=97.4, vina_p1_releases=0,
                                  gnina_p9_dg=-11.87, gnina_p9_residence=95.5, gnina_p9_releases=5),
+    # Oxybenzone's BoltzGen arm, all twelve legs measured 2026-10-07 on racc (co-folds live in
+    # ~/python_mac/boltzgen_local/md, docked legs in runs/oxybenzone/md; every row is in
+    # runs/oxybenzone/md/mmgbsa_summary.csv). `releases` is the episode count, residence the
+    # within-10 A share at full frame resolution -- NOT the 10-point decile md_contacts.csv, which
+    # reads several points high. Read these against ox2_orig_f8 (-24.21/100%), the best shell design
+    # on this molecule: bgox31_3's Vina p1 at -22.23/100% is the closest BoltzGen has come.
+    "bgox31_3":             dict(dg=-15.44, dg_err=0.03, residence=99.7,  releases=0,  source="boltzgen",
+                                 vina_p1_dg=-22.23, vina_p1_residence=100.0, vina_p1_releases=0,
+                                 gnina_p3_dg=-17.52, gnina_p3_residence=89.9, gnina_p3_releases=11),
+    "bgox31_5":             dict(dg=-16.78, dg_err=0.02, residence=100.0, releases=0,  source="boltzgen",
+                                 vina_p1_dg=-12.81, vina_p1_residence=70.3, vina_p1_releases=0,
+                                 gnina_p2_dg=-14.28, gnina_p2_residence=99.5, gnina_p2_releases=0),
+    "bgox31_4":             dict(dg=-14.05, dg_err=0.02, residence=100.0, releases=0,  source="boltzgen",
+                                 vina_p1_dg=-9.20, vina_p1_residence=36.5, vina_p1_releases=23,
+                                 gnina_p6_dg=-4.31, gnina_p6_residence=4.9, gnina_p6_releases=44),
+    # The deliberate contrast: poly-alanine, 0.44 enclosed, ligand 9.1 A outside the predicted fold.
+    # It lets go in all three legs, so every dg here is computed largely on an unbound ligand.
+    "bgox31_2":             dict(dg=-10.89, dg_err=0.03, residence=33.7,  releases=4,  source="boltzgen",
+                                 vina_p1_dg=-2.11, vina_p1_residence=8.8, vina_p1_releases=7,
+                                 gnina_p6_dg=-8.50, gnina_p6_residence=2.6, gnina_p6_releases=10),
 }
 
 

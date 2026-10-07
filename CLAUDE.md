@@ -36,11 +36,19 @@ end-of-run ensemble, needed because the predicted pose and the pose after 20 ns 
 structures. A leg without them is incomplete; compare against `s3_orig_f12_dock1`, which has the full
 file set.
 
-**Record input → production ligand RMSD on every leg.** Equilibration restrains protein heavy atoms only
-(`openmm_md/dynamics.py:144`), so the ligand slides 1.2 to 15.1 Å before production starts depending on
-the run. **Do not "fix" this by restraining the ligand** — every run in the project equilibrated it
-freely and a restrained leg would not be comparable. Record the number; it is what says whether a cell
-is worth reading.
+**Record input → production ligand RMSD on every leg** with `code/ligand_slide.py <prod dirs...>`
+(`--csv` to write the table; it superposes on protein Cα first, so the number means the ligand moved
+relative to its peptide rather than the box translating). Equilibration restrains protein heavy atoms
+only (`openmm_md/dynamics.py:144`), so the ligand slides 1.2 to 15.1 Å before production starts
+depending on the run. **Do not "fix" this by restraining the ligand** — every run in the project
+equilibrated it freely and a restrained leg would not be comparable. Record the number; it is what
+says whether a cell is worth reading. Oxybenzone's twelve BoltzGen legs came in at 1.05–3.15 Å, the
+tightest spread in the project.
+
+**A second molecule must pass `SMILES` to `boltzgen_local/tools/metrics.sh`.** It defaults to the
+octinoxate analogue, so `lig_geom.py` would otherwise measure every predicted bond against the wrong
+reference and report plausible-looking errors. Perceive it from the run's own geometry rather than
+typing it: `boltz_check.ligand_smiles('runs/<mol>')` reads `ligand.xyz`.
 
 ## Modal
 
@@ -120,8 +128,34 @@ For a quick figure: **wall ≈ 8 min + 10M × 0.236 ms × (N/5838)^0.4**.
 readable any time (row cadence 500 steps) without contacting produce. Use it to revise estimates
 within the first 20 minutes instead of waiting for completion to find out.
 
+**Two watchers do the queue work; neither reimplements a tool.** `code/racc_feed.sh <legfile>` keeps
+the queue topped up from an explicit ordered list of `<local dir>:<leg name>` lines, staging each leg
+by tar before submitting; `BATCH=1` instead submits the whole list as ONE job. `code/racc_drain.sh
+<legfile>` watches for completions, fetches each one's wrapped solute and runs that leg's tail,
+dispatching to `run_dock_pose_md.sh` for a `<leg>_dock<N>` and `run_md20.sh` for a co-fold, then
+strips the MM/GBSA scatter. Launch both detached (`start_new_session`), and give every ssh a
+`ConnectTimeout` — a wedged ControlMaster with the network gone under it blocked one poll for 40
+minutes on 2026-10-07, where a timeout costs seconds.
+
+**`gpuscavenger` is `MaxSubmitJobsPU=3`, `MaxJobsPU=1`.** Only three jobs may exist and only one
+runs, so **spare slots cannot add throughput** — a second job holding different legs just waits its
+turn, exactly as those legs would have inside the first. The only thing idle slots can usefully hold
+is a standby copy for failover, and with `Requeue=1` already set on these jobs even that is close to
+redundant. The real consequence is that one-leg-per-slot needs the socket re-touched every ~50
+minutes to submit the next, and that socket needs a password and TFA only the user can give. For any
+unattended stretch, bank the remainder in one job: `racc_run.py` takes `LEGS` as a comma-separated
+list and runs them in sequence, guarding each on its own `traj_wrapped.xtc` on scratch so a
+resubmission after preemption skips what is already done. 24 h partition cap, so ~24 compact legs.
+
+**Submission is socket-free once batched; draining is not.** A network loss stops nothing on the
+cluster — the legs keep computing and their wrapped solutes wait on scratch indefinitely — but the
+drain cannot fetch until the user rebuilds the two ControlMasters. The worst case is delayed
+analysis, never lost compute; say so rather than implying the run is at risk.
+
 Waits go in background watchers that poll sacct (`--format=State --noheader | tail -1`), never
-foreground sleep loops. Partition is `gpuscavenger`: free, preemptible, and — like on Modal — a
+foreground sleep loops. **A completion is better judged by the leg's own output than by a job
+state**: a leg running inside a multi-leg batch has no `<leg>_run` job for `sacct --name=` to find,
+so key on `traj_wrapped.xtc` and consult sacct only to tell "not started" from "its job died". Partition is `gpuscavenger`: free, preemptible, and — like on Modal — a
 preempted leg restarts from zero, so a long leg is not protected; check `sacct` before assuming one
 is still the run it was.
 
@@ -142,13 +176,37 @@ run_dock_pose_md.sh's whole-run analyze guard skips and its window loop slices t
 (no full-box load) — the Modal legs always worked this way, the racc lane just hadn't.
 
 **Whole-table scripts rewrite their table: name every structure, not just the new one.**
-`vina_redock.py` and `make_gnina_bundle.py` write `dock_summary.csv`, `dock_poses.csv` and
-`reference.csv` wholesale, so a run naming only the new structures drops every other row — the same trap
-`md_stability.py` has. On 2026-10-06 docking two nulls cut `dock_summary.csv` from five structures to
-two. The repair is `git checkout` the tables and dock only the new structures, **not** re-docking
-everything: a re-dock is reproducible (seed 42 gave byte-identical rows) but it rewrites files belonging
-to legs whose GNINA and MD are already done and committed. `--all` is not the fix either — it silently
-pulled in an eighth structure that had never been in the docking matrix. Name the targets.
+`vina_redock.py` writes `dock_summary.csv` and `dock_poses.csv`; `make_gnina_bundle.py` writes
+`reference.csv` — one script each, not both, whatever an earlier version of this file said. All three
+are rewritten wholesale over only the structures named, so a run naming only the new ones drops every
+other row — the same trap `md_stability.py` has. On 2026-10-06 docking two nulls cut
+`dock_summary.csv` from five structures to two.
+
+**The route that avoids the damage rather than repairing it:** `vina_redock.py` has an `--out`, so
+dock the new structures into a scratch directory and append the rows to the real tables, which leaves
+committed legs' pose files untouched; verify with `git diff --numstat` that the change is
+additions-only. `make_gnina_bundle.py` has no `--out` and its `out_root` is hardcoded, so back
+`reference.csv` up first, build only the new bundles, then restore and append — it does not rebuild
+other structures' bundle directories that way, which matters once their GNINA results are retrieved.
+Both verified on 2026-10-07 adding four BoltzGen legs to oxybenzone's eleven-structure tables.
+
+Re-docking everything is *not* the fix: a re-dock is reproducible (seed 42 gives byte-identical rows)
+but it rewrites files belonging to legs whose GNINA and MD are already done and committed. `--all` is
+not the fix either — it silently pulled in an eighth structure that had never been in the docking
+matrix. Name the targets.
+
+`md_stability.py` is the worst of the three because its one file is shared across **every** ligand
+plus the BoltzGen legs (62 rows as of 2026-10-07), and the glob in older notes omitted
+`runs/oxybenzone` entirely. It now refuses to write fewer rows than the file holds unless
+`--allow-shrink` is passed. Pass every lane: `runs/octinoxate/md/*/prod_20ns`,
+`runs/octinoxate/md/*/prod_L1_modal`, `runs/oxybenzone/md/*/prod_20ns`,
+`~/python_mac/boltzgen_local/md/*/prod_20ns` — and not `boltzgen_local`'s `prod_L1_modal`, which does
+not exist and whose empty glob aborts the whole zsh launch.
+
+**`vina_redock.py` must be run with `~/python_mac/dock_assist/dock-env/bin/python`**, never
+peptidebuilder's `.venv`: it locates Vina through `import dockstring`, which is installed only in
+`dock-env`, and the `DockError`'s advice to "pass --vina-bin" is a dead end because `vina_redock.py`
+does not expose that flag. `dock-env` carries rdkit and numpy, so the script runs there unchanged.
 
 ## MM/GBSA housekeeping
 

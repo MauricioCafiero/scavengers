@@ -279,9 +279,13 @@ further legs, same protocol, same cluster, so **25 legs in all** across the two 
 tables below carry both arms; the fifth cannot cover BoltzGen and says why. The headline is that the
 shell pipeline still wins but only by **2.0 kcal/mol** — `ox2_orig_f8` at −24.21/100% against
 `bgox31_3_dock1` at −22.23/100% — where on octinoxate no BoltzGen fold enclosed its ligand at all.
-Two caveats carry through every table: five of the twelve BoltzGen legs are ligand **releases** rather
-than weak binders, and the input→production slide was not recorded per leg for this arm, so those
-cells are attributable to their starting pose only as far as the residence column supports.
+One caveat carries through every table: five of the twelve BoltzGen legs are ligand **releases**
+rather than weak binders, so their ΔG is computed partly on an unbound ligand and the residence
+column has to be read alongside. The input→production slide is **1.05–3.15 Å on all twelve legs**
+(`runs/oxybenzone/md/ligand_slide.csv`, via `code/ligand_slide.py`), the tightest spread of any arm
+in the project — octinoxate's legs ranged to 15.1 Å — so every cell here is genuinely attributable to
+the starting pose it is labelled with. The one leg above 2.5 Å is `bgox31_5_dock2` at 3.15 Å, which
+is also the only GNINA pick that beat its Vina peer.
 
 ### Oxybenzone — MM/GBSA ΔG by starting pose
 
