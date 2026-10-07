@@ -28,7 +28,12 @@ SYSNAME=${SYSNAME:-oxybenzone}
 
 caffeinate -w $$ &
 
-r() { ssh -o ControlPath=$SOCK $REMOTE "$@"; }
+# -n so a command never eats this script's stdin; ConnectTimeout/ServerAlive* so a *wedged* master --
+# the socket file still there, the network underneath it gone -- fails in seconds instead of blocking.
+# Measured 2026-10-07: without these, one poll hung 40 minutes against a dead master during a train
+# journey, and the loop made no progress for that whole time rather than logging and retrying.
+r() { ssh -n -o ControlPath=$SOCK -o ConnectTimeout=15 -o ServerAliveInterval=10 \
+          -o ServerAliveCountMax=3 -o BatchMode=yes $REMOTE "$@"; }
 log() { print -r -- "[$(date '+%Y-%m-%d %H:%M:%S')] $*"; }
 
 typeset -a SRCS LEGS

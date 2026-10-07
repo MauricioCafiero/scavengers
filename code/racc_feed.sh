@@ -32,7 +32,7 @@ REMOTE=racc.rdg.ac.uk
 
 caffeinate -w $$ &               # dies with this script
 
-r() { ssh -o ControlPath=$SOCK $REMOTE "$@"; }
+r() { ssh -n -o ControlPath=$SOCK -o ConnectTimeout=15 -o BatchMode=yes $REMOTE "$@"; }
 
 log() { print -r -- "[$(date '+%Y-%m-%d %H:%M:%S')] $*"; }
 

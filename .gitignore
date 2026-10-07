@@ -29,3 +29,10 @@ reference.frc
 
 # Cluster access facts: account-specific, untracked (CLAUDE.md carries the workflow)
 RACC.md
+
+# racc_drain.sh bookkeeping: .drained is its per-leg sentinel (a fresh clone must not inherit it),
+# tail.log the transcript of that leg's local tail. Neither is a result; the results are the
+# mmgbsa/ directories and md_contacts.csv beside them.
+runs/*/md/**/.drained
+runs/*/md/**/tail.log
+runs/*/logs/racc_*.log

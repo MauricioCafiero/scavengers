@@ -39,17 +39,25 @@ def main(argv=None):
     ap.add_argument("structures", nargs="*")
     ap.add_argument("--all", action="store_true")
     ap.add_argument("--outdir", default="runs/octinoxate")
+    ap.add_argument("--md-root", action="append", default=None, metavar="DIR",
+                    help="extra directory of prepared MD runs to look in, repeatable. Co-folded "
+                         "BoltzGen legs live outside this repo (~/python_mac/boltzgen_local/md), but "
+                         "their rows belong in the same mmgbsa_summary.csv -- octinoxate's bg33_1 and "
+                         "bg33_2 co-folds are already there. runs/<system>/md is searched first.")
     a = ap.parse_args(argv)
     md = REPO / a.outdir / "md"
     summary = md / "mmgbsa_summary.csv"
+    # Roots to resolve a named structure against, in order. The summary stays where it is: one file
+    # per ligand, whichever lane a leg ran in.
+    roots = [md] + [Path(r).expanduser() for r in (a.md_root or [])]
     existing = summary.read_text().splitlines()
     present = {(l.split(",")[0], l.split(",")[1]) for l in existing if l and "," in l}
     structs = ([p.name for p in md.iterdir() if p.is_dir()] if a.all else a.structures)
     added = []
     for s in structs:
-        sdir = md / s
+        sdir = next((r / s for r in roots if (r / s).is_dir()), md / s)
         if not sdir.is_dir():
-            print(f"skip {s}: no dir"); continue
+            print(f"skip {s}: no dir in {', '.join(str(r) for r in roots)}"); continue
         for legdir in sorted(sdir.iterdir()):
             fp = legdir / "mmgbsa" / "FINAL_RESULTS_MMPBSA.dat"
             if not fp.exists():
