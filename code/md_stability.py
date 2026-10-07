@@ -88,9 +88,25 @@ def main(argv):
               f" ->{r['rg_last_A']:7.1f}")
 
     if out:
-        # fixed location, derived from this script's own position (code/ -> repo root)
+        # fixed location, derived from this script's own position (code/ -> repo root). One shared
+        # file for every ligand -- octinoxate, oxybenzone and the BoltzGen legs all land here.
         repo = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
         csv_path = os.path.join(repo, "runs", "octinoxate", "md", "protein_stability.csv")
+
+        # This file is rewritten wholesale, so a run naming fewer legs than it already holds silently
+        # deletes the rest -- the trap CLAUDE.md records for the dock tables, and a single-leg run
+        # here reduces 62 rows to 1. Refuse to shrink it unless that is asked for explicitly. The
+        # glob to pass is every lane: runs/octinoxate/md/*/prod_20ns, .../prod_L1_modal,
+        # runs/oxybenzone/md/*/prod_20ns and ~/python_mac/boltzgen_local/md/*/prod_20ns (boltzgen has
+        # no prod_L1_modal, and zsh aborts the whole launch if one glob matches nothing).
+        if os.path.exists(csv_path) and "--allow-shrink" not in argv:
+            with open(csv_path) as fh:
+                had = max(0, sum(1 for _ in fh) - 1)
+            if len(out) < had:
+                print(f"REFUSING to write {len(out)} rows over a file holding {had}: this script "
+                      f"rewrites the whole table, so the missing {had - len(out)} would be lost.\n"
+                      f"Pass every lane's glob, or --allow-shrink if the shrink is intended.")
+                return 1
         with open(csv_path, "w", newline="") as fh:
             w = csv.DictWriter(fh, fieldnames=["peptide", "pose", "leg", "ca_rmsd_final_A",
                                                "ca_rmsd_max_A", "ca_rmsd_mean_last_quarter_A",

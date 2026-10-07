@@ -107,7 +107,12 @@ while (( remaining > 0 )); do
                 # -delete rather than a multi-path rm, whose zsh globs abort the whole command when
                 # one pattern matches nothing. Window xtc slices are not kept either: they are two
                 # seconds of work off prod_20ns, which is kept.
-                find $src \( -name 'reference.frc' -o -name '_MMPBSA_*' \) -delete 2>/dev/null
+                # traj.nc belongs in this list even though CLAUDE.md's strip command historically
+                # omitted it: MMPBSA.py writes one per window plus one for the whole run, ~70 MB
+                # each, and 89 of them had quietly reached 6.0 GB by 2026-10-07. It is a NetCDF
+                # conversion of traj_wrapped.xtc, which is kept, so it regenerates in seconds and is
+                # tracked by neither repo.
+                find $src \( -name 'reference.frc' -o -name '_MMPBSA_*' -o -name 'traj.nc' \) -delete 2>/dev/null
                 find $src -path '*/first_*ns/traj_wrapped.xtc' -delete 2>/dev/null
                 find $src -path '*/first_*ns/traj.dcd' -delete 2>/dev/null
                 if [[ -f $src/prod_20ns/mmgbsa/FINAL_RESULTS_MMPBSA.dat ]]; then

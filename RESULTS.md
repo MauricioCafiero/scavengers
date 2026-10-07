@@ -273,6 +273,16 @@ retention); the charged shell is weak (~−10) and the only one that lets the li
 benzophenone, so aromatic side-chain stacking paying off is the expected chemistry — a clean transfer
 result distinct from octinoxate's.
 
+**A BoltzGen arm was added for this molecule too** (2026-10-07): four designs at 31 residues, matched
+to the aromatic shell's length, each through co-folded plus Vina pose 1 plus its GNINA pick — twelve
+further legs, same protocol, same cluster, so **25 legs in all** across the two pipelines. The four
+tables below carry both arms; the fifth cannot cover BoltzGen and says why. The headline is that the
+shell pipeline still wins but only by **2.0 kcal/mol** — `ox2_orig_f8` at −24.21/100% against
+`bgox31_3_dock1` at −22.23/100% — where on octinoxate no BoltzGen fold enclosed its ligand at all.
+Two caveats carry through every table: five of the twelve BoltzGen legs are ligand **releases** rather
+than weak binders, and the input→production slide was not recorded per leg for this arm, so those
+cells are attributable to their starting pose only as far as the residence column supports.
+
 ### Oxybenzone — MM/GBSA ΔG by starting pose
 
 ΔG (ligand retention over 20 ns), kcal/mol. `=p1` = GNINA's top pose is pose 1, the same leg as top-AutoDock.
@@ -287,6 +297,36 @@ The `_f8`/`_f12` suffix is the fold version used for each peptide — `ox1_orig`
 | `ox3_orig_f8` | hydrophilic | −18.84 (100%) | −19.98 (94.2%) | =p1 |
 | `ox1_esm1_f8` | charged·esm2 | −10.70 (75.0%) | −16.87 (98.5%) | =p1 |
 | `ox1_orig_f12` | charged | −10.31 (49.1%) | −8.80 (51.0%) | −10.42 (77.2%, p4) |
+| | | | | |
+| `bgox31_3` | **BoltzGen** 31 aa | −15.44 (99.7%) | **−22.23 (100.0%)** | −17.52 (89.9%, p3) |
+| `bgox31_5` | **BoltzGen** 31 aa | −16.78 (100.0%) | −12.81 (70.3%) | −14.28 (99.5%, p2) |
+| `bgox31_4` | **BoltzGen** 31 aa | −14.05 (100.0%) | −9.20 (36.5%) | −4.31 (4.9%, p6) |
+| `bgox31_2` | **BoltzGen** 31 aa | −10.89 (33.7%) | −2.11 (8.8%) | −8.50 (2.6%, p6) |
+
+The lower block is the **BoltzGen arm**: four designs from `specs/oxybenzone31.yaml` in the
+`boltzgen_local` repo, length-matched at 31 residues to the aromatic shell, each run co-folded plus
+Vina pose 1 plus its GNINA CNNaffinity pick — twelve legs, 20 ns each, one 7:56:59 batch job on racc.
+
+**The designed shell still wins, by 2.0 kcal/mol.** BoltzGen's best cell is `bgox31_3_dock1` at
+−22.23 and 100% retention against `ox2_orig_f8`'s −24.21 at 100%. That is a far closer result than
+octinoxate's, where no BoltzGen fold enclosed the ligand at all (best `enclosed` 0.59 against the
+shuffled null's 0.74); here `bgox31_3` folds to 0.95 enclosed with all seventeen ligand atoms
+wrapped, matching the best fold the shell pipeline produced. The gap between the pipelines on this
+molecule is one leg's worth of pose selection, not a difference in kind.
+
+**Five of the twelve BoltzGen legs are releases rather than weak binders** — `bgox31_4_dock1` at
+36.5% residence, `bgox31_4_dock6` at 4.9%, `bgox31_2`'s three at 33.7/8.8/2.6%. A ΔG computed over
+frames in which the ligand has left is not a binding estimate, and the residence column is what
+distinguishes the two cases. `bgox31_2` is the deliberate contrast: poly-alanine at 0.645 alanine
+fraction, 0.44 enclosed, with its predicted ligand already 9.1 Å outside the fold, and it lets go in
+all three legs. It is the clean negative showing `enclosed` discriminates.
+
+**GNINA's pick beat Vina's pose 1 on one structure of the three where both ran** — `bgox31_5`, where
+−14.28 at 99.5% retention beats −12.81 at 70.3%. It lost on `bgox31_3` and `bgox31_4`. The warning
+sign was available in advance and is worth recording: the pick rule asks for max `CNNaffinity`
+corroborated by `minimizedAffinity`'s argmin, and those two disagreed on three of the four structures
+(the argmin pointing at pose 1). MD sided with `minimizedAffinity` every time. A pick resting on
+`CNNaffinity` alone should be treated as unsupported rather than merely less certain.
 
 The two `shuffle` rows are the null: `shuffle_control.py` on `design_shell2.json`, the same 11 side
 chains in a random arrangement with the glycine spacer pattern held fixed and no side chain left in its
@@ -329,6 +369,31 @@ that released late (cross-check the residence table).
 | `ox1_orig_f12` (co-fold) | −20.07 | −16.35 | −12.98 | −10.31 |
 | `ox1_orig_f12_dock1` (Vina p1) | −17.87 | −12.30 | −9.71 | −8.80 |
 | `ox1_orig_f12_dock4` (GNINA p4) | −19.31 | −12.81 | −11.35 | −10.42 |
+| | | | | |
+| `bgox31_3` (BoltzGen, co-fold) | −19.91 | −17.07 | −15.69 | −15.44 |
+| **`bgox31_3_dock1`** (Vina p1) | **−21.57** | **−21.33** | **−21.79** | **−22.23** |
+| `bgox31_3_dock3` (GNINA p3) | −28.24 | −24.94 | −19.88 | −17.52 |
+| `bgox31_5` (co-fold) | −15.62 | −16.45 | −16.59 | −16.78 |
+| `bgox31_5_dock1` (Vina p1) | −12.33 | −13.14 | −12.89 | −12.81 |
+| `bgox31_5_dock2` (GNINA p2) | −13.66 | −14.05 | −14.29 | −14.28 |
+| `bgox31_4` (co-fold) | −16.10 | −15.03 | −14.57 | −14.05 |
+| `bgox31_4_dock1` (Vina p1) | −13.56 | −11.94 | −10.95 | −9.20 |
+| `bgox31_4_dock6` (GNINA p6) | −6.59 | −7.09 | −5.28 | −4.31 |
+| `bgox31_2` (co-fold) | −12.22 | −12.00 | −11.31 | −10.89 |
+| `bgox31_2_dock1` (Vina p1) | −6.63 | −3.30 | −2.20 | −2.11 |
+| `bgox31_2_dock6` (GNINA p6) | −8.77 | −8.50 | −8.18 | −8.50 |
+
+The BoltzGen block makes the point of this table better than the shell legs do. **`bgox31_3_dock1`
+is the only leg in either arm whose four windows sit inside 1 kcal/mol** (−21.57 to −22.23), and it
+is also the strongest cell — a converged ensemble rather than a pose still settling. Read against it,
+`bgox31_3_dock3` shows the failure mode at full size: **−28.24 at 5 ns decaying to −17.52 at 20 ns**,
+a 10.7 kcal/mol walk. A 5 ns window on that leg would have reported the best number anywhere in the
+project, and it would have been an artifact of still measuring the docked starting pose.
+
+`bgox31_5`'s three legs are the only ones here that **strengthen** with time (−15.62 → −16.78,
+−13.66 → −14.28). Every other series in both arms weakens monotonically, which is what a short
+window reading its own starting pose looks like; a series moving the other way means the ensemble
+settled into something better than the pose it was handed.
 
 ### Oxybenzone — residence and release
 
@@ -355,6 +420,32 @@ Residence within 10 Å of the peptide centroid; `late` is the share of released 
 | `ox1_orig_f12` | 49.1% | 225 | 36 | 350 ps | 100% |
 | `ox1_orig_f12_dock1` | 51.0% | 86 | 18 | 540 ps | 83% |
 | `ox1_orig_f12_dock4` | 77.2% | 57 | 8 | 420 ps | 12% |
+| | | | | | |
+| `bgox31_3` (BoltzGen) | 99.7% | 0 | 0 | — | — |
+| `bgox31_3_dock1` | 100.0% | 0 | 0 | — | — |
+| `bgox31_3_dock3` | 89.9% | 18 | 11 | 50 ps | 89% |
+| `bgox31_5` | 100.0% | 0 | 0 | — | — |
+| `bgox31_5_dock1` | 70.3% | 0 | 0 | — | — |
+| `bgox31_5_dock2` | 99.5% | 0 | 0 | — | — |
+| `bgox31_4` | 100.0% | 0 | 0 | — | — |
+| `bgox31_4_dock1` | 36.5% | 282 | 23 | 720 ps | 100% |
+| `bgox31_4_dock6` | 4.9% | 671 | 44 | 1120 ps | 96% |
+| `bgox31_2` | 33.7% | 12 | 4 | 90 ps | 92% |
+| `bgox31_2_dock1` | 8.8% | 1373 | 7 | **5580 ps** | 61% |
+| `bgox31_2_dock6` | 2.6% | 10 | 10 | 10 ps | 80% |
+
+Two readings this table supports and a scalar ΔG cannot. **`bgox31_2_dock1` is the project record for
+sustained detachment**: 1373 released frames in only 7 episodes, the longest lasting 5.58 ns — 13.7 ns
+detached in total out of 20. That is one departure that never returns, not thermal flicker, and its
+−2.11 is a number computed mostly on an unbound ligand.
+
+**Low residence does not imply release, and the two columns must be read together.** `bgox31_5_dock1`
+sits at 70.3% residence with **zero** released frames, and `bgox31_2_dock6` at 2.6% residence with 10
+released frames in 10 single-frame episodes. In both the ligand is parked just beyond the 10 Å
+centroid cutoff while staying in contact — the surface-roamer mode this project recorded for
+`bg33_1` on octinoxate, where the centroid walks the ligand along the peptide rather than holding it
+in a pocket or letting it go. `bgox31_4_dock1` and `_dock6` are the genuine releases, with 100% and
+96% of their detached time in the second half: progressive loss, not flicker.
 
 ### Oxybenzone — peptide structural stability
 
@@ -381,6 +472,34 @@ Cα RMSD (final, max) and Rg start→end, Å.
 | `ox1_orig_f12` | co-folded | 4.0 | 6.0 | 8.1 → 7.7 |
 | | Vina p1 | 6.3 | 7.6 | 8.5 → 8.5 |
 | | GNINA p4 | 5.5 | 6.5 | 8.1 → 7.7 |
+| `bgox31_3` (BoltzGen) | co-folded | 1.4 | 2.7 | 9.3 → 8.8 |
+| | Vina p1 | **1.2** | 3.1 | 9.4 → 9.4 |
+| | GNINA p3 | 2.7 | 3.5 | 9.5 → 8.7 |
+| `bgox31_5` (BoltzGen) | co-folded | 1.9 | 3.4 | 9.3 → 9.4 |
+| | Vina p1 | 1.6 | 3.1 | 9.4 → 9.4 |
+| | GNINA p2 | 1.7 | 2.5 | 9.5 → 9.7 |
+| `bgox31_4` (BoltzGen) | co-folded | 1.4 | 2.3 | 9.1 → 9.3 |
+| | Vina p1 | 1.3 | 2.4 | 9.2 → 8.9 |
+| | GNINA p6 | 1.4 | **1.8** | 8.9 → 9.0 |
+| `bgox31_2` (BoltzGen) | co-folded | 4.3 | 7.0 | 13.7 → 12.5 |
+| | Vina p1 | 6.1 | 7.0 | 13.5 → 12.1 |
+| | GNINA p6 | 3.7 | 5.5 | 13.6 → 13.4 |
+
+**The BoltzGen peptides hold their folds considerably better than the shell designs.** Nine of their
+twelve legs finish within 1.2–2.7 Å Cα RMSD and never exceed 3.5 Å, with Rg flat to within 0.7 Å,
+against 1.7–8.0 Å final and up to 9.4 Å maximum across the shell legs. That is the expected
+difference in kind: a shell design is fragments threaded on glycine linkers and folded by Boltz,
+while a BoltzGen backbone is generated as a structure and its sequence inverse-folded onto it, so it
+starts from something already self-consistent.
+
+**It also decouples fold stability from binding.** `bgox31_4` is the most stable peptide in the whole
+table — 1.3–1.4 Å final, 1.8 Å maximum on its GNINA leg — and two of its three legs lose the ligand
+(36.5% and 4.9% residence). A peptide can hold its own shape perfectly while failing to hold the
+ligand, so this table qualifies the others rather than ranking anything by itself.
+
+`bgox31_2` is again the exception that confirms the design read: 3.7–6.1 Å drift and an Rg of 13.5 Å
+against ~9.3 Å for its three siblings. It is an extended poly-alanine rod, not a compact fold, which
+is why it never enclosed its ligand.
 
 ### Oxybenzone — residue-pair contacts
 
@@ -412,6 +531,16 @@ grips along its length scores well on it. `dead_slots` is the clearer signal her
 | `ox3_orig_f8_dock1` | 10 | 2.46 | 21/45 | 33 |
 | `ox1_esm1_f8` | 10 | 1.97 | 30/45 | 58 |
 | `ox1_esm1_f8_dock1` | 10 | 2.89 | 26/45 | 47 |
+
+**The BoltzGen arm has no rows in this table, and cannot have any.** `pair_contacts.py` counts how
+many of a design's *placed slots* reach the ligand, taking those slots from the parent design json's
+non-glycine positions — the measure is defined relative to an arrangement that was chosen. A BoltzGen
+peptide has no such arrangement: the backbone is generated by a diffusion model and the sequence
+inverse-folded onto it, so there is no slot list, no n, and therefore no [n−1, n(n−1)/2] band to
+realise a fraction of. This is a property of the measure, not a gap in the twelve legs. The
+comparable question for those designs — how much of the ligand the fold actually covers — is answered
+by `enclosed`/`wrapped`/`engaged` in the `boltzgen_local` README's design table, where `bgox31_3`
+reaches 0.95 enclosed with 17/17 atoms wrapped.
 | `ox1_orig_f12` | 10 | 1.70 | 42/45 | 92 |
 | `ox1_orig_f12_dock1` | 10 | 1.84 | 39/45 | 83 |
 | `ox1_orig_f12_dock4` | 10 | 2.07 | 38/45 | 81 |

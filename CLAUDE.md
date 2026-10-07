@@ -156,7 +156,12 @@ pulled in an eighth structure that had never been in the docking matrix. Name th
 run and for each window and leaves every `reference.frc` and `_MMPBSA_*` in place; only
 `md_window_modal.sh` carries the `rm`. On 2026-10-06 four docked legs tailed through the driver were
 holding **24 GB** (5.0–7.2 GB each, against 294–427 MB for two co-folded legs tailed through
-`md_window_modal.sh`). Strip with `find <leg> \( -name 'reference.frc' -o -name '_MMPBSA_*' \) -delete`
+`md_window_modal.sh`). Strip with
+`find <leg> \( -name 'reference.frc' -o -name '_MMPBSA_*' -o -name 'traj.nc' \) -delete`
+— **`traj.nc` belongs in that list and was missing from it until 2026-10-07**, by which point 89 of
+them held 6.0 GB across the two campaigns (one per window plus one per whole run, ~70 MB each). It is
+MMPBSA.py's NetCDF conversion of `traj_wrapped.xtc`, which is kept, so it regenerates in seconds and
+is tracked by neither repo; `code/racc_drain.sh` now strips it automatically
 — `find -delete` rather than a multi-path `rm`, whose zsh globs abort the whole command when one pattern
 matches nothing — and re-check `FINAL_RESULTS_MMPBSA.dat` afterwards. **Window `traj_wrapped.xtc` slices
 are not kept either**: the committed legs hold only `first_Nns/mmgbsa/` plus `traj_wrapped.pdb`, because
