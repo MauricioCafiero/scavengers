@@ -5,9 +5,14 @@ Written 2026-10-02 after a day in which every rule below was learned by breaking
 **Use the scripts that already exist; parameterise, don't reimplement.** The established flow for a
 docked Modal leg is: `run_dock_pose_md.sh BUILD_ONLY=1` → `modal push` → `probe` → `produce` →
 `md_window_modal.sh` → whole-run `omd mmgbsa` → `md_contacts.py` → `md_frames.py` → `pair_contacts.py`,
-each invoked directly. On 2026-10-04 an orchestration driver for this was drafted twice and rejected
-twice — the tools each hold one step of the tacit knowledge, and gluing them into a new driver is where
-steps silently drop.
+each invoked directly. The rule is about *reimplementing* a tool's steps, not about automation: a
+driver that invokes these scripts is fine, and `code/racc_feed.sh` (queue top-up) and
+`code/racc_drain.sh` (fetch + tail) are exactly that — they call `run_dock_pose_md.sh` and
+`run_md20.sh` rather than inlining their stages, so each step's tacit knowledge stays where it lives.
+
+An earlier version of this file said such a driver had been "drafted twice and rejected twice" on
+2026-10-04. **That was wrong** — the user never rejected it, and says a long-context session was
+misreading them at the time (corrected 2026-10-07). Do not treat orchestration as forbidden here.
 
 ## Dynamics runs
 
