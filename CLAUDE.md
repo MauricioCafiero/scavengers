@@ -107,6 +107,15 @@ wall including equilibration), so a compact 20 ns leg is 46–48 min and a 12,80
 The 0.45 figure came from one earlier leg and is pessimistic; quote whichever matches the particle
 count, and read that count off the build.
 
+**Do not use Modal's N^0.77 scaling here — it is an A10G number and badly overestimates the H100.**
+Measured on racc: 0.236 ms/step at 5,838 particles (`bgox31_3`, 2026-10-07, from two `energy.csv`
+samples 180 s apart), against wall times of 45:56–47:57 at 5,425–5,761 particles and 56:28–65:49 at
+12,826–12,841. Going 2.3× in particle count adds only 10–18 minutes of wall, so the effective
+exponent is nearer **0.4**: these systems are far too small to saturate an H100 NVL, and 7–9 minutes
+of every leg's wall is fixed JIT-plus-equilibration overhead that does not scale with N at all.
+Applying the A10G exponent to an 18,650-particle leg predicted 1.6–1.8 h where ~70–80 min is right.
+For a quick figure: **wall ≈ 8 min + 10M × 0.236 ms × (N/5838)^0.4**.
+
 **energy.csv flushes continuously here, unlike on Modal** — mid-run progress and ms/step are
 readable any time (row cadence 500 steps) without contacting produce. Use it to revise estimates
 within the first 20 minutes instead of waiting for completion to find out.
