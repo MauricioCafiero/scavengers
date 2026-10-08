@@ -108,81 +108,6 @@ unfavourable the pose is rather than converged values.
 | | Vina p1 | −11.09 | −11.63 | −13.30 | −13.47 |
 | | GNINA p2 | −10.29 | −11.58 | −11.79 | −12.55 |
 
-### The pre-dynamics fold and pose read, and the pairs every leg realises
-
-The first four number columns are the analysis that chose these peptides: **enclosed** (fraction of
-directions out of the ligand that meet peptide), **wrapped** (fraction of ligand atoms with peptide
-within 4.5 Å) and engagement, measured on each starting pose's own coordinates from
-`dock_poses.csv` — before any score was computed and before any dynamics ran — with the same
-`geometry()` as `check_fold.py`. Pose 0 is the co-folded Boltz pose as prepared for MD, pose 1 is
-Vina's rank-1, and the third pose for each peptide is the GNINA pick named in the headline table.
-The trajectory columns are then what those same poses did over their 20 ns runs, from
-`pair_contacts.py`: how many pairs of the design's non-glycine slot positions the fold brings onto
-the ligand — total realised, of which the adjacent pairs (which chain connectivity gives for free)
-and the non-adjacent ones (which it must earn). peptidebuilder designs have 12 slots, so the
-denominator band is [11, 66]; the BoltzGen designs have 11, so [10, 55], and their cells are not
-pooled with the others.
-
-| peptide | pose | enclosed | wrapped | engaged | cent sep | pairs realised | adjacent | non-adjacent |
-|---|---|---|---|---|---|---|---|---|
-| `s3_orig_f12` | co-folded | 0.965 | 1.00 | 20/20 | 3.6 Å | **53/66** | 10/11 | **43/55** |
-| | Vina p1 | 0.92 | 1.00 | 20/20 | 5.4 Å | 41/66 | 6/11 | 35/55 |
-| | GNINA p9 | 0.915 | 1.00 | 20/20 | 5.3 Å | 24/66 | 3/11 | 21/55 |
-| `s3_esm2_f4` | co-folded | 0.795 | 0.90 | 18/20 | 7.0 Å | 32/66 | 6/11 | 26/55 |
-| | Vina p1 | 0.905 | 0.95 | 19/20 | 8.4 Å | 32/66 | 6/11 | 26/55 |
-| | GNINA p6 | 0.94 | 0.95 | 19/20 | 8.0 Å | 17/66 | 3/11 | 14/55 |
-| `bg33_4` | co-folded | 0.59 | 0.95 | 19/20 | 6.3 Å | **14/55** | 1/10 | **13/45** |
-| | Vina p1 | 0.705 | 0.90 | 18/20 | 6.3 Å | 9/55 | 2/10 | 7/45 |
-| | GNINA p6 | 0.635 | 0.95 | 19/20 | 6.2 Å | 5/55 | 0/10 | 5/45 |
-| `s2_esm2_control` | co-folded | 0.51 | 0.85 | 17/20 | 6.7 Å | 10/66 | 3/11 | 7/55 |
-| | Vina p1 | 0.745 | 1.00 | 20/20 | 8.0 Å | 5/66 | 2/11 | 3/55 |
-| | GNINA p6 | 0.755 | 0.85 | 17/20 | 5.0 Å | 10/66 | 3/11 | 7/55 |
-| `shuffle_control` (null) | co-folded | 0.745 | 0.75 | 15/20 | 7.9 Å | 18/66 | 5/11 | 13/55 |
-| | Vina p1 | 0.755 | 0.90 | 18/20 | 6.5 Å | 23/66 | 6/11 | 17/55 |
-| | GNINA p9 | 0.885 | 1.00 | 20/20 | 5.9 Å | 18/66 | 5/11 | 13/55 |
-| | CNNscore p7 | 0.88 | 0.95 | 19/20 | 6.3 Å | 31/66 | 5/11 | 26/55 |
-| `shuffle_control_esm0` (null) | co-folded | 0.535 | 0.85 | 17/20 | 11.0 Å | 12/66 | 4/11 | 8/55 |
-| | Vina p1 | 0.55 | 1.00 | 20/20 | 12.2 Å | 9/66 | 4/11 | 5/55 |
-| | GNINA p9 | 0.735 | 0.90 | 18/20 | 9.3 Å | 13/66 | 4/11 | 9/55 |
-| `orig_f12` | co-folded | 0.96 | 1.00 | 20/20 | 4.2 Å | 22/66 | 4/11 | 18/55 |
-| | Vina p1 | **0.975** | 1.00 | 20/20 | 3.5 Å | 32/66 | 6/11 | 26/55 |
-| | GNINA p5 | 0.975 | 0.90 | 18/20 | 5.0 Å | 30/66 | 6/11 | 24/55 |
-| `bg33_3` | co-folded | 0.48 | 1.00 | 20/20 | 8.6 Å | 3/55 | 1/10 | 2/45 |
-| | Vina p1 | 0.55 | 0.90 | 18/20 | 8.0 Å | 13/55 | 5/10 | 8/45 |
-| | GNINA p6 | 0.53 | 0.95 | 19/20 | 8.1 Å | 3/55 | 1/10 | 2/45 |
-| `bg33_1` | co-folded | 0.38 | 0.75 | 15/20 | 17.3 Å | 8/55 | 4/10 | 4/45 |
-| | Vina p1 | 0.45 | 0.85 | 17/20 | 13.1 Å | 7/55 | 3/10 | 4/45 |
-| | GNINA p2 | 0.59 | 0.95 | 19/20 | 10.5 Å | 10/55 | 4/10 | 6/45 |
-| `bg33_2` | co-folded | 0.585 | 0.75 | 15/20 | 5.2 Å | 8/55 | 3/10 | 5/45 |
-| | Vina p1 | 0.51 | 0.85 | 17/20 | 8.7 Å | 20/55 | 6/10 | 14/45 |
-| | GNINA p4 | 0.60 | 1.00 | 20/20 | 6.0 Å | 27/55 | 6/10 | 21/45 |
-
-Three reads the merged rows support. **The static half separates the pipelines without any energy
-computation at all.** The shell-pipeline co-folds taken through dynamics enclose 0.795–0.965 with
-the ligand centroid 3.6–7.0 Å from the peptide; only `bg33_4` of the four BoltzGen co-folds reaches
-0.59, and `bg33_1` sits at 0.38 with its centroid 17.3 Å from the fold — and the dynamics table
-above confirms the split: `bg33_4`'s co-fold is the only BoltzGen co-fold worth anything as a pose
-(−19.66 at 100% retention), while the other three hold nothing above −11.86 anywhere in their rows.
-
-**Where a docked start beat the co-fold, the static read saw it coming.** `orig_f12`'s Vina-p1 pose
-is the best static cell in the table — 0.975 enclosed at 3.5 Å, tighter than its own co-fold on both
-counts — and that is the one leg where a docked start clearly won (−22.11 at 100% against −13.71).
-
-**The static read also has a failure recorded here.** `s2_esm2_control`'s Vina-p1 pose carries
-0.745 enclosed with all 20 atoms engaged — respectable numbers against the design rows — and its
-leg drifted 12.6 Å to 0.0% residence regardless (footnote †). Enclosure prices the pose given, and
-the ligand left that pose; it is not a stability forecast.
-
-**The `bg33` rows are now complete.** The four racc-campaign legs (`bg33_1`/`bg33_2`, co-folded and
-docked) were computed from the already-fetched wrapped solutes with the same `design.json` slots as
-the committed `bg33_3`/`bg33_4` rows (`runs/octinoxate/md/pair_contacts_bg33_missing.csv`). They
-close the BoltzGen rows the way the ΔG table wants them: `bg33_1` realises 7–10/55 pairs in every
-pose with 4–6 dead slots and no long-range pair anywhere — the weakest pair profile in the table,
-down with its −11 to −13 cells and its 0.38-co-fold static read; `bg33_2`'s co-fold realises 8/55
-but its docked legs rise to 20/55 and 27/55 (38% up the band, the only long-range pair in the
-BoltzGen arm) — the same legs where its ΔG also improves, and still under half of the shell
-designs' 41–53/66 rows.
-
 ### Residence and release, every leg
 
 Residence within 10 Å of the peptide centroid over the 20 ns run, with the release record behind it,
@@ -295,6 +220,81 @@ two extended nulls are the same story at opposite geometry: the `*esm2*`/`esm0` 
 that never folded, not globules that opened. The bg33_1/bg33_2 docked legs are the exception that
 proves the difference: starting from a pose the fold was not made around, the extended rod folds up
 around the bound ligand.
+
+### The pre-dynamics fold and pose read, and the pairs every leg realises
+
+The first four number columns are the analysis that chose these peptides: **enclosed** (fraction of
+directions out of the ligand that meet peptide), **wrapped** (fraction of ligand atoms with peptide
+within 4.5 Å) and engagement, measured on each starting pose's own coordinates from
+`dock_poses.csv` — before any score was computed and before any dynamics ran — with the same
+`geometry()` as `check_fold.py`. Pose 0 is the co-folded Boltz pose as prepared for MD, pose 1 is
+Vina's rank-1, and the third pose for each peptide is the GNINA pick named in the headline table.
+The trajectory columns are then what those same poses did over their 20 ns runs, from
+`pair_contacts.py`: how many pairs of the design's non-glycine slot positions the fold brings onto
+the ligand — total realised, of which the adjacent pairs (which chain connectivity gives for free)
+and the non-adjacent ones (which it must earn). peptidebuilder designs have 12 slots, so the
+denominator band is [11, 66]; the BoltzGen designs have 11, so [10, 55], and their cells are not
+pooled with the others.
+
+| peptide | pose | enclosed | wrapped | engaged | cent sep | pairs realised | adjacent | non-adjacent |
+|---|---|---|---|---|---|---|---|---|
+| `s3_orig_f12` | co-folded | 0.965 | 1.00 | 20/20 | 3.6 Å | **53/66** | 10/11 | **43/55** |
+| | Vina p1 | 0.92 | 1.00 | 20/20 | 5.4 Å | 41/66 | 6/11 | 35/55 |
+| | GNINA p9 | 0.915 | 1.00 | 20/20 | 5.3 Å | 24/66 | 3/11 | 21/55 |
+| `s3_esm2_f4` | co-folded | 0.795 | 0.90 | 18/20 | 7.0 Å | 32/66 | 6/11 | 26/55 |
+| | Vina p1 | 0.905 | 0.95 | 19/20 | 8.4 Å | 32/66 | 6/11 | 26/55 |
+| | GNINA p6 | 0.94 | 0.95 | 19/20 | 8.0 Å | 17/66 | 3/11 | 14/55 |
+| `bg33_4` | co-folded | 0.59 | 0.95 | 19/20 | 6.3 Å | **14/55** | 1/10 | **13/45** |
+| | Vina p1 | 0.705 | 0.90 | 18/20 | 6.3 Å | 9/55 | 2/10 | 7/45 |
+| | GNINA p6 | 0.635 | 0.95 | 19/20 | 6.2 Å | 5/55 | 0/10 | 5/45 |
+| `s2_esm2_control` | co-folded | 0.51 | 0.85 | 17/20 | 6.7 Å | 10/66 | 3/11 | 7/55 |
+| | Vina p1 | 0.745 | 1.00 | 20/20 | 8.0 Å | 5/66 | 2/11 | 3/55 |
+| | GNINA p6 | 0.755 | 0.85 | 17/20 | 5.0 Å | 10/66 | 3/11 | 7/55 |
+| `shuffle_control` (null) | co-folded | 0.745 | 0.75 | 15/20 | 7.9 Å | 18/66 | 5/11 | 13/55 |
+| | Vina p1 | 0.755 | 0.90 | 18/20 | 6.5 Å | 23/66 | 6/11 | 17/55 |
+| | GNINA p9 | 0.885 | 1.00 | 20/20 | 5.9 Å | 18/66 | 5/11 | 13/55 |
+| | CNNscore p7 | 0.88 | 0.95 | 19/20 | 6.3 Å | 31/66 | 5/11 | 26/55 |
+| `shuffle_control_esm0` (null) | co-folded | 0.535 | 0.85 | 17/20 | 11.0 Å | 12/66 | 4/11 | 8/55 |
+| | Vina p1 | 0.55 | 1.00 | 20/20 | 12.2 Å | 9/66 | 4/11 | 5/55 |
+| | GNINA p9 | 0.735 | 0.90 | 18/20 | 9.3 Å | 13/66 | 4/11 | 9/55 |
+| `orig_f12` | co-folded | 0.96 | 1.00 | 20/20 | 4.2 Å | 22/66 | 4/11 | 18/55 |
+| | Vina p1 | **0.975** | 1.00 | 20/20 | 3.5 Å | 32/66 | 6/11 | 26/55 |
+| | GNINA p5 | 0.975 | 0.90 | 18/20 | 5.0 Å | 30/66 | 6/11 | 24/55 |
+| `bg33_3` | co-folded | 0.48 | 1.00 | 20/20 | 8.6 Å | 3/55 | 1/10 | 2/45 |
+| | Vina p1 | 0.55 | 0.90 | 18/20 | 8.0 Å | 13/55 | 5/10 | 8/45 |
+| | GNINA p6 | 0.53 | 0.95 | 19/20 | 8.1 Å | 3/55 | 1/10 | 2/45 |
+| `bg33_1` | co-folded | 0.38 | 0.75 | 15/20 | 17.3 Å | 8/55 | 4/10 | 4/45 |
+| | Vina p1 | 0.45 | 0.85 | 17/20 | 13.1 Å | 7/55 | 3/10 | 4/45 |
+| | GNINA p2 | 0.59 | 0.95 | 19/20 | 10.5 Å | 10/55 | 4/10 | 6/45 |
+| `bg33_2` | co-folded | 0.585 | 0.75 | 15/20 | 5.2 Å | 8/55 | 3/10 | 5/45 |
+| | Vina p1 | 0.51 | 0.85 | 17/20 | 8.7 Å | 20/55 | 6/10 | 14/45 |
+| | GNINA p4 | 0.60 | 1.00 | 20/20 | 6.0 Å | 27/55 | 6/10 | 21/45 |
+
+Three reads the merged rows support. **The static half separates the pipelines without any energy
+computation at all.** The shell-pipeline co-folds taken through dynamics enclose 0.795–0.965 with
+the ligand centroid 3.6–7.0 Å from the peptide; only `bg33_4` of the four BoltzGen co-folds reaches
+0.59, and `bg33_1` sits at 0.38 with its centroid 17.3 Å from the fold — and the dynamics table
+above confirms the split: `bg33_4`'s co-fold is the only BoltzGen co-fold worth anything as a pose
+(−19.66 at 100% retention), while the other three hold nothing above −11.86 anywhere in their rows.
+
+**Where a docked start beat the co-fold, the static read saw it coming.** `orig_f12`'s Vina-p1 pose
+is the best static cell in the table — 0.975 enclosed at 3.5 Å, tighter than its own co-fold on both
+counts — and that is the one leg where a docked start clearly won (−22.11 at 100% against −13.71).
+
+**The static read also has a failure recorded here.** `s2_esm2_control`'s Vina-p1 pose carries
+0.745 enclosed with all 20 atoms engaged — respectable numbers against the design rows — and its
+leg drifted 12.6 Å to 0.0% residence regardless (footnote †). Enclosure prices the pose given, and
+the ligand left that pose; it is not a stability forecast.
+
+**The `bg33` rows are now complete.** The four racc-campaign legs (`bg33_1`/`bg33_2`, co-folded and
+docked) were computed from the already-fetched wrapped solutes with the same `design.json` slots as
+the committed `bg33_3`/`bg33_4` rows (`runs/octinoxate/md/pair_contacts_bg33_missing.csv`). They
+close the BoltzGen rows the way the ΔG table wants them: `bg33_1` realises 7–10/55 pairs in every
+pose with 4–6 dead slots and no long-range pair anywhere — the weakest pair profile in the table,
+down with its −11 to −13 cells and its 0.38-co-fold static read; `bg33_2`'s co-fold realises 8/55
+but its docked legs rise to 20/55 and 27/55 (38% up the band, the only long-range pair in the
+BoltzGen arm) — the same legs where its ΔG also improves, and still under half of the shell
+designs' 41–53/66 rows.
 
 ## Oxybenzone: a second molecule through the pipeline
 
@@ -626,9 +626,9 @@ and the static read cannot.
 
 - [The table to read first: MM/GBSA by starting pose](#the-table-to-read-first-mmgbsa-by-starting-pose)
 - [Window convergence, every leg](#window-convergence-every-leg)
-- [The pre-dynamics fold and pose read, and the pairs every leg realises](#the-pre-dynamics-fold-and-pose-read-and-the-pairs-every-leg-realises)
 - [Residence and release, every leg](#residence-and-release-every-leg)
 - [Peptide structural stability, every leg](#peptide-structural-stability-every-leg)
+- [The pre-dynamics fold and pose read, and the pairs every leg realises](#the-pre-dynamics-fold-and-pose-read-and-the-pairs-every-leg-realises)
 
 - [Worked example: octinoxate](#worked-example-octinoxate)
 - [Second worked example: a different shell around the same ligand](#second-worked-example-a-different-shell-around-the-same-ligand)
