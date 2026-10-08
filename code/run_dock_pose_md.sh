@@ -43,11 +43,15 @@ POSE=${POSE:-1}
 SYSNAME=${SYSNAME:-octinoxate}
 BOX=${BOX:-dodecahedron}
 BUILD_ONLY=${BUILD_ONLY:-0}   # stop after the build, to read the particle count before the 20 ns
+LEGNAME=${LEGNAME:-}   # override N outright: a replicate leg (<leg>_r2) is its own staged dir with a
+                       # byte-identical system/ copied from the original, so the build guard skips
+                       # straight to the run; STRUCT/POSE stay set for the tail's SDF naming. See
+                       # NEXT_STEPS.md, "Replicate every MM/GBSA leg".
 # Honor the documented invocation `run_dock_pose_md.sh BUILD_ONLY=1` as a positional argument too:
 # only reading the env var let a bare positional word through and the "build-only" launch ran a full
 # 20 ns (2026-10-04, two accidental runs). `set -u` is set; loop over "$@" explicitly.
 for a in "$@"; do [[ $a == BUILD_ONLY=1 ]] && BUILD_ONLY=1; done
-N=${STRUCT}_dock${POSE}
+N=${LEGNAME:-${STRUCT}_dock${POSE}}
 M=runs/${SYSNAME}/md/$N                   # SYSNAME parameterizes the run dir (was hardcoded octinoxate)
 SRC=${SRC:-runs/${SYSNAME}/md/$STRUCT}   # the cofolded leg: supplies the already-prepped, frame-matched receptor
                                          # boltzgen cofolds live under boltzgen_local/md/<STRUCT>; pass

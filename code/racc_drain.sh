@@ -90,7 +90,20 @@ while (( remaining > 0 )); do
                 fi
 
                 log "  running tail for $leg"
-                if [[ $leg == *_dock<-> ]]; then
+                if [[ $leg == *_r2 ]]; then
+                    # A replicate leg (<leg>_r2) carries the word dock in the middle of its base
+                    # name, so STRUCT/POSE must be parsed from the base with _r2 stripped, and
+                    # LEGNAME passes the real leg name through (run_dock_pose_md.sh derives
+                    # N=<STRUCT>_dock<POSE> otherwise). The staged _r2 dir already holds a copied
+                    # system/, so the driver's build guard skips and SRC is never read -- it is set
+                    # to the base's co-fold dir only to keep the driver's arguments complete.
+                    base=${leg%_r2}
+                    struct=$base; pose=1
+                    [[ $base == *_dock<-> ]] && { struct=${base%_dock*}; pose=${base##*_dock}; }
+                    STRUCT=$struct POSE=$pose LEGNAME=$leg SYSNAME=$SYSNAME SRC=$BG/md/$struct \
+                        zsh $REPO/code/run_dock_pose_md.sh >> $src/tail.log 2>&1
+                    rc=$?
+                elif [[ $leg == *_dock<-> ]]; then
                     struct=${leg%_dock*}
                     pose=${leg##*_dock}
                     STRUCT=$struct POSE=$pose SYSNAME=$SYSNAME SRC=$BG/md/$struct \

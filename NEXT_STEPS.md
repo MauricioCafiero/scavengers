@@ -604,6 +604,99 @@ The September 2026 allocation was spent (about $4 across scoring and six 20 ns r
       predictor**, which ranks that pair backwards. Use `dead_slots` instead (3–5 of 11 against 0).
 
 
+## Replicate every MM/GBSA leg: run-to-run variation, prepared 2026-10-08, not launched
+
+CLAUDE.md records that "MM/GBSA standard errors are not uncertainty on a comparison" but nothing has
+ever put a number on run-to-run variation. This plan runs a second, independent 20 ns trajectory of
+every leg that produced an MM/GBSA row — both molecules, 62 legs — so the headline comparisons can
+carry a real ΔΔG reproducibility figure. **Plan only; no leg is launched until you approve it.**
+
+**Why a re-run is a replicate without touching any code.** `openmm_md/dynamics.py` never sets a
+seed: the `LangevinMiddleIntegrator` (line 77) and `setVelocitiesToTemperature` at equilibration
+(line 183) both draw fresh random numbers every instantiation. So running `omd run` again on the
+*same* `system.xml` is an independent trajectory, and the replicate definition is exact: identical
+starting coordinates and box, new initial velocities and new Langevin noise. No seed plumbing, no omd
+change.
+
+**The inventory (read off `system/system.xml` particle counts, not estimated): 62 legs.** Octinoxate
+31 (27 in `runs/octinoxate/md/` + the four `bg33_*` co-folds in `~/python_mac/boltzgen_local/md/`),
+oxybenzone 31 (27 + the four `bgox31_*` co-folds). Exclusions: `zzz_test_dock1` (leftover test build,
+no system) and `orig_f12_dock5/prod_25ns` (the matrix leg is its 20 ns run — the 25 ns extension is a
+different experiment, not a duplicate). Particle range 3,382–33,057; racc wall-time estimate
+(using wall ≈ 8 min + 10M × 0.236 ms × (N/5838)^0.4): **~31.8 h octinoxate, ~26.0 h oxybenzone,
+~58 h total ≈ 2.4 days continuous racc**. Modal by the cost model would be ≈ $55
+($0.45/leg + $0.041/1,000 particles on 665,689 total) — an estimate, not a quote, and racc is free
+and was where every recent leg ran anyway.
+
+**Replicate construction: each leg gets its own directory `<leg>_r2` holding a byte-identical copy
+of the original's inputs and a fresh dynamics run.** Copy from the original leg dir:
+`system/`, `protein_fixed.pdb`, `ligand_prepped.sdf`, and `<N>_ligand.sdf` — nothing else (no
+trajectory). Because `run_dock_pose_md.sh`'s build stage is guarded on `$M/system/system.xml`, a
+staged `_r2` dir skips the build and goes straight to `omd run` into a new `prod_20ns`. Naming it as
+its own leg dir (rather than `prod_20ns_r2` inside the original) is what makes every downstream glob
+work unchanged — `md_stability.py`'s `runs/*/md/*/prod_20ns`, `pair_contacts.py`, `ligand_slide.py`
+all pick the replicates up automatically.
+
+**Two parameterisations are needed, both one-line (per "extend, don't reimplement"):**
+1. `code/run_dock_pose_md.sh` gains `N=${LEGNAME:-${STRUCT}_dock${POSE}}` — then a replicate co-fold
+   is `LEGNAME=<leg>_r2 STRUCT=<orig base> SRC=<orig dir>` and a replicate dock is
+   `LEGNAME=<leg>_dock1_r2 STRUCT=<base> POSE=1 SRC=<co-fold dir>`.
+2. `code/racc_drain.sh`'s dispatch parses `<leg>_dock<K>` to set STRUCT/POSE; parsing a
+   `..._dock1_r2` name needs the `_r2` suffix stripped first, then passed back through. Small edit,
+   flag it when the first batch is staged.
+
+**Queue plan — racc, four batch jobs (each well inside the 24 h partition cap, one running at a
+time):** octinoxate-A (~16 h) and octinoxate-B (~16 h) split the 31 legs so each batch carries a mix
+of 5,000–8,000-particle legs (~46–54 min) and the few 21–33k ones (~74–87 min); same for oxybenzone-A
+and -B (~13 h each). Stage with `racc_feed.sh <legfile>` in `BATCH=1` mode
+(`<local dir>:<leg>` lines); fetch with `racc_drain.sh`, which also strips `traj.nc`. Preemption
+restarts a leg from zero, but `racc_run.py`'s per-leg `traj_wrapped.xtc` guard means a resubmitted
+batch skips completed legs and re-runs only what wasn't done. Total wall ~2.4 days if nothing
+preempts; realistic figure 3–4 days.
+
+**Order of operations.** (a) Make the two one-line driver edits. (b) Stage all 62 `_r2` dirs locally
+(a find-loop of `cp` — the only new file this task needs). (c) **Smoke leg first**: run one
+small leg end-to-end through run → fetch → tail (window MM/GBSA, contacts, frames, pairs) and verify
+every stage before submitting any batch — the one-leg-checking rule, here applied to a whole new leg
+kind. Suggested smoke: `ox2_orig_f8_r2` (5,231 particles, ~46 min racc, and its original is the best
+characterised leg on the oxybenzone side, so agreement vs disagreement is interpretable at a glance).
+(d) Submit batches in order, keeping the queue topped up. (e) Tail each leg as it lands —
+never let the drain backlog (see [[drain-remote-completions-proactively]]).
+
+**Per-leg recording set for a replicate** (same-day, one commit per leg — per the outstanding-work
+list): whole-run + three window MM/GBSA rows; `md_contacts.py` and `md_frames.py` (pipeline steps);
+`pair_contacts.py`; input→production ligand RMSD (`ligand_slide.py`); `md_stability.py` **full glob**
+(the globs above pick `_r2` legs up with no change; include them in the same argv pass, never a
+single-leg run). One change from a normal leg: **replicate rows go in a separate file
+`runs/<mol>/md/mmgbsa_replicates.csv`, not into `mmgbsa_summary.csv`**, and `make_gnina_bundle.py`'s
+`REFERENCE` dict is NOT extended — REFERENCE carries canonical-leg numbers for the GNINA bundle, and
+a replicate is not a canonical leg.
+
+**Deliverable.** Per molecule, `RESULTS.md` gains a replicate table after the MM/GBSA matrix:
+`leg | ΔG run 1 | ΔG run 2 | |ΔΔG| | retention r2 (r1) |` — 62 rows, plus a median/mean |ΔΔG| per
+molecule quoted in prose, which finally replaces "the standard errors are not uncertainty" with an
+actual reproducibility number. If |ΔΔG| turns out small (a few tenths), the headline tables stand as
+they are; if it is comparable to the design-vs-null gaps, the matrix gains a run-to-run spread column
+across all rows at once. Ligand retention may differ more than ΔG does (residence is a tail event) —
+record it, but treat a released-frames difference as a flagged cell, not a conclusion.
+
+Nothing here runs until you say go; the first action on a go is the two one-line edits and the smoke
+leg.
+
+**Prepared 2026-10-08 (uncommitted; nothing launched, nothing staged to racc).** Both one-line edits
+are in (`run_dock_pose_md.sh` now honours `LEGNAME`; `racc_drain.sh` parses `..._dock1_r2` by
+stripping the suffix and passing `LEGNAME=$leg`). All **62 `_r2` dirs are staged local** under
+`runs/<mol>/md/` — including the BoltzGen co-fold replicates, which live in `runs/` next to their
+molecule's docks rather than in `boltzgen_local/md/` — each holding a verified byte-identical
+`system/` (`system.xml` particle count equal to the original's, checked all 62) plus
+`protein_fixed.pdb`, `ligand_prepped.sdf`, the leg's `*_ligand.sdf`/`*_protein.pdb`, and no
+trajectory. The four wall-balanced leg lists are written: `runs/replicates/{oct_A,oct_B,oxb_A,oxb_B}.legs`
+(`oct_A` 15 legs ~15.6 h, `oct_B` 16 legs ~16.3 h, `oxb_A` 16 legs ~13.3 h, `oxb_B` 15 legs ~12.7 h,
+in dir:leg format for `racc_feed.sh BATCH=1`). The remaining actions on a go are: one smoke leg
+(`ox2_orig_f8_r2`), then the four `racc_feed.sh BATCH=1` submissions with `BATCH_NAME` per batch and
+`SYSNAME` set to the batch's molecule, a `racc_drain.sh` watcher per molecule, and the same-day tails.
+
+
 ## Environment map
 
 Nothing extra is installed in this repo; each external tool is called from its own environment.
