@@ -4,6 +4,7 @@
 #
 #   LANE=esmfold code/fold_batch.sh                 # ESMFold: ligand-free fold, sequence only
 #   LANE=openfold3 code/fold_batch.sh               # OpenFold3: protein+ligand cofold on the A10G
+#   LANE=of3apo code/fold_batch.sh                  # OpenFold3: protein-only (apo) query
 #   LANE=rf3 code/fold_batch.sh                     # RosettaFold3 cofold, second opinion
 #   MOL=oxybenzone LANE=esmfold code/fold_batch.sh  # restrict to one molecule's peptide set
 #
@@ -18,14 +19,20 @@
 # sample; RF3 drops outputs/rf3_<job>/ and promotes its best model. The driver converts the
 # best-ranked cif (fold.results.find_best_cif) to pdb in the fold lane dir and leaves the raw cifs
 # in the fold repo; a later re-run of the metrics script reads the converted pdb.
+# of3apo submits the SEQUENCE: line alone (no SMILES) as a single-chain apo query and names its
+# job <pep>_apo so it cannot collide with the cofold lane's outputs. Requires the fold repo's
+# guards relaxed to allow one-chain queries (done 2026-10-09). rf3apo is the same for RF3 -- the
+# app itself prefixes outputs with rf3_, so its job dir is outputs/rf3_<pep>_apo.
 set -u
 REPO=${0:A:h:h}
 cd $REPO
 FOLD=${FOLD_ROOT:-$HOME/python_mac/fold}
 LANE=${LANE:-esmfold}
 
-[[ $LANE == esmfold || $LANE == openfold3 || $LANE == rf3 ]] || {
-    print -u2 "LANE must be esmfold, openfold3 or rf3"; exit 1; }
+case $LANE in
+    esmfold|openfold3|rf3|of3apo|rf3apo) ;;
+    *) print -u2 "LANE must be esmfold, openfold3, rf3, of3apo or rf3apo"; exit 1 ;;
+esac
 
 for f in runs/*/folds/inputs/*.txt(N); do
     mol=${f:h:h:h:t}
@@ -41,6 +48,27 @@ for f in runs/*/folds/inputs/*.txt(N); do
         rc=$?
         echo "--- $LANE $mol/$name exit $rc ($(date '+%H:%M:%S'))" >> $log
         [[ $rc -eq 0 && -s $out ]] || echo "FAILED $mol/$name (exit $rc) -- see $log" | tee -a $log
+    elif [[ $LANE == of3apo || $LANE == rf3apo ]]; then
+        out=$REPO/runs/$mol/folds/$LANE/$name.pdb
+        [[ -e $out ]] && { echo "skip $mol/$name (exists)" >> $log; continue; }
+        [[ $LANE == rf3apo ]] && APP=src/fold/rf3_app.py::main || APP=src/fold/app.py::main
+        [[ $LANE == rf3apo ]] && dirjob=rf3_${name}_apo || dirjob=${name}_apo
+        seq=$(awk '/^SEQUENCE:/ {print $2}' $f)
+        ( cd $FOLD && caffeinate -i uv run modal run $APP \
+              --sequence $seq --job-name ${name}_apo ) >> $log 2>&1
+        rc=$?
+        cif=$( cd $FOLD && uv run python -c "
+from fold.results import find_best_cif
+print(find_best_cif('outputs/$dirjob'))" 2>/dev/null | tail -1 )
+        if [[ -n $cif && -f $FOLD/$cif ]]; then
+            mkdir -p runs/$mol/folds/$LANE
+            ( cd $FOLD && uv run python -m fold.analyze cif-to-pdb $cif --out-path $out ) >> $log 2>&1
+            echo "--- $LANE $mol/$name exit $rc, converted ($(date '+%H:%M:%S'))" >> $log
+            [[ -s $out ]] || echo "CONVERT FAILED $mol/$name -- cif found but pdb empty, see $log" \
+                | tee -a $log
+        else
+            echo "NO CIF for $mol/$name (modal exit $rc) -- see $log" | tee -a $log
+        fi
     else
         out=$REPO/runs/$mol/folds/$LANE/$name.pdb
         [[ -e $out ]] && { echo "skip $mol/$name (exists)" >> $log; continue; }

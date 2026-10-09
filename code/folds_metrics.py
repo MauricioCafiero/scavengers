@@ -16,8 +16,11 @@ Lanes:
                 from OF3's best-ranked cif), so `check_fold.geometry()` runs unmodified and the
                 wrapped/enclosed/engaged columns read straight against fold_check.csv and
                 dock_poses.csv.
+    rf3         `runs/<mol>/folds/rf3/<peptide>.pdb`        — RF3 cofold, same treatment as openfold3.
+    of3apo      `runs/<mol>/folds/of3apo/<peptide>.pdb`    — OpenFold3 protein-only: ligand-free like
+                esmfold, geometry columns stay empty; the comparison becomes shape/helix/RMSD.
 
-Usage:  python code/folds_metrics.py [esmfold|openfold3]   # default esmfold
+Usage:  python code/folds_metrics.py [esmfold|openfold3|rf3|of3apo]   # default esmfold
 """
 import csv
 import glob
@@ -174,7 +177,7 @@ def main():
                 line = (f"{mol[:3]} {r['peptide']:22s} helix {r['helix_esm']:>5} vs {r['helix_cofold']:>5}"
                         f" | Rg {r['rg_esm']:>5} vs {r['rg_cofold']:>5}"
                         f" | RMSD {r['ca_rmsd']:>5} | plddt {r['mean_plddt']}")
-                if lane != "esmfold":
+                if "enclosed" in r:
                     line += (f" | enc {r['enclosed']}/{r['enclosedref']} wrap {r['wrapped']}/{r['wrappedref']}"
                              f" eng {r['engaged']}/{r['engagedref']} d {r['cent_sep']}/{r['cent_sepref']}")
                 print(line)

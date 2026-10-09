@@ -15,13 +15,15 @@ surfaced: the four bg33 folds and the four bgox31 folds are **different sequence
 and from the design jsons** — BoltzGen generated its own sequence per candidate, it did not fold the
 designed sequence.
 
-## The three lanes and the question each answers
+## The five lanes and the question each answers
 
 | Lane | Model | Input | Where | Question |
 |---|---|---|---|---|
 | ESMFold | esmfold_v1 (3B) | sequence only | Modal A10G | is the designed fold a fold **without the ligand**? |
 | OpenFold3 | OF3 (+ ligand) | sequence + SMILES | Modal A10G | does an independent cofolder place the ligand like BoltzGen did? |
 | RF3 | RosettaFold3 | sequence + SMILES | Modal A10G | second opinion on the cofold (all 21 landed 2026-10-09) |
+| OpenFold3 apo | OF3, apo | sequence only | Modal A10G | is the compact apo fold real or ESMFold-specific? (all 21 landed 2026-10-09) |
+| RF3 apo | RF3, apo | sequence only | Modal A10G | second opinion on the apo fold (all 21 landed 2026-10-09) |
 
 All three run through the `fold` repo (`~/python_mac/fold`, cloned from
 `github.com/MauricioCafiero/fold`; see its HANDOFF.md for what was verified live). ESMFold is **not
@@ -29,6 +31,54 @@ local** — its 11 GB of weights need more than this Mac has; only ESM2 *embeddi
 and they are not used here. `code/fold_batch.sh` drives a lane: `LANE=<name> code/fold_batch.sh`,
 resumable over its outputs, sequential (one Modal run at a time), each invocation under
 `caffeinate -i` as the modal guard requires.
+
+### The five methods, in detail
+
+**1. ESMFold — sequence only, no ligand.** The peptide sequence is sent to `esmfold_v1` (3B
+parameters) through the fold repo's `esmfold_app.py`, which runs on a Modal A10G and writes a PDB
+directly; the B-factor column carries pLDDT on a 0–1 scale. The SMILES never enters — this lane
+answers *does the sequence alone produce the fold*, which is why it is the apo test. The first run
+carried the one-time ~3 GB weight download into the Modal volume; after that each fold took ~30 s.
+Nothing of the design or Boltz/BoltzGen pipeline touches it: different architecture, different
+training, ligand-blind.
+
+**2. OpenFold3 — sequence + SMILES cofold.** The input file carries both the sequence and the
+ligand SMILES; `app.py` runs OpenFold3 on the A10G with MSA, drops one model cif per sample (five
+samples, seed 42) under `outputs/<job>/<job>/seed_*/`, plus a per-sample
+`*_confidences_aggregated.json`. The best sample is picked by `sample_ranking_score`
+(`fold.results.find_best_cif`) and converted to PDB with `fold.analyze cif-to-pdb`; in that PDB the
+peptide sits on chain A and the ligand on chain Z. The run auto-prints interface confidences for
+the A–Z pair — ipSAE, pDockQ2, pDockQ — of which ipSAE (Dunbrack 2025) is the interface-local one;
+for protein–ligand pairs the calibration is experimental, so they are used as a rank only. First
+run carried the container build and a 2.3 GB checkpoint (~7 min); the other twenty averaged
+~1.5 min.
+
+**3. RF3 (RosettaFold3) — same cofold, second model.** Identical input file through `rf3_app.py`;
+its outputs land under `outputs/rf3_<job>/` with the best model promoted to the top level, peptide
+on chain A and ligand on chain B, and the same ipSAE/pDockQ auto-print (lower dynamic range than
+OF3's — RF3 lacks an image that scores protein–ligand interfaces well, per the fold repo's note).
+Ran ~45 s per cofold once its checkpoint was cached. Its role is the second opinion: a fold that
+both cofolders reproduce is model-robust; a fold they pack differently is degenerate.
+
+**4. OpenFold3 apo — sequence only.** A later lane (2026-10-09, after the ESMFold results asked
+the question): the same `app.py` submitted with `--sequence` and no SMILES. OpenFold3 accepts a
+single-chain protein query natively — the requirement lived in this repo's plumbing, which
+relaxed it (`inputs.py`, `openfold3_core.py`, `app.py`; pushed as fold@`d969fc0`). Jobs are named
+`<pep>_apo` so they cannot collide with the cofold lane's outputs; conversion and measurement are
+identical to the cofold lane, with the geometry columns empty (no ligand). ~1.5 min per leg.
+
+**5. RF3 apo — the same, second model.** `rf3_app.py` with `--sequence` only; its ligand
+component was hardcoded into `rf3_core.build_query_components` and its app auto-filled
+rosuvastatin — both relaxed the same way (fold@`77dcb8b`, first test coverage for rf3_core).
+Outputs land under `outputs/rf3_<pep>_apo/`. ~45 s per leg. Its role: whether the apo state is
+compact under a second architecture, or whether *only* ESMFold collapses it.
+
+**What every lane feeds.** `code/folds_metrics.py <lane>` reads the converted PDB against the leg's
+own files: helical/beta fraction and hbond counts from `check_fold.secondary_structure`, Cα Rg,
+Cα RMSD against the co-fold's peptide (Kabsch superposition, `protein_fixed.pdb`), mean pLDDT, and
+— for the two cofold lanes — `check_fold.geometry()` on fold *and* on `system/complex.pdb` (the
+structure the dynamics leg was actually built from), giving enclosed/wrapped/engaged/centroid
+separation for both sides through one shared code path.
 
 ## What is compared (the inexpensive metrics)
 
@@ -81,14 +131,17 @@ residues; Rg is the peptide CA radius of gyration; RMSD superposes ESMFold's CAs
 | bgox31_4 | oxy | boltzgen | 0.690 / 0.724 | 11.32 / 8.31 | 6.10 | 80 |
 | bgox31_5 | oxy | boltzgen | 0.793 / 0.759 | 12.08 / 8.97 | 6.69 | 90 |
 
-**The headline: the designed glycine-rich folds are ligand-governed, not intrinsic.** Every
+**The headline (as ESMFold showed it): the designed glycine-rich folds collapse apo.** Every
 glycine-rich designed sequence — `orig_f12`, `s3_orig_f12`, `ox1_orig_f12` (octinoxate's design
 json), `ox2_orig_f8`, `ox3_orig_f8`, and both octinoxate nulls plus `ox2_shuffle` — folds from
 sequence alone into a near-fully-extended chain (Rg 19–29 Å, coordinate span 80–95 Å) instead of
-the compact shell its Boltz/BoltzGen co-fold shows (Rg 7–7.5 Å), at Cα RMSD 17–27 Å. The fold the
-dynamics legs inherit exists only because Boltz asked the question *with* the ligand present. That
-is a genuine property of the campaign, not a defect — it says the designed arrangement is paid for
-by interaction energy, and it warns that an apo version of these peptides does not exist as a fold.
+the compact shell its Boltz/BoltzGen co-fold shows (Rg 7–7.5 Å), at Cα RMSD 17–27 Å. This section's
+original conclusion — that the compact fold "exists only because Boltz asked the question *with*
+the ligand present" — **was overturned by the apo cofolder lanes below**: OpenFold3 and RF3 fold
+the same sequences compact *without* any ligand. The extended apo chain is ESMFold's behaviour
+under these sequences, not a property of them. The ESMFold comparison is still the discriminator
+that exposed the collapse in the first place — the two apo cofolders now locate it as model- rather
+than sequence-determined.
 
 **The ESM2-variants and structured nulls fold on their own.** `s2_esm2_control` (0.37 Å),
 `ox2_shuffle_esm0` (2.25), `shuffle_control_esm0` (5.8) and the remaining esm2-variants reproduce
@@ -219,29 +272,133 @@ protein–ligand interfaces well, per the fold repo note). Highest: bgox31_4 (0.
 (0.045) — again BoltzGen-arm peptides — but the dynamic range is too small to rank designs on it.
 Treat both cofold lanes' interface confidences as corroboration only.
 
-**Campaign bottom line (three models, 21 peptides, all static reads):** the designed
-glycine-rich shells are real but ligand-paid and pack-degenerate — apo folding destroys them
-(ESMFold), both cofolders rebuild *a* compact shell but at 5–8 Å from Boltz's packing and with
-less ligand engagement. The BoltzGen arms are the model-robust structures of the campaign
-(sub-Å from both cofolders), and the esm2-variants are packing-degenerate between cofolders. If
-fold-comparison follow-up (docking/MMGBSA on a re-folded structure) ever runs, the candidates are
-the designed arms — their re-folded compact shells at 5–8 Å RMSD ask whether a different packing
-binds differently, which is a per-peptide dynamics question.
+## Apo cofolding results (OpenFold3 and RF3 without the ligand; all 21 landed 2026-10-09)
 
-**Read jointly with the ESMFold lane:** compactness is ligand-conditional for every designed
-glycine-rich sequence and the three non-esm2 nulls (ESMFold apo: extended, Rg 19–29; OF3 cofold:
-compact, Rg 6–7.5). BoltzGen's arms and the esm2-variants are sequence-determined (compact in
-apo *and* cofold). Whether the designed compact shells survive 20 ns of dynamics is the
-question the co-fold MD legs already answer — this comparison says the *fold* is real but
-design-specific, while the BoltzGen arms are model-robust.
+Full data in `runs/<mol>/folds/metrics/of3apo.csv` and `rf3apo.csv`. Same format as the cofold
+tables minus the ligand columns: each row is best-sample-per-job, Cα RMSD against the leg's own
+co-fold, pLDDT on the 0–100 scale. No ligand in either lane, so enclosure/wrap/engaged are empty.
+
+### OpenFold3 apo
+
+| peptide | mol | kind | Cα RMSD | Rg / co-fold | pLDDT |
+|---|---|---|---|---|---|
+| orig_f12 | oct | designed | 8.11 | 8.40 / 7.46 | 47.3 |
+| s2_esm2_control | oct | esm2-variant | 1.47 | 14.58 / 14.50 | 95.9 |
+| s3_esm2_f4 | oct | esm2-variant | 12.23 | 15.13 / 9.53 | 95.1 |
+| s3_orig_f12 | oct | designed | 6.11 | 7.38 / 7.61 | 48.5 |
+| shuffle_control | oct | null | 8.04 | 6.88 / 7.23 | 52.0 |
+| shuffle_control_esm0 | oct | null-esm | 0.38 | 15.04 / 14.83 | 87.6 |
+| bg33_1 | oct | boltzgen | 0.71 | 14.46 / 14.40 | 97.4 |
+| bg33_2 | oct | boltzgen | 0.64 | 14.21 / 14.41 | 97.4 |
+| bg33_3 | oct | boltzgen | 0.50 | 8.06 / 8.09 | 96.7 |
+| bg33_4 | oct | boltzgen | 1.04 | 9.21 / 9.47 | 92.5 |
+| ox1_esm1_f8 | oxy | esm2-variant | 7.07 | 10.68 / 8.22 | 77.7 |
+| ox1_orig_f12 | oxy | designed | 6.25 | 6.93 / 6.89 | 57.6 |
+| ox2_esm1_f8 | oxy | esm2-variant | 4.86 | 10.01 / 8.85 | 75.0 |
+| ox2_orig_f8 | oxy | designed | 7.03 | 7.01 / 7.12 | 50.2 |
+| ox2_shuffle | oxy | null | 7.22 | 6.27 / 6.68 | 52.1 |
+| ox2_shuffle_esm0 | oxy | null-esm | 5.35 | 13.50 / 12.78 | 83.3 |
+| ox3_orig_f8 | oxy | designed | 6.56 | 6.32 / 6.94 | 56.1 |
+| bgox31_2 | oxy | boltzgen | 0.40 | 13.58 / 13.62 | 98.2 |
+| bgox31_3 | oxy | boltzgen | 2.72 | 8.27 / 9.00 | 89.2 |
+| bgox31_4 | oxy | boltzgen | 0.52 | 8.16 / 8.31 | 93.5 |
+| bgox31_5 | oxy | boltzgen | 2.37 | 8.78 / 8.97 | 84.9 |
+
+### RF3 apo
+
+| peptide | mol | kind | Cα RMSD | Rg / co-fold | pLDDT |
+|---|---|---|---|---|---|
+| orig_f12 | oct | designed | 9.11 | 7.72 / 7.46 | 70.1 |
+| s2_esm2_control | oct | esm2-variant | 0.44 | 14.46 / 14.50 | 86.2 |
+| s3_esm2_f4 | oct | esm2-variant | 3.65 | 9.90 / 9.53 | 80.6 |
+| s3_orig_f12 | oct | designed | 6.78 | 6.82 / 7.61 | 68.3 |
+| shuffle_control | oct | null | 7.79 | 8.78 / 7.23 | 67.4 |
+| shuffle_control_esm0 | oct | null-esm | 0.34 | 14.91 / 14.83 | 78.0 |
+| bg33_1 | oct | boltzgen | 0.46 | 14.46 / 14.40 | 78.1 |
+| bg33_2 | oct | boltzgen | 0.24 | 14.41 / 14.41 | 76.0 |
+| bg33_3 | oct | boltzgen | 0.41 | 7.96 / 8.09 | 86.3 |
+| bg33_4 | oct | boltzgen | 0.52 | 9.21 / 9.47 | 87.2 |
+| ox1_esm1_f8 | oxy | esm2-variant | 4.99 | 8.71 / 8.22 | 82.0 |
+| ox1_orig_f12 | oxy | designed | 6.26 | 6.77 / 6.89 | 72.2 |
+| ox2_esm1_f8 | oxy | esm2-variant | 4.43 | 9.09 / 8.85 | 82.4 |
+| ox2_orig_f8 | oxy | designed | 9.79 | 8.86 / 7.12 | 70.5 |
+| ox2_shuffle | oxy | null | 5.83 | 8.02 / 6.68 | 68.7 |
+| ox2_shuffle_esm0 | oxy | null-esm | 2.73 | 11.42 / 12.78 | 85.7 |
+| ox3_orig_f8 | oxy | designed | 6.15 | 7.37 / 6.94 | 66.7 |
+| bgox31_2 | oxy | boltzgen | 0.60 | 13.58 / 13.62 | 88.8 |
+| bgox31_3 | oxy | boltzgen | 1.44 | 8.45 / 9.00 | 84.4 |
+| bgox31_4 | oxy | boltzgen | 1.16 | 7.84 / 8.31 | 83.9 |
+| bgox31_5 | oxy | boltzgen | 0.86 | 8.85 / 8.97 | 85.6 |
+
+**Both cofolders fold every glycine-rich sequence compact apo — designed and null alike.**
+OpenFold3 apo gives the designed arms Rg 6.3–8.4 against co-folds 6.9–7.6 at RMSD 6.1–8.1 Å, and
+RF3 apo the same picture (Rg 6.8–8.9, RMSD 6.2–9.8), with the two gly-rich nulls compact under
+both as well. **The ESMFold extended-apo collapse is therefore model-specific, not a property of
+the sequences**: three of three architectures produce *a* compact state without the ligand;
+ESMFold alone produces an extended one. The campaign's apo comparison is not
+"ligand-governed versus intrinsic" — it is *which* of (at least) two apo states each model lands
+on, and how loosely each is held: OF3's own confidence on these apo folds is pLDDT ~47–58 (the
+lowest numbers in the whole campaign), RF3's ~66–70, versus 70–90 for ESMFold. **The compact apo
+form exists for these sequences, but no model holds it confidently.** What every line still agrees
+on: the exact packing (RMSD 6–10 Å across lanes) is degenerate, and nothing here — the fold, the
+compactness, the apo state — separates a designed arm from its gly-rich null; only the binding
+measurements can.
+
+**Four-lane one-glance grid** (`same` = reproduces the co-fold, `diff` = compact but repacked,
+`ext` = near-fully-extended apo):
+
+| peptide | mol | kind | ESMFold apo | OF3 apo | RF3 apo | OF3 cofold | RF3 cofold |
+|---|---|---|---|---|---|---|---|
+| orig_f12 | oct | designed | ext | diff | diff | diff | diff |
+| s2_esm2_control | oct | esm2-variant | same | same | same | same | diff |
+| s3_esm2_f4 | oct | esm2-variant | diff | diff | same | diff | same |
+| s3_orig_f12 | oct | designed | ext | diff | diff | diff | diff |
+| shuffle_control | oct | null | ext | diff | diff | diff | diff |
+| shuffle_control_esm0 | oct | null-esm | same | same | same | same | diff |
+| bg33_1 | oct | boltzgen | diff | same | same | same | same |
+| bg33_2 | oct | boltzgen | diff | same | same | same | same |
+| bg33_3 | oct | boltzgen | same | same | same | same | same |
+| bg33_4 | oct | boltzgen | same | same | same | same | same |
+| ox1_esm1_f8 | oxy | esm2-variant | diff | diff | diff | diff | diff |
+| ox1_orig_f12 | oxy | designed | ext | diff | diff | diff | diff |
+| ox2_esm1_f8 | oxy | esm2-variant | diff | diff | diff | diff | diff |
+| ox2_orig_f8 | oxy | designed | ext | diff | diff | diff | diff |
+| ox2_shuffle | oxy | null | ext | diff | diff | diff | diff |
+| ox2_shuffle_esm0 | oxy | null-esm | same | diff | diff | diff | diff |
+| ox3_orig_f8 | oxy | designed | ext | diff | diff | diff | diff |
+| bgox31_2 | oxy | boltzgen | same | same | same | same | same |
+| bgox31_3 | oxy | boltzgen | same | same | same | same | same |
+| bgox31_4 | oxy | boltzgen | same | same | same | same | same |
+| bgox31_5 | oxy | boltzgen | same | same | same | same | same |
+
+**Campaign bottom line (five lanes, 21 peptides, all static reads):**
+
+- **BoltzGen's arms are the model-robust structures of the campaign** — sub-Å to 1.4 Å Cα RMSD
+  from *both* cofolders and *both* their apo lanes (bg33 and bgox31, all "same" in four columns of
+  the grid; ESMFold disagrees only on bg33_1/2). Nothing else in the campaign is that consistent.
+- **The designed glycine-rich shells are pack-degenerate but not ligand-governed.** The ESMFold
+  lane's extended-apo collapse was model-specific: both cofolders fold every one of these
+  sequences (and the gly-rich nulls) compact without any ligand. What no lane reproduces is
+  Boltz's particular packing — everything sits 5–10 Å away in Cα RMSD, and cofolded runs engage
+  the ligand *less* than BoltzGen's static read. The apo compact state exists but is held at low
+  confidence (OF3 pLDDT ~50) — it is one of several loose alternatives, not a defined fold.
+- **Packing degeneracy — not apo fragility — is the property that distinguishes the groups:**
+  designed and null glycine-rich arms live at 4–10 Å from every reference in every model, the
+  BoltzGen arms are pinned sub-Å, and the esm2-variants sit between, with the two cofolders
+  disagreeing on which packing they land in.
+- **Fold metrics alone cannot separate a design from its null.** Designed and plain-null rows look
+  alike in every grid cell — the rubric for what to pursue has to come from binding: MM/GBSA,
+  ligand retention and contacts against those same null rows.
 
 ## What "interesting" means for the follow-up
 
 Docking/MMGBSA legs on a *re-folded* structure run only if the inexpensive metrics above show
-something worth chasing. **That condition has fired, and the proposal is pending the go:** every
-designed glycine-rich arm re-folds into a compact shell that is 5–8 Å (Cα) from the co-fold the
-dynamics ran on, in *both* cofold lanes — a different packing that may engage the ligand
-differently, while the apo fold does not exist to bind at all. The candidate cells are the five
-designed arms (`orig_f12`, `s3_orig_f12`, `ox1_orig_f12`, `ox2_orig_f8`, `ox3_orig_f8`), docked
-and run as MD legs against their co-fold baselines. Until that go arrives, nothing downstream of
-folding has run: no docking, no MD, no dynamics spend on the folded structures.
+something worth chasing. **The condition fired on the cofold lanes, and the proposal is pending
+the go:** every designed glycine-rich arm re-folds into a compact shell 4–8 Å (Cα) from the
+co-fold the dynamics ran on, in *both* cofold lanes — a different packing that may engage the
+ligand differently. (The apo lanes sharpen the framing rather than add candidates: they compact
+*everything*, nulls included, so an apo fold is not a promising starting structure *per se*.) The
+candidate cells are the five designed arms (`orig_f12`, `s3_orig_f12`, `ox1_orig_f12`,
+`ox2_orig_f8`, `ox3_orig_f8`), docked and run as MD legs against their co-fold baselines. Until
+that go arrives, nothing downstream of folding has run: no docking, no MD, no dynamics spend on
+the folded structures.
