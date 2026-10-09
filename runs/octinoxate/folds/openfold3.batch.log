@@ -1,0 +1,1395 @@
+=== openfold3 octinoxate/bg33_1 (13:01:24)
+✓ Initialized. View run at 
+https://modal.com/apps/mauriciocafiero/main/ap-AZdMy2qNONupM4rTzgrGDt
+✓ Created objects.
+├── 🔨 Created mount /Users/cafierom/python_mac/fold/src/fold/app.py
+├── 🔨 Created mount PythonPackage:fold
+└── 🔨 Created function predict.
+submitting bg33_1 on A10G ...
+
+==========
+== CUDA ==
+==========
+
+CUDA Version 12.1.1
+
+Container image Copyright (c) 2016-2023, NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+
+This container image and its contents are governed by the NVIDIA Deep Learning Container License.
+By pulling and using the container, you accept the terms and conditions of this license:
+https://developer.nvidia.com/ngc/nvidia-deep-learning-container-license
+
+A copy of this license is made available in this container at /NGC-DL-CONTAINER-LICENSE for your convenience.
+
+weights already cached at /cache/of3-ob-2025-06-30-174k.pt (2287872989 bytes)
+running: run_openfold predict --query_json=/tmp/bg33_1_query.json --output_dir=/outputs/bg33_1 --inference_ckpt_path=/cache/of3-ob-2025-06-30-174k.pt --use_msa_server=true --use_templates=false
+[93m [WARNING] [0m Please pip install nvidia-cutlass
+Submitting 1 sequences to the Colabfold MSA server for main MSAs...
+No complexes found for paired MSA generation. Skipping...
+
+Predicting: |          | 0/? [00:00<?, ?s/it]
+Predicting: |          | 0/? [00:00<?, ?s/it]
+Predicting DataLoader 0:   0%|          | 0/1 [00:00<?, ?s/it]
+Predicting DataLoader 0: 100%|██████████| 1/1 [00:24<00:00, 24.78s/it]
+Predicting DataLoader 0: 100%|██████████| 1/1 [00:24<00:00, 24.88s/it][93m [WARNING] [0m Please pip install nvidia-cutlass
+[93m [WARNING] [0m Please pip install nvidia-cutlass
+[93m [WARNING] [0m Please pip install nvidia-cutlass
+[93m [WARNING] [0m Please pip install nvidia-cutlass
+[93m [WARNING] [0m Please pip install nvidia-cutlass
+[93m [WARNING] [0m Please pip install nvidia-cutlass
+[93m [WARNING] [0m Please pip install nvidia-cutlass
+[93m [WARNING] [0m Please pip install nvidia-cutlass
+[93m [WARNING] [0m Please pip install nvidia-cutlass
+[93m [WARNING] [0m Please pip install nvidia-cutlass
+
+
+==================================================
+    PREDICTION SUMMARY (COMPLETE)    
+==================================================
+Total Queries Processed: 1
+  - Successful Queries:  1
+  - Failed Queries:      0
+==================================================
+
+Removing empty log directory...
+
+GPU available: True (cuda), used: True
+TPU available: False, using: 0 TPU cores
+💡 Tip: For seamless cloud logging and experiment tracking, try installing [litlogger](https://pypi.org/project/litlogger/) to enable LitLogger, which logs metrics and artifacts automatically to the Lightning Experiments platform.
+💡 Tip: For seamless cloud uploads and versioning, try installing [litmodels](https://pypi.org/project/litmodels/) to enable LitModelCheckpoint, which syncs automatically with the Lightning model registry.
+WARNING:openfold3.core.data.tools.colabfold_msa_server:Using output directory: /tmp/of3-of-root/msa-root-20261009T120151139289Z-ce96afdc for ColabFold MSAs.
+
+  0%|          | 0/150 [elapsed: 00:00 remaining: ?]
+SUBMIT:   0%|          | 0/150 [elapsed: 00:00 remaining: ?]
+PENDING:   0%|          | 0/150 [elapsed: 00:00 remaining: ?]
+PENDING:   0%|          | 0/150 [elapsed: 00:06 remaining: ?]
+PENDING:   0%|          | 0/150 [elapsed: 00:16 remaining: ?]
+PENDING:   0%|          | 0/150 [elapsed: 00:25 remaining: ?]
+PENDING:   0%|          | 0/150 [elapsed: 00:31 remaining: ?]
+COMPLETE:   0%|          | 0/150 [elapsed: 00:39 remaining: ?]
+COMPLETE: 100%|██████████| 150/150 [elapsed: 00:39 remaining: 00:00]
+COMPLETE: 100%|██████████| 150/150 [elapsed: 00:40 remaining: 00:00]
+/opt/openfold3/openfold3/core/data/tools/colabfold_msa_server.py:401: DeprecationWarning: Python 3.14 will, by default, filter extracted tar archives and reject files or modify their metadata. Use the filter argument to control this behavior.
+  tar_gz.extractall(path)
+WARNING:openfold3.core.data.tools.colabfold_msa_server:Colabfold returned no templates. Proceeding without template alignments for this batch.
+LOCAL_RANK: 0 - CUDA_VISIBLE_DEVICES: [0]
+Seed set to 42
+/opt/conda/envs/openfold3/lib/python3.12/site-packages/torch/autograd/function.py:575: UserWarning: OpenFold3 Triton evoformer kernel is running on a non-HIP backend with default, untuned Triton config (AMD MFMA / waves_per_eu tunings disabled). Correctness holds; performance is not tuned for this backend.
+  return super().apply(*args, **kwargs)  # type: ignore[misc]
+/opt/conda/envs/openfold3/lib/python3.12/site-packages/torch/autograd/function.py:575: UserWarning: OpenFold3 Triton evoformer kernel is running on a non-HIP backend with default, untuned Triton config (AMD MFMA / waves_per_eu tunings disabled). Correctness holds; performance is not tuned for this backend.
+  return super().apply(*args, **kwargs)  # type: ignore[misc]
+/opt/conda/envs/openfold3/lib/python3.12/site-packages/torch/autograd/function.py:575: UserWarning: OpenFold3 Triton evoformer kernel is running on a non-HIP backend with default, untuned Triton config (AMD MFMA / waves_per_eu tunings disabled). Correctness holds; performance is not tuned for this backend.
+  return super().apply(*args, **kwargs)  # type: ignore[misc]
+/opt/conda/envs/openfold3/lib/python3.12/site-packages/torch/autograd/function.py:575: UserWarning: OpenFold3 Triton evoformer kernel is running on a non-HIP backend with default, untuned Triton config (AMD MFMA / waves_per_eu tunings disabled). Correctness holds; performance is not tuned for this backend.
+  return super().apply(*args, **kwargs)  # type: ignore[misc]
+/opt/conda/envs/openfold3/lib/python3.12/site-packages/torch/autograd/function.py:575: UserWarning: OpenFold3 Triton evoformer kernel is running on a non-HIP backend with default, untuned Triton config (AMD MFMA / waves_per_eu tunings disabled). Correctness holds; performance is not tuned for this backend.
+  return super().apply(*args, **kwargs)  # type: ignore[misc]
+/opt/conda/envs/openfold3/lib/python3.12/site-packages/torch/autograd/function.py:575: UserWarning: OpenFold3 Triton evoformer kernel is running on a non-HIP backend with default, untuned Triton config (AMD MFMA / waves_per_eu tunings disabled). Correctness holds; performance is not tuned for this backend.
+  return super().apply(*args, **kwargs)  # type: ignore[misc]
+/opt/conda/envs/openfold3/lib/python3.12/site-packages/torch/autograd/function.py:575: UserWarning: OpenFold3 Triton evoformer kernel is running on a non-HIP backend with default, untuned Triton config (AMD MFMA / waves_per_eu tunings disabled). Correctness holds; performance is not tuned for this backend.
+  return super().apply(*args, **kwargs)  # type: ignore[misc]
+/opt/conda/envs/openfold3/lib/python3.12/site-packages/torch/autograd/function.py:575: UserWarning: OpenFold3 Triton evoformer kernel is running on a non-HIP backend with default, untuned Triton config (AMD MFMA / waves_per_eu tunings disabled). Correctness holds; performance is not tuned for this backend.
+  return super().apply(*args, **kwargs)  # type: ignore[misc]
+/opt/conda/envs/openfold3/lib/python3.12/site-packages/biotite/structure/io/pdbx/convert.py:1024: DeprecationWarning: `include_bonds` parameter is deprecated, intra-residue are always written, if available
+  warnings.warn(
+/opt/conda/envs/openfold3/lib/python3.12/tempfile.py:940: ResourceWarning: Implicitly cleaning up <TemporaryDirectory '/tmp/tmpwraleb22'>
+  _warnings.warn(warn_message, ResourceWarning)
+
+wrote outputs/bg33_1/experiment_config.json
+wrote outputs/bg33_1/inference_query_set.json
+wrote outputs/bg33_1/model_config.json
+wrote outputs/bg33_1/summary.txt
+wrote outputs/bg33_1/bg33_1/seed_42/bg33_1_seed_42_sample_1_confidences.json
+wrote outputs/bg33_1/bg33_1/seed_42/bg33_1_seed_42_sample_1_confidences_aggregated.json
+wrote outputs/bg33_1/bg33_1/seed_42/bg33_1_seed_42_sample_1_model.cif
+wrote outputs/bg33_1/bg33_1/seed_42/bg33_1_seed_42_sample_2_confidences.json
+wrote outputs/bg33_1/bg33_1/seed_42/bg33_1_seed_42_sample_2_confidences_aggregated.json
+wrote outputs/bg33_1/bg33_1/seed_42/bg33_1_seed_42_sample_2_model.cif
+wrote outputs/bg33_1/bg33_1/seed_42/bg33_1_seed_42_sample_3_confidences.json
+wrote outputs/bg33_1/bg33_1/seed_42/bg33_1_seed_42_sample_3_confidences_aggregated.json
+wrote outputs/bg33_1/bg33_1/seed_42/bg33_1_seed_42_sample_3_model.cif
+wrote outputs/bg33_1/bg33_1/seed_42/bg33_1_seed_42_sample_4_confidences.json
+wrote outputs/bg33_1/bg33_1/seed_42/bg33_1_seed_42_sample_4_confidences_aggregated.json
+wrote outputs/bg33_1/bg33_1/seed_42/bg33_1_seed_42_sample_4_model.cif
+wrote outputs/bg33_1/bg33_1/seed_42/bg33_1_seed_42_sample_5_confidences.json
+wrote outputs/bg33_1/bg33_1/seed_42/bg33_1_seed_42_sample_5_confidences_aggregated.json
+wrote outputs/bg33_1/bg33_1/seed_42/bg33_1_seed_42_sample_5_model.cif
+wrote outputs/bg33_1/bg33_1/seed_42/timing.json
+wrote outputs/bg33_1/msas/msa-root-20261009T120151139289Z-ce96afdc/main/a1f54739b1f0d206e244d5284c481507912689ddc38049f5e0ce25c837ee2b03.npz
+wrote outputs/bg33_1/msas/msa-root-20261009T120151139289Z-ce96afdc/mappings/README.md
+wrote outputs/bg33_1/msas/msa-root-20261009T120151139289Z-ce96afdc/mappings/chain_id_to_rep_id.json
+wrote outputs/bg33_1/msas/msa-root-20261009T120151139289Z-ce96afdc/mappings/query_name_to_complex_id.json
+wrote outputs/bg33_1/msas/msa-root-20261009T120151139289Z-ce96afdc/mappings/rep_id_to_seq.json
+wrote outputs/bg33_1/msas/msa-root-20261009T120151139289Z-ce96afdc/mappings/seq_to_rep_id.json
+wrote outputs/bg33_1/msas/raw/msa-root-20261009T120151139289Z-ce96afdc/main/bfd.mgnify30.metaeuk30.smag30.a3m
+wrote outputs/bg33_1/msas/raw/msa-root-20261009T120151139289Z-ce96afdc/main/msa.sh
+wrote outputs/bg33_1/msas/raw/msa-root-20261009T120151139289Z-ce96afdc/main/out.tar.gz
+wrote outputs/bg33_1/msas/raw/msa-root-20261009T120151139289Z-ce96afdc/main/pdb70.m8
+wrote outputs/bg33_1/msas/raw/msa-root-20261009T120151139289Z-ce96afdc/main/uniref.a3m
+interface confidence (best model: bg33_1_seed_42_sample_2_model.cif):
+  interface A-Z: ipSAE 0.078, pDockQ2 0.395, pDockQ 0.474
+Stopping app - local entrypoint completed.
+✓ App completed. View run at 
+https://modal.com/apps/mauriciocafiero/main/ap-AZdMy2qNONupM4rTzgrGDt
+Usage: python -m fold.analyze cif-to-pdb [OPTIONS] {cif_path}
+Try 'python -m fold.analyze cif-to-pdb --help' for help.
+╭─ Error ──────────────────────────────────────────────────────────────────────╮
+│ Got unexpected extra argument(s)                                             │
+│ (/Users/cafierom/python_mac/peptidebuilder/runs/octinoxate/folds/openfold3/b │
+│ g33_1.pdb)                                                                   │
+╰──────────────────────────────────────────────────────────────────────────────╯
+--- openfold3 octinoxate/bg33_1 exit 0, converted (13:03:32)
+CONVERT FAILED octinoxate/bg33_1 -- cif found but pdb empty, see /Users/cafierom/python_mac/peptidebuilder/runs/octinoxate/folds/openfold3.batch.log
+=== openfold3 octinoxate/bg33_2 (13:03:37)
+✓ Initialized. View run at 
+https://modal.com/apps/mauriciocafiero/main/ap-oR0SvDr9eKqs6mrQrtwTAL
+✓ Created objects.
+├── 🔨 Created mount /Users/cafierom/python_mac/fold/src/fold/app.py
+├── 🔨 Created mount PythonPackage:fold
+└── 🔨 Created function predict.
+submitting bg33_2 on A10G ...
+
+==========
+== CUDA ==
+==========
+
+CUDA Version 12.1.1
+
+Container image Copyright (c) 2016-2023, NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+
+This container image and its contents are governed by the NVIDIA Deep Learning Container License.
+By pulling and using the container, you accept the terms and conditions of this license:
+https://developer.nvidia.com/ngc/nvidia-deep-learning-container-license
+
+A copy of this license is made available in this container at /NGC-DL-CONTAINER-LICENSE for your convenience.
+
+weights already cached at /cache/of3-ob-2025-06-30-174k.pt (2287872989 bytes)
+running: run_openfold predict --query_json=/tmp/bg33_2_query.json --output_dir=/outputs/bg33_2 --inference_ckpt_path=/cache/of3-ob-2025-06-30-174k.pt --use_msa_server=true --use_templates=false
+[93m [WARNING] [0m Please pip install nvidia-cutlass
+Submitting 1 sequences to the Colabfold MSA server for main MSAs...
+No complexes found for paired MSA generation. Skipping...
+
+Predicting: |          | 0/? [00:00<?, ?s/it]
+Predicting: |          | 0/? [00:00<?, ?s/it]
+Predicting DataLoader 0:   0%|          | 0/1 [00:00<?, ?s/it]
+Predicting DataLoader 0: 100%|██████████| 1/1 [00:28<00:00, 28.48s/it]
+Predicting DataLoader 0: 100%|██████████| 1/1 [00:28<00:00, 28.59s/it][93m [WARNING] [0m Please pip install nvidia-cutlass
+[93m [WARNING] [0m Please pip install nvidia-cutlass
+[93m [WARNING] [0m Please pip install nvidia-cutlass
+[93m [WARNING] [0m Please pip install nvidia-cutlass
+[93m [WARNING] [0m Please pip install nvidia-cutlass
+[93m [WARNING] [0m Please pip install nvidia-cutlass
+[93m [WARNING] [0m Please pip install nvidia-cutlass
+[93m [WARNING] [0m Please pip install nvidia-cutlass
+[93m [WARNING] [0m Please pip install nvidia-cutlass
+[93m [WARNING] [0m Please pip install nvidia-cutlass
+
+
+==================================================
+    PREDICTION SUMMARY (COMPLETE)    
+==================================================
+Total Queries Processed: 1
+  - Successful Queries:  1
+  - Failed Queries:      0
+==================================================
+
+Removing empty log directory...
+
+GPU available: True (cuda), used: True
+TPU available: False, using: 0 TPU cores
+💡 Tip: For seamless cloud logging and experiment tracking, try installing [litlogger](https://pypi.org/project/litlogger/) to enable LitLogger, which logs metrics and artifacts automatically to the Lightning Experiments platform.
+💡 Tip: For seamless cloud uploads and versioning, try installing [litmodels](https://pypi.org/project/litmodels/) to enable LitModelCheckpoint, which syncs automatically with the Lightning model registry.
+WARNING:openfold3.core.data.tools.colabfold_msa_server:Using output directory: /tmp/of3-of-root/msa-root-20261009T120407655999Z-7d99e7ef for ColabFold MSAs.
+
+  0%|          | 0/150 [elapsed: 00:00 remaining: ?]
+SUBMIT:   0%|          | 0/150 [elapsed: 00:00 remaining: ?]
+PENDING:   0%|          | 0/150 [elapsed: 00:00 remaining: ?]
+RUNNING:   0%|          | 0/150 [elapsed: 00:10 remaining: ?]
+RUNNING:   7%|▋         | 10/150 [elapsed: 00:10 remaining: 02:29]
+COMPLETE:   7%|▋         | 10/150 [elapsed: 00:17 remaining: 02:29]
+COMPLETE: 100%|██████████| 150/150 [elapsed: 00:17 remaining: 00:00]
+COMPLETE: 100%|██████████| 150/150 [elapsed: 00:18 remaining: 00:00]
+/opt/openfold3/openfold3/core/data/tools/colabfold_msa_server.py:401: DeprecationWarning: Python 3.14 will, by default, filter extracted tar archives and reject files or modify their metadata. Use the filter argument to control this behavior.
+  tar_gz.extractall(path)
+WARNING:openfold3.core.data.tools.colabfold_msa_server:Colabfold returned no templates. Proceeding without template alignments for this batch.
+LOCAL_RANK: 0 - CUDA_VISIBLE_DEVICES: [0]
+Seed set to 42
+/opt/conda/envs/openfold3/lib/python3.12/site-packages/torch/autograd/function.py:575: UserWarning: OpenFold3 Triton evoformer kernel is running on a non-HIP backend with default, untuned Triton config (AMD MFMA / waves_per_eu tunings disabled). Correctness holds; performance is not tuned for this backend.
+  return super().apply(*args, **kwargs)  # type: ignore[misc]
+/opt/conda/envs/openfold3/lib/python3.12/site-packages/torch/autograd/function.py:575: UserWarning: OpenFold3 Triton evoformer kernel is running on a non-HIP backend with default, untuned Triton config (AMD MFMA / waves_per_eu tunings disabled). Correctness holds; performance is not tuned for this backend.
+  return super().apply(*args, **kwargs)  # type: ignore[misc]
+/opt/conda/envs/openfold3/lib/python3.12/site-packages/torch/autograd/function.py:575: UserWarning: OpenFold3 Triton evoformer kernel is running on a non-HIP backend with default, untuned Triton config (AMD MFMA / waves_per_eu tunings disabled). Correctness holds; performance is not tuned for this backend.
+  return super().apply(*args, **kwargs)  # type: ignore[misc]
+/opt/conda/envs/openfold3/lib/python3.12/site-packages/torch/autograd/function.py:575: UserWarning: OpenFold3 Triton evoformer kernel is running on a non-HIP backend with default, untuned Triton config (AMD MFMA / waves_per_eu tunings disabled). Correctness holds; performance is not tuned for this backend.
+  return super().apply(*args, **kwargs)  # type: ignore[misc]
+/opt/conda/envs/openfold3/lib/python3.12/site-packages/torch/autograd/function.py:575: UserWarning: OpenFold3 Triton evoformer kernel is running on a non-HIP backend with default, untuned Triton config (AMD MFMA / waves_per_eu tunings disabled). Correctness holds; performance is not tuned for this backend.
+  return super().apply(*args, **kwargs)  # type: ignore[misc]
+/opt/conda/envs/openfold3/lib/python3.12/site-packages/torch/autograd/function.py:575: UserWarning: OpenFold3 Triton evoformer kernel is running on a non-HIP backend with default, untuned Triton config (AMD MFMA / waves_per_eu tunings disabled). Correctness holds; performance is not tuned for this backend.
+  return super().apply(*args, **kwargs)  # type: ignore[misc]
+/opt/conda/envs/openfold3/lib/python3.12/site-packages/torch/autograd/function.py:575: UserWarning: OpenFold3 Triton evoformer kernel is running on a non-HIP backend with default, untuned Triton config (AMD MFMA / waves_per_eu tunings disabled). Correctness holds; performance is not tuned for this backend.
+  return super().apply(*args, **kwargs)  # type: ignore[misc]
+/opt/conda/envs/openfold3/lib/python3.12/site-packages/torch/autograd/function.py:575: UserWarning: OpenFold3 Triton evoformer kernel is running on a non-HIP backend with default, untuned Triton config (AMD MFMA / waves_per_eu tunings disabled). Correctness holds; performance is not tuned for this backend.
+  return super().apply(*args, **kwargs)  # type: ignore[misc]
+/opt/conda/envs/openfold3/lib/python3.12/site-packages/biotite/structure/io/pdbx/convert.py:1024: DeprecationWarning: `include_bonds` parameter is deprecated, intra-residue are always written, if available
+  warnings.warn(
+/opt/conda/envs/openfold3/lib/python3.12/tempfile.py:940: ResourceWarning: Implicitly cleaning up <TemporaryDirectory '/tmp/tmpkl1kksua'>
+  _warnings.warn(warn_message, ResourceWarning)
+
+wrote outputs/bg33_2/experiment_config.json
+wrote outputs/bg33_2/inference_query_set.json
+wrote outputs/bg33_2/model_config.json
+wrote outputs/bg33_2/summary.txt
+wrote outputs/bg33_2/bg33_2/seed_42/bg33_2_seed_42_sample_1_confidences.json
+wrote outputs/bg33_2/bg33_2/seed_42/bg33_2_seed_42_sample_1_confidences_aggregated.json
+wrote outputs/bg33_2/bg33_2/seed_42/bg33_2_seed_42_sample_1_model.cif
+wrote outputs/bg33_2/bg33_2/seed_42/bg33_2_seed_42_sample_2_confidences.json
+wrote outputs/bg33_2/bg33_2/seed_42/bg33_2_seed_42_sample_2_confidences_aggregated.json
+wrote outputs/bg33_2/bg33_2/seed_42/bg33_2_seed_42_sample_2_model.cif
+wrote outputs/bg33_2/bg33_2/seed_42/bg33_2_seed_42_sample_3_confidences.json
+wrote outputs/bg33_2/bg33_2/seed_42/bg33_2_seed_42_sample_3_confidences_aggregated.json
+wrote outputs/bg33_2/bg33_2/seed_42/bg33_2_seed_42_sample_3_model.cif
+wrote outputs/bg33_2/bg33_2/seed_42/bg33_2_seed_42_sample_4_confidences.json
+wrote outputs/bg33_2/bg33_2/seed_42/bg33_2_seed_42_sample_4_confidences_aggregated.json
+wrote outputs/bg33_2/bg33_2/seed_42/bg33_2_seed_42_sample_4_model.cif
+wrote outputs/bg33_2/bg33_2/seed_42/bg33_2_seed_42_sample_5_confidences.json
+wrote outputs/bg33_2/bg33_2/seed_42/bg33_2_seed_42_sample_5_confidences_aggregated.json
+wrote outputs/bg33_2/bg33_2/seed_42/bg33_2_seed_42_sample_5_model.cif
+wrote outputs/bg33_2/bg33_2/seed_42/timing.json
+wrote outputs/bg33_2/msas/msa-root-20261009T120407655999Z-7d99e7ef/main/07835f3318bdba983dfe7f11e10d33cb553c9d90685eb7f5b67175e18255aae7.npz
+wrote outputs/bg33_2/msas/msa-root-20261009T120407655999Z-7d99e7ef/mappings/README.md
+wrote outputs/bg33_2/msas/msa-root-20261009T120407655999Z-7d99e7ef/mappings/chain_id_to_rep_id.json
+wrote outputs/bg33_2/msas/msa-root-20261009T120407655999Z-7d99e7ef/mappings/query_name_to_complex_id.json
+wrote outputs/bg33_2/msas/msa-root-20261009T120407655999Z-7d99e7ef/mappings/rep_id_to_seq.json
+wrote outputs/bg33_2/msas/msa-root-20261009T120407655999Z-7d99e7ef/mappings/seq_to_rep_id.json
+wrote outputs/bg33_2/msas/raw/msa-root-20261009T120407655999Z-7d99e7ef/main/bfd.mgnify30.metaeuk30.smag30.a3m
+wrote outputs/bg33_2/msas/raw/msa-root-20261009T120407655999Z-7d99e7ef/main/msa.sh
+wrote outputs/bg33_2/msas/raw/msa-root-20261009T120407655999Z-7d99e7ef/main/out.tar.gz
+wrote outputs/bg33_2/msas/raw/msa-root-20261009T120407655999Z-7d99e7ef/main/pdb70.m8
+wrote outputs/bg33_2/msas/raw/msa-root-20261009T120407655999Z-7d99e7ef/main/uniref.a3m
+interface confidence (best model: bg33_2_seed_42_sample_4_model.cif):
+  interface A-Z: ipSAE 0.069, pDockQ2 0.295, pDockQ 0.318
+Stopping app - local entrypoint completed.
+✓ App completed. View run at 
+https://modal.com/apps/mauriciocafiero/main/ap-oR0SvDr9eKqs6mrQrtwTAL
+Usage: python -m fold.analyze cif-to-pdb [OPTIONS] {cif_path}
+Try 'python -m fold.analyze cif-to-pdb --help' for help.
+╭─ Error ──────────────────────────────────────────────────────────────────────╮
+│ Got unexpected extra argument(s)                                             │
+│ (/Users/cafierom/python_mac/peptidebuilder/runs/octinoxate/folds/openfold3/b │
+│ g33_2.pdb)                                                                   │
+╰──────────────────────────────────────────────────────────────────────────────╯
+--- openfold3 octinoxate/bg33_2 exit 0, converted (13:05:43)
+CONVERT FAILED octinoxate/bg33_2 -- cif found but pdb empty, see /Users/cafierom/python_mac/peptidebuilder/runs/octinoxate/folds/openfold3.batch.log
+=== openfold3 octinoxate/bg33_3 (13:05:48)
+✓ Initialized. View run at 
+https://modal.com/apps/mauriciocafiero/main/ap-O1fARKTpxcRE1vd5gaPLLL
+✓ Created objects.
+├── 🔨 Created mount /Users/cafierom/python_mac/fold/src/fold/app.py
+├── 🔨 Created mount PythonPackage:fold
+└── 🔨 Created function predict.
+submitting bg33_3 on A10G ...
+
+==========
+== CUDA ==
+==========
+
+CUDA Version 12.1.1
+
+Container image Copyright (c) 2016-2023, NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+
+This container image and its contents are governed by the NVIDIA Deep Learning Container License.
+By pulling and using the container, you accept the terms and conditions of this license:
+https://developer.nvidia.com/ngc/nvidia-deep-learning-container-license
+
+A copy of this license is made available in this container at /NGC-DL-CONTAINER-LICENSE for your convenience.
+
+weights already cached at /cache/of3-ob-2025-06-30-174k.pt (2287872989 bytes)
+running: run_openfold predict --query_json=/tmp/bg33_3_query.json --output_dir=/outputs/bg33_3 --inference_ckpt_path=/cache/of3-ob-2025-06-30-174k.pt --use_msa_server=true --use_templates=false
+[93m [WARNING] [0m Please pip install nvidia-cutlass
+Submitting 1 sequences to the Colabfold MSA server for main MSAs...
+No complexes found for paired MSA generation. Skipping...
+
+Predicting: |          | 0/? [00:00<?, ?s/it]
+Predicting: |          | 0/? [00:00<?, ?s/it]
+Predicting DataLoader 0:   0%|          | 0/1 [00:00<?, ?s/it]
+Predicting DataLoader 0: 100%|██████████| 1/1 [00:19<00:00, 19.59s/it]
+Predicting DataLoader 0: 100%|██████████| 1/1 [00:19<00:00, 19.67s/it][93m [WARNING] [0m Please pip install nvidia-cutlass
+[93m [WARNING] [0m Please pip install nvidia-cutlass
+[93m [WARNING] [0m Please pip install nvidia-cutlass
+[93m [WARNING] [0m Please pip install nvidia-cutlass
+[93m [WARNING] [0m Please pip install nvidia-cutlass
+[93m [WARNING] [0m Please pip install nvidia-cutlass
+[93m [WARNING] [0m Please pip install nvidia-cutlass
+[93m [WARNING] [0m Please pip install nvidia-cutlass
+[93m [WARNING] [0m Please pip install nvidia-cutlass
+[93m [WARNING] [0m Please pip install nvidia-cutlass
+
+
+==================================================
+    PREDICTION SUMMARY (COMPLETE)    
+==================================================
+Total Queries Processed: 1
+  - Successful Queries:  1
+  - Failed Queries:      0
+==================================================
+
+Removing empty log directory...
+
+GPU available: True (cuda), used: True
+TPU available: False, using: 0 TPU cores
+💡 Tip: For seamless cloud logging and experiment tracking, try installing [litlogger](https://pypi.org/project/litlogger/) to enable LitLogger, which logs metrics and artifacts automatically to the Lightning Experiments platform.
+💡 Tip: For seamless cloud uploads and versioning, try installing [litmodels](https://pypi.org/project/litmodels/) to enable LitModelCheckpoint, which syncs automatically with the Lightning model registry.
+WARNING:openfold3.core.data.tools.colabfold_msa_server:Using output directory: /tmp/of3-of-root/msa-root-20261009T120608453912Z-0673b93a for ColabFold MSAs.
+
+  0%|          | 0/150 [elapsed: 00:00 remaining: ?]
+SUBMIT:   0%|          | 0/150 [elapsed: 00:00 remaining: ?]
+PENDING:   0%|          | 0/150 [elapsed: 00:00 remaining: ?]
+COMPLETE:   0%|          | 0/150 [elapsed: 00:07 remaining: ?]
+COMPLETE: 100%|██████████| 150/150 [elapsed: 00:07 remaining: 00:00]
+COMPLETE: 100%|██████████| 150/150 [elapsed: 00:07 remaining: 00:00]
+/opt/openfold3/openfold3/core/data/tools/colabfold_msa_server.py:401: DeprecationWarning: Python 3.14 will, by default, filter extracted tar archives and reject files or modify their metadata. Use the filter argument to control this behavior.
+  tar_gz.extractall(path)
+WARNING:openfold3.core.data.tools.colabfold_msa_server:Colabfold returned no templates. Proceeding without template alignments for this batch.
+LOCAL_RANK: 0 - CUDA_VISIBLE_DEVICES: [0]
+Seed set to 42
+/opt/conda/envs/openfold3/lib/python3.12/site-packages/torch/autograd/function.py:575: UserWarning: OpenFold3 Triton evoformer kernel is running on a non-HIP backend with default, untuned Triton config (AMD MFMA / waves_per_eu tunings disabled). Correctness holds; performance is not tuned for this backend.
+  return super().apply(*args, **kwargs)  # type: ignore[misc]
+/opt/conda/envs/openfold3/lib/python3.12/site-packages/torch/autograd/function.py:575: UserWarning: OpenFold3 Triton evoformer kernel is running on a non-HIP backend with default, untuned Triton config (AMD MFMA / waves_per_eu tunings disabled). Correctness holds; performance is not tuned for this backend.
+  return super().apply(*args, **kwargs)  # type: ignore[misc]
+/opt/conda/envs/openfold3/lib/python3.12/site-packages/torch/autograd/function.py:575: UserWarning: OpenFold3 Triton evoformer kernel is running on a non-HIP backend with default, untuned Triton config (AMD MFMA / waves_per_eu tunings disabled). Correctness holds; performance is not tuned for this backend.
+  return super().apply(*args, **kwargs)  # type: ignore[misc]
+/opt/conda/envs/openfold3/lib/python3.12/site-packages/torch/autograd/function.py:575: UserWarning: OpenFold3 Triton evoformer kernel is running on a non-HIP backend with default, untuned Triton config (AMD MFMA / waves_per_eu tunings disabled). Correctness holds; performance is not tuned for this backend.
+  return super().apply(*args, **kwargs)  # type: ignore[misc]
+/opt/conda/envs/openfold3/lib/python3.12/site-packages/torch/autograd/function.py:575: UserWarning: OpenFold3 Triton evoformer kernel is running on a non-HIP backend with default, untuned Triton config (AMD MFMA / waves_per_eu tunings disabled). Correctness holds; performance is not tuned for this backend.
+  return super().apply(*args, **kwargs)  # type: ignore[misc]
+/opt/conda/envs/openfold3/lib/python3.12/site-packages/torch/autograd/function.py:575: UserWarning: OpenFold3 Triton evoformer kernel is running on a non-HIP backend with default, untuned Triton config (AMD MFMA / waves_per_eu tunings disabled). Correctness holds; performance is not tuned for this backend.
+  return super().apply(*args, **kwargs)  # type: ignore[misc]
+/opt/conda/envs/openfold3/lib/python3.12/site-packages/torch/autograd/function.py:575: UserWarning: OpenFold3 Triton evoformer kernel is running on a non-HIP backend with default, untuned Triton config (AMD MFMA / waves_per_eu tunings disabled). Correctness holds; performance is not tuned for this backend.
+  return super().apply(*args, **kwargs)  # type: ignore[misc]
+/opt/conda/envs/openfold3/lib/python3.12/site-packages/torch/autograd/function.py:575: UserWarning: OpenFold3 Triton evoformer kernel is running on a non-HIP backend with default, untuned Triton config (AMD MFMA / waves_per_eu tunings disabled). Correctness holds; performance is not tuned for this backend.
+  return super().apply(*args, **kwargs)  # type: ignore[misc]
+/opt/conda/envs/openfold3/lib/python3.12/site-packages/biotite/structure/io/pdbx/convert.py:1024: DeprecationWarning: `include_bonds` parameter is deprecated, intra-residue are always written, if available
+  warnings.warn(
+/opt/conda/envs/openfold3/lib/python3.12/tempfile.py:940: ResourceWarning: Implicitly cleaning up <TemporaryDirectory '/tmp/tmpttpsl636'>
+  _warnings.warn(warn_message, ResourceWarning)
+
+wrote outputs/bg33_3/experiment_config.json
+wrote outputs/bg33_3/inference_query_set.json
+wrote outputs/bg33_3/model_config.json
+wrote outputs/bg33_3/summary.txt
+wrote outputs/bg33_3/bg33_3/seed_42/bg33_3_seed_42_sample_1_confidences.json
+wrote outputs/bg33_3/bg33_3/seed_42/bg33_3_seed_42_sample_1_confidences_aggregated.json
+wrote outputs/bg33_3/bg33_3/seed_42/bg33_3_seed_42_sample_1_model.cif
+wrote outputs/bg33_3/bg33_3/seed_42/bg33_3_seed_42_sample_2_confidences.json
+wrote outputs/bg33_3/bg33_3/seed_42/bg33_3_seed_42_sample_2_confidences_aggregated.json
+wrote outputs/bg33_3/bg33_3/seed_42/bg33_3_seed_42_sample_2_model.cif
+wrote outputs/bg33_3/bg33_3/seed_42/bg33_3_seed_42_sample_3_confidences.json
+wrote outputs/bg33_3/bg33_3/seed_42/bg33_3_seed_42_sample_3_confidences_aggregated.json
+wrote outputs/bg33_3/bg33_3/seed_42/bg33_3_seed_42_sample_3_model.cif
+wrote outputs/bg33_3/bg33_3/seed_42/bg33_3_seed_42_sample_4_confidences.json
+wrote outputs/bg33_3/bg33_3/seed_42/bg33_3_seed_42_sample_4_confidences_aggregated.json
+wrote outputs/bg33_3/bg33_3/seed_42/bg33_3_seed_42_sample_4_model.cif
+wrote outputs/bg33_3/bg33_3/seed_42/bg33_3_seed_42_sample_5_confidences.json
+wrote outputs/bg33_3/bg33_3/seed_42/bg33_3_seed_42_sample_5_confidences_aggregated.json
+wrote outputs/bg33_3/bg33_3/seed_42/bg33_3_seed_42_sample_5_model.cif
+wrote outputs/bg33_3/bg33_3/seed_42/timing.json
+wrote outputs/bg33_3/msas/msa-root-20261009T120608453912Z-0673b93a/main/0bc9b869a84111dafd4b60b7d705b71d17d11d1972aecdd98cc3655684635425.npz
+wrote outputs/bg33_3/msas/msa-root-20261009T120608453912Z-0673b93a/mappings/README.md
+wrote outputs/bg33_3/msas/msa-root-20261009T120608453912Z-0673b93a/mappings/chain_id_to_rep_id.json
+wrote outputs/bg33_3/msas/msa-root-20261009T120608453912Z-0673b93a/mappings/query_name_to_complex_id.json
+wrote outputs/bg33_3/msas/msa-root-20261009T120608453912Z-0673b93a/mappings/rep_id_to_seq.json
+wrote outputs/bg33_3/msas/msa-root-20261009T120608453912Z-0673b93a/mappings/seq_to_rep_id.json
+wrote outputs/bg33_3/msas/raw/msa-root-20261009T120608453912Z-0673b93a/main/bfd.mgnify30.metaeuk30.smag30.a3m
+wrote outputs/bg33_3/msas/raw/msa-root-20261009T120608453912Z-0673b93a/main/msa.sh
+wrote outputs/bg33_3/msas/raw/msa-root-20261009T120608453912Z-0673b93a/main/out.tar.gz
+wrote outputs/bg33_3/msas/raw/msa-root-20261009T120608453912Z-0673b93a/main/pdb70.m8
+wrote outputs/bg33_3/msas/raw/msa-root-20261009T120608453912Z-0673b93a/main/uniref.a3m
+interface confidence (best model: bg33_3_seed_42_sample_4_model.cif):
+  interface A-Z: ipSAE 0.247, pDockQ2 0.745, pDockQ 0.576
+Stopping app - local entrypoint completed.
+✓ App completed. View run at 
+https://modal.com/apps/mauriciocafiero/main/ap-O1fARKTpxcRE1vd5gaPLLL
+Usage: python -m fold.analyze cif-to-pdb [OPTIONS] {cif_path}
+Try 'python -m fold.analyze cif-to-pdb --help' for help.
+╭─ Error ──────────────────────────────────────────────────────────────────────╮
+│ Got unexpected extra argument(s)                                             │
+│ (/Users/cafierom/python_mac/peptidebuilder/runs/octinoxate/folds/openfold3/b │
+│ g33_3.pdb)                                                                   │
+╰──────────────────────────────────────────────────────────────────────────────╯
+--- openfold3 octinoxate/bg33_3 exit 0, converted (13:07:07)
+CONVERT FAILED octinoxate/bg33_3 -- cif found but pdb empty, see /Users/cafierom/python_mac/peptidebuilder/runs/octinoxate/folds/openfold3.batch.log
+=== openfold3 octinoxate/bg33_4 (13:07:12)
+✓ Initialized. View run at 
+https://modal.com/apps/mauriciocafiero/main/ap-5XoalkTQkQrwqqcjWtOdPN
+✓ Created objects.
+├── 🔨 Created mount /Users/cafierom/python_mac/fold/src/fold/app.py
+├── 🔨 Created mount PythonPackage:fold
+└── 🔨 Created function predict.
+submitting bg33_4 on A10G ...
+
+==========
+== CUDA ==
+==========
+
+CUDA Version 12.1.1
+
+Container image Copyright (c) 2016-2023, NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+
+This container image and its contents are governed by the NVIDIA Deep Learning Container License.
+By pulling and using the container, you accept the terms and conditions of this license:
+https://developer.nvidia.com/ngc/nvidia-deep-learning-container-license
+
+A copy of this license is made available in this container at /NGC-DL-CONTAINER-LICENSE for your convenience.
+
+weights already cached at /cache/of3-ob-2025-06-30-174k.pt (2287872989 bytes)
+running: run_openfold predict --query_json=/tmp/bg33_4_query.json --output_dir=/outputs/bg33_4 --inference_ckpt_path=/cache/of3-ob-2025-06-30-174k.pt --use_msa_server=true --use_templates=false
+[93m [WARNING] [0m Please pip install nvidia-cutlass
+Submitting 1 sequences to the Colabfold MSA server for main MSAs...
+No complexes found for paired MSA generation. Skipping...
+
+Predicting: |          | 0/? [00:00<?, ?s/it]
+Predicting: |          | 0/? [00:00<?, ?s/it]
+Predicting DataLoader 0:   0%|          | 0/1 [00:00<?, ?s/it]
+Predicting DataLoader 0: 100%|██████████| 1/1 [00:19<00:00, 19.39s/it]
+Predicting DataLoader 0: 100%|██████████| 1/1 [00:19<00:00, 19.46s/it][93m [WARNING] [0m Please pip install nvidia-cutlass
+[93m [WARNING] [0m Please pip install nvidia-cutlass
+[93m [WARNING] [0m Please pip install nvidia-cutlass
+[93m [WARNING] [0m Please pip install nvidia-cutlass
+[93m [WARNING] [0m Please pip install nvidia-cutlass
+[93m [WARNING] [0m Please pip install nvidia-cutlass
+[93m [WARNING] [0m Please pip install nvidia-cutlass
+[93m [WARNING] [0m Please pip install nvidia-cutlass
+[93m [WARNING] [0m Please pip install nvidia-cutlass
+[93m [WARNING] [0m Please pip install nvidia-cutlass
+
+
+==================================================
+    PREDICTION SUMMARY (COMPLETE)    
+==================================================
+Total Queries Processed: 1
+  - Successful Queries:  1
+  - Failed Queries:      0
+==================================================
+
+Removing empty log directory...
+
+GPU available: True (cuda), used: True
+TPU available: False, using: 0 TPU cores
+💡 Tip: For seamless cloud logging and experiment tracking, try installing [litlogger](https://pypi.org/project/litlogger/) to enable LitLogger, which logs metrics and artifacts automatically to the Lightning Experiments platform.
+💡 Tip: For seamless cloud uploads and versioning, try installing [litmodels](https://pypi.org/project/litmodels/) to enable LitModelCheckpoint, which syncs automatically with the Lightning model registry.
+WARNING:openfold3.core.data.tools.colabfold_msa_server:Using output directory: /tmp/of3-of-root/msa-root-20261009T120732625622Z-52d88d1d for ColabFold MSAs.
+
+  0%|          | 0/150 [elapsed: 00:00 remaining: ?]
+SUBMIT:   0%|          | 0/150 [elapsed: 00:00 remaining: ?]
+PENDING:   0%|          | 0/150 [elapsed: 00:00 remaining: ?]
+RUNNING:   0%|          | 0/150 [elapsed: 00:06 remaining: ?]
+RUNNING:   4%|▍         | 6/150 [elapsed: 00:06 remaining: 02:35]
+COMPLETE:   4%|▍         | 6/150 [elapsed: 00:12 remaining: 02:35]
+COMPLETE: 100%|██████████| 150/150 [elapsed: 00:12 remaining: 00:00]
+COMPLETE: 100%|██████████| 150/150 [elapsed: 00:12 remaining: 00:00]
+/opt/openfold3/openfold3/core/data/tools/colabfold_msa_server.py:401: DeprecationWarning: Python 3.14 will, by default, filter extracted tar archives and reject files or modify their metadata. Use the filter argument to control this behavior.
+  tar_gz.extractall(path)
+WARNING:openfold3.core.data.tools.colabfold_msa_server:Colabfold returned no templates. Proceeding without template alignments for this batch.
+LOCAL_RANK: 0 - CUDA_VISIBLE_DEVICES: [0]
+Seed set to 42
+/opt/conda/envs/openfold3/lib/python3.12/site-packages/torch/autograd/function.py:575: UserWarning: OpenFold3 Triton evoformer kernel is running on a non-HIP backend with default, untuned Triton config (AMD MFMA / waves_per_eu tunings disabled). Correctness holds; performance is not tuned for this backend.
+  return super().apply(*args, **kwargs)  # type: ignore[misc]
+/opt/conda/envs/openfold3/lib/python3.12/site-packages/torch/autograd/function.py:575: UserWarning: OpenFold3 Triton evoformer kernel is running on a non-HIP backend with default, untuned Triton config (AMD MFMA / waves_per_eu tunings disabled). Correctness holds; performance is not tuned for this backend.
+  return super().apply(*args, **kwargs)  # type: ignore[misc]
+/opt/conda/envs/openfold3/lib/python3.12/site-packages/torch/autograd/function.py:575: UserWarning: OpenFold3 Triton evoformer kernel is running on a non-HIP backend with default, untuned Triton config (AMD MFMA / waves_per_eu tunings disabled). Correctness holds; performance is not tuned for this backend.
+  return super().apply(*args, **kwargs)  # type: ignore[misc]
+/opt/conda/envs/openfold3/lib/python3.12/site-packages/torch/autograd/function.py:575: UserWarning: OpenFold3 Triton evoformer kernel is running on a non-HIP backend with default, untuned Triton config (AMD MFMA / waves_per_eu tunings disabled). Correctness holds; performance is not tuned for this backend.
+  return super().apply(*args, **kwargs)  # type: ignore[misc]
+/opt/conda/envs/openfold3/lib/python3.12/site-packages/torch/autograd/function.py:575: UserWarning: OpenFold3 Triton evoformer kernel is running on a non-HIP backend with default, untuned Triton config (AMD MFMA / waves_per_eu tunings disabled). Correctness holds; performance is not tuned for this backend.
+  return super().apply(*args, **kwargs)  # type: ignore[misc]
+/opt/conda/envs/openfold3/lib/python3.12/site-packages/torch/autograd/function.py:575: UserWarning: OpenFold3 Triton evoformer kernel is running on a non-HIP backend with default, untuned Triton config (AMD MFMA / waves_per_eu tunings disabled). Correctness holds; performance is not tuned for this backend.
+  return super().apply(*args, **kwargs)  # type: ignore[misc]
+/opt/conda/envs/openfold3/lib/python3.12/site-packages/torch/autograd/function.py:575: UserWarning: OpenFold3 Triton evoformer kernel is running on a non-HIP backend with default, untuned Triton config (AMD MFMA / waves_per_eu tunings disabled). Correctness holds; performance is not tuned for this backend.
+  return super().apply(*args, **kwargs)  # type: ignore[misc]
+/opt/conda/envs/openfold3/lib/python3.12/site-packages/torch/autograd/function.py:575: UserWarning: OpenFold3 Triton evoformer kernel is running on a non-HIP backend with default, untuned Triton config (AMD MFMA / waves_per_eu tunings disabled). Correctness holds; performance is not tuned for this backend.
+  return super().apply(*args, **kwargs)  # type: ignore[misc]
+/opt/conda/envs/openfold3/lib/python3.12/site-packages/biotite/structure/io/pdbx/convert.py:1024: DeprecationWarning: `include_bonds` parameter is deprecated, intra-residue are always written, if available
+  warnings.warn(
+/opt/conda/envs/openfold3/lib/python3.12/tempfile.py:940: ResourceWarning: Implicitly cleaning up <TemporaryDirectory '/tmp/tmpxtb90udt'>
+  _warnings.warn(warn_message, ResourceWarning)
+
+wrote outputs/bg33_4/experiment_config.json
+wrote outputs/bg33_4/inference_query_set.json
+wrote outputs/bg33_4/model_config.json
+wrote outputs/bg33_4/summary.txt
+wrote outputs/bg33_4/bg33_4/seed_42/bg33_4_seed_42_sample_1_confidences.json
+wrote outputs/bg33_4/bg33_4/seed_42/bg33_4_seed_42_sample_1_confidences_aggregated.json
+wrote outputs/bg33_4/bg33_4/seed_42/bg33_4_seed_42_sample_1_model.cif
+wrote outputs/bg33_4/bg33_4/seed_42/bg33_4_seed_42_sample_2_confidences.json
+wrote outputs/bg33_4/bg33_4/seed_42/bg33_4_seed_42_sample_2_confidences_aggregated.json
+wrote outputs/bg33_4/bg33_4/seed_42/bg33_4_seed_42_sample_2_model.cif
+wrote outputs/bg33_4/bg33_4/seed_42/bg33_4_seed_42_sample_3_confidences.json
+wrote outputs/bg33_4/bg33_4/seed_42/bg33_4_seed_42_sample_3_confidences_aggregated.json
+wrote outputs/bg33_4/bg33_4/seed_42/bg33_4_seed_42_sample_3_model.cif
+wrote outputs/bg33_4/bg33_4/seed_42/bg33_4_seed_42_sample_4_confidences.json
+wrote outputs/bg33_4/bg33_4/seed_42/bg33_4_seed_42_sample_4_confidences_aggregated.json
+wrote outputs/bg33_4/bg33_4/seed_42/bg33_4_seed_42_sample_4_model.cif
+wrote outputs/bg33_4/bg33_4/seed_42/bg33_4_seed_42_sample_5_confidences.json
+wrote outputs/bg33_4/bg33_4/seed_42/bg33_4_seed_42_sample_5_confidences_aggregated.json
+wrote outputs/bg33_4/bg33_4/seed_42/bg33_4_seed_42_sample_5_model.cif
+wrote outputs/bg33_4/bg33_4/seed_42/timing.json
+wrote outputs/bg33_4/msas/msa-root-20261009T120732625622Z-52d88d1d/main/2cd7e904d28293f8484db16a02022adf16c6746c1eda49efb7f34165876fb902.npz
+wrote outputs/bg33_4/msas/msa-root-20261009T120732625622Z-52d88d1d/mappings/README.md
+wrote outputs/bg33_4/msas/msa-root-20261009T120732625622Z-52d88d1d/mappings/chain_id_to_rep_id.json
+wrote outputs/bg33_4/msas/msa-root-20261009T120732625622Z-52d88d1d/mappings/query_name_to_complex_id.json
+wrote outputs/bg33_4/msas/msa-root-20261009T120732625622Z-52d88d1d/mappings/rep_id_to_seq.json
+wrote outputs/bg33_4/msas/msa-root-20261009T120732625622Z-52d88d1d/mappings/seq_to_rep_id.json
+wrote outputs/bg33_4/msas/raw/msa-root-20261009T120732625622Z-52d88d1d/main/bfd.mgnify30.metaeuk30.smag30.a3m
+wrote outputs/bg33_4/msas/raw/msa-root-20261009T120732625622Z-52d88d1d/main/msa.sh
+wrote outputs/bg33_4/msas/raw/msa-root-20261009T120732625622Z-52d88d1d/main/out.tar.gz
+wrote outputs/bg33_4/msas/raw/msa-root-20261009T120732625622Z-52d88d1d/main/pdb70.m8
+wrote outputs/bg33_4/msas/raw/msa-root-20261009T120732625622Z-52d88d1d/main/uniref.a3m
+interface confidence (best model: bg33_4_seed_42_sample_2_model.cif):
+  interface A-Z: ipSAE 0.067, pDockQ2 0.368, pDockQ 0.545
+Stopping app - local entrypoint completed.
+✓ App completed. View run at 
+https://modal.com/apps/mauriciocafiero/main/ap-5XoalkTQkQrwqqcjWtOdPN
+Usage: python -m fold.analyze cif-to-pdb [OPTIONS] {cif_path}
+Try 'python -m fold.analyze cif-to-pdb --help' for help.
+╭─ Error ──────────────────────────────────────────────────────────────────────╮
+│ Got unexpected extra argument(s)                                             │
+│ (/Users/cafierom/python_mac/peptidebuilder/runs/octinoxate/folds/openfold3/b │
+│ g33_4.pdb)                                                                   │
+╰──────────────────────────────────────────────────────────────────────────────╯
+--- openfold3 octinoxate/bg33_4 exit 0, converted (13:08:33)
+CONVERT FAILED octinoxate/bg33_4 -- cif found but pdb empty, see /Users/cafierom/python_mac/peptidebuilder/runs/octinoxate/folds/openfold3.batch.log
+=== openfold3 octinoxate/orig_f12 (13:08:38)
+✓ Initialized. View run at 
+https://modal.com/apps/mauriciocafiero/main/ap-A7F0Rmlg21f3KntNZXKi6B
+✓ Created objects.
+├── 🔨 Created mount /Users/cafierom/python_mac/fold/src/fold/app.py
+├── 🔨 Created mount PythonPackage:fold
+└── 🔨 Created function predict.
+submitting orig_f12 on A10G ...
+
+==========
+== CUDA ==
+==========
+
+CUDA Version 12.1.1
+
+Container image Copyright (c) 2016-2023, NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+
+This container image and its contents are governed by the NVIDIA Deep Learning Container License.
+By pulling and using the container, you accept the terms and conditions of this license:
+https://developer.nvidia.com/ngc/nvidia-deep-learning-container-license
+
+A copy of this license is made available in this container at /NGC-DL-CONTAINER-LICENSE for your convenience.
+
+weights already cached at /cache/of3-ob-2025-06-30-174k.pt (2287872989 bytes)
+running: run_openfold predict --query_json=/tmp/orig_f12_query.json --output_dir=/outputs/orig_f12 --inference_ckpt_path=/cache/of3-ob-2025-06-30-174k.pt --use_msa_server=true --use_templates=false
+[93m [WARNING] [0m Please pip install nvidia-cutlass
+Submitting 1 sequences to the Colabfold MSA server for main MSAs...
+No complexes found for paired MSA generation. Skipping...
+
+Predicting: |          | 0/? [00:00<?, ?s/it]
+Predicting: |          | 0/? [00:00<?, ?s/it]
+Predicting DataLoader 0:   0%|          | 0/1 [00:00<?, ?s/it]
+Predicting DataLoader 0: 100%|██████████| 1/1 [00:25<00:00, 25.08s/it]
+Predicting DataLoader 0: 100%|██████████| 1/1 [00:25<00:00, 25.19s/it][93m [WARNING] [0m Please pip install nvidia-cutlass
+[93m [WARNING] [0m Please pip install nvidia-cutlass
+[93m [WARNING] [0m Please pip install nvidia-cutlass
+[93m [WARNING] [0m Please pip install nvidia-cutlass
+[93m [WARNING] [0m Please pip install nvidia-cutlass
+[93m [WARNING] [0m Please pip install nvidia-cutlass
+[93m [WARNING] [0m Please pip install nvidia-cutlass
+[93m [WARNING] [0m Please pip install nvidia-cutlass
+[93m [WARNING] [0m Please pip install nvidia-cutlass
+[93m [WARNING] [0m Please pip install nvidia-cutlass
+
+
+==================================================
+    PREDICTION SUMMARY (COMPLETE)    
+==================================================
+Total Queries Processed: 1
+  - Successful Queries:  1
+  - Failed Queries:      0
+==================================================
+
+Removing empty log directory...
+
+GPU available: True (cuda), used: True
+TPU available: False, using: 0 TPU cores
+💡 Tip: For seamless cloud logging and experiment tracking, try installing [litlogger](https://pypi.org/project/litlogger/) to enable LitLogger, which logs metrics and artifacts automatically to the Lightning Experiments platform.
+💡 Tip: For seamless cloud uploads and versioning, try installing [litmodels](https://pypi.org/project/litmodels/) to enable LitModelCheckpoint, which syncs automatically with the Lightning model registry.
+WARNING:openfold3.core.data.tools.colabfold_msa_server:Using output directory: /tmp/of3-of-root/msa-root-20261009T120912021877Z-e84654f7 for ColabFold MSAs.
+
+  0%|          | 0/150 [elapsed: 00:00 remaining: ?]
+SUBMIT:   0%|          | 0/150 [elapsed: 00:00 remaining: ?]
+PENDING:   0%|          | 0/150 [elapsed: 00:00 remaining: ?]
+COMPLETE:   0%|          | 0/150 [elapsed: 00:06 remaining: ?]
+COMPLETE: 100%|██████████| 150/150 [elapsed: 00:06 remaining: 00:00]
+COMPLETE: 100%|██████████| 150/150 [elapsed: 00:06 remaining: 00:00]
+/opt/openfold3/openfold3/core/data/tools/colabfold_msa_server.py:401: DeprecationWarning: Python 3.14 will, by default, filter extracted tar archives and reject files or modify their metadata. Use the filter argument to control this behavior.
+  tar_gz.extractall(path)
+WARNING:openfold3.core.data.tools.colabfold_msa_server:Colabfold returned no templates. Proceeding without template alignments for this batch.
+LOCAL_RANK: 0 - CUDA_VISIBLE_DEVICES: [0]
+Seed set to 42
+/opt/conda/envs/openfold3/lib/python3.12/site-packages/torch/autograd/function.py:575: UserWarning: OpenFold3 Triton evoformer kernel is running on a non-HIP backend with default, untuned Triton config (AMD MFMA / waves_per_eu tunings disabled). Correctness holds; performance is not tuned for this backend.
+  return super().apply(*args, **kwargs)  # type: ignore[misc]
+/opt/conda/envs/openfold3/lib/python3.12/site-packages/torch/autograd/function.py:575: UserWarning: OpenFold3 Triton evoformer kernel is running on a non-HIP backend with default, untuned Triton config (AMD MFMA / waves_per_eu tunings disabled). Correctness holds; performance is not tuned for this backend.
+  return super().apply(*args, **kwargs)  # type: ignore[misc]
+/opt/conda/envs/openfold3/lib/python3.12/site-packages/torch/autograd/function.py:575: UserWarning: OpenFold3 Triton evoformer kernel is running on a non-HIP backend with default, untuned Triton config (AMD MFMA / waves_per_eu tunings disabled). Correctness holds; performance is not tuned for this backend.
+  return super().apply(*args, **kwargs)  # type: ignore[misc]
+/opt/conda/envs/openfold3/lib/python3.12/site-packages/torch/autograd/function.py:575: UserWarning: OpenFold3 Triton evoformer kernel is running on a non-HIP backend with default, untuned Triton config (AMD MFMA / waves_per_eu tunings disabled). Correctness holds; performance is not tuned for this backend.
+  return super().apply(*args, **kwargs)  # type: ignore[misc]
+/opt/conda/envs/openfold3/lib/python3.12/site-packages/torch/autograd/function.py:575: UserWarning: OpenFold3 Triton evoformer kernel is running on a non-HIP backend with default, untuned Triton config (AMD MFMA / waves_per_eu tunings disabled). Correctness holds; performance is not tuned for this backend.
+  return super().apply(*args, **kwargs)  # type: ignore[misc]
+/opt/conda/envs/openfold3/lib/python3.12/site-packages/torch/autograd/function.py:575: UserWarning: OpenFold3 Triton evoformer kernel is running on a non-HIP backend with default, untuned Triton config (AMD MFMA / waves_per_eu tunings disabled). Correctness holds; performance is not tuned for this backend.
+  return super().apply(*args, **kwargs)  # type: ignore[misc]
+/opt/conda/envs/openfold3/lib/python3.12/site-packages/torch/autograd/function.py:575: UserWarning: OpenFold3 Triton evoformer kernel is running on a non-HIP backend with default, untuned Triton config (AMD MFMA / waves_per_eu tunings disabled). Correctness holds; performance is not tuned for this backend.
+  return super().apply(*args, **kwargs)  # type: ignore[misc]
+/opt/conda/envs/openfold3/lib/python3.12/site-packages/torch/autograd/function.py:575: UserWarning: OpenFold3 Triton evoformer kernel is running on a non-HIP backend with default, untuned Triton config (AMD MFMA / waves_per_eu tunings disabled). Correctness holds; performance is not tuned for this backend.
+  return super().apply(*args, **kwargs)  # type: ignore[misc]
+/opt/conda/envs/openfold3/lib/python3.12/site-packages/biotite/structure/io/pdbx/convert.py:1024: DeprecationWarning: `include_bonds` parameter is deprecated, intra-residue are always written, if available
+  warnings.warn(
+/opt/conda/envs/openfold3/lib/python3.12/tempfile.py:940: ResourceWarning: Implicitly cleaning up <TemporaryDirectory '/tmp/tmpwo5_468s'>
+  _warnings.warn(warn_message, ResourceWarning)
+
+wrote outputs/orig_f12/experiment_config.json
+wrote outputs/orig_f12/inference_query_set.json
+wrote outputs/orig_f12/model_config.json
+wrote outputs/orig_f12/summary.txt
+wrote outputs/orig_f12/msas/msa-root-20261009T120912021877Z-e84654f7/main/5f6c535b7108189a4069220f9db2332655a8db358235be73f970ba1f4984c057.npz
+wrote outputs/orig_f12/msas/msa-root-20261009T120912021877Z-e84654f7/mappings/README.md
+wrote outputs/orig_f12/msas/msa-root-20261009T120912021877Z-e84654f7/mappings/chain_id_to_rep_id.json
+wrote outputs/orig_f12/msas/msa-root-20261009T120912021877Z-e84654f7/mappings/query_name_to_complex_id.json
+wrote outputs/orig_f12/msas/msa-root-20261009T120912021877Z-e84654f7/mappings/rep_id_to_seq.json
+wrote outputs/orig_f12/msas/msa-root-20261009T120912021877Z-e84654f7/mappings/seq_to_rep_id.json
+wrote outputs/orig_f12/msas/raw/msa-root-20261009T120912021877Z-e84654f7/main/bfd.mgnify30.metaeuk30.smag30.a3m
+wrote outputs/orig_f12/msas/raw/msa-root-20261009T120912021877Z-e84654f7/main/msa.sh
+wrote outputs/orig_f12/msas/raw/msa-root-20261009T120912021877Z-e84654f7/main/out.tar.gz
+wrote outputs/orig_f12/msas/raw/msa-root-20261009T120912021877Z-e84654f7/main/pdb70.m8
+wrote outputs/orig_f12/msas/raw/msa-root-20261009T120912021877Z-e84654f7/main/uniref.a3m
+wrote outputs/orig_f12/orig_f12/seed_42/orig_f12_seed_42_sample_1_confidences.json
+wrote outputs/orig_f12/orig_f12/seed_42/orig_f12_seed_42_sample_1_confidences_aggregated.json
+wrote outputs/orig_f12/orig_f12/seed_42/orig_f12_seed_42_sample_1_model.cif
+wrote outputs/orig_f12/orig_f12/seed_42/orig_f12_seed_42_sample_2_confidences.json
+wrote outputs/orig_f12/orig_f12/seed_42/orig_f12_seed_42_sample_2_confidences_aggregated.json
+wrote outputs/orig_f12/orig_f12/seed_42/orig_f12_seed_42_sample_2_model.cif
+wrote outputs/orig_f12/orig_f12/seed_42/orig_f12_seed_42_sample_3_confidences.json
+wrote outputs/orig_f12/orig_f12/seed_42/orig_f12_seed_42_sample_3_confidences_aggregated.json
+wrote outputs/orig_f12/orig_f12/seed_42/orig_f12_seed_42_sample_3_model.cif
+wrote outputs/orig_f12/orig_f12/seed_42/orig_f12_seed_42_sample_4_confidences.json
+wrote outputs/orig_f12/orig_f12/seed_42/orig_f12_seed_42_sample_4_confidences_aggregated.json
+wrote outputs/orig_f12/orig_f12/seed_42/orig_f12_seed_42_sample_4_model.cif
+wrote outputs/orig_f12/orig_f12/seed_42/orig_f12_seed_42_sample_5_confidences.json
+wrote outputs/orig_f12/orig_f12/seed_42/orig_f12_seed_42_sample_5_confidences_aggregated.json
+wrote outputs/orig_f12/orig_f12/seed_42/orig_f12_seed_42_sample_5_model.cif
+wrote outputs/orig_f12/orig_f12/seed_42/timing.json
+interface confidence (best model: orig_f12_seed_42_sample_4_model.cif):
+  interface A-Z: ipSAE 0.182, pDockQ2 0.242, pDockQ 0.372
+Stopping app - local entrypoint completed.
+✓ App completed. View run at 
+https://modal.com/apps/mauriciocafiero/main/ap-A7F0Rmlg21f3KntNZXKi6B
+Usage: python -m fold.analyze cif-to-pdb [OPTIONS] {cif_path}
+Try 'python -m fold.analyze cif-to-pdb --help' for help.
+╭─ Error ──────────────────────────────────────────────────────────────────────╮
+│ Got unexpected extra argument(s)                                             │
+│ (/Users/cafierom/python_mac/peptidebuilder/runs/octinoxate/folds/openfold3/o │
+│ rig_f12.pdb)                                                                 │
+╰──────────────────────────────────────────────────────────────────────────────╯
+--- openfold3 octinoxate/orig_f12 exit 0, converted (13:10:28)
+CONVERT FAILED octinoxate/orig_f12 -- cif found but pdb empty, see /Users/cafierom/python_mac/peptidebuilder/runs/octinoxate/folds/openfold3.batch.log
+=== openfold3 octinoxate/s2_esm2_control (13:10:33)
+✓ Initialized. View run at 
+https://modal.com/apps/mauriciocafiero/main/ap-2eLnF8CW8hwgaeGtsR7YOH
+✓ Created objects.
+├── 🔨 Created mount /Users/cafierom/python_mac/fold/src/fold/app.py
+├── 🔨 Created mount PythonPackage:fold
+└── 🔨 Created function predict.
+submitting s2_esm2_control on A10G ...
+
+==========
+== CUDA ==
+==========
+
+CUDA Version 12.1.1
+
+Container image Copyright (c) 2016-2023, NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+
+This container image and its contents are governed by the NVIDIA Deep Learning Container License.
+By pulling and using the container, you accept the terms and conditions of this license:
+https://developer.nvidia.com/ngc/nvidia-deep-learning-container-license
+
+A copy of this license is made available in this container at /NGC-DL-CONTAINER-LICENSE for your convenience.
+
+weights already cached at /cache/of3-ob-2025-06-30-174k.pt (2287872989 bytes)
+running: run_openfold predict --query_json=/tmp/s2_esm2_control_query.json --output_dir=/outputs/s2_esm2_control --inference_ckpt_path=/cache/of3-ob-2025-06-30-174k.pt --use_msa_server=true --use_templates=false
+[93m [WARNING] [0m Please pip install nvidia-cutlass
+Submitting 1 sequences to the Colabfold MSA server for main MSAs...
+No complexes found for paired MSA generation. Skipping...
+
+Predicting: |          | 0/? [00:00<?, ?s/it]
+Predicting: |          | 0/? [00:00<?, ?s/it]
+Predicting DataLoader 0:   0%|          | 0/1 [00:00<?, ?s/it]
+Predicting DataLoader 0: 100%|██████████| 1/1 [00:25<00:00, 25.12s/it]
+Predicting DataLoader 0: 100%|██████████| 1/1 [00:25<00:00, 25.24s/it][93m [WARNING] [0m Please pip install nvidia-cutlass
+[93m [WARNING] [0m Please pip install nvidia-cutlass
+[93m [WARNING] [0m Please pip install nvidia-cutlass
+[93m [WARNING] [0m Please pip install nvidia-cutlass
+[93m [WARNING] [0m Please pip install nvidia-cutlass
+[93m [WARNING] [0m Please pip install nvidia-cutlass
+[93m [WARNING] [0m Please pip install nvidia-cutlass
+[93m [WARNING] [0m Please pip install nvidia-cutlass
+[93m [WARNING] [0m Please pip install nvidia-cutlass
+[93m [WARNING] [0m Please pip install nvidia-cutlass
+
+
+==================================================
+    PREDICTION SUMMARY (COMPLETE)    
+==================================================
+Total Queries Processed: 1
+  - Successful Queries:  1
+  - Failed Queries:      0
+==================================================
+
+Removing empty log directory...
+
+GPU available: True (cuda), used: True
+TPU available: False, using: 0 TPU cores
+💡 Tip: For seamless cloud logging and experiment tracking, try installing [litlogger](https://pypi.org/project/litlogger/) to enable LitLogger, which logs metrics and artifacts automatically to the Lightning Experiments platform.
+💡 Tip: For seamless cloud uploads and versioning, try installing [litmodels](https://pypi.org/project/litmodels/) to enable LitModelCheckpoint, which syncs automatically with the Lightning model registry.
+WARNING:openfold3.core.data.tools.colabfold_msa_server:Using output directory: /tmp/of3-of-root/msa-root-20261009T121059572121Z-ded84006 for ColabFold MSAs.
+
+  0%|          | 0/150 [elapsed: 00:00 remaining: ?]
+SUBMIT:   0%|          | 0/150 [elapsed: 00:00 remaining: ?]
+PENDING:   0%|          | 0/150 [elapsed: 00:00 remaining: ?]
+COMPLETE:   0%|          | 0/150 [elapsed: 00:10 remaining: ?]
+COMPLETE: 100%|██████████| 150/150 [elapsed: 00:10 remaining: 00:00]
+COMPLETE: 100%|██████████| 150/150 [elapsed: 00:10 remaining: 00:00]
+/opt/openfold3/openfold3/core/data/tools/colabfold_msa_server.py:401: DeprecationWarning: Python 3.14 will, by default, filter extracted tar archives and reject files or modify their metadata. Use the filter argument to control this behavior.
+  tar_gz.extractall(path)
+WARNING:openfold3.core.data.tools.colabfold_msa_server:Colabfold returned no templates. Proceeding without template alignments for this batch.
+LOCAL_RANK: 0 - CUDA_VISIBLE_DEVICES: [0]
+Seed set to 42
+/opt/conda/envs/openfold3/lib/python3.12/site-packages/torch/autograd/function.py:575: UserWarning: OpenFold3 Triton evoformer kernel is running on a non-HIP backend with default, untuned Triton config (AMD MFMA / waves_per_eu tunings disabled). Correctness holds; performance is not tuned for this backend.
+  return super().apply(*args, **kwargs)  # type: ignore[misc]
+/opt/conda/envs/openfold3/lib/python3.12/site-packages/torch/autograd/function.py:575: UserWarning: OpenFold3 Triton evoformer kernel is running on a non-HIP backend with default, untuned Triton config (AMD MFMA / waves_per_eu tunings disabled). Correctness holds; performance is not tuned for this backend.
+  return super().apply(*args, **kwargs)  # type: ignore[misc]
+/opt/conda/envs/openfold3/lib/python3.12/site-packages/torch/autograd/function.py:575: UserWarning: OpenFold3 Triton evoformer kernel is running on a non-HIP backend with default, untuned Triton config (AMD MFMA / waves_per_eu tunings disabled). Correctness holds; performance is not tuned for this backend.
+  return super().apply(*args, **kwargs)  # type: ignore[misc]
+/opt/conda/envs/openfold3/lib/python3.12/site-packages/torch/autograd/function.py:575: UserWarning: OpenFold3 Triton evoformer kernel is running on a non-HIP backend with default, untuned Triton config (AMD MFMA / waves_per_eu tunings disabled). Correctness holds; performance is not tuned for this backend.
+  return super().apply(*args, **kwargs)  # type: ignore[misc]
+/opt/conda/envs/openfold3/lib/python3.12/site-packages/torch/autograd/function.py:575: UserWarning: OpenFold3 Triton evoformer kernel is running on a non-HIP backend with default, untuned Triton config (AMD MFMA / waves_per_eu tunings disabled). Correctness holds; performance is not tuned for this backend.
+  return super().apply(*args, **kwargs)  # type: ignore[misc]
+/opt/conda/envs/openfold3/lib/python3.12/site-packages/torch/autograd/function.py:575: UserWarning: OpenFold3 Triton evoformer kernel is running on a non-HIP backend with default, untuned Triton config (AMD MFMA / waves_per_eu tunings disabled). Correctness holds; performance is not tuned for this backend.
+  return super().apply(*args, **kwargs)  # type: ignore[misc]
+/opt/conda/envs/openfold3/lib/python3.12/site-packages/torch/autograd/function.py:575: UserWarning: OpenFold3 Triton evoformer kernel is running on a non-HIP backend with default, untuned Triton config (AMD MFMA / waves_per_eu tunings disabled). Correctness holds; performance is not tuned for this backend.
+  return super().apply(*args, **kwargs)  # type: ignore[misc]
+/opt/conda/envs/openfold3/lib/python3.12/site-packages/torch/autograd/function.py:575: UserWarning: OpenFold3 Triton evoformer kernel is running on a non-HIP backend with default, untuned Triton config (AMD MFMA / waves_per_eu tunings disabled). Correctness holds; performance is not tuned for this backend.
+  return super().apply(*args, **kwargs)  # type: ignore[misc]
+/opt/conda/envs/openfold3/lib/python3.12/site-packages/biotite/structure/io/pdbx/convert.py:1024: DeprecationWarning: `include_bonds` parameter is deprecated, intra-residue are always written, if available
+  warnings.warn(
+/opt/conda/envs/openfold3/lib/python3.12/tempfile.py:940: ResourceWarning: Implicitly cleaning up <TemporaryDirectory '/tmp/tmpmjnwru30'>
+  _warnings.warn(warn_message, ResourceWarning)
+
+wrote outputs/s2_esm2_control/experiment_config.json
+wrote outputs/s2_esm2_control/inference_query_set.json
+wrote outputs/s2_esm2_control/model_config.json
+wrote outputs/s2_esm2_control/summary.txt
+wrote outputs/s2_esm2_control/msas/msa-root-20261009T121059572121Z-ded84006/main/33d4614e7247f9a462eb027bfae43bdc4a815fe54859bd2c0dae8327b885bf08.npz
+wrote outputs/s2_esm2_control/msas/msa-root-20261009T121059572121Z-ded84006/mappings/README.md
+wrote outputs/s2_esm2_control/msas/msa-root-20261009T121059572121Z-ded84006/mappings/chain_id_to_rep_id.json
+wrote outputs/s2_esm2_control/msas/msa-root-20261009T121059572121Z-ded84006/mappings/query_name_to_complex_id.json
+wrote outputs/s2_esm2_control/msas/msa-root-20261009T121059572121Z-ded84006/mappings/rep_id_to_seq.json
+wrote outputs/s2_esm2_control/msas/msa-root-20261009T121059572121Z-ded84006/mappings/seq_to_rep_id.json
+wrote outputs/s2_esm2_control/msas/raw/msa-root-20261009T121059572121Z-ded84006/main/bfd.mgnify30.metaeuk30.smag30.a3m
+wrote outputs/s2_esm2_control/msas/raw/msa-root-20261009T121059572121Z-ded84006/main/msa.sh
+wrote outputs/s2_esm2_control/msas/raw/msa-root-20261009T121059572121Z-ded84006/main/out.tar.gz
+wrote outputs/s2_esm2_control/msas/raw/msa-root-20261009T121059572121Z-ded84006/main/pdb70.m8
+wrote outputs/s2_esm2_control/msas/raw/msa-root-20261009T121059572121Z-ded84006/main/uniref.a3m
+wrote outputs/s2_esm2_control/s2_esm2_control/seed_42/s2_esm2_control_seed_42_sample_1_confidences.json
+wrote outputs/s2_esm2_control/s2_esm2_control/seed_42/s2_esm2_control_seed_42_sample_1_confidences_aggregated.json
+wrote outputs/s2_esm2_control/s2_esm2_control/seed_42/s2_esm2_control_seed_42_sample_1_model.cif
+wrote outputs/s2_esm2_control/s2_esm2_control/seed_42/s2_esm2_control_seed_42_sample_2_confidences.json
+wrote outputs/s2_esm2_control/s2_esm2_control/seed_42/s2_esm2_control_seed_42_sample_2_confidences_aggregated.json
+wrote outputs/s2_esm2_control/s2_esm2_control/seed_42/s2_esm2_control_seed_42_sample_2_model.cif
+wrote outputs/s2_esm2_control/s2_esm2_control/seed_42/s2_esm2_control_seed_42_sample_3_confidences.json
+wrote outputs/s2_esm2_control/s2_esm2_control/seed_42/s2_esm2_control_seed_42_sample_3_confidences_aggregated.json
+wrote outputs/s2_esm2_control/s2_esm2_control/seed_42/s2_esm2_control_seed_42_sample_3_model.cif
+wrote outputs/s2_esm2_control/s2_esm2_control/seed_42/s2_esm2_control_seed_42_sample_4_confidences.json
+wrote outputs/s2_esm2_control/s2_esm2_control/seed_42/s2_esm2_control_seed_42_sample_4_confidences_aggregated.json
+wrote outputs/s2_esm2_control/s2_esm2_control/seed_42/s2_esm2_control_seed_42_sample_4_model.cif
+wrote outputs/s2_esm2_control/s2_esm2_control/seed_42/s2_esm2_control_seed_42_sample_5_confidences.json
+wrote outputs/s2_esm2_control/s2_esm2_control/seed_42/s2_esm2_control_seed_42_sample_5_confidences_aggregated.json
+wrote outputs/s2_esm2_control/s2_esm2_control/seed_42/s2_esm2_control_seed_42_sample_5_model.cif
+wrote outputs/s2_esm2_control/s2_esm2_control/seed_42/timing.json
+interface confidence (best model: s2_esm2_control_seed_42_sample_3_model.cif):
+  interface A-Z: ipSAE 0.033, pDockQ2 0.148, pDockQ 0.169
+Stopping app - local entrypoint completed.
+✓ App completed. View run at 
+https://modal.com/apps/mauriciocafiero/main/ap-2eLnF8CW8hwgaeGtsR7YOH
+Usage: python -m fold.analyze cif-to-pdb [OPTIONS] {cif_path}
+Try 'python -m fold.analyze cif-to-pdb --help' for help.
+╭─ Error ──────────────────────────────────────────────────────────────────────╮
+│ Got unexpected extra argument(s)                                             │
+│ (/Users/cafierom/python_mac/peptidebuilder/runs/octinoxate/folds/openfold3/s │
+│ 2_esm2_control.pdb)                                                          │
+╰──────────────────────────────────────────────────────────────────────────────╯
+--- openfold3 octinoxate/s2_esm2_control exit 0, converted (13:12:13)
+CONVERT FAILED octinoxate/s2_esm2_control -- cif found but pdb empty, see /Users/cafierom/python_mac/peptidebuilder/runs/octinoxate/folds/openfold3.batch.log
+=== openfold3 octinoxate/s3_esm2_f4 (13:12:18)
+✓ Initialized. View run at 
+https://modal.com/apps/mauriciocafiero/main/ap-tfnE2jlfPcYsQja1RUiH61
+✓ Created objects.
+├── 🔨 Created mount /Users/cafierom/python_mac/fold/src/fold/app.py
+├── 🔨 Created mount PythonPackage:fold
+└── 🔨 Created function predict.
+submitting s3_esm2_f4 on A10G ...
+
+==========
+== CUDA ==
+==========
+
+CUDA Version 12.1.1
+
+Container image Copyright (c) 2016-2023, NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+
+This container image and its contents are governed by the NVIDIA Deep Learning Container License.
+By pulling and using the container, you accept the terms and conditions of this license:
+https://developer.nvidia.com/ngc/nvidia-deep-learning-container-license
+
+A copy of this license is made available in this container at /NGC-DL-CONTAINER-LICENSE for your convenience.
+
+weights already cached at /cache/of3-ob-2025-06-30-174k.pt (2287872989 bytes)
+running: run_openfold predict --query_json=/tmp/s3_esm2_f4_query.json --output_dir=/outputs/s3_esm2_f4 --inference_ckpt_path=/cache/of3-ob-2025-06-30-174k.pt --use_msa_server=true --use_templates=false
+[93m [WARNING] [0m Please pip install nvidia-cutlass
+Submitting 1 sequences to the Colabfold MSA server for main MSAs...
+No complexes found for paired MSA generation. Skipping...
+
+Predicting: |          | 0/? [00:00<?, ?s/it]
+Predicting: |          | 0/? [00:00<?, ?s/it]
+Predicting DataLoader 0:   0%|          | 0/1 [00:00<?, ?s/it]
+Predicting DataLoader 0: 100%|██████████| 1/1 [00:19<00:00, 19.34s/it]
+Predicting DataLoader 0: 100%|██████████| 1/1 [00:19<00:00, 19.43s/it][93m [WARNING] [0m Please pip install nvidia-cutlass
+[93m [WARNING] [0m Please pip install nvidia-cutlass
+[93m [WARNING] [0m Please pip install nvidia-cutlass
+[93m [WARNING] [0m Please pip install nvidia-cutlass
+[93m [WARNING] [0m Please pip install nvidia-cutlass
+[93m [WARNING] [0m Please pip install nvidia-cutlass
+[93m [WARNING] [0m Please pip install nvidia-cutlass
+[93m [WARNING] [0m Please pip install nvidia-cutlass
+[93m [WARNING] [0m Please pip install nvidia-cutlass
+[93m [WARNING] [0m Please pip install nvidia-cutlass
+
+
+==================================================
+    PREDICTION SUMMARY (COMPLETE)    
+==================================================
+Total Queries Processed: 1
+  - Successful Queries:  1
+  - Failed Queries:      0
+==================================================
+
+Removing empty log directory...
+
+GPU available: True (cuda), used: True
+TPU available: False, using: 0 TPU cores
+💡 Tip: For seamless cloud logging and experiment tracking, try installing [litlogger](https://pypi.org/project/litlogger/) to enable LitLogger, which logs metrics and artifacts automatically to the Lightning Experiments platform.
+💡 Tip: For seamless cloud uploads and versioning, try installing [litmodels](https://pypi.org/project/litmodels/) to enable LitModelCheckpoint, which syncs automatically with the Lightning model registry.
+WARNING:openfold3.core.data.tools.colabfold_msa_server:Using output directory: /tmp/of3-of-root/msa-root-20261009T121238773470Z-4c8e5675 for ColabFold MSAs.
+
+  0%|          | 0/150 [elapsed: 00:00 remaining: ?]
+SUBMIT:   0%|          | 0/150 [elapsed: 00:00 remaining: ?]
+PENDING:   0%|          | 0/150 [elapsed: 00:00 remaining: ?]
+RUNNING:   0%|          | 0/150 [elapsed: 00:06 remaining: ?]
+RUNNING:   3%|▎         | 5/150 [elapsed: 00:06 remaining: 02:58]
+COMPLETE:   3%|▎         | 5/150 [elapsed: 00:14 remaining: 02:58]
+COMPLETE: 100%|██████████| 150/150 [elapsed: 00:14 remaining: 00:00]
+COMPLETE: 100%|██████████| 150/150 [elapsed: 00:15 remaining: 00:00]
+/opt/openfold3/openfold3/core/data/tools/colabfold_msa_server.py:401: DeprecationWarning: Python 3.14 will, by default, filter extracted tar archives and reject files or modify their metadata. Use the filter argument to control this behavior.
+  tar_gz.extractall(path)
+WARNING:openfold3.core.data.tools.colabfold_msa_server:Colabfold returned no templates. Proceeding without template alignments for this batch.
+LOCAL_RANK: 0 - CUDA_VISIBLE_DEVICES: [0]
+Seed set to 42
+/opt/conda/envs/openfold3/lib/python3.12/site-packages/torch/autograd/function.py:575: UserWarning: OpenFold3 Triton evoformer kernel is running on a non-HIP backend with default, untuned Triton config (AMD MFMA / waves_per_eu tunings disabled). Correctness holds; performance is not tuned for this backend.
+  return super().apply(*args, **kwargs)  # type: ignore[misc]
+/opt/conda/envs/openfold3/lib/python3.12/site-packages/torch/autograd/function.py:575: UserWarning: OpenFold3 Triton evoformer kernel is running on a non-HIP backend with default, untuned Triton config (AMD MFMA / waves_per_eu tunings disabled). Correctness holds; performance is not tuned for this backend.
+  return super().apply(*args, **kwargs)  # type: ignore[misc]
+/opt/conda/envs/openfold3/lib/python3.12/site-packages/torch/autograd/function.py:575: UserWarning: OpenFold3 Triton evoformer kernel is running on a non-HIP backend with default, untuned Triton config (AMD MFMA / waves_per_eu tunings disabled). Correctness holds; performance is not tuned for this backend.
+  return super().apply(*args, **kwargs)  # type: ignore[misc]
+/opt/conda/envs/openfold3/lib/python3.12/site-packages/torch/autograd/function.py:575: UserWarning: OpenFold3 Triton evoformer kernel is running on a non-HIP backend with default, untuned Triton config (AMD MFMA / waves_per_eu tunings disabled). Correctness holds; performance is not tuned for this backend.
+  return super().apply(*args, **kwargs)  # type: ignore[misc]
+/opt/conda/envs/openfold3/lib/python3.12/site-packages/torch/autograd/function.py:575: UserWarning: OpenFold3 Triton evoformer kernel is running on a non-HIP backend with default, untuned Triton config (AMD MFMA / waves_per_eu tunings disabled). Correctness holds; performance is not tuned for this backend.
+  return super().apply(*args, **kwargs)  # type: ignore[misc]
+/opt/conda/envs/openfold3/lib/python3.12/site-packages/torch/autograd/function.py:575: UserWarning: OpenFold3 Triton evoformer kernel is running on a non-HIP backend with default, untuned Triton config (AMD MFMA / waves_per_eu tunings disabled). Correctness holds; performance is not tuned for this backend.
+  return super().apply(*args, **kwargs)  # type: ignore[misc]
+/opt/conda/envs/openfold3/lib/python3.12/site-packages/torch/autograd/function.py:575: UserWarning: OpenFold3 Triton evoformer kernel is running on a non-HIP backend with default, untuned Triton config (AMD MFMA / waves_per_eu tunings disabled). Correctness holds; performance is not tuned for this backend.
+  return super().apply(*args, **kwargs)  # type: ignore[misc]
+/opt/conda/envs/openfold3/lib/python3.12/site-packages/torch/autograd/function.py:575: UserWarning: OpenFold3 Triton evoformer kernel is running on a non-HIP backend with default, untuned Triton config (AMD MFMA / waves_per_eu tunings disabled). Correctness holds; performance is not tuned for this backend.
+  return super().apply(*args, **kwargs)  # type: ignore[misc]
+/opt/conda/envs/openfold3/lib/python3.12/site-packages/biotite/structure/io/pdbx/convert.py:1024: DeprecationWarning: `include_bonds` parameter is deprecated, intra-residue are always written, if available
+  warnings.warn(
+/opt/conda/envs/openfold3/lib/python3.12/tempfile.py:940: ResourceWarning: Implicitly cleaning up <TemporaryDirectory '/tmp/tmpmo4mgxws'>
+  _warnings.warn(warn_message, ResourceWarning)
+
+wrote outputs/s3_esm2_f4/experiment_config.json
+wrote outputs/s3_esm2_f4/inference_query_set.json
+wrote outputs/s3_esm2_f4/model_config.json
+wrote outputs/s3_esm2_f4/summary.txt
+wrote outputs/s3_esm2_f4/msas/msa-root-20261009T121238773470Z-4c8e5675/main/b989f4737a6c4c79419321ee50eea08925f2f2de0530bd2cf0c207fe1cb79e38.npz
+wrote outputs/s3_esm2_f4/msas/msa-root-20261009T121238773470Z-4c8e5675/mappings/README.md
+wrote outputs/s3_esm2_f4/msas/msa-root-20261009T121238773470Z-4c8e5675/mappings/chain_id_to_rep_id.json
+wrote outputs/s3_esm2_f4/msas/msa-root-20261009T121238773470Z-4c8e5675/mappings/query_name_to_complex_id.json
+wrote outputs/s3_esm2_f4/msas/msa-root-20261009T121238773470Z-4c8e5675/mappings/rep_id_to_seq.json
+wrote outputs/s3_esm2_f4/msas/msa-root-20261009T121238773470Z-4c8e5675/mappings/seq_to_rep_id.json
+wrote outputs/s3_esm2_f4/msas/raw/msa-root-20261009T121238773470Z-4c8e5675/main/bfd.mgnify30.metaeuk30.smag30.a3m
+wrote outputs/s3_esm2_f4/msas/raw/msa-root-20261009T121238773470Z-4c8e5675/main/msa.sh
+wrote outputs/s3_esm2_f4/msas/raw/msa-root-20261009T121238773470Z-4c8e5675/main/out.tar.gz
+wrote outputs/s3_esm2_f4/msas/raw/msa-root-20261009T121238773470Z-4c8e5675/main/pdb70.m8
+wrote outputs/s3_esm2_f4/msas/raw/msa-root-20261009T121238773470Z-4c8e5675/main/uniref.a3m
+wrote outputs/s3_esm2_f4/s3_esm2_f4/seed_42/s3_esm2_f4_seed_42_sample_1_confidences.json
+wrote outputs/s3_esm2_f4/s3_esm2_f4/seed_42/s3_esm2_f4_seed_42_sample_1_confidences_aggregated.json
+wrote outputs/s3_esm2_f4/s3_esm2_f4/seed_42/s3_esm2_f4_seed_42_sample_1_model.cif
+wrote outputs/s3_esm2_f4/s3_esm2_f4/seed_42/s3_esm2_f4_seed_42_sample_2_confidences.json
+wrote outputs/s3_esm2_f4/s3_esm2_f4/seed_42/s3_esm2_f4_seed_42_sample_2_confidences_aggregated.json
+wrote outputs/s3_esm2_f4/s3_esm2_f4/seed_42/s3_esm2_f4_seed_42_sample_2_model.cif
+wrote outputs/s3_esm2_f4/s3_esm2_f4/seed_42/s3_esm2_f4_seed_42_sample_3_confidences.json
+wrote outputs/s3_esm2_f4/s3_esm2_f4/seed_42/s3_esm2_f4_seed_42_sample_3_confidences_aggregated.json
+wrote outputs/s3_esm2_f4/s3_esm2_f4/seed_42/s3_esm2_f4_seed_42_sample_3_model.cif
+wrote outputs/s3_esm2_f4/s3_esm2_f4/seed_42/s3_esm2_f4_seed_42_sample_4_confidences.json
+wrote outputs/s3_esm2_f4/s3_esm2_f4/seed_42/s3_esm2_f4_seed_42_sample_4_confidences_aggregated.json
+wrote outputs/s3_esm2_f4/s3_esm2_f4/seed_42/s3_esm2_f4_seed_42_sample_4_model.cif
+wrote outputs/s3_esm2_f4/s3_esm2_f4/seed_42/s3_esm2_f4_seed_42_sample_5_confidences.json
+wrote outputs/s3_esm2_f4/s3_esm2_f4/seed_42/s3_esm2_f4_seed_42_sample_5_confidences_aggregated.json
+wrote outputs/s3_esm2_f4/s3_esm2_f4/seed_42/s3_esm2_f4_seed_42_sample_5_model.cif
+wrote outputs/s3_esm2_f4/s3_esm2_f4/seed_42/timing.json
+interface confidence (best model: s3_esm2_f4_seed_42_sample_2_model.cif):
+  interface A-Z: ipSAE 0.115, pDockQ2 0.498, pDockQ 0.415
+Stopping app - local entrypoint completed.
+✓ App completed. View run at 
+https://modal.com/apps/mauriciocafiero/main/ap-tfnE2jlfPcYsQja1RUiH61
+Usage: python -m fold.analyze cif-to-pdb [OPTIONS] {cif_path}
+Try 'python -m fold.analyze cif-to-pdb --help' for help.
+╭─ Error ──────────────────────────────────────────────────────────────────────╮
+│ Got unexpected extra argument(s)                                             │
+│ (/Users/cafierom/python_mac/peptidebuilder/runs/octinoxate/folds/openfold3/s │
+│ 3_esm2_f4.pdb)                                                               │
+╰──────────────────────────────────────────────────────────────────────────────╯
+--- openfold3 octinoxate/s3_esm2_f4 exit 0, converted (13:13:43)
+CONVERT FAILED octinoxate/s3_esm2_f4 -- cif found but pdb empty, see /Users/cafierom/python_mac/peptidebuilder/runs/octinoxate/folds/openfold3.batch.log
+=== openfold3 octinoxate/s3_orig_f12 (13:13:48)
+✓ Initialized. View run at 
+https://modal.com/apps/mauriciocafiero/main/ap-B0m63mqI1052Uk6V30fCuY
+✓ Created objects.
+├── 🔨 Created mount /Users/cafierom/python_mac/fold/src/fold/app.py
+├── 🔨 Created mount PythonPackage:fold
+└── 🔨 Created function predict.
+submitting s3_orig_f12 on A10G ...
+
+==========
+== CUDA ==
+==========
+
+CUDA Version 12.1.1
+
+Container image Copyright (c) 2016-2023, NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+
+This container image and its contents are governed by the NVIDIA Deep Learning Container License.
+By pulling and using the container, you accept the terms and conditions of this license:
+https://developer.nvidia.com/ngc/nvidia-deep-learning-container-license
+
+A copy of this license is made available in this container at /NGC-DL-CONTAINER-LICENSE for your convenience.
+
+weights already cached at /cache/of3-ob-2025-06-30-174k.pt (2287872989 bytes)
+running: run_openfold predict --query_json=/tmp/s3_orig_f12_query.json --output_dir=/outputs/s3_orig_f12 --inference_ckpt_path=/cache/of3-ob-2025-06-30-174k.pt --use_msa_server=true --use_templates=false
+[93m [WARNING] [0m Please pip install nvidia-cutlass
+Submitting 1 sequences to the Colabfold MSA server for main MSAs...
+No complexes found for paired MSA generation. Skipping...
+
+Predicting: |          | 0/? [00:00<?, ?s/it]
+Predicting: |          | 0/? [00:00<?, ?s/it]
+Predicting DataLoader 0:   0%|          | 0/1 [00:00<?, ?s/it]
+Predicting DataLoader 0: 100%|██████████| 1/1 [00:19<00:00, 19.06s/it]
+Predicting DataLoader 0: 100%|██████████| 1/1 [00:19<00:00, 19.14s/it][93m [WARNING] [0m Please pip install nvidia-cutlass
+[93m [WARNING] [0m Please pip install nvidia-cutlass
+[93m [WARNING] [0m Please pip install nvidia-cutlass
+[93m [WARNING] [0m Please pip install nvidia-cutlass
+[93m [WARNING] [0m Please pip install nvidia-cutlass
+[93m [WARNING] [0m Please pip install nvidia-cutlass
+[93m [WARNING] [0m Please pip install nvidia-cutlass
+[93m [WARNING] [0m Please pip install nvidia-cutlass
+[93m [WARNING] [0m Please pip install nvidia-cutlass
+[93m [WARNING] [0m Please pip install nvidia-cutlass
+
+
+==================================================
+    PREDICTION SUMMARY (COMPLETE)    
+==================================================
+Total Queries Processed: 1
+  - Successful Queries:  1
+  - Failed Queries:      0
+==================================================
+
+Removing empty log directory...
+
+GPU available: True (cuda), used: True
+TPU available: False, using: 0 TPU cores
+💡 Tip: For seamless cloud logging and experiment tracking, try installing [litlogger](https://pypi.org/project/litlogger/) to enable LitLogger, which logs metrics and artifacts automatically to the Lightning Experiments platform.
+💡 Tip: For seamless cloud uploads and versioning, try installing [litmodels](https://pypi.org/project/litmodels/) to enable LitModelCheckpoint, which syncs automatically with the Lightning model registry.
+WARNING:openfold3.core.data.tools.colabfold_msa_server:Using output directory: /tmp/of3-of-root/msa-root-20261009T121408175738Z-b45b40e2 for ColabFold MSAs.
+
+  0%|          | 0/150 [elapsed: 00:00 remaining: ?]
+SUBMIT:   0%|          | 0/150 [elapsed: 00:00 remaining: ?]
+PENDING:   0%|          | 0/150 [elapsed: 00:00 remaining: ?]
+PENDING:   0%|          | 0/150 [elapsed: 00:07 remaining: ?]
+COMPLETE:   0%|          | 0/150 [elapsed: 00:15 remaining: ?]
+COMPLETE: 100%|██████████| 150/150 [elapsed: 00:15 remaining: 00:00]
+COMPLETE: 100%|██████████| 150/150 [elapsed: 00:15 remaining: 00:00]
+/opt/openfold3/openfold3/core/data/tools/colabfold_msa_server.py:401: DeprecationWarning: Python 3.14 will, by default, filter extracted tar archives and reject files or modify their metadata. Use the filter argument to control this behavior.
+  tar_gz.extractall(path)
+WARNING:openfold3.core.data.tools.colabfold_msa_server:Colabfold returned no templates. Proceeding without template alignments for this batch.
+LOCAL_RANK: 0 - CUDA_VISIBLE_DEVICES: [0]
+Seed set to 42
+/opt/conda/envs/openfold3/lib/python3.12/site-packages/torch/autograd/function.py:575: UserWarning: OpenFold3 Triton evoformer kernel is running on a non-HIP backend with default, untuned Triton config (AMD MFMA / waves_per_eu tunings disabled). Correctness holds; performance is not tuned for this backend.
+  return super().apply(*args, **kwargs)  # type: ignore[misc]
+/opt/conda/envs/openfold3/lib/python3.12/site-packages/torch/autograd/function.py:575: UserWarning: OpenFold3 Triton evoformer kernel is running on a non-HIP backend with default, untuned Triton config (AMD MFMA / waves_per_eu tunings disabled). Correctness holds; performance is not tuned for this backend.
+  return super().apply(*args, **kwargs)  # type: ignore[misc]
+/opt/conda/envs/openfold3/lib/python3.12/site-packages/torch/autograd/function.py:575: UserWarning: OpenFold3 Triton evoformer kernel is running on a non-HIP backend with default, untuned Triton config (AMD MFMA / waves_per_eu tunings disabled). Correctness holds; performance is not tuned for this backend.
+  return super().apply(*args, **kwargs)  # type: ignore[misc]
+/opt/conda/envs/openfold3/lib/python3.12/site-packages/torch/autograd/function.py:575: UserWarning: OpenFold3 Triton evoformer kernel is running on a non-HIP backend with default, untuned Triton config (AMD MFMA / waves_per_eu tunings disabled). Correctness holds; performance is not tuned for this backend.
+  return super().apply(*args, **kwargs)  # type: ignore[misc]
+/opt/conda/envs/openfold3/lib/python3.12/site-packages/torch/autograd/function.py:575: UserWarning: OpenFold3 Triton evoformer kernel is running on a non-HIP backend with default, untuned Triton config (AMD MFMA / waves_per_eu tunings disabled). Correctness holds; performance is not tuned for this backend.
+  return super().apply(*args, **kwargs)  # type: ignore[misc]
+/opt/conda/envs/openfold3/lib/python3.12/site-packages/torch/autograd/function.py:575: UserWarning: OpenFold3 Triton evoformer kernel is running on a non-HIP backend with default, untuned Triton config (AMD MFMA / waves_per_eu tunings disabled). Correctness holds; performance is not tuned for this backend.
+  return super().apply(*args, **kwargs)  # type: ignore[misc]
+/opt/conda/envs/openfold3/lib/python3.12/site-packages/torch/autograd/function.py:575: UserWarning: OpenFold3 Triton evoformer kernel is running on a non-HIP backend with default, untuned Triton config (AMD MFMA / waves_per_eu tunings disabled). Correctness holds; performance is not tuned for this backend.
+  return super().apply(*args, **kwargs)  # type: ignore[misc]
+/opt/conda/envs/openfold3/lib/python3.12/site-packages/torch/autograd/function.py:575: UserWarning: OpenFold3 Triton evoformer kernel is running on a non-HIP backend with default, untuned Triton config (AMD MFMA / waves_per_eu tunings disabled). Correctness holds; performance is not tuned for this backend.
+  return super().apply(*args, **kwargs)  # type: ignore[misc]
+/opt/conda/envs/openfold3/lib/python3.12/site-packages/biotite/structure/io/pdbx/convert.py:1024: DeprecationWarning: `include_bonds` parameter is deprecated, intra-residue are always written, if available
+  warnings.warn(
+/opt/conda/envs/openfold3/lib/python3.12/tempfile.py:940: ResourceWarning: Implicitly cleaning up <TemporaryDirectory '/tmp/tmp_k0k7jrj'>
+  _warnings.warn(warn_message, ResourceWarning)
+
+wrote outputs/s3_orig_f12/experiment_config.json
+wrote outputs/s3_orig_f12/inference_query_set.json
+wrote outputs/s3_orig_f12/model_config.json
+wrote outputs/s3_orig_f12/summary.txt
+wrote outputs/s3_orig_f12/msas/msa-root-20261009T121408175738Z-b45b40e2/main/dec6826ae451ec17a491ada7e1822a20f1e1fbed74de4bc92a33d4f712c1b44e.npz
+wrote outputs/s3_orig_f12/msas/msa-root-20261009T121408175738Z-b45b40e2/mappings/README.md
+wrote outputs/s3_orig_f12/msas/msa-root-20261009T121408175738Z-b45b40e2/mappings/chain_id_to_rep_id.json
+wrote outputs/s3_orig_f12/msas/msa-root-20261009T121408175738Z-b45b40e2/mappings/query_name_to_complex_id.json
+wrote outputs/s3_orig_f12/msas/msa-root-20261009T121408175738Z-b45b40e2/mappings/rep_id_to_seq.json
+wrote outputs/s3_orig_f12/msas/msa-root-20261009T121408175738Z-b45b40e2/mappings/seq_to_rep_id.json
+wrote outputs/s3_orig_f12/msas/raw/msa-root-20261009T121408175738Z-b45b40e2/main/bfd.mgnify30.metaeuk30.smag30.a3m
+wrote outputs/s3_orig_f12/msas/raw/msa-root-20261009T121408175738Z-b45b40e2/main/msa.sh
+wrote outputs/s3_orig_f12/msas/raw/msa-root-20261009T121408175738Z-b45b40e2/main/out.tar.gz
+wrote outputs/s3_orig_f12/msas/raw/msa-root-20261009T121408175738Z-b45b40e2/main/pdb70.m8
+wrote outputs/s3_orig_f12/msas/raw/msa-root-20261009T121408175738Z-b45b40e2/main/uniref.a3m
+wrote outputs/s3_orig_f12/s3_orig_f12/seed_42/s3_orig_f12_seed_42_sample_1_confidences.json
+wrote outputs/s3_orig_f12/s3_orig_f12/seed_42/s3_orig_f12_seed_42_sample_1_confidences_aggregated.json
+wrote outputs/s3_orig_f12/s3_orig_f12/seed_42/s3_orig_f12_seed_42_sample_1_model.cif
+wrote outputs/s3_orig_f12/s3_orig_f12/seed_42/s3_orig_f12_seed_42_sample_2_confidences.json
+wrote outputs/s3_orig_f12/s3_orig_f12/seed_42/s3_orig_f12_seed_42_sample_2_confidences_aggregated.json
+wrote outputs/s3_orig_f12/s3_orig_f12/seed_42/s3_orig_f12_seed_42_sample_2_model.cif
+wrote outputs/s3_orig_f12/s3_orig_f12/seed_42/s3_orig_f12_seed_42_sample_3_confidences.json
+wrote outputs/s3_orig_f12/s3_orig_f12/seed_42/s3_orig_f12_seed_42_sample_3_confidences_aggregated.json
+wrote outputs/s3_orig_f12/s3_orig_f12/seed_42/s3_orig_f12_seed_42_sample_3_model.cif
+wrote outputs/s3_orig_f12/s3_orig_f12/seed_42/s3_orig_f12_seed_42_sample_4_confidences.json
+wrote outputs/s3_orig_f12/s3_orig_f12/seed_42/s3_orig_f12_seed_42_sample_4_confidences_aggregated.json
+wrote outputs/s3_orig_f12/s3_orig_f12/seed_42/s3_orig_f12_seed_42_sample_4_model.cif
+wrote outputs/s3_orig_f12/s3_orig_f12/seed_42/s3_orig_f12_seed_42_sample_5_confidences.json
+wrote outputs/s3_orig_f12/s3_orig_f12/seed_42/s3_orig_f12_seed_42_sample_5_confidences_aggregated.json
+wrote outputs/s3_orig_f12/s3_orig_f12/seed_42/s3_orig_f12_seed_42_sample_5_model.cif
+wrote outputs/s3_orig_f12/s3_orig_f12/seed_42/timing.json
+interface confidence (best model: s3_orig_f12_seed_42_sample_1_model.cif):
+  interface A-Z: ipSAE 0.160, pDockQ2 0.322, pDockQ 0.374
+Stopping app - local entrypoint completed.
+✓ App completed. View run at 
+https://modal.com/apps/mauriciocafiero/main/ap-B0m63mqI1052Uk6V30fCuY
+Usage: python -m fold.analyze cif-to-pdb [OPTIONS] {cif_path}
+Try 'python -m fold.analyze cif-to-pdb --help' for help.
+╭─ Error ──────────────────────────────────────────────────────────────────────╮
+│ Got unexpected extra argument(s)                                             │
+│ (/Users/cafierom/python_mac/peptidebuilder/runs/octinoxate/folds/openfold3/s │
+│ 3_orig_f12.pdb)                                                              │
+╰──────────────────────────────────────────────────────────────────────────────╯
+--- openfold3 octinoxate/s3_orig_f12 exit 0, converted (13:15:13)
+CONVERT FAILED octinoxate/s3_orig_f12 -- cif found but pdb empty, see /Users/cafierom/python_mac/peptidebuilder/runs/octinoxate/folds/openfold3.batch.log
+=== openfold3 octinoxate/shuffle_control (13:15:18)
+✓ Initialized. View run at 
+https://modal.com/apps/mauriciocafiero/main/ap-92bW0SVTyiZxjgt3v4tq56
+✓ Created objects.
+├── 🔨 Created mount /Users/cafierom/python_mac/fold/src/fold/app.py
+├── 🔨 Created mount PythonPackage:fold
+└── 🔨 Created function predict.
+submitting shuffle_control on A10G ...
+
+==========
+== CUDA ==
+==========
+
+CUDA Version 12.1.1
+
+Container image Copyright (c) 2016-2023, NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+
+This container image and its contents are governed by the NVIDIA Deep Learning Container License.
+By pulling and using the container, you accept the terms and conditions of this license:
+https://developer.nvidia.com/ngc/nvidia-deep-learning-container-license
+
+A copy of this license is made available in this container at /NGC-DL-CONTAINER-LICENSE for your convenience.
+
+weights already cached at /cache/of3-ob-2025-06-30-174k.pt (2287872989 bytes)
+running: run_openfold predict --query_json=/tmp/shuffle_control_query.json --output_dir=/outputs/shuffle_control --inference_ckpt_path=/cache/of3-ob-2025-06-30-174k.pt --use_msa_server=true --use_templates=false
+[93m [WARNING] [0m Please pip install nvidia-cutlass
+Submitting 1 sequences to the Colabfold MSA server for main MSAs...
+No complexes found for paired MSA generation. Skipping...
+
+Predicting: |          | 0/? [00:00<?, ?s/it]
+Predicting: |          | 0/? [00:00<?, ?s/it]
+Predicting DataLoader 0:   0%|          | 0/1 [00:00<?, ?s/it]
+Predicting DataLoader 0: 100%|██████████| 1/1 [00:25<00:00, 25.32s/it]
+Predicting DataLoader 0: 100%|██████████| 1/1 [00:25<00:00, 25.43s/it][93m [WARNING] [0m Please pip install nvidia-cutlass
+[93m [WARNING] [0m Please pip install nvidia-cutlass
+[93m [WARNING] [0m Please pip install nvidia-cutlass
+[93m [WARNING] [0m Please pip install nvidia-cutlass
+[93m [WARNING] [0m Please pip install nvidia-cutlass
+[93m [WARNING] [0m Please pip install nvidia-cutlass
+[93m [WARNING] [0m Please pip install nvidia-cutlass
+[93m [WARNING] [0m Please pip install nvidia-cutlass
+[93m [WARNING] [0m Please pip install nvidia-cutlass
+[93m [WARNING] [0m Please pip install nvidia-cutlass
+
+
+==================================================
+    PREDICTION SUMMARY (COMPLETE)    
+==================================================
+Total Queries Processed: 1
+  - Successful Queries:  1
+  - Failed Queries:      0
+==================================================
+
+Removing empty log directory...
+
+GPU available: True (cuda), used: True
+TPU available: False, using: 0 TPU cores
+💡 Tip: For seamless cloud logging and experiment tracking, try installing [litlogger](https://pypi.org/project/litlogger/) to enable LitLogger, which logs metrics and artifacts automatically to the Lightning Experiments platform.
+💡 Tip: For seamless cloud uploads and versioning, try installing [litmodels](https://pypi.org/project/litmodels/) to enable LitModelCheckpoint, which syncs automatically with the Lightning model registry.
+WARNING:openfold3.core.data.tools.colabfold_msa_server:Using output directory: /tmp/of3-of-root/msa-root-20261009T121618859316Z-531165ee for ColabFold MSAs.
+
+  0%|          | 0/150 [elapsed: 00:00 remaining: ?]
+SUBMIT:   0%|          | 0/150 [elapsed: 00:00 remaining: ?]
+PENDING:   0%|          | 0/150 [elapsed: 00:00 remaining: ?]
+COMPLETE:   0%|          | 0/150 [elapsed: 00:09 remaining: ?]
+COMPLETE: 100%|██████████| 150/150 [elapsed: 00:09 remaining: 00:00]
+COMPLETE: 100%|██████████| 150/150 [elapsed: 00:09 remaining: 00:00]
+/opt/openfold3/openfold3/core/data/tools/colabfold_msa_server.py:401: DeprecationWarning: Python 3.14 will, by default, filter extracted tar archives and reject files or modify their metadata. Use the filter argument to control this behavior.
+  tar_gz.extractall(path)
+WARNING:openfold3.core.data.tools.colabfold_msa_server:Colabfold returned no templates. Proceeding without template alignments for this batch.
+LOCAL_RANK: 0 - CUDA_VISIBLE_DEVICES: [0]
+/opt/conda/envs/openfold3/lib/python3.12/site-packages/torch/utils/data/dataloader.py:617: UserWarning: This DataLoader will create 10 worker processes in total. Our suggested max number of worker in current system is 8, which is smaller than what this DataLoader is going to create. Please be aware that excessive worker creation might get DataLoader running slow or even freeze, lower the worker number to avoid potential slowness/freeze if necessary.
+  warnings.warn(
+Seed set to 42
+/opt/conda/envs/openfold3/lib/python3.12/site-packages/torch/autograd/function.py:575: UserWarning: OpenFold3 Triton evoformer kernel is running on a non-HIP backend with default, untuned Triton config (AMD MFMA / waves_per_eu tunings disabled). Correctness holds; performance is not tuned for this backend.
+  return super().apply(*args, **kwargs)  # type: ignore[misc]
+/opt/conda/envs/openfold3/lib/python3.12/site-packages/torch/autograd/function.py:575: UserWarning: OpenFold3 Triton evoformer kernel is running on a non-HIP backend with default, untuned Triton config (AMD MFMA / waves_per_eu tunings disabled). Correctness holds; performance is not tuned for this backend.
+  return super().apply(*args, **kwargs)  # type: ignore[misc]
+/opt/conda/envs/openfold3/lib/python3.12/site-packages/torch/autograd/function.py:575: UserWarning: OpenFold3 Triton evoformer kernel is running on a non-HIP backend with default, untuned Triton config (AMD MFMA / waves_per_eu tunings disabled). Correctness holds; performance is not tuned for this backend.
+  return super().apply(*args, **kwargs)  # type: ignore[misc]
+/opt/conda/envs/openfold3/lib/python3.12/site-packages/torch/autograd/function.py:575: UserWarning: OpenFold3 Triton evoformer kernel is running on a non-HIP backend with default, untuned Triton config (AMD MFMA / waves_per_eu tunings disabled). Correctness holds; performance is not tuned for this backend.
+  return super().apply(*args, **kwargs)  # type: ignore[misc]
+/opt/conda/envs/openfold3/lib/python3.12/site-packages/torch/autograd/function.py:575: UserWarning: OpenFold3 Triton evoformer kernel is running on a non-HIP backend with default, untuned Triton config (AMD MFMA / waves_per_eu tunings disabled). Correctness holds; performance is not tuned for this backend.
+  return super().apply(*args, **kwargs)  # type: ignore[misc]
+/opt/conda/envs/openfold3/lib/python3.12/site-packages/torch/autograd/function.py:575: UserWarning: OpenFold3 Triton evoformer kernel is running on a non-HIP backend with default, untuned Triton config (AMD MFMA / waves_per_eu tunings disabled). Correctness holds; performance is not tuned for this backend.
+  return super().apply(*args, **kwargs)  # type: ignore[misc]
+/opt/conda/envs/openfold3/lib/python3.12/site-packages/torch/autograd/function.py:575: UserWarning: OpenFold3 Triton evoformer kernel is running on a non-HIP backend with default, untuned Triton config (AMD MFMA / waves_per_eu tunings disabled). Correctness holds; performance is not tuned for this backend.
+  return super().apply(*args, **kwargs)  # type: ignore[misc]
+/opt/conda/envs/openfold3/lib/python3.12/site-packages/torch/autograd/function.py:575: UserWarning: OpenFold3 Triton evoformer kernel is running on a non-HIP backend with default, untuned Triton config (AMD MFMA / waves_per_eu tunings disabled). Correctness holds; performance is not tuned for this backend.
+  return super().apply(*args, **kwargs)  # type: ignore[misc]
+/opt/conda/envs/openfold3/lib/python3.12/site-packages/biotite/structure/io/pdbx/convert.py:1024: DeprecationWarning: `include_bonds` parameter is deprecated, intra-residue are always written, if available
+  warnings.warn(
+/opt/conda/envs/openfold3/lib/python3.12/tempfile.py:940: ResourceWarning: Implicitly cleaning up <TemporaryDirectory '/tmp/tmpi1ocy658'>
+  _warnings.warn(warn_message, ResourceWarning)
+
+wrote outputs/shuffle_control/experiment_config.json
+wrote outputs/shuffle_control/inference_query_set.json
+wrote outputs/shuffle_control/model_config.json
+wrote outputs/shuffle_control/summary.txt
+wrote outputs/shuffle_control/msas/msa-root-20261009T121618859316Z-531165ee/main/aa302aeb6aece41b3293022f0238fbe8b737e12628e5873ceca30fce9f1ee546.npz
+wrote outputs/shuffle_control/msas/msa-root-20261009T121618859316Z-531165ee/mappings/README.md
+wrote outputs/shuffle_control/msas/msa-root-20261009T121618859316Z-531165ee/mappings/chain_id_to_rep_id.json
+wrote outputs/shuffle_control/msas/msa-root-20261009T121618859316Z-531165ee/mappings/query_name_to_complex_id.json
+wrote outputs/shuffle_control/msas/msa-root-20261009T121618859316Z-531165ee/mappings/rep_id_to_seq.json
+wrote outputs/shuffle_control/msas/msa-root-20261009T121618859316Z-531165ee/mappings/seq_to_rep_id.json
+wrote outputs/shuffle_control/msas/raw/msa-root-20261009T121618859316Z-531165ee/main/bfd.mgnify30.metaeuk30.smag30.a3m
+wrote outputs/shuffle_control/msas/raw/msa-root-20261009T121618859316Z-531165ee/main/msa.sh
+wrote outputs/shuffle_control/msas/raw/msa-root-20261009T121618859316Z-531165ee/main/out.tar.gz
+wrote outputs/shuffle_control/msas/raw/msa-root-20261009T121618859316Z-531165ee/main/pdb70.m8
+wrote outputs/shuffle_control/msas/raw/msa-root-20261009T121618859316Z-531165ee/main/uniref.a3m
+wrote outputs/shuffle_control/shuffle_control/seed_42/shuffle_control_seed_42_sample_1_confidences.json
+wrote outputs/shuffle_control/shuffle_control/seed_42/shuffle_control_seed_42_sample_1_confidences_aggregated.json
+wrote outputs/shuffle_control/shuffle_control/seed_42/shuffle_control_seed_42_sample_1_model.cif
+wrote outputs/shuffle_control/shuffle_control/seed_42/shuffle_control_seed_42_sample_2_confidences.json
+wrote outputs/shuffle_control/shuffle_control/seed_42/shuffle_control_seed_42_sample_2_confidences_aggregated.json
+wrote outputs/shuffle_control/shuffle_control/seed_42/shuffle_control_seed_42_sample_2_model.cif
+wrote outputs/shuffle_control/shuffle_control/seed_42/shuffle_control_seed_42_sample_3_confidences.json
+wrote outputs/shuffle_control/shuffle_control/seed_42/shuffle_control_seed_42_sample_3_confidences_aggregated.json
+wrote outputs/shuffle_control/shuffle_control/seed_42/shuffle_control_seed_42_sample_3_model.cif
+wrote outputs/shuffle_control/shuffle_control/seed_42/shuffle_control_seed_42_sample_4_confidences.json
+wrote outputs/shuffle_control/shuffle_control/seed_42/shuffle_control_seed_42_sample_4_confidences_aggregated.json
+wrote outputs/shuffle_control/shuffle_control/seed_42/shuffle_control_seed_42_sample_4_model.cif
+wrote outputs/shuffle_control/shuffle_control/seed_42/shuffle_control_seed_42_sample_5_confidences.json
+wrote outputs/shuffle_control/shuffle_control/seed_42/shuffle_control_seed_42_sample_5_confidences_aggregated.json
+wrote outputs/shuffle_control/shuffle_control/seed_42/shuffle_control_seed_42_sample_5_model.cif
+wrote outputs/shuffle_control/shuffle_control/seed_42/timing.json
+interface confidence (best model: shuffle_control_seed_42_sample_1_model.cif):
+  interface A-Z: ipSAE 0.110, pDockQ2 0.256, pDockQ 0.386
+Stopping app - local entrypoint completed.
+✓ App completed. View run at 
+https://modal.com/apps/mauriciocafiero/main/ap-92bW0SVTyiZxjgt3v4tq56
+Usage: python -m fold.analyze cif-to-pdb [OPTIONS] {cif_path}
+Try 'python -m fold.analyze cif-to-pdb --help' for help.
+╭─ Error ──────────────────────────────────────────────────────────────────────╮
+│ Got unexpected extra argument(s)                                             │
+│ (/Users/cafierom/python_mac/peptidebuilder/runs/octinoxate/folds/openfold3/s │
+│ huffle_control.pdb)                                                          │
+╰──────────────────────────────────────────────────────────────────────────────╯
+--- openfold3 octinoxate/shuffle_control exit 0, converted (13:17:50)
+CONVERT FAILED octinoxate/shuffle_control -- cif found but pdb empty, see /Users/cafierom/python_mac/peptidebuilder/runs/octinoxate/folds/openfold3.batch.log
+=== openfold3 octinoxate/shuffle_control_esm0 (13:17:55)
+✓ Initialized. View run at 
+https://modal.com/apps/mauriciocafiero/main/ap-q1z3fPPjwdOBaobPJOcClO
+✓ Created objects.
+├── 🔨 Created mount /Users/cafierom/python_mac/fold/src/fold/app.py
+├── 🔨 Created mount PythonPackage:fold
+└── 🔨 Created function predict.
+submitting shuffle_control_esm0 on A10G ...
+
+==========
+== CUDA ==
+==========
+
+CUDA Version 12.1.1
+
+Container image Copyright (c) 2016-2023, NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+
+This container image and its contents are governed by the NVIDIA Deep Learning Container License.
+By pulling and using the container, you accept the terms and conditions of this license:
+https://developer.nvidia.com/ngc/nvidia-deep-learning-container-license
+
+A copy of this license is made available in this container at /NGC-DL-CONTAINER-LICENSE for your convenience.
+
+weights already cached at /cache/of3-ob-2025-06-30-174k.pt (2287872989 bytes)
+running: run_openfold predict --query_json=/tmp/shuffle_control_esm0_query.json --output_dir=/outputs/shuffle_control_esm0 --inference_ckpt_path=/cache/of3-ob-2025-06-30-174k.pt --use_msa_server=true --use_templates=false
+[93m [WARNING] [0m Please pip install nvidia-cutlass
+Submitting 1 sequences to the Colabfold MSA server for main MSAs...
+No complexes found for paired MSA generation. Skipping...
+
+Predicting: |          | 0/? [00:00<?, ?s/it]
+Predicting: |          | 0/? [00:00<?, ?s/it]
+Predicting DataLoader 0:   0%|          | 0/1 [00:00<?, ?s/it]
+Predicting DataLoader 0: 100%|██████████| 1/1 [00:19<00:00, 19.29s/it]
+Predicting DataLoader 0: 100%|██████████| 1/1 [00:19<00:00, 19.39s/it][93m [WARNING] [0m Please pip install nvidia-cutlass
+[93m [WARNING] [0m Please pip install nvidia-cutlass
+[93m [WARNING] [0m Please pip install nvidia-cutlass
+[93m [WARNING] [0m Please pip install nvidia-cutlass
+[93m [WARNING] [0m Please pip install nvidia-cutlass
+[93m [WARNING] [0m Please pip install nvidia-cutlass
+[93m [WARNING] [0m Please pip install nvidia-cutlass
+[93m [WARNING] [0m Please pip install nvidia-cutlass
+[93m [WARNING] [0m Please pip install nvidia-cutlass
+[93m [WARNING] [0m Please pip install nvidia-cutlass
+
+
+==================================================
+    PREDICTION SUMMARY (COMPLETE)    
+==================================================
+Total Queries Processed: 1
+  - Successful Queries:  1
+  - Failed Queries:      0
+==================================================
+
+Removing empty log directory...
+
+GPU available: True (cuda), used: True
+TPU available: False, using: 0 TPU cores
+💡 Tip: For seamless cloud logging and experiment tracking, try installing [litlogger](https://pypi.org/project/litlogger/) to enable LitLogger, which logs metrics and artifacts automatically to the Lightning Experiments platform.
+💡 Tip: For seamless cloud uploads and versioning, try installing [litmodels](https://pypi.org/project/litmodels/) to enable LitModelCheckpoint, which syncs automatically with the Lightning model registry.
+WARNING:openfold3.core.data.tools.colabfold_msa_server:Using output directory: /tmp/of3-of-root/msa-root-20261009T121814266617Z-b6e7cf11 for ColabFold MSAs.
+
+  0%|          | 0/150 [elapsed: 00:00 remaining: ?]
+SUBMIT:   0%|          | 0/150 [elapsed: 00:00 remaining: ?]
+PENDING:   0%|          | 0/150 [elapsed: 00:00 remaining: ?]
+RUNNING:   0%|          | 0/150 [elapsed: 00:10 remaining: ?]
+RUNNING:   6%|▌         | 9/150 [elapsed: 00:10 remaining: 02:39]
+COMPLETE:   6%|▌         | 9/150 [elapsed: 00:17 remaining: 02:39]
+COMPLETE: 100%|██████████| 150/150 [elapsed: 00:17 remaining: 00:00]
+COMPLETE: 100%|██████████| 150/150 [elapsed: 00:18 remaining: 00:00]
+/opt/openfold3/openfold3/core/data/tools/colabfold_msa_server.py:401: DeprecationWarning: Python 3.14 will, by default, filter extracted tar archives and reject files or modify their metadata. Use the filter argument to control this behavior.
+  tar_gz.extractall(path)
+WARNING:openfold3.core.data.tools.colabfold_msa_server:Colabfold returned no templates. Proceeding without template alignments for this batch.
+LOCAL_RANK: 0 - CUDA_VISIBLE_DEVICES: [0]
+Seed set to 42
+/opt/conda/envs/openfold3/lib/python3.12/site-packages/torch/autograd/function.py:575: UserWarning: OpenFold3 Triton evoformer kernel is running on a non-HIP backend with default, untuned Triton config (AMD MFMA / waves_per_eu tunings disabled). Correctness holds; performance is not tuned for this backend.
+  return super().apply(*args, **kwargs)  # type: ignore[misc]
+/opt/conda/envs/openfold3/lib/python3.12/site-packages/torch/autograd/function.py:575: UserWarning: OpenFold3 Triton evoformer kernel is running on a non-HIP backend with default, untuned Triton config (AMD MFMA / waves_per_eu tunings disabled). Correctness holds; performance is not tuned for this backend.
+  return super().apply(*args, **kwargs)  # type: ignore[misc]
+/opt/conda/envs/openfold3/lib/python3.12/site-packages/torch/autograd/function.py:575: UserWarning: OpenFold3 Triton evoformer kernel is running on a non-HIP backend with default, untuned Triton config (AMD MFMA / waves_per_eu tunings disabled). Correctness holds; performance is not tuned for this backend.
+  return super().apply(*args, **kwargs)  # type: ignore[misc]
+/opt/conda/envs/openfold3/lib/python3.12/site-packages/torch/autograd/function.py:575: UserWarning: OpenFold3 Triton evoformer kernel is running on a non-HIP backend with default, untuned Triton config (AMD MFMA / waves_per_eu tunings disabled). Correctness holds; performance is not tuned for this backend.
+  return super().apply(*args, **kwargs)  # type: ignore[misc]
+/opt/conda/envs/openfold3/lib/python3.12/site-packages/torch/autograd/function.py:575: UserWarning: OpenFold3 Triton evoformer kernel is running on a non-HIP backend with default, untuned Triton config (AMD MFMA / waves_per_eu tunings disabled). Correctness holds; performance is not tuned for this backend.
+  return super().apply(*args, **kwargs)  # type: ignore[misc]
+/opt/conda/envs/openfold3/lib/python3.12/site-packages/torch/autograd/function.py:575: UserWarning: OpenFold3 Triton evoformer kernel is running on a non-HIP backend with default, untuned Triton config (AMD MFMA / waves_per_eu tunings disabled). Correctness holds; performance is not tuned for this backend.
+  return super().apply(*args, **kwargs)  # type: ignore[misc]
+/opt/conda/envs/openfold3/lib/python3.12/site-packages/torch/autograd/function.py:575: UserWarning: OpenFold3 Triton evoformer kernel is running on a non-HIP backend with default, untuned Triton config (AMD MFMA / waves_per_eu tunings disabled). Correctness holds; performance is not tuned for this backend.
+  return super().apply(*args, **kwargs)  # type: ignore[misc]
+/opt/conda/envs/openfold3/lib/python3.12/site-packages/torch/autograd/function.py:575: UserWarning: OpenFold3 Triton evoformer kernel is running on a non-HIP backend with default, untuned Triton config (AMD MFMA / waves_per_eu tunings disabled). Correctness holds; performance is not tuned for this backend.
+  return super().apply(*args, **kwargs)  # type: ignore[misc]
+/opt/conda/envs/openfold3/lib/python3.12/site-packages/biotite/structure/io/pdbx/convert.py:1024: DeprecationWarning: `include_bonds` parameter is deprecated, intra-residue are always written, if available
+  warnings.warn(
+/opt/conda/envs/openfold3/lib/python3.12/tempfile.py:940: ResourceWarning: Implicitly cleaning up <TemporaryDirectory '/tmp/tmp9fes0erj'>
+  _warnings.warn(warn_message, ResourceWarning)
+
+wrote outputs/shuffle_control_esm0/experiment_config.json
+wrote outputs/shuffle_control_esm0/inference_query_set.json
+wrote outputs/shuffle_control_esm0/model_config.json
+wrote outputs/shuffle_control_esm0/summary.txt
+wrote outputs/shuffle_control_esm0/msas/msa-root-20261009T121814266617Z-b6e7cf11/main/f1fb4db08c7bd8018b49e8525ea591fa577b3f109d32bcde0b4bea001e3793b6.npz
+wrote outputs/shuffle_control_esm0/msas/msa-root-20261009T121814266617Z-b6e7cf11/mappings/README.md
+wrote outputs/shuffle_control_esm0/msas/msa-root-20261009T121814266617Z-b6e7cf11/mappings/chain_id_to_rep_id.json
+wrote outputs/shuffle_control_esm0/msas/msa-root-20261009T121814266617Z-b6e7cf11/mappings/query_name_to_complex_id.json
+wrote outputs/shuffle_control_esm0/msas/msa-root-20261009T121814266617Z-b6e7cf11/mappings/rep_id_to_seq.json
+wrote outputs/shuffle_control_esm0/msas/msa-root-20261009T121814266617Z-b6e7cf11/mappings/seq_to_rep_id.json
+wrote outputs/shuffle_control_esm0/msas/raw/msa-root-20261009T121814266617Z-b6e7cf11/main/bfd.mgnify30.metaeuk30.smag30.a3m
+wrote outputs/shuffle_control_esm0/msas/raw/msa-root-20261009T121814266617Z-b6e7cf11/main/msa.sh
+wrote outputs/shuffle_control_esm0/msas/raw/msa-root-20261009T121814266617Z-b6e7cf11/main/out.tar.gz
+wrote outputs/shuffle_control_esm0/msas/raw/msa-root-20261009T121814266617Z-b6e7cf11/main/pdb70.m8
+wrote outputs/shuffle_control_esm0/msas/raw/msa-root-20261009T121814266617Z-b6e7cf11/main/uniref.a3m
+wrote outputs/shuffle_control_esm0/shuffle_control_esm0/seed_42/shuffle_control_esm0_seed_42_sample_1_confidences.json
+wrote outputs/shuffle_control_esm0/shuffle_control_esm0/seed_42/shuffle_control_esm0_seed_42_sample_1_confidences_aggregated.json
+wrote outputs/shuffle_control_esm0/shuffle_control_esm0/seed_42/shuffle_control_esm0_seed_42_sample_1_model.cif
+wrote outputs/shuffle_control_esm0/shuffle_control_esm0/seed_42/shuffle_control_esm0_seed_42_sample_2_confidences.json
+wrote outputs/shuffle_control_esm0/shuffle_control_esm0/seed_42/shuffle_control_esm0_seed_42_sample_2_confidences_aggregated.json
+wrote outputs/shuffle_control_esm0/shuffle_control_esm0/seed_42/shuffle_control_esm0_seed_42_sample_2_model.cif
+wrote outputs/shuffle_control_esm0/shuffle_control_esm0/seed_42/shuffle_control_esm0_seed_42_sample_3_confidences.json
+wrote outputs/shuffle_control_esm0/shuffle_control_esm0/seed_42/shuffle_control_esm0_seed_42_sample_3_confidences_aggregated.json
+wrote outputs/shuffle_control_esm0/shuffle_control_esm0/seed_42/shuffle_control_esm0_seed_42_sample_3_model.cif
+wrote outputs/shuffle_control_esm0/shuffle_control_esm0/seed_42/shuffle_control_esm0_seed_42_sample_4_confidences.json
+wrote outputs/shuffle_control_esm0/shuffle_control_esm0/seed_42/shuffle_control_esm0_seed_42_sample_4_confidences_aggregated.json
+wrote outputs/shuffle_control_esm0/shuffle_control_esm0/seed_42/shuffle_control_esm0_seed_42_sample_4_model.cif
+wrote outputs/shuffle_control_esm0/shuffle_control_esm0/seed_42/shuffle_control_esm0_seed_42_sample_5_confidences.json
+wrote outputs/shuffle_control_esm0/shuffle_control_esm0/seed_42/shuffle_control_esm0_seed_42_sample_5_confidences_aggregated.json
+wrote outputs/shuffle_control_esm0/shuffle_control_esm0/seed_42/shuffle_control_esm0_seed_42_sample_5_model.cif
+wrote outputs/shuffle_control_esm0/shuffle_control_esm0/seed_42/timing.json
+interface confidence (best model: shuffle_control_esm0_seed_42_sample_4_model.cif):
+  interface A-Z: ipSAE 0.041, pDockQ2 0.209, pDockQ 0.118
+Stopping app - local entrypoint completed.
+✓ App completed. View run at 
+https://modal.com/apps/mauriciocafiero/main/ap-q1z3fPPjwdOBaobPJOcClO
+Usage: python -m fold.analyze cif-to-pdb [OPTIONS] {cif_path}
+Try 'python -m fold.analyze cif-to-pdb --help' for help.
+╭─ Error ──────────────────────────────────────────────────────────────────────╮
+│ Got unexpected extra argument(s)                                             │
+│ (/Users/cafierom/python_mac/peptidebuilder/runs/octinoxate/folds/openfold3/s │
+│ huffle_control_esm0.pdb)                                                     │
+╰──────────────────────────────────────────────────────────────────────────────╯
+--- openfold3 octinoxate/shuffle_control_esm0 exit 0, converted (13:19:21)
+CONVERT FAILED octinoxate/shuffle_control_esm0 -- cif found but pdb empty, see /Users/cafierom/python_mac/peptidebuilder/runs/octinoxate/folds/openfold3.batch.log

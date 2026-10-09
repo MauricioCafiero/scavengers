@@ -29,6 +29,8 @@ mean, and where it goes wrong.
 - [What each file does](#what-each-file-does)
 - [Where output goes](#where-output-goes)
 - [Results](#results) — summary; the full record is in [RESULTS.md](RESULTS.md)
+- The independent fold-method check (the same peptides folded by ESMFold/OpenFold3 from sequence
+  only, compared against the Boltz/BoltzGen co-folds) is [FOLDS.md](FOLDS.md)
 - [What the metrics mean](#what-the-metrics-mean)
 - [Traps](#traps)
 - [Limitations](#limitations)

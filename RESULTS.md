@@ -5,7 +5,10 @@ describes what the code does and how to run it; this file is the record of what 
 
 For the short version — the current pipeline, every peptide in both projects, the comparison that
 matters and what is still open — read [PROJECT.md](PROJECT.md) first. This file is the long-form
-evidence behind it, ordered as the work was done.
+evidence behind it, ordered as the work was done. A second doc, [FOLDS.md](FOLDS.md), holds the
+independent folding-method check: the same peptides folded from sequence only by ESMFold and
+OpenFold3 (no shared mechanism with Boltz/BoltzGen), compared against the co-folds these tables
+were built from.
 
 One caveat governs the whole document, and it is worth reading before any number in it. The ligand is
 **C17H24O3, one CH2 short of real octinoxate** (2-ethylhexyl 4-methoxycinnamate, C18H26O3) -- its SMILES,
