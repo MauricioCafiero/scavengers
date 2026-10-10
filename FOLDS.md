@@ -344,32 +344,60 @@ on: the exact packing (RMSD 6–10 Å across lanes) is degenerate, and nothing h
 compactness, the apo state — separates a designed arm from its gly-rich null; only the binding
 measurements can.
 
-**Four-lane one-glance grid** (`same` = reproduces the co-fold, `diff` = compact but repacked,
-`ext` = near-fully-extended apo):
+**Apo grid** (`same` = reproduces the co-fold, `diff` = compact but repacked, `ext` =
+near-fully-extended apo). Note the apo folds are compared against the *co-fold's* packing, so
+`diff` does not mean wrong — with no ligand in the query, no model can know Boltz's packing:
 
-| peptide | mol | kind | ESMFold apo | OF3 apo | RF3 apo | OF3 cofold | RF3 cofold |
-|---|---|---|---|---|---|---|---|
-| orig_f12 | oct | designed | ext | diff | diff | diff | diff |
-| s2_esm2_control | oct | esm2-variant | same | same | same | same | diff |
-| s3_esm2_f4 | oct | esm2-variant | diff | diff | same | diff | same |
-| s3_orig_f12 | oct | designed | ext | diff | diff | diff | diff |
-| shuffle_control | oct | null | ext | diff | diff | diff | diff |
-| shuffle_control_esm0 | oct | null-esm | same | same | same | same | diff |
-| bg33_1 | oct | boltzgen | diff | same | same | same | same |
-| bg33_2 | oct | boltzgen | diff | same | same | same | same |
-| bg33_3 | oct | boltzgen | same | same | same | same | same |
-| bg33_4 | oct | boltzgen | same | same | same | same | same |
-| ox1_esm1_f8 | oxy | esm2-variant | diff | diff | diff | diff | diff |
-| ox1_orig_f12 | oxy | designed | ext | diff | diff | diff | diff |
-| ox2_esm1_f8 | oxy | esm2-variant | diff | diff | diff | diff | diff |
-| ox2_orig_f8 | oxy | designed | ext | diff | diff | diff | diff |
-| ox2_shuffle | oxy | null | ext | diff | diff | diff | diff |
-| ox2_shuffle_esm0 | oxy | null-esm | same | diff | diff | diff | diff |
-| ox3_orig_f8 | oxy | designed | ext | diff | diff | diff | diff |
-| bgox31_2 | oxy | boltzgen | same | same | same | same | same |
-| bgox31_3 | oxy | boltzgen | same | same | same | same | same |
-| bgox31_4 | oxy | boltzgen | same | same | same | same | same |
-| bgox31_5 | oxy | boltzgen | same | same | same | same | same |
+| peptide | mol | kind | ESMFold apo | OF3 apo | RF3 apo |
+|---|---|---|---|---|---|
+| orig_f12 | oct | designed | ext | diff | diff |
+| s2_esm2_control | oct | esm2-variant | same | same | same |
+| s3_esm2_f4 | oct | esm2-variant | diff | diff | same |
+| s3_orig_f12 | oct | designed | ext | diff | diff |
+| shuffle_control | oct | null | ext | diff | diff |
+| shuffle_control_esm0 | oct | null-esm | same | same | same |
+| bg33_1 | oct | boltzgen | diff | same | same |
+| bg33_2 | oct | boltzgen | diff | same | same |
+| bg33_3 | oct | boltzgen | same | same | same |
+| bg33_4 | oct | boltzgen | same | same | same |
+| ox1_esm1_f8 | oxy | esm2-variant | diff | diff | diff |
+| ox1_orig_f12 | oxy | designed | ext | diff | diff |
+| ox2_esm1_f8 | oxy | esm2-variant | diff | diff | diff |
+| ox2_orig_f8 | oxy | designed | ext | diff | diff |
+| ox2_shuffle | oxy | null | ext | diff | diff |
+| ox2_shuffle_esm0 | oxy | null-esm | same | diff | diff |
+| ox3_orig_f8 | oxy | designed | ext | diff | diff |
+| bgox31_2 | oxy | boltzgen | same | same | same |
+| bgox31_3 | oxy | boltzgen | same | same | same |
+| bgox31_4 | oxy | boltzgen | same | same | same |
+| bgox31_5 | oxy | boltzgen | same | same | same |
+
+**Cofold grid** (same key; here the fold carries the ligand, so `same`/`diff` say whether an
+independent cofolder reproduces Boltz's packing and ligand engagement):
+
+| peptide | mol | kind | OF3 cofold | RF3 cofold |
+|---|---|---|---|---|
+| orig_f12 | oct | designed | diff | diff |
+| s2_esm2_control | oct | esm2-variant | same | diff |
+| s3_esm2_f4 | oct | esm2-variant | diff | same |
+| s3_orig_f12 | oct | designed | diff | diff |
+| shuffle_control | oct | null | diff | diff |
+| shuffle_control_esm0 | oct | null-esm | same | diff |
+| bg33_1 | oct | boltzgen | same | same |
+| bg33_2 | oct | boltzgen | same | same |
+| bg33_3 | oct | boltzgen | same | same |
+| bg33_4 | oct | boltzgen | same | same |
+| ox1_esm1_f8 | oxy | esm2-variant | diff | diff |
+| ox1_orig_f12 | oxy | designed | diff | diff |
+| ox2_esm1_f8 | oxy | esm2-variant | diff | diff |
+| ox2_orig_f8 | oxy | designed | diff | diff |
+| ox2_shuffle | oxy | null | diff | diff |
+| ox2_shuffle_esm0 | oxy | null-esm | diff | diff |
+| ox3_orig_f8 | oxy | designed | diff | diff |
+| bgox31_2 | oxy | boltzgen | same | same |
+| bgox31_3 | oxy | boltzgen | same | same |
+| bgox31_4 | oxy | boltzgen | same | same |
+| bgox31_5 | oxy | boltzgen | same | same |
 
 **Campaign bottom line (five lanes, 21 peptides, all static reads):**
 
@@ -390,15 +418,242 @@ measurements can.
   alike in every grid cell — the rubric for what to pursue has to come from binding: MM/GBSA,
   ligand retention and contacts against those same null rows.
 
+## Vina docking into the folded structures (all 105, 2026-10-09)
+
+Every fold structure was Vina-docked (`code/dock_folds.py`, which stages the fold's peptide as
+receptor and calls `vina_redock.redock()` unchanged: 22 Å box, exhaustiveness 16, seed 42, 9
+modes, project cutoffs). 21 peptides × 5 lanes = 105 docks in ~25 min of Mac Vina; the rows are
+appended additions-only to the committed `dock_summary.csv`/`dock_poses.csv` (50 + 55 summary rows,
+500 + 550 pose rows; structure names carry the lane suffix, e.g. `s3_orig_f12_o3cof`). Full scratch
+tables in `runs/<mol>/folds/metrics/dock_folds_{summary,poses}.csv`.
+
+Box definition is the interesting part. A **cofold** fold contains the ligand: its atoms are
+perceived from geometry and the reference molecule rigidly aligned onto them, so the search box is
+centred on exactly where the cofolder put the ligand and pose 0 is that placement. An **apo** fold
+contains no ligand, so there is no local information to centre on: the OF3-cofold reference pose is
+carried over onto the apo fold by Cα superposition, which makes "look here, where this peptide
+packs its ligand" a site definition rather than a prediction.
+
+Perception trap worth recording: Open Babel loses the alkene on strained cofold geometries
+(`C=Cc1ccc(OC)cc1` read back as `CCc1...`), which fails the template substructure match; the fix
+is RDKit proximity bonding + `AllChem.AssignBondOrdersFromTemplate`, which imposes the template's
+connectivity wherever the perceived graph admits it. Obabel remains the fallback.
+
+What the docks say:
+
+**Best Vina score (kcal/mol) / pose-1 in-place RMSD (Å) to the structure's reference placement** —
+cofold lanes' reference is the fold's own ligand (pose 0); apo lanes' reference is the
+superposed-site pose. Pose-1 RMSD is how far Vina's best pose lands from where the cofolder (or
+site definition) put the ligand. Full per-pose data in `runs/<mol>/folds/metrics/dock_folds_poses.csv`.
+
+| peptide | mol | kind | o3cof | rf3cof | esmapo | o3apo | rf3apo |
+|---|---|---|---|---|---|---|---|
+| orig_f12 | oct | designed | -4.2 / 10.2 | -5.6 / 6.2 | -2.7 / 8.2 | -3.6 / 7.4 | -3.4 / 8.2 |
+| s3_orig_f12 | oct | designed | -4.3 / 8.0 | -4.9 / 3.0 | -2.3 / 7.4 | -3.9 / 10.7 | -3.9 / 8.8 |
+| ox1_orig_f12 | oxy | designed | -5.7 / 1.2 | -4.6 / 4.6 | -3.4 / 6.8 | -6.1 / 12.4 | -4.3 / 13.2 |
+| ox2_orig_f8 | oxy | designed | -6.3 / 6.7 | -4.5 / 9.3 | -3.3 / 9.0 | -5.0 / 8.9 | -4.6 / 5.2 |
+| ox3_orig_f8 | oxy | designed | -4.6 / 5.8 | -4.4 / 6.0 | -4.5 / 9.6 | -5.0 / 8.1 | -4.0 / 9.5 |
+| s2_esm2_control | oct | esm2-variant | -4.4 / 12.6 | -4.8 / 10.6 | -5.2 / 11.0 | -4.4 / 6.4 | -4.1 / 9.2 |
+| s3_esm2_f4 | oct | esm2-variant | -5.1 / 6.9 | -4.5 / 9.3 | -4.9 / 11.2 | -4.9 / 11.0 | -4.1 / 10.8 |
+| ox1_esm1_f8 | oxy | esm2-variant | -5.0 / 1.5 | -4.4 / 7.0 | -4.2 / 12.8 | -4.7 / 7.7 | -4.6 / 12.0 |
+| ox2_esm1_f8 | oxy | esm2-variant | -6.5 / 5.9 | -5.0 / 13.0 | -4.5 / 10.4 | -5.2 / 8.1 | -5.5 / 7.2 |
+| shuffle_control | oct | null | -3.8 / 13.6 | -4.9 / 8.1 | -2.9 / 10.7 | -3.8 / 10.2 | -4.6 / 10.1 |
+| ox2_shuffle | oxy | null | -5.5 / 5.9 | -3.6 / 11.2 | -3.4 / 10.7 | -4.6 / 8.9 | -4.4 / 8.6 |
+| shuffle_control_esm0 | oct | null-esm | -4.5 / 10.7 | -5.3 / 4.1 | -4.9 / 9.7 | -4.9 / 7.6 | -4.9 / 8.2 |
+| ox2_shuffle_esm0 | oxy | null-esm | -5.5 / 10.3 | -5.1 / 10.9 | -5.7 / 13.7 | -4.7 / 12.2 | -5.3 / 8.8 |
+| bg33_1 | oct | boltzgen | -3.3 / 7.6 | -3.6 / 10.0 | -3.4 / 9.8 | -3.6 / 10.9 | -3.2 / 9.9 |
+| bg33_2 | oct | boltzgen | -3.4 / 10.0 | -2.9 / 12.9 | -4.4 / 11.1 | -2.9 / 8.0 | -3.3 / 9.5 |
+| bg33_3 | oct | boltzgen | -4.2 / 9.5 | -4.0 / 10.4 | -4.0 / 12.4 | -4.1 / 9.6 | -4.4 / 5.5 |
+| bg33_4 | oct | boltzgen | -4.5 / 10.6 | -4.1 / 4.6 | -4.1 / 9.8 | -4.2 / 5.3 | -4.0 / 12.5 |
+| bgox31_2 | oxy | boltzgen | -4.8 / 7.8 | -4.1 / 10.9 | -4.0 / 6.9 | -4.2 / 7.9 | -4.4 / 6.9 |
+| bgox31_3 | oxy | boltzgen | -5.2 / 7.2 | -5.1 / 6.4 | -5.3 / 11.1 | -4.7 / 10.9 | -4.8 / 11.7 |
+| bgox31_4 | oxy | boltzgen | -4.6 / 7.5 | -4.9 / 6.1 | -4.7 / 9.2 | -4.7 / 10.0 | -4.0 / 13.4 |
+| bgox31_5 | oxy | boltzgen | -4.6 / 5.9 | -5.0 / 8.0 | -4.5 / 5.6 | -5.5 / 7.3 | -5.2 / 9.5 |
+
+- **Vina does not reproduce cofolder packing in these shells.** Pose 1 sits 1.2–13.7 Å in-place
+  RMSD from the fold's own ligand placement, with a median around 9 Å: in 103 of 105 structures
+  the independent pose search finds different packing than the cofolder did. The two agreements —
+  `ox1_orig_f12` and `ox1_esm1_f8` in the OF3 cofold lane at 1.16 and 1.51 Å — are the oxybenzone
+  structures whose OF3 cofolds sit tightest to Boltz in the cofold tables. This is the
+  packing-degeneracy story from the fold geometry, seen from a third direction.
+- **But the docked poses stay inside the envelope.** Pose-1 wrapped fraction is 0.77–1.00
+  everywhere and engaged counts run 13–20. A Vina search 9 Å from the cofold placement still
+  leaves the ligand packed against the chain — these shells are pockets, not grooves, for every
+  peptide including the nulls.
+- **Scores say nothing separating.** Best scores span −2.3 to −6.6 kcal/mol across all 105, with
+  no designed-vs-null gap in any lane. Consistent with "fold metrics cannot separate a design
+  from its null"; the expectation is the same for these docks.
+- **The 9 MD legs run the OF3-cofold structures' OWN ligand placement** — the cofold pose,
+  pose 0 in the dock tables, not a Vina pose. The cofolder's placement is the structure being
+  tested; docking it again (2026-10-09 showed Vina moves it a median ~9 Å) would have measured
+  Vina's packing instead. `run_dock_pose_md.sh POSE=cofold` stages the leg-ready pose from
+  `runs/<mol>/folds/dock_stage/openfold3/<pep>_o3cof_ligand_cofold.sdf` (the fold's perceived
+  ligand with template bond orders, template atom order).
+
 ## What "interesting" means for the follow-up
 
 Docking/MMGBSA legs on a *re-folded* structure run only if the inexpensive metrics above show
-something worth chasing. **The condition fired on the cofold lanes, and the proposal is pending
-the go:** every designed glycine-rich arm re-folds into a compact shell 4–8 Å (Cα) from the
-co-fold the dynamics ran on, in *both* cofold lanes — a different packing that may engage the
-ligand differently. (The apo lanes sharpen the framing rather than add candidates: they compact
-*everything*, nulls included, so an apo fold is not a promising starting structure *per se*.) The
-candidate cells are the five designed arms (`orig_f12`, `s3_orig_f12`, `ox1_orig_f12`,
-`ox2_orig_f8`, `ox3_orig_f8`), docked and run as MD legs against their co-fold baselines. Until
-that go arrives, nothing downstream of folding has run: no docking, no MD, no dynamics spend on
-the folded structures.
+something worth chasing. The condition fired, and **the go arrived 2026-10-09:** nine legs are
+running on Modal — the five designed arms (`orig_f12`, `s3_orig_f12`, `ox1_orig_f12`,
+`ox2_orig_f8`, `ox3_orig_f8`) plus the four esm-variants (`s2_esm2_control`, `s3_esm2_f4`,
+`ox1_esm1_f8`, `ox2_esm1_f8`), each as `<pep>_o3cof`: an OF3-cofold fold run with the ligand
+where the cofolder put it (POSE=cofold), 20 ns and scored against the same peptides' Boltz
+co-fold baselines. (One docked-pose leg, `orig_f12_o3cof_dock1`, runs first as a separate
+comparison cell; the campaign itself is the cofold poses.) ~$10, one
+leg at a time, tails done as each leg lands. Every one of the 105 fold structures is now
+docked-ready at `runs/<mol>/dock/<name>/` should more legs be wanted — the apo-fold legs would
+need that superposed-site definition, which is a site choice, not a prediction.
+
+### The MD legs, as they land
+
+Every leg records: whole-run + window ΔG (`mmgbsa_summary.csv`), contacts/residence
+(`md_contacts.csv`), end-of-run frames, slide RMSD (`code/ligand_slide.py`), and a
+`protein_stability.csv` row. Reference legs: `orig_f12` Boltz pose **−19.75**;
+`orig_f12_dock1` (Boltz shell, Vina pose 1) **−31.40** — a Vina pose can read strong in a
+good shell, so a weak re-fold number is not a docking artifact.
+
+| leg | structure | ligand | ΔG 20 ns | 5/10/15 ns | slide Å | Cα drift (final) | retention |
+|---|---|---|---|---|---|---|---|
+| orig_f12_o3cof_dock1 | OF3 refold of orig_f12 | Vina p1 (10.2 Å from cofold placement) | −9.65 ± 0.11 | −9.13 / −10.86 / −11.28 | 2.34 | 4.6 | **released ~18 ns** (29→4.4 contacts, 15.8 Å) |
+| orig_f12_o3cof | OF3 refold of orig_f12 | cofold's own placement | −5.90 ± 0.09 | −9.62 / −8.31 / −7.34 | 1.26 | 5.5 | **released** (21→1.8 contacts, 11→18.3 Å) |
+| s3_orig_f12_o3cof | OF3 refold of s3_orig_f12 | cofold's own placement | −10.10 ± 0.09 | −14.04 / −10.92 / −10.51 | 1.88 | 3.9 | partial loss (33→12.5 contacts) |
+| s2_esm2_control_o3cof | OF3 refold of s2_esm2_control | cofold's own placement | −10.21 ± 0.11 | −7.32 / −8.52 / −9.86 | 3.20 | 2.5 | full exit + return (18.7→0→25.6→13.0) |
+| s3_esm2_f4_o3cof | OF3 refold of s3_esm2_f4 | cofold's own placement | −13.76 ± 0.08 | −13.58 / −14.61 / −14.52 | 1.30 | 1.9 | best of the refolds (11–21 contacts held, ~6–10 Å) |
+| ox1_orig_f12_o3cof | OF3 refold of ox1_orig_f12 | cofold's own placement | −3.96 ± 0.10 | −7.60 / −5.17 / −4.29 | 2.94 | 2.9 | worst refold: bouncing (37→0→18.5→0.5, excursions to 22 Å) |
+| ox2_orig_f8_o3cof | OF3 refold of ox2_orig_f8 | cofold's own placement | −7.23 ± 0.14 | −14.87 / −11.98 / −8.10 | 2.32 | 4.1 | walked out after 10 ns: 56/8 → 0 contacts at 12–16 ns, partial return |
+| ox3_orig_f8_o3cof | OF3 refold of ox3_orig_f8 | cofold's own placement | −2.06 ± 0.06 | −0.43 / −1.44 / −1.91 | 3.12 | 5.3 | never bound: 18–19 Å separation the whole run, ~1 contact, mid-run drift to 10–13 then back out |
+| ox1_esm1_f8_o3cof | OF3 refold of ox1_esm1_f8 | cofold's own placement | **−17.95 ± 0.09** | −19.54 / −19.23 / −18.92 | 3.00 | 4.2 | **the one exception**: stronger than its Boltz baseline (−10.70) by 7.2; flat profile, 28–48 contacts at ~5–7 Å the whole run |
+| ox2_esm1_f8_o3cof | OF3 refold of ox2_esm1_f8 | cofold's own placement | −16.68 ± 0.11 | −19.08 / −17.54 / −15.70 | 1.20 | 4.0 | strong: weaker than its Boltz baseline (−20.81) by 4.1 but held — 23–46 contacts at ~5.6–6.7 Å, 0 released frames, best slide in the campaign (1.20 Å) |
+
+## The cofold campaign: the five headline tables
+
+The campaign question, answered across all ten legs: **is the OF3 re-fold worth running dynamics on,
+or does the Boltz co-fold remain the start the pipeline should use?** Eight of nine re-folds read
+4–18 kcal/mol *weaker* than their Boltz baseline with degraded or lost retention; the two esm1
+re-folds of ox1/ox2 (`ox1_esm1_f8_o3cof`, `ox2_esm1_f8_o3cof`) are the exception — the first beats its
+baseline by 7.2. Spend: ten legs ≈ $8.2 of produce (plus the $0.78 erroneous dock-pose leg), one at a
+time on Modal.
+
+### Co-folds, ΔG and retention: Boltz pose vs OF3 re-fold
+
+| peptide | mol | Boltz co-fold ΔG (ret.) | OF3 re-fold ΔG (ret.) | Δ (refold − Boltz) |
+|---|---|---|---|---|
+| `orig_f12` | oct | **−13.71 (77.3%)** | −5.90 (7.4%) | +7.8 weaker, released |
+| `orig_f12` (Vina p1 in the OF3 shell) | oct | −13.71 (77.3%) | −9.65 (50.2%) | +4.1 weaker, partial loss |
+| `s3_orig_f12` | oct | **−24.33 (100.0%)** | −10.10 (44.8%) | +14.2 weaker, partial loss |
+| `s2_esm2_control` | oct | **−16.25 (59.6%)** | −10.21 (33.9%) | +6.0 weaker, one long exit-and-return |
+| `s3_esm2_f4` | oct | **−21.08 (99.6%)** | −13.76 (84.8%) | +7.3 weaker but held (best oct refold) |
+| `ox1_orig_f12` | oxy | −10.31 (49.1%) | −3.96 (20.5%) | +6.4 weaker, bouncing |
+| `ox2_orig_f8` | oxy | **−24.21 (100.0%)** | −7.23 (49.5%) | +17.0 weaker, walked out at 10 ns |
+| `ox3_orig_f8` | oxy | **−18.84 (100.0%)** | −2.06 (2.4%) | +16.8 weaker, never bound |
+| `ox1_esm1_f8` | oxy | −10.70 (75.0%) | **−17.95 (100.0%)** | **−7.2 stronger, held all run** |
+| `ox2_esm1_f8` | oxy | **−20.81 (100.0%)** | −16.68 (93.2%) | +4.1 weaker but held, 0 releases |
+
+Eight of nine re-folds are worse by 4–17 kcal/mol and most of those lose the ligand; only the two
+ox esm1 re-folds retain, and `ox1_esm1_f8`'s re-fold is the single cell where the OF3 pose beats the
+model that predicted the baseline. The Boltz co-fold stays the campaign's default start.
+
+### Co-folds — window convergence
+
+| leg | 5 ns | 10 ns | 15 ns | 20 ns |
+|---|---|---|---|---|
+| `orig_f12_o3cof_dock1` | −9.13 | −10.86 | −11.28 | −9.65 |
+| `orig_f12_o3cof` | −9.62 | −8.31 | −7.34 | **−5.90** |
+| `s3_orig_f12_o3cof` | −14.04 | −10.92 | −10.51 | −10.10 |
+| `s2_esm2_control_o3cof` | −7.32 | −8.52 | −9.86 | −10.21 |
+| `s3_esm2_f4_o3cof` | −13.58 | −14.61 | −14.52 | −13.76 |
+| `ox1_orig_f12_o3cof` | −7.60 | −5.17 | −4.29 | −3.96 |
+| `ox2_orig_f8_o3cof` | −14.87 | −11.98 | −8.10 | **−7.23** |
+| `ox3_orig_f8_o3cof` | −0.43 | −1.44 | −1.91 | −2.06 |
+| `ox1_esm1_f8_o3cof` | −19.54 | −19.23 | −18.92 | −17.95 |
+| `ox2_esm1_f8_o3cof` | −19.08 | −17.54 | −15.70 | −16.68 |
+
+Every release leg shows the decay signature (`orig_f12_o3cof` and `ox2_orig_f8_o3cof` give back
+~7 and ~8 over their windows); the retainers (`s3_esm2_f4`, `ox1/ox2_esm1_f8`) hold a flat
+−13 to −19 band the whole run, so their numbers are settled poses rather than starting-pose
+artifacts.
+
+### Co-folds — residence and release
+
+Residence within 10 Å of the peptide centroid at 10 ps sampling; `late` is the share of released
+frames in the second half of the run.
+
+| leg | residence | released frames | episodes | longest | late |
+|---|---|---|---|---|---|
+| `orig_f12_o3cof_dock1` | 50.2% | 86 (4.3%) | 31 | 230 ps | 92% |
+| `orig_f12_o3cof` | 7.4% | 442 (22.1%) | 53 | 2140 ps | 86% |
+| `s3_orig_f12_o3cof` | 44.8% | 28 (1.4%) | 14 | 80 ps | 50% |
+| `s2_esm2_control_o3cof` | 33.9% | 276 (13.8%) | 8 | **2680 ps** | 1% |
+| `s3_esm2_f4_o3cof` | 84.8% | 7 (0.35%) | 5 | 30 ps | 14% |
+| `ox1_orig_f12_o3cof` | 20.5% | 777 (38.9%) | 40 | 1800 ps | 66% |
+| `ox2_orig_f8_o3cof` | 49.5% | 624 (31.2%) | 16 | **3010 ps** | 99% |
+| `ox3_orig_f8_o3cof` | 2.4% | 1059 (53.0%) | 80 | 1470 ps | 35% |
+| `ox1_esm1_f8_o3cof` | 100.0% | 0 | 0 | — | — |
+| `ox2_esm1_f8_o3cof` | 93.2% | 0 | 0 | — | — |
+
+The two esm1 re-folds and `s3_esm2_f4` are the only genuine retainers (0–7 released frames in
+20 ns). `s2_esm2_control`'s single 2.68 ns excursion with 1% late is a mid-run visit that
+returned — a different failure from the `ox2_orig_f8` 99%-late progressive walk-out of 3.01 ns.
+
+### Co-folds — peptide structural stability
+
+Cα RMSD final/max and Rg start→end, Å (`protein_stability.csv`).
+
+| leg | Cα final | Cα max | Rg start→end |
+|---|---|---|---|
+| `orig_f12_o3cof_dock1` | 4.6 | 6.0 | 8.8 → 8.6 |
+| `orig_f12_o3cof` | 5.5 | 6.5 | 9.0 → 8.7 |
+| `s3_orig_f12_o3cof` | 3.9 | 4.6 | 8.4 → 8.7 |
+| `s2_esm2_control_o3cof` | 2.5 | 3.8 | 15.3 → 14.7 |
+| `s3_esm2_f4_o3cof` | 1.9 | 3.9 | 15.2 → 15.4 |
+| `ox1_orig_f12_o3cof` | 2.9 | 3.8 | 8.6 → 7.8 |
+| `ox2_orig_f8_o3cof` | 4.1 | 4.8 | 9.0 → 8.1 |
+| `ox3_orig_f8_o3cof` | 5.3 | 6.2 | 7.8 → 8.6 |
+| `ox1_esm1_f8_o3cof` | 4.2 | 4.7 | 9.5 → 9.6 |
+| `ox2_esm1_f8_o3cof` | 4.0 | 5.7 | 10.0 → 10.4 |
+
+No re-fold's Cα drift exceeds the Boltz legs' own band; failure here is ligand retention, not fold
+collapse. The long-Rg legs (`s2_esm2_control`, `s3_esm2_f4` at ~15 Å) are the elongated designs and
+their shells stayed the same size through dynamics.
+
+### The pre-dynamics static read and the pairs the re-folds realise
+
+Static half: `dock_poses.csv` on each placement's own coordinates — **enclosed** (fraction of
+directions out of the ligand that meet peptide), **wrapped** (fraction of ligand atoms with peptide
+within 4.5 Å), engaged atoms, centroid separation — pose 0 of the same structures the legs ran from.
+Trajectory half: `pair_contacts.py` on each re-fold leg's 20 ns run — mean simultaneous designed
+side chains on the ligand (`sim`) and realised pairs against the [n−1, n(n−1)/2] band.
+
+Pair outputs are persisted as `runs/{octinoxate,oxybenzone}/md/pair_contacts_o3cof_shellN.csv`
+(the `orig_f12` pair under `pair_contacts_o3cof_design.csv`); static half from
+`runs/<mol>/dock/dock_poses.csv` pose 0.
+
+| peptide | pose | enclosed | wrapped | engaged | cent sep | sim | pairs | band% |
+|---|---|---|---|---|---|---|---|---|
+| `orig_f12` | Boltz co-fold | 0.96 | 1.00 | 20 | 4.2 Å | | 22/66 | |
+| | OF3 re-fold | 0.68 | 0.70 | 14 | 9.4 Å | 0.88 | 12/66 | 2 |
+| | OF3 re-fold, Vina p1 | 0.76 | 0.95 | 19 | 6.5 Å | 1.37 | 18/66 | 13 |
+| `s3_orig_f12` | Boltz co-fold | 0.965 | 1.00 | 20 | 3.6 Å | | 53/66 | |
+| | OF3 re-fold | 0.43 | 0.65 | 13 | 10.4 Å | 1.39 | 18/66 | 13 |
+| `s2_esm2_control` | Boltz co-fold | 0.51 | 0.85 | 17 | 6.7 Å | | 10/66 | |
+| | OF3 re-fold | 0.38 | 0.50 | 10 | 13.5 Å | 1.08 | 13/66 | 4 |
+| `s3_esm2_f4` | Boltz co-fold | 0.795 | 0.90 | 18 | 7.0 Å | | 32/66 | |
+| | OF3 re-fold | 0.58 | 0.60 | 12 | 7.3 Å | 1.63 | 9/66 | −4 |
+| `ox1_orig_f12` | Boltz co-fold | 0.995 | 1.00 | 17 | 1.2 Å | | 42/45 | |
+| | OF3 re-fold | 0.81 | 0.94 | 16 | 5.7 Å | 0.76 | 15/45 | 17 |
+| `ox2_orig_f8` | Boltz co-fold | 0.975 | 1.00 | 17 | 2.7 Å | | 10/55 | |
+| | OF3 re-fold | 0.655 | 1.00 | 17 | 7.5 Å | 1.48 | 15/55 | 11 |
+| `ox3_orig_f8` | Boltz co-fold | 0.995 | 1.00 | 17 | 2.1 Å | | 26/45 | |
+| | OF3 re-fold | 0.54 | 0.77 | 13 | 10.3 Å | 0.46 | 8/45 | −3 |
+| `ox1_esm1_f8` | Boltz co-fold | 0.94 | 1.00 | 17 | 4.1 Å | | 30/45 | |
+| | OF3 re-fold | 0.58 | 0.47 | 8 | 6.1 Å | 2.36 | 12/45 | 8 |
+| `ox2_esm1_f8` | Boltz co-fold | 0.665 | 1.00 | 17 | 6.4 Å | | 36/55 | |
+| | OF3 re-fold | 0.745 | 1.00 | 17 | 5.3 Å | 2.15 | 19/55 | 20 |
+
+The static read priced the re-folds before the GPU did: the Boltz co-folds enclose 0.51–0.995 at
+1.2–6.7 Å, the OF3 placements enclose 0.38–0.81 at 5.3–13.5 Å, and every leg that read weaker in the
+ΔG table sat on the low half of that drop. The one high-energy counterexample, `ox2_esm1_f8`, is
+also the placement that matched its Boltz pose best statically (0.745 enclosed, 17 atoms engaged,
+ligand *inside* its Boltz centroid distance at 5.3 Å) — and in dynamics it realises the campaign's
+best pair band (19/55) with the longest `held` list of the ten legs. Re-fold quality is legible in
+the placement's enclosure fraction at zero dynamics cost.

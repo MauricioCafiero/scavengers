@@ -43,6 +43,17 @@ POSE=${POSE:-1}
 SYSNAME=${SYSNAME:-octinoxate}
 BOX=${BOX:-dodecahedron}
 BUILD_ONLY=${BUILD_ONLY:-0}   # stop after the build, to read the particle count before the 20 ns
+# POSE=cofold runs a fold structure's OWN ligand placement (the cofold pose, pose 0 in the dock
+# tables) rather than a Vina dock: the leg name carries no _dock suffix and the ligand SDF is the
+# leg-ready cofold pose code/dock_folds.py staged at
+# runs/$SYSNAME/folds/dock_stage/openfold3/<name>_ligand_cofold.sdf. Run for the fold campaign's
+# OF3-cofold legs (FOLDS.md): <pep>_o3cof with the ligand where the cofolder put it.
+if [[ $POSE == cofold ]]; then
+    N=${LEGNAME:-$STRUCT}
+    DOCK_STAGE=runs/$SYSNAME/folds/dock_stage/openfold3/$N"_ligand_cofold.sdf"
+else
+    N=${LEGNAME:-${STRUCT}_dock${POSE}}
+fi
 LEGNAME=${LEGNAME:-}   # override N outright: a replicate leg (<leg>_r2) is its own staged dir with a
                        # byte-identical system/ copied from the original, so the build guard skips
                        # straight to the run; STRUCT/POSE stay set for the tail's SDF naming. See
@@ -51,7 +62,6 @@ LEGNAME=${LEGNAME:-}   # override N outright: a replicate leg (<leg>_r2) is its 
 # only reading the env var let a bare positional word through and the "build-only" launch ran a full
 # 20 ns (2026-10-04, two accidental runs). `set -u` is set; loop over "$@" explicitly.
 for a in "$@"; do [[ $a == BUILD_ONLY=1 ]] && BUILD_ONLY=1; done
-N=${LEGNAME:-${STRUCT}_dock${POSE}}
 M=runs/${SYSNAME}/md/$N                   # SYSNAME parameterizes the run dir (was hardcoded octinoxate)
 SRC=${SRC:-runs/${SYSNAME}/md/$STRUCT}   # the cofolded leg: supplies the already-prepped, frame-matched receptor
                                          # boltzgen cofolds live under boltzgen_local/md/<STRUCT>; pass
@@ -70,9 +80,16 @@ mkdir -p $M
 if [[ ! -f $M/system/system.xml ]]; then
     echo "--- building $N ($BOX) ---"
     [[ -f $M/protein_fixed.pdb ]] || cp $SRC/protein_fixed.pdb $M/protein_fixed.pdb
-    [[ -f $M/${N}_ligand.sdf ]] || \
-        $PY $ROOT/code/dock_pose_to_sdf.py $STRUCT --pose $POSE --system $SYSNAME \
-            --out $M/${N}_ligand.sdf
+    if [[ ! -f $M/${N}_ligand.sdf ]]; then
+        if [[ $POSE == cofold ]]; then
+            [[ -f $ROOT/$DOCK_STAGE ]] || { echo "missing cofold pose: $DOCK_STAGE"; exit 1; }
+            cp $ROOT/$DOCK_STAGE $M/${N}_ligand.sdf
+            echo "ligand: cofold pose staged SDF -> $M/${N}_ligand.sdf"
+        else
+            $PY $ROOT/code/dock_pose_to_sdf.py $STRUCT --pose $POSE --system $SYSNAME \
+                --out $M/${N}_ligand.sdf
+        fi
+    fi
     [[ -f $M/ligand_prepped.sdf ]] || \
         $OMD prep-ligand --sdf $M/${N}_ligand.sdf --out $M/ligand_prepped.sdf
     $OMD build --protein $M/protein_fixed.pdb --ligand $M/ligand_prepped.sdf \

@@ -54,9 +54,12 @@ typing it: `boltz_check.ligand_smiles('runs/<mol>')` reads `ligand.xyz`.
 
 **Launch every `modal run` through `code/modal_run.sh` — it is not optional.** The client stays
 attached for the whole leg even with `--detach`, and when the Mac sleeps the client drops and Modal
-cancels the in-flight leg at full price. The script `exec`s the run under `caffeinate -i`, which holds
-an idle-sleep assertion for exactly the client's lifetime, so the guard is self-cleaning and covers the
-whole leg (2026-10-04: two cancelled legs, $1.06, for skipping this). There is no warm restart: `omd run`
+cancels the in-flight leg at full price. The script `exec`s the run under `caffeinate -i -s`, which
+holds idle and system-sleep assertions for exactly the client's lifetime, so the guard is self-cleaning
+and covers the whole leg (2026-10-04: two cancelled legs, $1.06, for skipping this; 2026-10-10: a
+16-minute maintenance/dark sleep dropped a `-i`-only produce client mid-leg — the client's disconnect
+handler cancelled the input itself — which is why `-s` was added; valid on AC, and all legs run on AC).
+There is no warm restart: `omd run`
 writes `checkpoint.chk` but nothing loads it. The guard protects a *launch*, not a day of work: any
 instruction to release sleep inhibitors is scoped to the work that motivated it — before resuming any
 work after a release (e.g. an overnight laptop sleep), verify one is armed with `pgrep -f caffeinate`
@@ -200,6 +203,8 @@ plus the BoltzGen legs (62 rows as of 2026-10-07), and the glob in older notes o
 `runs/oxybenzone` entirely. It now refuses to write fewer rows than the file holds unless
 `--allow-shrink` is passed. Pass every lane: `runs/octinoxate/md/*/prod_20ns`,
 `runs/octinoxate/md/*/prod_L1_modal`, `runs/oxybenzone/md/*/prod_20ns`,
+`runs/oxybenzone/md/*/prod_L1_modal` (oxybenzone has Modal legs since 2026-10-10 — omitting this
+glob silently drops them from the rewritten table),
 `~/python_mac/boltzgen_local/md/*/prod_20ns` — and not `boltzgen_local`'s `prod_L1_modal`, which does
 not exist and whose empty glob aborts the whole zsh launch.
 
