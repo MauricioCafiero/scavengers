@@ -29,8 +29,12 @@ mean, and where it goes wrong.
 - [What each file does](#what-each-file-does)
 - [Where output goes](#where-output-goes)
 - [Results](#results) — summary; the full record is in [RESULTS.md](RESULTS.md)
-- The independent fold-method check (the same peptides folded by ESMFold/OpenFold3 from sequence
-  only, compared against the Boltz/BoltzGen co-folds) is [FOLDS.md](FOLDS.md)
+- The independent fold-method check (the same peptides folded by five independent fold lanes —
+  ESMFold apo, OpenFold3 and RosettaFold3 with and without the ligand — scored for geometry and
+  interface confidence) is [FOLDS.md](FOLDS.md); it also holds the cofold campaign: 21 designs
+  re-folded cofold-style by OpenFold3 and RF3, docked (`dock_folds.py`), and run as 20 ns dynamics
+  legs (`*_o3cof`, one at a time on Modal) against their Boltz co-fold baselines, with the
+  shuffle-null replication of the same flow
 - [What the metrics mean](#what-the-metrics-mean)
 - [Traps](#traps)
 - [Limitations](#limitations)
@@ -289,6 +293,8 @@ peptidebuilder/
 | `pair_contacts.py` | how many designed side-chain **pairs** reach the ligand over a trajectory, against the [n−1, n(n−1)/2] band. Mean simultaneous engagement is the best predictor of MM/GBSA ΔG measured here. Slots come from the parent design, so shells, ESM variants and shuffles all work |
 | `shuffle_control.py` | the null model: the same residues in a random arrangement, keeping the linker pattern, with one ESM2 variant. No scoring — it has no poses, and `sequences.csv` is left alone |
 | `vina_redock.py` | redocks the ligand into its own folded peptide with AutoDock Vina, from the receptor and reference ligand the MD prep already wrote. `--md-root` adds structures prepared outside this repository — BoltzGen's two go in with `--md-root ~/python_mac/boltzgen_local/md` — so they land in the same tables and compare directly; a `source` column records where each came from. Vina and Open Babel come from `~/python_mac/dock_assist`; nothing is installed here. Reports Vina's score, symmetry-corrected RMSD to the Boltz pose, and `check_fold.py`'s wrapping and enclosure on every pose, so a docked pose and a fold are measured by identical cutoffs. See [redocking](RESULTS.md#an-independent-check-on-the-pose-redocking) |
+| `dock_folds.py` | Vina-docks every fold structure from [FOLDS.md](FOLDS.md) into its own peptide (`runs/<mol>/folds/`), with the cofold pose kept as pose 0 so a re-fold is measured by the same enclosure/wrapping cutoffs as a Boltz fold; metric tables land in `runs/<mol>/folds/metrics/` |
+| `build_cofolds.sh` | the `BUILD_ONLY=1` staging loop that turns cofold structures and their pose-0 placements into MD leg dirs (`STRUCT=<leg> POSE=cofold SYSNAME=<mol>`), which then run one at a time on Modal and tail locally |
 | `dock_compare.py` | splits each pose difference into its parts — rigid-body translation and rotation from a Kabsch fit, internal torsion change as the RMSD left after that fit, and the angle between the two poses' head→tail vectors — then asks separately, by contact-residue Jaccard, whether it is even the same pocket. Writes a `compare.pml` per structure |
 | `dock_vs_md.py` | superposes each MD medoid's peptide onto the docking receptor and asks whether the ligand ended nearer the Boltz pose or a docked one. Reports the peptide's own superposition RMSD, because when that is as large as the pose differences the comparison cannot settle anything |
 

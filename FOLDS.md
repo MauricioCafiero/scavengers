@@ -504,6 +504,18 @@ leg at a time, tails done as each leg lands. Every one of the 105 fold structure
 docked-ready at `runs/<mol>/dock/<name>/` should more legs be wanted — the apo-fold legs would
 need that superposed-site definition, which is a site choice, not a prediction.
 
+**How a cofold leg stages, end to end** (the campaign legs and the four nulls both went through
+this): `code/build_cofolds.sh` runs the `BUILD_ONLY=1` loop over its leg list
+(`run_dock_pose_md.sh STRUCT=<leg> POSE=cofold SYSNAME=<mol>`). A leg whose protein was never
+staged by a campaign build fails at `omd build` with a missing `protein_fixed.pdb`; prepping it
+needs the *protonated* receptor from the docking grid —
+`omd prep-protein --pdb runs/<mol>/dock/<leg>/<leg>_protein.pdb --out runs/<mol>/md/<leg>/protein_fixed.pdb`
+(`--out` takes the FILE path; a directory gives `IsADirectoryError`). The dock-dir protein is
+coordinate-identical to the campaign legs' `protein_fixed.pdb` (verified 0.0000 Å), so this is the
+same prep, just done per leg. Then push → probe → produce on Modal (`code/modal_md.py`), and the
+local tail is `run_dock_pose_md.sh` again with a `prod_L1_modal → prod_20ns` symlink, which the
+build guard skips straight past to the analysis.
+
 ### The MD legs, as they land
 
 Every leg records: whole-run + window ΔG (`mmgbsa_summary.csv`), contacts/residence

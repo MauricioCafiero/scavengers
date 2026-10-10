@@ -606,6 +606,13 @@ The September 2026 allocation was spent (about $4 across scoring and six 20 ns r
 
 ## Replicate every MM/GBSA leg: run-to-run variation, prepared 2026-10-08, not launched
 
+**Status 2026-10-10: paused until the racc queue reopens Monday 2026-10-12 — nothing submitted.**
+One stale figure when it resumes: the
+inventory was read 2026-10-08, and the fourteen legs since then (ten `*_o3cof` cofold legs + four
+`_o3cof` nulls, all with MM/GBSA rows) are NOT staged as `_r2` and not in the four batch lists —
+extend the inventory and stage them before the smoke leg if they are to be replicated in the same
+pass.
+
 CLAUDE.md records that "MM/GBSA standard errors are not uncertainty on a comparison" but nothing has
 ever put a number on run-to-run variation. This plan runs a second, independent 20 ns trajectory of
 every leg that produced an MM/GBSA row — both molecules, 62 legs — so the headline comparisons can
