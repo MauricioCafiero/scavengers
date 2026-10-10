@@ -524,6 +524,10 @@ good shell, so a weak re-fold number is not a docking artifact.
 | ox3_orig_f8_o3cof | OF3 refold of ox3_orig_f8 | cofold's own placement | −2.06 ± 0.06 | −0.43 / −1.44 / −1.91 | 3.12 | 5.3 | never bound: 18–19 Å separation the whole run, ~1 contact, mid-run drift to 10–13 then back out |
 | ox1_esm1_f8_o3cof | OF3 refold of ox1_esm1_f8 | cofold's own placement | **−17.95 ± 0.09** | −19.54 / −19.23 / −18.92 | 3.00 | 4.2 | **the one exception**: stronger than its Boltz baseline (−10.70) by 7.2; flat profile, 28–48 contacts at ~5–7 Å the whole run |
 | ox2_esm1_f8_o3cof | OF3 refold of ox2_esm1_f8 | cofold's own placement | −16.68 ± 0.11 | −19.08 / −17.54 / −15.70 | 1.20 | 4.0 | strong: weaker than its Boltz baseline (−20.81) by 4.1 but held — 23–46 contacts at ~5.6–6.7 Å, 0 released frames, best slide in the campaign (1.20 Å) |
+| `shuffle_control_o3cof` | OF3 refold of shuffle_control (null) | cofold's own placement | −9.38 ± 0.11 | −9.51 / −11.60 / −12.91 | 7.59 | 7.9 | released late: built to −12.9 by 15 ns then gave 3.5 back; 83% of releases in the back half, slide 7.59 Å |
+| `shuffle_control_esm0_o3cof` | OF3 refold of shuffle_control_esm0 (null) | cofold's own placement | **−15.62 ± 0.09** | −12.46 / −14.55 / −15.05 | 10.62 | 4.2 | **null counterexample 2**: stronger than its Boltz null baseline (−14.32) by 1.3 and retention higher (92.5% vs 80.2%); ligand pulls IN 11.3→4.5 Å, 0% of releases late |
+| `ox2_shuffle_o3cof` | OF3 refold of ox2_shuffle (null) | cofold's own placement | −2.98 ± 0.09 | −7.55 / −4.39 / −3.28 | 1.49 | 5.9 | shell opens: slide only 1.49 Å yet separation 8.9→15.4 Å, residence 14.8%, longest 2.9 ns detached |
+| `ox2_shuffle_esm0_o3cof` | OF3 refold of ox2_shuffle_esm0 (null) | cofold's own placement | −0.92 ± 0.05 | −1.53 / −0.82 / −0.55 | 13.14 | 2.4 | effectively unbound: OF3 places the ligand 18.6 Å out (9.3 ns detached) while the Boltz baseline of the same null held at 94.7% |
 
 ## The cofold campaign: the five headline tables
 
@@ -533,6 +537,22 @@ or does the Boltz co-fold remain the start the pipeline should use?** Eight of n
 re-folds of ox1/ox2 (`ox1_esm1_f8_o3cof`, `ox2_esm1_f8_o3cof`) are the exception — the first beats its
 baseline by 7.2. Spend: ten legs ≈ $8.2 of produce (plus the $0.78 erroneous dock-pose leg), one at a
 time on Modal.
+
+**The four cofold nulls (2026-10-10, $3.90 of produce).** The campaign's question asked again on
+shuffle-control sequences: all four null structures' `*_o3cof` legs run the same cofold-pose flow
+(`shuffle_control`/`shuffle_control_esm0` oct, `ox2_shuffle`/`ox2_shuffle_esm0` oxy). The split is
+not "nulls release" — it is **compact vs elongated**. The two compact nulls repeat the design-refold
+pattern in different directions: `shuffle_control` reads +5.7 weaker with 83%-late release, and
+`ox2_shuffle`'s shell opens under it (slide 1.5 Å yet separation 8.9→15.4 Å). But the two
+elongated nulls split: `ox2_shuffle_esm0`'s OF3 placement misses the site entirely (−0.92, 18.6 Å,
+9.3 ns detached) against a Boltz baseline that held at 94.7% — while `shuffle_control_esm0` is a
+**null counterexample**: −15.62 vs its Boltz null baseline −14.32, 1.3 stronger, retention 92.5%
+vs 80.2%, and 0% of its releases late (the ligand pulls *in*, 11.3→4.5 Å). That makes two cells in
+the whole campaign where the OF3 pose beats the model that predicted the baseline
+(`ox1_esm1_f8`, `shuffle_control_esm0`), and one of them is a *null* — so a strong OF3-cofold ΔG is
+legible on any sequence, designed or shuffled, for sequences whose Boltz fold is compact and whose
+site survives the re-fold. The `ox2_shuffle` pairing also shows the baseline itself can bind
+nowhere (7.1% residence, −5.30) on a structure whose static geometry is as good as the designs'.
 
 ### Co-folds, ΔG and retention: Boltz pose vs OF3 re-fold
 
@@ -548,6 +568,10 @@ time on Modal.
 | `ox3_orig_f8` | oxy | **−18.84 (100.0%)** | −2.06 (2.4%) | +16.8 weaker, never bound |
 | `ox1_esm1_f8` | oxy | −10.70 (75.0%) | **−17.95 (100.0%)** | **−7.2 stronger, held all run** |
 | `ox2_esm1_f8` | oxy | **−20.81 (100.0%)** | −16.68 (93.2%) | +4.1 weaker but held, 0 releases |
+| `shuffle_control` (null) | oct | **−15.13 (75.9%)** | −9.39 (25.7%) | +5.7 weaker, late progressive release |
+| `shuffle_control_esm0` (null) | oct | −14.32 (80.2%) | **−15.62 (92.5%)** | **−1.3 stronger on the OF3 fold, retention higher** |
+| `ox2_shuffle` (null) | oxy | −5.30 (7.1%) | −2.98 (14.8%) | +2.3 weaker; both legs poor, the baseline binds nowhere either |
+| `ox2_shuffle_esm0` (null) | oxy | **−12.04 (94.7%)** | −0.92 (1.1%) | +11.1 weaker, OF3 placement misses the site entirely |
 
 Eight of nine re-folds are worse by 4–17 kcal/mol and most of those lose the ligand; only the two
 ox esm1 re-folds retain, and `ox1_esm1_f8`'s re-fold is the single cell where the OF3 pose beats the
@@ -567,6 +591,10 @@ model that predicted the baseline. The Boltz co-fold stays the campaign's defaul
 | `ox3_orig_f8_o3cof` | −0.43 | −1.44 | −1.91 | −2.06 |
 | `ox1_esm1_f8_o3cof` | −19.54 | −19.23 | −18.92 | −17.95 |
 | `ox2_esm1_f8_o3cof` | −19.08 | −17.54 | −15.70 | −16.68 |
+| `shuffle_control_o3cof` | −9.51 | −11.60 | −12.91 | **−9.39** |
+| `shuffle_control_esm0_o3cof` | −12.46 | −14.55 | −15.05 | **−15.62** |
+| `ox2_shuffle_o3cof` | −7.55 | −4.39 | −3.28 | −2.98 |
+| `ox2_shuffle_esm0_o3cof` | −1.53 | −0.82 | −0.55 | **−0.92** |
 
 Every release leg shows the decay signature (`orig_f12_o3cof` and `ox2_orig_f8_o3cof` give back
 ~7 and ~8 over their windows); the retainers (`s3_esm2_f4`, `ox1/ox2_esm1_f8`) hold a flat
@@ -590,6 +618,10 @@ frames in the second half of the run.
 | `ox3_orig_f8_o3cof` | 2.4% | 1059 (53.0%) | 80 | 1470 ps | 35% |
 | `ox1_esm1_f8_o3cof` | 100.0% | 0 | 0 | — | — |
 | `ox2_esm1_f8_o3cof` | 93.2% | 0 | 0 | — | — |
+| `shuffle_control_o3cof` | 25.7% | 84 (4.2%) | 18 | 430 ps | 83% |
+| `shuffle_control_esm0_o3cof` | 92.5% | 49 (2.5%) | 11 | 160 ps | 0% |
+| `ox2_shuffle_o3cof` | 14.8% | 1092 (54.6%) | 34 | **2900 ps** | 54% |
+| `ox2_shuffle_esm0_o3cof` | 1.1% | 1667 (83.4%) | 25 | **9270 ps** | 52% |
 
 The two esm1 re-folds and `s3_esm2_f4` are the only genuine retainers (0–7 released frames in
 20 ns). `s2_esm2_control`'s single 2.68 ns excursion with 1% late is a mid-run visit that
@@ -611,6 +643,10 @@ Cα RMSD final/max and Rg start→end, Å (`protein_stability.csv`).
 | `ox3_orig_f8_o3cof` | 5.3 | 6.2 | 7.8 → 8.6 |
 | `ox1_esm1_f8_o3cof` | 4.2 | 4.7 | 9.5 → 9.6 |
 | `ox2_esm1_f8_o3cof` | 4.0 | 5.7 | 10.0 → 10.4 |
+| `shuffle_control_o3cof` | 7.9 | 9.2 | 8.8 → 9.4 |
+| `shuffle_control_esm0_o3cof` | 4.2 | 5.3 | 15.3 → 14.9 |
+| `ox2_shuffle_o3cof` | 5.9 | 6.6 | 8.0 → 8.6 |
+| `ox2_shuffle_esm0_o3cof` | 2.4 | 5.2 | 14.1 → 14.1 |
 
 No re-fold's Cα drift exceeds the Boltz legs' own band; failure here is ligand retention, not fold
 collapse. The long-Rg legs (`s2_esm2_control`, `s3_esm2_f4` at ~15 Å) are the elongated designs and
@@ -649,6 +685,15 @@ Pair outputs are persisted as `runs/{octinoxate,oxybenzone}/md/pair_contacts_o3c
 | | OF3 re-fold | 0.58 | 0.47 | 8 | 6.1 Å | 2.36 | 12/45 | 8 |
 | `ox2_esm1_f8` | Boltz co-fold | 0.665 | 1.00 | 17 | 6.4 Å | | 36/55 | |
 | | OF3 re-fold | 0.745 | 1.00 | 17 | 5.3 Å | 2.15 | 19/55 | 20 |
+| `shuffle_control` | Boltz co-fold | 0.75 | 0.75 | 15 | 7.9 Å | | 18/66 | 13 |
+| | OF3 re-fold (null) | 0.51 | 0.90 | 18 | 9.2 Å | 1.70 | 33/66 | 40 |
+| `shuffle_control_esm0` | Boltz co-fold | 0.54 | 0.85 | 17 | 11.0 Å | | 12/66 | 2 |
+| | OF3 re-fold (null) | 0.31 | 0.30 | 6 | 9.4 Å | 1.26 | 4/66 | −13 |
+| `ox2_shuffle` | Boltz co-fold | 0.58 | 0.82 | 14 | 9.3 Å | 1.21 | 29/55 | 42 |
+| | OF3 re-fold (null) | 0.58 | 0.94 | 16 | 7.9 Å | 0.59 | 7/55 | −7 |
+| `ox2_shuffle_esm0` | Boltz co-fold | 0.64 | 0.94 | 16 | 4.2 Å | 2.21 | 18/55 | 18 |
+| | OF3 re-fold (null) | 0.47 | 0.77 | 13 | 7.3 Å | 0.13 | 3/55 | −16 |
+| | OF3 re-fold (null) | 0.58 | 0.94 | 16 | 7.9 Å | 0.59 | 7/55 | −7 |
 
 The static read priced the re-folds before the GPU did: the Boltz co-folds enclose 0.51–0.995 at
 1.2–6.7 Å, the OF3 placements enclose 0.38–0.81 at 5.3–13.5 Å, and every leg that read weaker in the
