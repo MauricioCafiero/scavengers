@@ -495,13 +495,14 @@ independent cofolder reproduces Boltz's packing and ligand engagement):
   alike in every grid cell — the rubric for what to pursue has to come from binding: MM/GBSA,
   ligand retention and contacts against those same null rows.
 
-## Vina docking into the folded structures (all 105, 2026-10-09)
+## Vina docking into the folded structures (all 126, 2026-10-09; the Boltz apo lane 2026-10-11)
 
 Every fold structure was Vina-docked (`code/dock_folds.py`, which stages the fold's peptide as
 receptor and calls `vina_redock.redock()` unchanged: 22 Å box, exhaustiveness 16, seed 42, 9
-modes, project cutoffs). 21 peptides × 5 lanes = 105 docks in ~25 min of Mac Vina; the rows are
-appended additions-only to the committed `dock_summary.csv`/`dock_poses.csv` (50 + 55 summary rows,
-500 + 550 pose rows; structure names carry the lane suffix, e.g. `s3_orig_f12_o3cof`). Full scratch
+modes, project cutoffs). 21 peptides × 6 lanes = 126 docks; the first five lanes took ~25 min of
+Mac Vina and the Boltz apo lane 5 min more. The rows are appended additions-only to the committed
+`dock_summary.csv`/`dock_poses.csv` (60 + 66 summary rows, 600 + 660 pose rows; structure names
+carry the lane suffix, e.g. `s3_orig_f12_o3cof`, `orig_f12_bzapo`). Full scratch
 tables in `runs/<mol>/folds/metrics/dock_folds_{summary,poses}.csv`.
 
 Box definition is the interesting part. A **cofold** fold contains the ligand: its atoms are
@@ -523,32 +524,32 @@ cofold lanes' reference is the fold's own ligand (pose 0); apo lanes' reference 
 superposed-site pose. Pose-1 RMSD is how far Vina's best pose lands from where the cofolder (or
 site definition) put the ligand. Full per-pose data in `runs/<mol>/folds/metrics/dock_folds_poses.csv`.
 
-| peptide | mol | kind | o3cof | rf3cof | esmapo | o3apo | rf3apo |
-|---|---|---|---|---|---|---|---|
-| orig_f12 | oct | designed | -4.2 / 10.2 | -5.6 / 6.2 | -2.7 / 8.2 | -3.6 / 7.4 | -3.4 / 8.2 |
-| s3_orig_f12 | oct | designed | -4.3 / 8.0 | -4.9 / 3.0 | -2.3 / 7.4 | -3.9 / 10.7 | -3.9 / 8.8 |
-| ox1_orig_f12 | oxy | designed | -5.7 / 1.2 | -4.6 / 4.6 | -3.4 / 6.8 | -6.1 / 12.4 | -4.3 / 13.2 |
-| ox2_orig_f8 | oxy | designed | -6.3 / 6.7 | -4.5 / 9.3 | -3.3 / 9.0 | -5.0 / 8.9 | -4.6 / 5.2 |
-| ox3_orig_f8 | oxy | designed | -4.6 / 5.8 | -4.4 / 6.0 | -4.5 / 9.6 | -5.0 / 8.1 | -4.0 / 9.5 |
-| s2_esm2_control | oct | esm2-variant | -4.4 / 12.6 | -4.8 / 10.6 | -5.2 / 11.0 | -4.4 / 6.4 | -4.1 / 9.2 |
-| s3_esm2_f4 | oct | esm2-variant | -5.1 / 6.9 | -4.5 / 9.3 | -4.9 / 11.2 | -4.9 / 11.0 | -4.1 / 10.8 |
-| ox1_esm1_f8 | oxy | esm2-variant | -5.0 / 1.5 | -4.4 / 7.0 | -4.2 / 12.8 | -4.7 / 7.7 | -4.6 / 12.0 |
-| ox2_esm1_f8 | oxy | esm2-variant | -6.5 / 5.9 | -5.0 / 13.0 | -4.5 / 10.4 | -5.2 / 8.1 | -5.5 / 7.2 |
-| shuffle_control | oct | null | -3.8 / 13.6 | -4.9 / 8.1 | -2.9 / 10.7 | -3.8 / 10.2 | -4.6 / 10.1 |
-| ox2_shuffle | oxy | null | -5.5 / 5.9 | -3.6 / 11.2 | -3.4 / 10.7 | -4.6 / 8.9 | -4.4 / 8.6 |
-| shuffle_control_esm0 | oct | null-esm | -4.5 / 10.7 | -5.3 / 4.1 | -4.9 / 9.7 | -4.9 / 7.6 | -4.9 / 8.2 |
-| ox2_shuffle_esm0 | oxy | null-esm | -5.5 / 10.3 | -5.1 / 10.9 | -5.7 / 13.7 | -4.7 / 12.2 | -5.3 / 8.8 |
-| bg33_1 | oct | boltzgen | -3.3 / 7.6 | -3.6 / 10.0 | -3.4 / 9.8 | -3.6 / 10.9 | -3.2 / 9.9 |
-| bg33_2 | oct | boltzgen | -3.4 / 10.0 | -2.9 / 12.9 | -4.4 / 11.1 | -2.9 / 8.0 | -3.3 / 9.5 |
-| bg33_3 | oct | boltzgen | -4.2 / 9.5 | -4.0 / 10.4 | -4.0 / 12.4 | -4.1 / 9.6 | -4.4 / 5.5 |
-| bg33_4 | oct | boltzgen | -4.5 / 10.6 | -4.1 / 4.6 | -4.1 / 9.8 | -4.2 / 5.3 | -4.0 / 12.5 |
-| bgox31_2 | oxy | boltzgen | -4.8 / 7.8 | -4.1 / 10.9 | -4.0 / 6.9 | -4.2 / 7.9 | -4.4 / 6.9 |
-| bgox31_3 | oxy | boltzgen | -5.2 / 7.2 | -5.1 / 6.4 | -5.3 / 11.1 | -4.7 / 10.9 | -4.8 / 11.7 |
-| bgox31_4 | oxy | boltzgen | -4.6 / 7.5 | -4.9 / 6.1 | -4.7 / 9.2 | -4.7 / 10.0 | -4.0 / 13.4 |
-| bgox31_5 | oxy | boltzgen | -4.6 / 5.9 | -5.0 / 8.0 | -4.5 / 5.6 | -5.5 / 7.3 | -5.2 / 9.5 |
+| peptide | mol | kind | o3cof | rf3cof | esmapo | o3apo | rf3apo | bzapo |
+|---|---|---|---|---|---|---|---|---|
+| orig_f12 | oct | designed | -4.2 / 10.2 | -5.6 / 6.2 | -2.7 / 8.2 | -3.6 / 7.4 | -3.4 / 8.2 | -3.9 / 9.7 |
+| s3_orig_f12 | oct | designed | -4.3 / 8.0 | -4.9 / 3.0 | -2.3 / 7.4 | -3.9 / 10.7 | -3.9 / 8.8 | -3.9 / 12.7 |
+| ox1_orig_f12 | oxy | designed | -5.7 / 1.2 | -4.6 / 4.6 | -3.4 / 6.8 | -6.1 / 12.4 | -4.3 / 13.2 | -4.1 / 10.9 |
+| ox2_orig_f8 | oxy | designed | -6.3 / 6.7 | -4.5 / 9.3 | -3.3 / 9.0 | -5.0 / 8.9 | -4.6 / 5.2 | -5.3 / 7.0 |
+| ox3_orig_f8 | oxy | designed | -4.6 / 5.8 | -4.4 / 6.0 | -4.5 / 9.6 | -5.0 / 8.1 | -4.0 / 9.5 | -4.1 / 9.2 |
+| s2_esm2_control | oct | esm2-variant | -4.4 / 12.6 | -4.8 / 10.6 | -5.2 / 11.0 | -4.4 / 6.4 | -4.1 / 9.2 | -4.7 / 9.9 |
+| s3_esm2_f4 | oct | esm2-variant | -5.1 / 6.9 | -4.5 / 9.3 | -4.9 / 11.2 | -4.9 / 11.0 | -4.1 / 10.8 | -5.5 / 9.0 |
+| ox1_esm1_f8 | oxy | esm2-variant | -5.0 / 1.5 | -4.4 / 7.0 | -4.2 / 12.8 | -4.7 / 7.7 | -4.6 / 12.0 | -4.0 / 9.6 |
+| ox2_esm1_f8 | oxy | esm2-variant | -6.5 / 5.9 | -5.0 / 13.0 | -4.5 / 10.4 | -5.2 / 8.1 | -5.5 / 7.2 | -5.0 / 8.8 |
+| shuffle_control | oct | null | -3.8 / 13.6 | -4.9 / 8.1 | -2.9 / 10.7 | -3.8 / 10.2 | -4.6 / 10.1 | -3.9 / 7.9 |
+| ox2_shuffle | oxy | null | -5.5 / 5.9 | -3.6 / 11.2 | -3.4 / 10.7 | -4.6 / 8.9 | -4.4 / 8.6 | -4.2 / 10.8 |
+| shuffle_control_esm0 | oct | null-esm | -4.5 / 10.7 | -5.3 / 4.1 | -4.9 / 9.7 | -4.9 / 7.6 | -4.9 / 8.2 | -4.4 / 11.2 |
+| ox2_shuffle_esm0 | oxy | null-esm | -5.5 / 10.3 | -5.1 / 10.9 | -5.7 / 13.7 | -4.7 / 12.2 | -5.3 / 8.8 | -5.2 / 7.5 |
+| bg33_1 | oct | boltzgen | -3.3 / 7.6 | -3.6 / 10.0 | -3.4 / 9.8 | -3.6 / 10.9 | -3.2 / 9.9 | -3.3 / 7.7 |
+| bg33_2 | oct | boltzgen | -3.4 / 10.0 | -2.9 / 12.9 | -4.4 / 11.1 | -2.9 / 8.0 | -3.3 / 9.5 | -2.9 / 13.8 |
+| bg33_3 | oct | boltzgen | -4.2 / 9.5 | -4.0 / 10.4 | -4.0 / 12.4 | -4.1 / 9.6 | -4.4 / 5.5 | -4.4 / 10.2 |
+| bg33_4 | oct | boltzgen | -4.5 / 10.6 | -4.1 / 4.6 | -4.1 / 9.8 | -4.2 / 5.3 | -4.0 / 12.5 | -4.4 / 12.6 |
+| bgox31_2 | oxy | boltzgen | -4.8 / 7.8 | -4.1 / 10.9 | -4.0 / 6.9 | -4.2 / 7.9 | -4.4 / 6.9 | -4.5 / 8.6 |
+| bgox31_3 | oxy | boltzgen | -5.2 / 7.2 | -5.1 / 6.4 | -5.3 / 11.1 | -4.7 / 10.9 | -4.8 / 11.7 | -4.8 / 9.7 |
+| bgox31_4 | oxy | boltzgen | -4.6 / 7.5 | -4.9 / 6.1 | -4.7 / 9.2 | -4.7 / 10.0 | -4.0 / 13.4 | -5.3 / 10.0 |
+| bgox31_5 | oxy | boltzgen | -4.6 / 5.9 | -5.0 / 8.0 | -4.5 / 5.6 | -5.5 / 7.3 | -5.2 / 9.5 | -4.6 / 6.2 |
 
-- **Vina does not reproduce cofolder packing in these shells.** Pose 1 sits 1.2–13.7 Å in-place
-  RMSD from the fold's own ligand placement, with a median around 9 Å: in 103 of 105 structures
+- **Vina does not reproduce cofolder packing in these shells.** Pose 1 sits 1.2–13.8 Å in-place
+  RMSD from the fold's own ligand placement, with a median around 9 Å: in 124 of 126 structures
   the independent pose search finds different packing than the cofolder did. The two agreements —
   `ox1_orig_f12` and `ox1_esm1_f8` in the OF3 cofold lane at 1.16 and 1.51 Å — are the oxybenzone
   structures whose OF3 cofolds sit tightest to Boltz in the cofold tables. This is the
@@ -557,7 +558,13 @@ site definition) put the ligand. Full per-pose data in `runs/<mol>/folds/metrics
   everywhere and engaged counts run 13–20. A Vina search 9 Å from the cofold placement still
   leaves the ligand packed against the chain — these shells are pockets, not grooves, for every
   peptide including the nulls.
-- **Scores say nothing separating.** Best scores span −2.3 to −6.6 kcal/mol across all 105, with
+- **The Boltz apo lane behaves like the other apo lanes** (added 2026-10-11, same superposed-site
+  box since Boltz apo folds carry no ligand): best scores −2.9 to −5.5, pose-1 RMSD 6.3–13.8 Å,
+  pose-1 wrapped fraction 0.71–1.00 and engaged 12–20. Its four extended-apo arms do not stand out
+  as worse-scoring — `ox1_orig_f12_bzapo` is −4.1 against −4.1 for its compact `ox3_orig_f8`
+  sibling — but it gives the lane's lowest wrapped fraction (0.71) and engaged count (12) of all
+  126 structures, the expected consequence of docking into a chain that has lost its shell.
+- **Scores say nothing separating.** Best scores span −2.3 to −6.6 kcal/mol across all 126, with
   no designed-vs-null gap in any lane. Consistent with "fold metrics cannot separate a design
   from its null"; the expectation is the same for these docks.
 - **The 9 MD legs run the OF3-cofold structures' OWN ligand placement** — the cofold pose,

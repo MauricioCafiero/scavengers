@@ -16,7 +16,7 @@ The reference SDF is built as:
   dock the same molecule for a given system) -- is rigidly aligned onto the
   perceived ligand. The reference then sits exactly where the cofolder put the
   ligand, which is what pose 0 measures against.
-- apo lanes (esmfold, of3apo, rf3apo): the fold has no ligand to perceive. The
+- apo lanes (esmfold, of3apo, rf3apo, boltzapo): the fold has no ligand to perceive. The
   peptide's OF3-cofold reference SDF is superposed onto the apo fold's C-alpha
   (resseq-matched Kabsch) and the transformed coordinates become the reference
   pose -- so a ligand-free fold still gets its search box centred on the part
@@ -67,7 +67,8 @@ LANES = [("openfold3", "o3cof", True),
          ("rf3", "rf3cof", True),
          ("of3apo", "o3apo", False),
          ("rf3apo", "rf3apo", False),
-         ("esmfold", "esmapo", False)]
+         ("esmfold", "esmapo", False),
+         ("boltzapo", "bzapo", False)]
 
 WATERS = {"HOH", "WAT", "NA", "CL"}
 
@@ -252,6 +253,11 @@ def main():
             done_names = {r["structure"] for r in summary_rows}
         else:
             done_names = set()
+        # Both tables are rewritten wholesale below, so BOTH must be preloaded: carrying only
+        # the summary forward (as this did until 2026-10-11) truncated the pose table to the
+        # structures of the latest pass.
+        if os.path.exists(pose_csv) and os.path.getsize(pose_csv):
+            pose_rows = list(csv.DictReader(open(pose_csv)))
         os.makedirs(stage, exist_ok=True)
 
         # Leg-ready cofold poses for the o3cof lane, independent of the docking
@@ -294,6 +300,11 @@ def main():
                             openfold3_ref[pep] = ref_sdf
                     else:
                         src_ref = openfold3_ref.get(pep)
+                        if src_ref is None:
+                            # the OF3 cofold was docked by an earlier pass, so this pass's
+                            # `continue` never staged it -- its SDF is still on disk
+                            staged = os.path.join(stage, "openfold3", f"{pep}_o3cof_ligand.sdf")
+                            src_ref = staged if os.path.exists(staged) else None
                         if src_ref is None or not os.path.exists(src_ref):
                             raise DockError(f"no staged OF3-cofold reference to build {name} from")
                         if pep not in cofold_cas_cache:
