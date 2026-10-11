@@ -29,8 +29,37 @@ collect_gnina.py              parses GNINA's output SDFs into one table
   poses_with_reference.sdf    10 poses: pose 0 is the PREDICTED pose, 1-9 are Vina's in rank order
 ```
 
-Eight structures: `s3_orig_f12`, `s3_esm2_f4`, `s2_esm2_control`, `orig_f12`, `shuffle_control`,
-`shuffle_control_esm0` from `peptidebuilder`, and `bg33_4`, `bg33_3` from `boltzgen_local`.
+Eight structures originally: `s3_orig_f12`, `s3_esm2_f4`, `s2_esm2_control`, `orig_f12`,
+`shuffle_control`, `shuffle_control_esm0` from `peptidebuilder`, and `bg33_4`, `bg33_3` from
+`boltzgen_local` — all of them Boltz / BoltzGen co-folds, and all already rescored.
+
+### The fold-lane bundles (added 2026-10-11)
+
+The fold campaign (see `FOLDS.md`) re-folded all 21 peptides with independent models and Vina-docked
+every result, and **none of those docks had been rescored**. This bundle now also carries them, named
+`<peptide>_<lane>`:
+
+| lane suffix | what the receptor is | n (oct + oxy) |
+|---|---|---|
+| `_o3cof` | OpenFold3 co-fold (sequence + ligand) | 10 + 11 |
+| `_rf3cof` | RF3 co-fold | 10 + 11 |
+| `_o3apo` | OpenFold3 apo (sequence only) | 10 + 11 |
+| `_rf3apo` | RF3 apo | 10 + 11 |
+| `_bzapo` | Boltz-2 apo — the model that made the original co-folds, asked without its ligand | 10 + 11 |
+
+105 structures, 1,050 poses. **ESMFold's 21 docks are deliberately excluded**: inverse-folding
+perplexity puts that lane at the no-information limit (mean 20.4, and 7 of the 11 zero-information
+structures across the campaign), with most of its structures extended and free of secondary
+structure, so rescoring poses docked into them would not mean anything.
+
+The question these ask is the fold-pipeline one rather than the pose-ranking one: given the same
+peptide folded five different ways, does the CNN prefer poses in the co-folded shells over the apo
+ones, and does it separate designs from their nulls where Vina's score could not.
+
+**`receptor_h.pdb` is present for only 13 of the 105** — the `_o3cof` structures that went on to
+become MD legs and so have a `protein_fixed.pdb`. The other 92 ship with `receptor.pdb` alone, so
+run `score_only` and `minimize` on them and skip the `receptor_h` pass (or generate the protonated
+receptors first with `omd prep-protein`).
 
 Every pose in `poses_with_reference.sdf` carries `structure`, `pose`, `is_reference`,
 `rmsd_to_reference_A` and `vina_score` as SDF tags, so a scored output can be joined without
