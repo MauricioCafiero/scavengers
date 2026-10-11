@@ -19,7 +19,7 @@ designed sequence.
 
 | Lane | Model | Input | Where | Question |
 |---|---|---|---|---|
-| ESMFold | esmfold_v1 (3B) | sequence only | Modal A10G | is the designed fold a fold **without the ligand**? |
+| ESMFold | esmfold_v1 (3B) | sequence only | Modal A10G | is the designed fold a fold **without the ligand**? — ⚠ **retired from downstream analysis 2026-10-11**, see below |
 | OpenFold3 | OF3 (+ ligand) | sequence + SMILES | Modal A10G | does an independent cofolder place the ligand like BoltzGen did? |
 | RF3 | RosettaFold3 | sequence + SMILES | Modal A10G | second opinion on the cofold (all 21 landed 2026-10-09) |
 | OpenFold3 apo | OF3, apo | sequence only | Modal A10G | is the compact apo fold real or ESMFold-specific? (all 21 landed 2026-10-09) |
@@ -182,6 +182,33 @@ ligand (`s2_esm2_control`, `shuffle_control_esm0`, `ox2_shuffle_esm0`, `bg33_3/4
 `bgox31_2/3`) reaches that structure by sequence physics alone. Whether ligand-governed folds are
 fragile in dynamics or simply expensive-to-form is the question the OpenFold3 cofold lane asks
 next, with the ligand present and by an independent mechanism.
+
+### ESMFold's standing, after the inverse-folding check (2026-10-11)
+
+**ESMFold is the least reliable lane of the six and is no longer used downstream.** Scoring every
+lane's structures with a PDB-trained inverse-folding model (the `pepgraph` repo,
+`scripts/compare_lanes.py`: perplexity = the effective number of residue types the geometry is
+choosing between at each position, 21 = no information) puts it last by a wide margin — mean 20.4
+against 10.7–15.7 for the other five lanes, i.e. at the no-information limit. It owns **7 of the
+11** structures in 202 whose backbone carries no sequence-order information at all (z ≤ 0), and
+**6 of those have exactly zero residue contacts**. For these ligand-dependent designs it emits
+extended chains with no secondary structure, so a measurement that starts from an ESMFold
+structure is measuring a model failure rather than an apo state.
+
+Consequence: the `morph` repo's apo → co-fold strain and surface-patch analysis dropped it on
+2026-10-11. That analysis originally morphed ESMFold, OF3-apo and RF3-apo all to the one Boltz
+co-fold, because no Boltz apo fold existed; now that every co-folder has an apo lane it runs three
+model-matched pairs instead (Boltz apo → Boltz, OF3 apo → OF3, RF3 apo → RF3), where the apo→bound
+difference is the ligand's effect rather than a change of model. ESMFold has no co-fold of its own,
+so it has no matched pair — and the perplexity result makes that a reason to retire it rather than
+a gap to fill. The superseded set is kept runnable at `morph`'s `--set legacy`.
+
+**What stays true from this lane.** Its folds and their docking are committed and unchanged, and
+the collapse it exposed is still what prompted the apo cofolder lanes. Note also that ESMFold is
+not alone on every arm: Boltz-2 apo independently extends `orig_f12`, `ox1_orig_f12`,
+`ox1_esm1_f8` and `ox2_shuffle` (see the Boltz apo section), so on those the extended state is the
+originating model's read too — ESMFold simply extends further, and everywhere, including the
+seventeen sequences three other models fold compact.
 
 ## OpenFold3 results (all 21 landed 2026-10-09; full data in `runs/<mol>/folds/metrics/openfold3.csv`)
 
@@ -491,6 +518,10 @@ independent cofolder reproduces Boltz's packing and ligand engagement):
   designed and null glycine-rich arms live at 4–10 Å from every reference in every model, the
   BoltzGen arms are pinned sub-Å, and the esm2-variants sit between, with the two cofolders
   disagreeing on which packing they land in.
+- **ESMFold is retired from downstream analysis** (2026-10-11): last of six lanes on
+  inverse-folding perplexity (20.4, the no-information limit), owner of 7 of the 11
+  zero-information structures, 6 of them with zero contacts. Its rows stay in the tables above as
+  the lane that exposed the apo collapse; nothing new should be built on them.
 - **Fold metrics alone cannot separate a design from its null.** Designed and plain-null rows look
   alike in every grid cell — the rubric for what to pursue has to come from binding: MM/GBSA,
   ligand retention and contacts against those same null rows.
