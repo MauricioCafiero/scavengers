@@ -6,6 +6,7 @@
 #   LANE=openfold3 code/fold_batch.sh               # OpenFold3: protein+ligand cofold on the A10G
 #   LANE=of3apo code/fold_batch.sh                  # OpenFold3: protein-only (apo) query
 #   LANE=rf3 code/fold_batch.sh                     # RosettaFold3 cofold, second opinion
+#   LANE=boltzapo code/fold_batch.sh                # Boltz-2 apo, local MPS (no Modal)
 #   MOL=oxybenzone LANE=esmfold code/fold_batch.sh  # restrict to one molecule's peptide set
 #
 # Resumable: an entry whose output already exists is skipped, so re-running after an interruption
@@ -23,6 +24,9 @@
 # job <pep>_apo so it cannot collide with the cofold lane's outputs. Requires the fold repo's
 # guards relaxed to allow one-chain queries (done 2026-10-09). rf3apo is the same for RF3 -- the
 # app itself prefixes outputs with rf3_, so its job dir is outputs/rf3_<pep>_apo.
+# boltzapo folds the SEQUENCE: line alone with the same local Boltz-2 that made the co-folds
+# (boltz_env.run_boltz, msa: empty as in runs/<mol>/boltz/*.yaml, no ligand, no hints). It runs on
+# this Mac, so no Modal; the yaml, log and Boltz's raw output stay under boltzapo/raw/.
 set -u
 REPO=${0:A:h:h}
 cd $REPO
@@ -30,8 +34,8 @@ FOLD=${FOLD_ROOT:-$HOME/python_mac/fold}
 LANE=${LANE:-esmfold}
 
 case $LANE in
-    esmfold|openfold3|rf3|of3apo|rf3apo) ;;
-    *) print -u2 "LANE must be esmfold, openfold3, rf3, of3apo or rf3apo"; exit 1 ;;
+    esmfold|openfold3|rf3|of3apo|rf3apo|boltzapo) ;;
+    *) print -u2 "LANE must be esmfold, openfold3, rf3, of3apo, rf3apo or boltzapo"; exit 1 ;;
 esac
 
 for f in runs/*/folds/inputs/*.txt(N); do
@@ -48,6 +52,28 @@ for f in runs/*/folds/inputs/*.txt(N); do
         rc=$?
         echo "--- $LANE $mol/$name exit $rc ($(date '+%H:%M:%S'))" >> $log
         [[ $rc -eq 0 && -s $out ]] || echo "FAILED $mol/$name (exit $rc) -- see $log" | tee -a $log
+    elif [[ $LANE == boltzapo ]]; then
+        out=$REPO/runs/$mol/folds/boltzapo/$name.pdb
+        [[ -e $out ]] && { echo "skip $mol/$name (exists)" >> $log; continue; }
+        raw=$REPO/runs/$mol/folds/boltzapo/raw
+        mkdir -p $raw
+        seq=$(awk '/^SEQUENCE:/ {print $2}' $f)
+        printf 'version: 1\nsequences:\n  - protein:\n      id: A\n      sequence: %s\n      msa: empty\n' \
+            $seq > $raw/$name.yaml
+        caffeinate -i .venv/bin/python -c "
+import sys; sys.path.insert(0, 'code')
+from boltz_env import run_boltz
+sys.exit(run_boltz('$raw/$name.yaml', '$raw', '$raw/$name.log'))" >> $log 2>&1
+        rc=$?
+        cif=$raw/boltz_results_$name/predictions/$name/${name}_model_0.cif
+        if [[ -f $cif ]]; then
+            ( cd $FOLD && uv run python -m fold.analyze cif-to-pdb $cif --out-path $out ) >> $log 2>&1
+            echo "--- $LANE $mol/$name exit $rc, converted ($(date '+%H:%M:%S'))" >> $log
+            [[ -s $out ]] || echo "CONVERT FAILED $mol/$name -- cif found but pdb empty, see $log" \
+                | tee -a $log
+        else
+            echo "NO CIF for $mol/$name (boltz exit $rc) -- see $raw/$name.log" | tee -a $log
+        fi
     elif [[ $LANE == of3apo || $LANE == rf3apo ]]; then
         out=$REPO/runs/$mol/folds/$LANE/$name.pdb
         [[ -e $out ]] && { echo "skip $mol/$name (exists)" >> $log; continue; }
