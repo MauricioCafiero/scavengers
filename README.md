@@ -29,12 +29,18 @@ mean, and where it goes wrong.
 - [What each file does](#what-each-file-does)
 - [Where output goes](#where-output-goes)
 - [Results](#results) — summary; the full record is in [RESULTS.md](RESULTS.md)
-- The independent fold-method check (the same peptides folded by five independent fold lanes —
-  ESMFold apo, OpenFold3 and RosettaFold3 with and without the ligand — scored for geometry and
-  interface confidence) is [FOLDS.md](FOLDS.md); it also holds the cofold campaign: 21 designs
-  re-folded cofold-style by OpenFold3 and RF3, docked (`dock_folds.py`), and run as 20 ns dynamics
-  legs (`*_o3cof`, one at a time on Modal) against their Boltz co-fold baselines, with the
-  shuffle-null replication of the same flow
+- The independent fold-method check (the same peptides folded by six independent fold lanes —
+  OpenFold3, RosettaFold3 and Boltz-2 with and without the ligand, plus ESMFold apo, now retired —
+  scored for geometry and interface confidence) is [FOLDS.md](FOLDS.md); it also holds the cofold
+  campaign: 21 designs re-folded cofold-style by OpenFold3 and RF3, docked (`dock_folds.py`), and
+  run as 20 ns dynamics legs (`*_o3cof`, one at a time on Modal) against their Boltz co-fold
+  baselines, with the shuffle-null replication of the same flow
+- Two sibling repos finish the fold analysis and are part of the flow, not optional extras —
+  **`~/python_mac/pepgraph`** scores every lane's backbone against its own sequence
+  (inverse-folding perplexity and a shuffle z, which is what retired the ESMFold lane) and
+  **`~/python_mac/morph`** measures apo → co-fold strain and charged/hydrophobic patch changes for
+  each model-matched pair. A new fold lane means extending both; see CLAUDE.md's "Downstream
+  analysis repos"
 - [What the metrics mean](#what-the-metrics-mean)
 - [Traps](#traps)
 - [Limitations](#limitations)

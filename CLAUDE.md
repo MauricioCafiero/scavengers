@@ -294,6 +294,36 @@ results.
   (argmin). It becomes `<struct>_dock<K>` via `run_dock_pose_md.sh STRUCT=<struct> POSE=<K>`; if the pick is
   pose 1 it coincides with the Vina-p1 leg, so no new leg. This feeds the `gnina_p*` REFERENCE fields.
 
+## Downstream analysis repos (`pepgraph`, `morph`) — pipeline steps, not side projects
+
+Two sibling repos consume `runs/<mol>/folds/`. **A new fold lane is not finished until both have
+been extended and re-run**, the same way a leg is not done until `protein_stability.csv` has its
+row. Neither is discoverable from this repo, so they are listed here.
+
+**`~/python_mac/pepgraph`** — inverse-folding perplexity per lane: given a backbone, how much does
+its geometry want the sequence it was given (21 = no information), plus `z` against 20 shuffles of
+the same sequence (`z ≤ 0` = the backbone carries no residue-order information). Add the lane to
+`LANES` in `scripts/compare_lanes.py`, then
+`.venv/bin/python scripts/compare_lanes.py --runs ~/python_mac/peptidebuilder/runs --lanes <lane>`.
+**Pass `--lanes`** — a full run re-scores all 202 structures and, because the shuffles come off one
+RNG stream consumed in structure order, re-draws every other lane's z and moves it by a few tenths.
+Perplexity is deterministic; z is not. Its `RESULTS.md` and `outputs/inverse/*.json` are
+**gitignored**, so a rerun that rewrites them cannot be recovered from git — copy them aside first.
+
+**`~/python_mac/morph`** — apo → co-fold morph movies, MM strain (ff14SB + GBn2) and
+charged/hydrophobic surface-patch changes. `$PY code/run_batch.py` with the conda `openmm-md`
+python; `--set matched` (the default) runs the model-matched pairs
+`boltzapo→boltz` / `of3apo→openfold3` / `rf3apo→rf3`, so a ΔE is the ligand's effect inside one
+model. A new apo lane means a new pair in `MATCHED_PAIRS`. `--set legacy` reruns the superseded
+all-apo-lanes→one-Boltz-co-fold analysis into `results/legacy/`; nothing should be concluded from
+it, and ESMFold exists only there.
+
+**ESMFold is retired from downstream analysis (2026-10-11)** on pepgraph's evidence: last of six
+lanes at mean perplexity 20.4 — the no-information limit — owning 7 of the campaign's 11
+zero-information structures, 6 of those with exactly zero residue contacts. Its folds and docks stay
+committed as the lane that exposed the apo collapse; do not build anything new on them, and do not
+bundle its docks for GNINA.
+
 ## Reporting results
 
 **Lead with MM/GBSA free energy and ligand retention, grouped by pipeline.** That is the comparison that

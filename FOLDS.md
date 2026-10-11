@@ -89,7 +89,14 @@ converts to pdb through the same `fold.analyze cif-to-pdb` the Modal lanes use. 
 OF3 and RF3 disagree with ESMFold about the apo state, neither of them is the model whose answer
 the co-folds — and therefore every MD leg — were built on.
 
-**What every lane feeds.** `code/folds_metrics.py <lane>` reads the converted PDB against the leg's
+**What every lane feeds, downstream of this repo.** Three consumers, all of which must be
+extended when a lane is added (see CLAUDE.md's "Downstream analysis repos"): `code/dock_folds.py`
+here (Vina into every fold, then `make_gnina_bundle.py` for the CNN rescoring packet),
+`~/python_mac/pepgraph` (inverse-folding perplexity and z per lane — add the lane to its `LANES`
+and run with `--lanes <lane>`, never a full re-run), and `~/python_mac/morph` (apo → co-fold strain
+and surface patches — add the pair to its `MATCHED_PAIRS`).
+
+**What every lane feeds here.** `code/folds_metrics.py <lane>` reads the converted PDB against the leg's
 own files: helical/beta fraction and hbond counts from `check_fold.secondary_structure`, Cα Rg,
 Cα RMSD against the co-fold's peptide (Kabsch superposition, `protein_fixed.pdb`), mean pLDDT, and
 — for the two cofold lanes — `check_fold.geometry()` on fold *and* on `system/complex.pdb` (the
