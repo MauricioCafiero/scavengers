@@ -56,10 +56,12 @@ The question these ask is the fold-pipeline one rather than the pose-ranking one
 peptide folded five different ways, does the CNN prefer poses in the co-folded shells over the apo
 ones, and does it separate designs from their nulls where Vina's score could not.
 
-**`receptor_h.pdb` is present for only 13 of the 105** — the `_o3cof` structures that went on to
-become MD legs and so have a `protein_fixed.pdb`. The other 92 ship with `receptor.pdb` alone, so
-run `score_only` and `minimize` on them and skip the `receptor_h` pass (or generate the protonated
-receptors first with `omd prep-protein`).
+**All 105 carry both receptors**, so every mode runs on every structure. Thirteen of them — the
+`_o3cof` structures that became MD legs — reuse that leg's own `protein_fixed.pdb`; the other 92
+were protonated from `receptor.pdb` with the same `omd prep-protein` the MD legs use (pH 7, no
+waters, residue count unchanged). `make_gnina_bundle.py` now prepares `receptor_h.pdb` whenever no
+MD leg supplies one, rather than leaving it out, because it is the receptor this side usually
+pulls.
 
 Every pose in `poses_with_reference.sdf` carries `structure`, `pose`, `is_reference`,
 `rmsd_to_reference_A` and `vina_score` as SDF tags, so a scored output can be joined without

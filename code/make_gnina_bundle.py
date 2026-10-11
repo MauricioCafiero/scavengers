@@ -31,6 +31,7 @@ import argparse
 import csv
 import os
 import shutil
+import subprocess
 import sys
 
 import numpy as np
@@ -113,15 +114,24 @@ def build(structure, dock_root, out_root):
     dest = os.path.join(out_root, structure)
     os.makedirs(dest, exist_ok=True)
     shutil.copy2(os.path.join(work, f"{structure}_protein.pdb"), os.path.join(dest, "receptor.pdb"))
-    # receptor_h.pdb (prep-protein, with H) is optional. Look in this run's own md/ first (out_root is
-    # runs/<system>/gnina, so its sibling md/ is runs/<system>/md), then the octinoxate/boltzgen roots.
+    # receptor_h.pdb (prep-protein, with H) is the receptor the GNINA side usually scores against,
+    # so it is NOT optional: reuse the MD leg's protein_fixed.pdb when the structure has one
+    # (out_root is runs/<system>/gnina, so its sibling md/ is runs/<system>/md), and otherwise
+    # protonate the receptor here. A fold-lane structure has no MD leg, and shipping it without
+    # receptor_h.pdb left 92 of 105 bundles unscorable in the mode that gets pulled (2026-10-11).
+    rec_h = os.path.join(dest, "receptor_h.pdb")
     for md_root in (os.path.join(os.path.dirname(out_root), "md"),
                     os.path.join(REPO, "runs", "octinoxate", "md"),
                     os.path.expanduser("~/python_mac/boltzgen_local/md")):
         h = os.path.join(md_root, structure, "protein_fixed.pdb")
         if os.path.exists(h):
-            shutil.copy2(h, os.path.join(dest, "receptor_h.pdb"))
+            shutil.copy2(h, rec_h)
             break
+    else:
+        omd = os.path.join(os.path.expanduser(os.environ.get("OMD_ENV",
+                           "~/miniforge3/envs/openmm-md")), "bin", "omd")
+        subprocess.run([omd, "prep-protein", "--pdb", os.path.join(dest, "receptor.pdb"),
+                        "--out", rec_h], check=True, capture_output=True)
 
     autos = ref.GetSubstructMatches(ref, uniquify=False, useChirality=False) or \
         [tuple(range(ref.GetNumAtoms()))]
