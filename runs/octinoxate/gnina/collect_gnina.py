@@ -26,7 +26,8 @@ def read_sdf_tags(path):
 
     Deliberately not RDKit: this has to run on whatever machine GNINA ran on, and no chemistry is
     needed to read the score tags. Records are split on the '$$$$' terminator, the name is the first
-    line of each record, and a '> <tag>' line is followed by its value on the next non-blank line.
+    line of each record, and a '> <tag>' line is followed by its value on the next non-blank line,
+    unless that line is itself the next tag (a blank value).
     """
     out = []
     for chunk in open(path).read().split("$$$$"):
@@ -44,9 +45,14 @@ def read_sdf_tags(path):
                 j = i + 1
                 while j < len(lines) and lines[j].strip() == "":
                     j += 1
-                if j < len(lines):
+                # A blank value (pose 0's vina_score) is followed straight by the next tag: record
+                # it as blank and re-read that line as a tag, rather than taking it as the value.
+                if j < len(lines) and not lines[j].lstrip().startswith(">"):
                     props[tag] = lines[j].strip()
-                i = j
+                    i = j
+                else:
+                    props[tag] = ""
+                    i = j - 1
             i += 1
         out.append((name, props))
     return out

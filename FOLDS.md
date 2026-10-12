@@ -612,6 +612,77 @@ site definition) put the ligand. Full per-pose data in `runs/<mol>/folds/metrics
   `runs/<mol>/folds/dock_stage/openfold3/<pep>_o3cof_ligand_cofold.sdf` (the fold's perceived
   ligand with template bond orders, template atom order).
 
+## GNINA rescoring of the fold-lane docks (105 structures, all three passes, retrieved 2026-10-12)
+
+The 105 non-ESMFold docks (bundled 2026-10-11, `runs/<mol>/gnina/README.md`) were rescored on the
+GNINA side (gnina v1.3.3, CPU) and committed to `gnina_local` under `rescoring/fold_lane/<mol>/`.
+Here they sit at `runs/<mol>/gnina/fold_lane/results_<mode>/` — a separate directory beside each
+molecule's co-fold `results_<mode>/`, so those committed tables were not rewritten — holding every
+structure's `*_scored.sdf` and `.log`, `gnina_version.txt`, and the `gnina_scores.csv` /
+`collect.txt` that `collect_gnina.py` writes from them (500 octinoxate and 550 oxybenzone poses per
+pass). All 105 are present in all three passes.
+
+**Per structure, `receptor_score_only`: pose-0 CNNaffinity (its rank of 10) · the GNINA-pick docked
+pose.** Pose 0 is the cofolder's own ligand placement in the cofold lanes and the superposed OF3-cofold
+site pose in the apo lanes. The pick is the max-CNNaffinity pose among Vina's 1–9; `pA/B/C` means
+score_only / receptor_h / minimize disagree, and **bold** marks a pick that is the same in all three
+passes *and* is the argmin of `minimizedAffinity` in the minimize pass — the full CLAUDE.md criterion,
+which only 15 of 105 meet (77 are consistent across the passes on CNNaffinity alone).
+
+| peptide | mol | kind | o3cof | rf3cof | o3apo | rf3apo | bzapo |
+|---|---|---|---|---|---|---|---|
+| orig_f12 | oct | designed | 4.01 (3) · p1 | 4.24 (6) · p5/5/2 | 1.72 (10) · p8 | 2.44 (10) · p9 | 4.29 (1) · p7/7/8 |
+| s2_esm2_control | oct | esm2-variant | 4.27 (5) · p5 | 4.00 (10) · p4/4/9 | 2.55 (10) · p8 | 4.31 (8) · **p2** | 2.71 (10) · p6 |
+| s3_esm2_f4 | oct | esm2-variant | 4.67 (2) · p8 | 4.92 (6) · **p3** | 1.95 (10) · p8 | 4.59 (1) · p9 | 1.88 (10) · p4 |
+| s3_orig_f12 | oct | designed | 4.74 (1) · p6 | 3.79 (4) · p5 | 1.79 (10) · p3 | 4.85 (1) · p9 | 3.34 (10) · p9/9/5 |
+| shuffle_control | oct | null | 4.01 (1) · p8 | 4.30 (1) · p7/7/4 | 1.56 (10) · p1 | 3.91 (10) · p4 | 2.83 (10) · p6 |
+| shuffle_control_esm0 | oct | null-esm | 4.82 (1) · **p3** | 4.30 (1) · p3/8/4 | 2.92 (10) · p9 | 2.36 (10) · p7/7/1 | 3.89 (8) · p3 |
+| bg33_1 | oct | boltzgen | 4.98 (3) · p6 | 4.38 (7) · p8 | 4.60 (7) · p8 | 1.71 (10) · **p2** | 1.95 (10) · **p7** |
+| bg33_2 | oct | boltzgen | 4.81 (2) · **p1** | 5.14 (1) · **p8** | 4.33 (7) · p4/4/5 | 4.33 (7) · **p3** | 1.82 (10) · **p2** |
+| bg33_3 | oct | boltzgen | 3.79 (7) · p6 | 4.14 (2) · p5 | 1.28 (10) · **p2** | 1.59 (10) · p2/4/2 | 1.31 (10) · p4 |
+| bg33_4 | oct | boltzgen | 5.00 (1) · p7 | 4.53 (4) · **p4** | 4.46 (7) · p2/2/8 | 4.61 (3) · p2 | 2.41 (10) · **p9** |
+| ox1_esm1_f8 | oxy | esm2-variant | 3.69 (5) · p2 | 3.79 (6) · p4/5/4 | 1.06 (10) · p5 | 3.21 (10) · p3 | 1.00 (10) · p7 |
+| ox1_orig_f12 | oxy | designed | 3.37 (2) · p4 | 3.75 (1) · **p1** | 1.10 (10) · p7 | 1.58 (10) · p4 | 2.77 (9) · p9 |
+| ox2_esm1_f8 | oxy | esm2-variant | 3.91 (4) · p3 | 3.90 (4) · p5 | 2.17 (10) · p5/5/7 | 2.26 (10) · p6/8/6 | 2.08 (10) · p6 |
+| ox2_orig_f8 | oxy | designed | 3.57 (6) · p2/2/6 | 3.64 (2) · p7 | 1.12 (10) · p9 | 3.45 (2) · p8 | 3.15 (10) · p2/9/7 |
+| ox2_shuffle | oxy | null | 3.51 (4) · **p1** | 3.49 (2) · p2 | 2.22 (10) · p9 | 1.12 (10) · p1/1/4 | 1.15 (10) · p5 |
+| ox2_shuffle_esm0 | oxy | null-esm | 4.05 (5) · p6/4/6 | 4.04 (9) · p1/1/2 | 2.83 (10) · p4/4/6 | 0.89 (10) · p9 | 3.14 (10) · p4 |
+| ox3_orig_f8 | oxy | designed | 3.45 (2) · p4 | 3.59 (2) · p8/8/1 | 1.00 (10) · p8 | 2.12 (10) · p4/4/9 | 2.58 (10) · p7 |
+| bgox31_2 | oxy | boltzgen | 4.35 (3) · p1/9/1 | 4.45 (3) · p3/4/3 | 3.15 (10) · p9 | 3.79 (7) · p3/3/8 | 2.42 (10) · p3/9/9 |
+| bgox31_3 | oxy | boltzgen | 3.36 (4) · p4 | 4.44 (1) · **p1** | 1.24 (10) · p7 | 1.03 (10) · p5/5/1 | 0.91 (10) · p7 |
+| bgox31_4 | oxy | boltzgen | 4.07 (1) · p7 | 3.42 (8) · p3/3/6 | 2.56 (10) · p6 | 3.13 (8) · p7 | 2.19 (10) · p9 |
+| bgox31_5 | oxy | boltzgen | 4.01 (7) · p7 | 4.03 (4) · p8 | 1.90 (10) · p8 | 3.14 (1) · p4/5/8 | 2.09 (10) · p2 |
+
+- **The CNN likes the cofolder's placement better than Vina did, but only as given.** In the two
+  cofold lanes pose 0 ranks median 3rd of 10 on CNNaffinity under score_only (1st in 10 of 42,
+  top three in 22), where Vina's scoring put the predicted pose 6th–9th in every original co-fold.
+  After `--minimize` that advantage is gone: cofold pose 0 drops to median 6th (1st in 4 of 42),
+  the same as the apo lanes.
+- **Apo-lane pose 0 is a clash, not a CNN verdict.** The OF3-cofold pose carried onto an apo fold by
+  Cα superposition overlaps the apo chain: its Vina-term affinity under score_only is positive in
+  20/21 `o3apo`, 15/21 `rf3apo` and 21/21 `bzapo` structures (medians +92, +14, +90 kcal/mol, against
+  −1.4 and −1.1 for the cofold lanes), so it ranks 10th of 10 almost everywhere (median 10, 1st in 4
+  of 63). Minimizing relieves every clash but one each in `o3apo` and `rf3apo` and lifts apo pose-0 CNNaffinity from
+  2.3–2.9 to 3.8, level with the cofold lanes' 3.9. Read apo pose-0 ranks as the site definition
+  failing to fit, nothing more.
+- **Best-pose CNNaffinity does not separate cofold from apo shells, or designs from nulls.** The mean
+  of each structure's best CNNaffinity is 4.42 over the cofold lanes and 4.31 over the apo lanes;
+  in the OF3 cofold lane designs + esm-variants average 4.31, nulls 4.26, BoltzGen 4.59; across the five
+  lanes the design-vs-null gap is within 0.2 either way (designs ahead in two lanes, behind in three). BoltzGen's shells score highest in every lane by a few tenths,
+  and octinoxate runs ~0.6 above oxybenzone throughout (a ligand-size effect on an affinity
+  regressor). Same conclusion as Vina's scores and the inexpensive fold metrics: a static score
+  of a static shell does not tell a design from its null.
+- **No MD has been queued from these picks** (2026-10-12). Should GNINA-pick legs be wanted, the
+  bold cells are the ones that meet the full pick criterion; for the 13 `_o3cof` structures with
+  cofold-pose MD legs, a pick leg would be `run_dock_pose_md.sh STRUCT=<pep>_o3cof POSE=<K>`.
+
+**Parser fix found doing this.** `collect_gnina.py` read a blank tag value (pose 0 has no
+`vina_score`) by skipping to the next non-blank line, which is the next tag, so it swallowed
+`minimizedAffinity` and every pose 0 came out with that column empty. Fixed 2026-10-12 and the
+fold-lane tables built with the fix. The previously committed co-fold `gnina_scores.csv` tables
+(octinoxate, `bg33_1_bg33_2`, oxybenzone) still carry the blank — their CNN columns are unaffected,
+and they have not been regenerated.
+
 ## What "interesting" means for the follow-up
 
 Docking/MMGBSA legs on a *re-folded* structure run only if the inexpensive metrics above show

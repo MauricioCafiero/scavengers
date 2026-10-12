@@ -63,6 +63,10 @@ waters, residue count unchanged). `make_gnina_bundle.py` now prepares `receptor_
 MD leg supplies one, rather than leaving it out, because it is the receptor this side usually
 pulls.
 
+**Results retrieved 2026-10-12**, all three passes for all 105: `runs/<mol>/gnina/fold_lane/results_<mode>/`
+(mirroring `gnina_local`'s `rescoring/fold_lane/<mol>/`), kept apart from the co-fold `results_<mode>/`
+tables. The read-out is in `FOLDS.md`, "GNINA rescoring of the fold-lane docks".
+
 Every pose in `poses_with_reference.sdf` carries `structure`, `pose`, `is_reference`,
 `rmsd_to_reference_A` and `vina_score` as SDF tags, so a scored output can be joined without
 reference to anything else.
