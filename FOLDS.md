@@ -1642,6 +1642,21 @@ Eleven legs, each as `<pep>_rf3cof`: `ox1_orig_f12`, `ox1_esm1_f8`, `ox2_orig_f8
 |---|---|---|---|
 | `ox1_esm1_f8` | −10.70 (75.0%) | **−12.12 (35.2%)** | **−1.42 stronger**; residence is a cutoff artefact, see below |
 
+**Prediction for `ox1_orig_f12_rf3cof`, 2026-10-14 20:52, tail running, no ΔG read.** Both
+pre-dynamics measures favour OF3 here — pepgraph px **7.09** against RF3's 14.26, and enclosure
+0.81/17 engaged at 5.7 Å against 0.55/13 at 6.1 Å — yet OF3's leg is the weakest designed-shell
+cell on this ligand (−3.96 at 20.5%, bouncing), against a −10.31 (49.1%) Boltz baseline.
+
+**Stated expectation: RF3 beats −3.96, somewhere around −8 to −14.** The reasoning is a floor
+effect rather than anything about RF3: OF3's cell is near the bottom of the campaign, and the
+precedent is octinoxate's `orig_f12`, whose equally poor OF3 cell (−5.90) RF3 beat by 13.6.
+Low confidence — the one oxybenzone pair so far (`ox1_esm1_f8`) went the *other* way by 5.8, so
+RF3-beats-OF3 is 4/4 on octinoxate and 0/1 here.
+
+If RF3 wins, **both static measures agreed and both were wrong on the same cell**, which is a
+sharper negative than either has produced alone. If OF3 holds its lead, that is the first
+oxybenzone evidence that the ligand, not the re-folder, decides which lane wins.
+
 ### Oxybenzone — RF3 co-folds, window convergence
 
 | leg | 5 ns | 10 ns | 15 ns | 20 ns |
