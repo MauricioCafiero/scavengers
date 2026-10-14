@@ -1641,6 +1641,7 @@ Eleven legs, each as `<pep>_rf3cof`: `ox1_orig_f12`, `ox1_esm1_f8`, `ox2_orig_f8
 | peptide | Boltz co-fold ΔG (ret.) | RF3 re-fold ΔG (ret.) | Δ (refold − Boltz) |
 |---|---|---|---|
 | `ox1_esm1_f8` | −10.70 (75.0%) | **−12.12 (35.2%)** | **−1.42 stronger**; residence is a cutoff artefact, see below |
+| `ox1_orig_f12` | −10.31 (49.1%) | **−12.27 (89.1%)** | **−1.96 stronger**, residence up; OF3's cell read −3.96 at 20.5%, so RF3 better by 8.3 |
 
 **Prediction for `ox1_orig_f12_rf3cof`, 2026-10-14 20:52, tail running, no ΔG read.** Both
 pre-dynamics measures favour OF3 here — pepgraph px **7.09** against RF3's 14.26, and enclosure
@@ -1657,23 +1658,59 @@ If RF3 wins, **both static measures agreed and both were wrong on the same cell*
 sharper negative than either has produced alone. If OF3 holds its lead, that is the first
 oxybenzone evidence that the ligand, not the re-folder, decides which lane wins.
 
+**OUTCOME (20:58): prediction correct and in range.** `ox1_orig_f12_rf3cof` reads **−12.27 at 89.1%
+residence**, 11 released frames in 8 episodes (longest 30 ps, 27% late), inside the stated −8 to −14
+window. It beats OF3's −3.96 by **8.3** and its own Boltz baseline by **1.96**. Windows strengthen
+(−10.28 → −12.27), slide 1.55 Å, pairs **29/45** with **0 dead slots** against OF3's 15/45.
+
+**Both pre-dynamics measures agreed on this cell and both were wrong.** pepgraph put OF3's backbone
+among its best anywhere (px 7.09 vs RF3's 14.26) and the static pose read favoured OF3 on every
+column (0.81/17 at 5.7 Å vs 0.55/13 at 6.1 Å). OF3's leg is the weakest designed-shell cell on this
+ligand. That is a sharper negative than either measure produced alone, because they are independent
+of each other and concordant here.
+
+RF3-beats-OF3 now stands at **5 of 6** (4/4 octinoxate, 1/2 oxybenzone), with `ox1_esm1_f8` the lone
+exception:
+
+| peptide | OF3 | RF3 | RF3 − OF3 |
+|---|---|---|---|
+| `orig_f12` (oct) | −5.90 | −19.51 | −13.6 |
+| `ox1_orig_f12` (oxy) | −3.96 | −12.27 | −8.3 |
+| `s2_esm2_control` (oct) | −10.21 | −14.98 | −4.8 |
+| `s3_esm2_f4` (oct) | −13.76 | −16.18 | −2.4 |
+| `s3_orig_f12` (oct) | −10.10 | −12.10 | −2.0 |
+| `ox1_esm1_f8` (oxy) | −17.95 | −12.12 | **+5.8** |
+
+The one regularity that survives all six is **floor-dependence, not ligand or lane**: the two cells
+where OF3 read worst (−3.96, −5.90) are where RF3 gains most (8.3, 13.6), and the cell where OF3
+read best (−17.95) is the only one it wins. Stated as a reading on six pairs with no replicates —
+and note it is close to a regression-to-the-mean artefact, which is the first thing to rule out if it
+holds up: RF3's six cells span −12.10 to −19.51 while OF3's span −3.96 to −17.95, so RF3 may simply
+be the more consistent lane rather than the better one.
+
+One caveat on this cell: the peptide moves a lot (Cα **8.4 Å** final, 10.9 Å max, Rg 7.9 → 8.7), so
+like `orig_f12_rf3cof` this is a ligand held by a fold that is itself rearranging.
+
 ### Oxybenzone — RF3 co-folds, window convergence
 
 | leg | 5 ns | 10 ns | 15 ns | 20 ns |
 |---|---|---|---|---|
 | `ox1_esm1_f8_rf3cof` | −8.77 | −9.95 | −11.47 | **−12.12** |
+| `ox1_orig_f12_rf3cof` | −10.28 | −10.84 | −12.40 | **−12.27** |
 
 ### Oxybenzone — RF3 co-folds, residence and release
 
 | leg | residence | released frames | episodes | longest | late |
 |---|---|---|---|---|---|
 | `ox1_esm1_f8_rf3cof` | 35.2% | 8 (0.4%) | 8 | 10 ps | 0% |
+| `ox1_orig_f12_rf3cof` | 89.1% | 11 (0.55%) | 8 | 30 ps | 27% |
 
 ### Oxybenzone — RF3 co-folds, peptide structural stability
 
 | leg | Cα final | Cα max | Rg start→end |
 |---|---|---|---|
 | `ox1_esm1_f8_rf3cof` | 1.5 | 4.2 | 10.7 → 10.5 |
+| `ox1_orig_f12_rf3cof` | 8.4 | 10.9 | 7.9 → 8.7 |
 
 ### Oxybenzone — the pre-dynamics static read and the pairs the RF3 re-folds realise
 
@@ -1681,3 +1718,5 @@ oxybenzone evidence that the ligand, not the re-folder, decides which lane wins.
 |---|---|---|---|---|---|---|---|---|
 | `ox1_esm1_f8` | Boltz co-fold | 0.94 | 1.00 | 17 | 4.1 Å | | 30/45 | |
 | | RF3 re-fold | 0.53 | 0.77 | 13 | **9.3 Å** | 1.79 | 10/45 | 3 |
+| `ox1_orig_f12` | Boltz co-fold | 0.995 | 1.00 | 17 | 1.2 Å | | 42/45 | |
+| | RF3 re-fold | 0.55 | 0.71 | 13 | 6.1 Å | 1.63 | **29/45** | 56 |
