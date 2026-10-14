@@ -1407,6 +1407,7 @@ rearranging, and the windows decay mildly (−21.63 → −19.51). Slide 1.29 Å
 | `orig_f12` | −13.71 (77.3%) | **−19.51 (99.9%)** | **−5.79 stronger, 0 releases**; OF3's same cell read −5.90 at 7.4% |
 | `s2_esm2_control` | **−16.25 (59.6%)** | −14.98 (57.2%) | +1.27 weaker, residence held; OF3's cell read −10.21 at 33.9% |
 | `s3_esm2_f4` | −21.08 (99.6%) ⚠ | −16.18 (88.2%) | +4.90 weaker, 0 releases; **Δ compromised — baseline slid 7.81 Å**; OF3's cell read −13.76 |
+| `s3_orig_f12` | **−24.33 (100.0%)** | −12.10 (68.9%) | +12.2 weaker; OF3's cell read −10.10 at 44.8%, so RF3 better by only 2.0 |
 
 **Prediction for `s2_esm2_control_rf3cof`, written 2026-10-14 17:58 with the leg drained and its
 tail running, so before any ΔG was read.** Unlike `orig_f12`, where RF3 was far gentler than OF3,
@@ -1464,6 +1465,7 @@ moves while the ligand does all the travelling.
 | `orig_f12_rf3cof` | −21.63 | −22.03 | −19.99 | **−19.51** |
 | `s2_esm2_control_rf3cof` | −12.43 | −13.84 | −15.75 | **−14.98** |
 | `s3_esm2_f4_rf3cof` | −17.93 | −17.98 | −17.39 | **−16.18** |
+| `s3_orig_f12_rf3cof` | −11.64 | −12.85 | −12.04 | **−12.10** |
 
 **Prediction for `s3_esm2_f4_rf3cof`, written 2026-10-14 19:06 — leg drained, tail running, no ΔG
 read — and offered with low confidence, for a reason worth stating.** Both readings I would
@@ -1544,6 +1546,7 @@ it is the reason the RF3-vs-OF3 column above is worth watching as the remaining 
 | `orig_f12_rf3cof` | **99.9%** | **0 (0.0%)** | 0 | — | — |
 | `s2_esm2_control_rf3cof` | 57.2% | 2 (0.1%) | 2 | 10 ps | 50% |
 | `s3_esm2_f4_rf3cof` | 88.2% | **0 (0.0%)** | 0 | — | — |
+| `s3_orig_f12_rf3cof` | 68.9% | 2 (0.1%) | 2 | 10 ps | 50% |
 
 **Prediction for `s3_orig_f12_rf3cof`, written 2026-10-14 19:55 — production ~6 min from done,
 tail not started, no ΔG in existence.** This is the sharpest test of the pepgraph-vs-dynamics
@@ -1570,6 +1573,44 @@ Confidence is moderate at best: of four predictions recorded today two were righ
 below OF3's −10.10, the RF3-beats-OF3 pattern is 3 of 4 rather than 4 of 4 and pepgraph's
 ordering gains its first dynamics support on this ligand.
 
+**OUTCOME (20:11): direction right, magnitude badly wrong, and one earlier pattern breaks.**
+`s3_orig_f12_rf3cof` reads **−12.10 at 68.9% residence**, 2 released frames, windows flat
+(−11.64 / −12.85 / −12.04 / −12.10) so converged. I predicted −16 to −21; it is −12.10 — better
+than OF3's −10.10 by only **2.0**, the smallest margin of the four pairs, and **+12.2 weaker than
+its −24.33 baseline**. Slide 1.67 Å, so the Δ is clean.
+
+The RF3-beats-OF3 count is now **4 of 4 on octinoxate shells**, but the *shrinking-margin* reading I
+noted after `s3_esm2_f4` — that RF3's advantage narrows as OF3's own cell improves — **does not
+survive this leg**:
+
+| peptide | OF3 ΔG | RF3 ΔG | RF3 − OF3 |
+|---|---|---|---|
+| `orig_f12` | −5.90 | −19.51 | −13.6 |
+| `s3_orig_f12` | −10.10 | −12.10 | **−2.0** |
+| `s2_esm2_control` | −10.21 | −14.98 | −4.8 |
+| `s3_esm2_f4` | −13.76 | −16.18 | −2.4 |
+
+Two nearly identical OF3 cells (−10.10 and −10.21) give margins of 2.0 and 4.8, so ordering by OF3
+quality is not monotone and that reading is withdrawn after one leg — which is what a four-point
+ordering should be expected to do.
+
+**Neither re-folder preserves the campaign's best Boltz co-fold.** −24.33 at 100% residence becomes
+−10.10 under OF3 and −12.10 under RF3 — 12–14 kcal/mol weaker either way. That is the strongest case
+in the file for the original campaign conclusion that the Boltz co-fold is the start to keep for a
+good shell design, and it is untouched by the slide caveats (baseline 2.34 Å, OF3 1.88 Å, RF3
+1.67 Å — all clean).
+
+**The pairs column fails again, in the direction that matters.** This leg has the **highest
+engagement of any RF3 leg**: sim **2.17**, ≥2 side chains in **76%** of frames, **34/66** pairs, only
+1 dead slot, 12/15 long-range. `orig_f12_rf3cof` has essentially the same pair count (35/66, sim
+1.96, 0 dead) and binds **7.4 kcal/mol stronger**. Engagement geometry and ΔG are not tracking each
+other on this arm.
+
+On the pepgraph tension this cell is mild rather than decisive: pepgraph strongly favoured OF3 here
+(px 8.19, among its best anywhere, against RF3's 13.31) and the dynamics favoured RF3 by only 2.0,
+so the two disagree in direction but barely in magnitude. It neither resolves the tension nor
+sharpens it.
+
 ### Octinoxate — RF3 co-folds, peptide structural stability
 
 | leg | Cα final | Cα max | Rg start→end |
@@ -1577,6 +1618,7 @@ ordering gains its first dynamics support on this ligand.
 | `orig_f12_rf3cof` | 9.2 | 12.4 | 8.8 → 9.9 |
 | `s2_esm2_control_rf3cof` | 1.0 | 3.1 | 10.5 → 10.8 |
 | `s3_esm2_f4_rf3cof` | 1.2 | 3.0 | 10.5 → 10.5 |
+| `s3_orig_f12_rf3cof` | 4.4 | 5.6 | 8.9 → 9.6 |
 
 ### Octinoxate — the pre-dynamics static read and the pairs the RF3 re-folds realise
 
@@ -1588,6 +1630,8 @@ ordering gains its first dynamics support on this ligand.
 | | RF3 re-fold | 0.42 | 0.65 | 13 | **13.5 Å** | 1.58 | 15/66 | 7 |
 | `s3_esm2_f4` | Boltz co-fold | 0.795 | 0.90 | 18 | 7.0 Å | | 32/66 | |
 | | RF3 re-fold | 0.46 | 0.60 | 12 | 9.3 Å | — | 19/66 | 15 |
+| `s3_orig_f12` | Boltz co-fold | 0.965 | 1.00 | 20 | 3.6 Å | | 53/66 | |
+| | RF3 re-fold | 0.72 | 0.95 | 19 | 8.5 Å | **2.17** | **34/66** | 42 |
 
 ### Oxybenzone — RF3 co-folds, ΔG and retention
 
