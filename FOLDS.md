@@ -1344,28 +1344,61 @@ regime. That is itself a reading of four cells and is the kind I have over-trust
 the leg goes the other way the sequence-level reading gains and this note should not be used to
 explain the result away.
 
+**OUTCOME (16:50, after the tail).** The pose-level expectation was right in direction and
+**understated in size**: `orig_f12_rf3cof` reads **−19.51 at 99.9% residence with zero released
+frames**, i.e. 5.79 kcal/mol *stronger* than its own Boltz baseline. The prediction said "nearer
+−13.71 than −5.90"; it went past −13.71 entirely, which the prediction did not anticipate.
+
+**The same sequence and the same ligand, re-folded by two predictors, differ by 13.6 kcal/mol and by
+92 points of residence** — OF3 −5.90 at 7.4%, RF3 −19.51 at 99.9%. That is the largest
+predictor-to-predictor gap in the campaign and it is the clearest evidence so far that **what a
+re-fold leg reports is a property of the pose it starts from, not of the sequence**: nothing about
+`orig_f12` itself changed between the two legs. The pair data says the same thing — the RF3 pose
+realises **35/66** pairs with **no slot ever out of contact**, against the Boltz co-fold's own 22/66
+and OF3's 12/66, so RF3 did not merely preserve the site, it presented more of the designed surface
+to the ligand than the pose the design was selected on.
+
+This weakens the sequence-level reading that `ox1_esm1_f8`'s double gain had supported; one peptide
+behaving alike under both predictors now looks like coincidence rather than a property. It does not
+license the reverse claim that the static read is reliable — one cell, and the four `bg33` cells where
+it pointed four ways are unchanged. The useful form is narrower: **a large static change between
+Boltz pose and re-fold pose has, so far, gone with a large ΔG change in the same direction whenever
+the Boltz pose was good** (`orig_f12` here, `bgox31_3`, `ox2_orig_f8`, `ox3_orig_f8`), and carried no
+direction at all on the weak-baseline `bg33` shells. Nine cells now sit on one side of that split and
+four on the other, which is a reading to take into the remaining 20 legs, not a result.
+
+One caveat on this cell: the peptide moves more than any other RF3 leg so far (Cα **9.2 Å** final,
+12.4 Å max, Rg 8.8 → 9.9), so the 99.9% residence is a ligand held by a fold that is itself
+rearranging, and the windows decay mildly (−21.63 → −19.51). Slide 1.29 Å.
+
 | peptide | Boltz co-fold ΔG (ret.) | RF3 re-fold ΔG (ret.) | Δ (refold − Boltz) |
 |---|---|---|---|
+| `orig_f12` | −13.71 (77.3%) | **−19.51 (99.9%)** | **−5.79 stronger, 0 releases**; OF3's same cell read −5.90 at 7.4% |
 
 ### Octinoxate — RF3 co-folds, window convergence
 
 | leg | 5 ns | 10 ns | 15 ns | 20 ns |
 |---|---|---|---|---|
+| `orig_f12_rf3cof` | −21.63 | −22.03 | −19.99 | **−19.51** |
 
 ### Octinoxate — RF3 co-folds, residence and release
 
 | leg | residence | released frames | episodes | longest | late |
 |---|---|---|---|---|---|
+| `orig_f12_rf3cof` | **99.9%** | **0 (0.0%)** | 0 | — | — |
 
 ### Octinoxate — RF3 co-folds, peptide structural stability
 
 | leg | Cα final | Cα max | Rg start→end |
 |---|---|---|---|
+| `orig_f12_rf3cof` | 9.2 | 12.4 | 8.8 → 9.9 |
 
 ### Octinoxate — the pre-dynamics static read and the pairs the RF3 re-folds realise
 
 | peptide | pose | enclosed | wrapped | engaged | cent sep | sim | pairs | band% |
 |---|---|---|---|---|---|---|---|---|
+| `orig_f12` | Boltz co-fold | 0.96 | 1.00 | 20 | 4.2 Å | | 22/66 | |
+| | RF3 re-fold | 0.80 | 0.90 | 18 | 5.8 Å | **1.96** | **35/66** | 44 |
 
 ### Oxybenzone — RF3 co-folds, ΔG and retention
 
