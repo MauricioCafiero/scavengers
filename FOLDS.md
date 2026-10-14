@@ -743,7 +743,7 @@ re-folds** at the end of this file.
 
 The campaign question, answered first across the ten Modal legs and now being extended on racc:
 **is the OF3 re-fold worth running dynamics on, or does the Boltz co-fold remain the start the
-pipeline should use?** Of the eighteen OF3 cells that have run, fourteen read 2–18 kcal/mol
+pipeline should use?** Of the nineteen OF3 cells that have run, fifteen read 2–18 kcal/mol
 *weaker* than their Boltz baseline with degraded or lost retention. Spend: ten Modal legs at ≈ $8.2 of
 produce (plus the $0.78 erroneous dock-pose leg), one at a time; the fold-lane extension runs free
 on racc.
@@ -1021,8 +1021,9 @@ the pre-dynamics read at all, which is the finding to report rather than a repai
 | `ox2_esm1_f8` | **−20.81 (100.0%)** | −16.68 (93.2%) | +4.1 weaker but held, 0 releases |
 | `ox2_shuffle` (null) | −5.30 (7.1%) | −2.98 (14.8%) | +2.3 weaker; both legs poor, the baseline binds nowhere either |
 | `ox2_shuffle_esm0` (null) | **−12.04 (94.7%)** | −0.92 (1.1%) | +11.1 weaker, OF3 placement misses the site entirely |
+| `bgox31_2` (boltzgen) | −10.89 (33.7%) | −7.45 (65.9%) | +3.45 weaker **yet retention doubled**; one 2.0 ns exit and return |
 
-Six of the seven oxybenzone cells are weaker, and this is where the campaign's **largest** losses
+Seven of the eight oxybenzone cells are weaker, and this is where the campaign's **largest** losses
 sit: `ox2_orig_f8` +17.0 and `ox3_orig_f8` +16.8, the two best Boltz co-folds on this molecule,
 both of which lose the ligand under the re-fold (49.5% and 2.4%). The one cell that goes the other
 way, `ox1_esm1_f8` at −7.2 and 100% retention, is the campaign's strongest counterexample and the
@@ -1031,6 +1032,24 @@ only one that is a designed shell.
 Read against the ΔG table in `RESULTS.md`, the pattern is that the re-fold costs most where the
 Boltz co-fold was best: the charged shell `ox1`, weak and releasing at baseline, is the one whose
 re-fold improves.
+
+**`bgox31_2_o3cof` is the first oxybenzone BoltzGen cell, and it splits ΔG from retention — they
+move in opposite directions.** The re-fold reads **+3.45 weaker** (−7.45 against −10.89) while
+residence **doubles**, 33.7% → 65.9%. Both halves of that are real and neither is the summary. The
+ΔG decays in the windows (−9.88 → −7.45, with the whole drop between 10 and 15 ns) and the contacts
+trace dates the cause exactly: centroid separation runs 7.6–9.3 Å for the first 10 ns, blows out to
+**28.7 Å at 14 ns**, then comes back to 6.9 Å by 20 ns. So this is one 2.04 ns excursion and return,
+98% of the detached time late, inside a leg whose fold never moves (Cα 2.4 Å, Rg flat at 13.6 Å) and
+whose ligand barely slid at equilibration (1.52 Å).
+
+The reason residence still *rises* is the baseline, not the re-fold: `bgox31_2` at 33.7% was already
+a poor retainer whose own detachment was 92% late. Both legs lose the ligand late; the re-fold simply
+loses it for less of the run but pays more in energy while it is gone, because a 28.7 Å excursion
+contributes near-zero binding to the mean where the baseline's shallower wandering did not. **This is
+the cleanest case in the campaign for not collapsing a leg to one number** — the pair of (ΔG,
+residence) disagrees in sign, and the `late` column plus the separation trace are what make it
+legible. It also means the octinoxate rule that a weak Boltz baseline has more to gain does *not*
+transfer here: `bgox31_2` is a weak baseline (−10.89, 33.7%) and its re-fold still lost 3.45.
 
 ### Oxybenzone — co-folds, window convergence
 
@@ -1043,6 +1062,7 @@ re-fold improves.
 | `ox2_esm1_f8_o3cof` | −19.08 | −17.54 | −15.70 | −16.68 |
 | `ox2_shuffle_o3cof` | −7.55 | −4.39 | −3.28 | −2.98 |
 | `ox2_shuffle_esm0_o3cof` | −1.53 | −0.82 | −0.55 | **−0.92** |
+| `bgox31_2_o3cof` | −9.88 | −9.68 | −7.50 | −7.45 |
 
 `ox2_orig_f8_o3cof` gives back ~7.6 across its windows and `ox1_orig_f12_o3cof` ~3.6 — the decay
 signature of a starting pose coming apart. The two esm1 re-folds hold a flat −16 to −19 band the
@@ -1060,6 +1080,7 @@ whole run, so their numbers are settled poses rather than starting-pose artifact
 | `ox2_esm1_f8_o3cof` | 93.2% | 0 | 0 | — | — |
 | `ox2_shuffle_o3cof` | 14.8% | 1092 (54.6%) | 34 | **2900 ps** | 54% |
 | `ox2_shuffle_esm0_o3cof` | 1.1% | 1667 (83.4%) | 25 | **9270 ps** | 52% |
+| `bgox31_2_o3cof` | 65.9% | 347 (17.35%) | 18 | 2040 ps | **98%** |
 
 The two esm1 re-folds are the only genuine retainers in this set, both with **zero** released
 frames. At the other end, `ox2_shuffle_esm0_o3cof` spends a single **9.27 ns** episode detached and
@@ -1078,6 +1099,7 @@ opposite failure: a ligand that never settled anywhere.
 | `ox2_esm1_f8_o3cof` | 4.0 | 5.7 | 10.0 → 10.4 |
 | `ox2_shuffle_o3cof` | 5.9 | 6.6 | 8.0 → 8.6 |
 | `ox2_shuffle_esm0_o3cof` | 2.4 | 5.2 | 14.1 → 14.1 |
+| `bgox31_2_o3cof` | 2.4 | 5.1 | 13.6 → 13.6 |
 
 No oxybenzone re-fold unravels either: Cα drift is 2.4–5.9 Å with Rg flat to within 1 Å in every
 leg, including the two that lost the ligand outright. Fold stability and ligand retention are
@@ -1103,6 +1125,8 @@ weak ΔG here cannot be explained away as a peptide falling apart.
 | `ox2_shuffle_esm0` | Boltz co-fold | 0.64 | 0.94 | 16 | 4.2 Å | 2.21 | 18/55 | 18 |
 | | OF3 re-fold (null) | 0.47 | 0.77 | 13 | 7.3 Å | 0.13 | 3/55 | −16 |
 | | OF3 re-fold (null) | 0.58 | 0.94 | 16 | 7.9 Å | 0.59 | 7/55 | −7 |
+| `bgox31_2` (boltzgen) | Boltz co-fold | 0.44 | 0.77 | 13 | 9.1 Å | | — | — |
+| | OF3 re-fold | 0.36 | 0.77 | 13 | 8.1 Å | — | — | — |
 
 The static read priced these re-folds before the GPU did: the Boltz co-folds enclose 0.58–0.995 at
 1.2–9.3 Å, the OF3 placements enclose 0.47–0.81 at 5.3–10.3 Å, and every leg that read weaker in the
@@ -1128,9 +1152,19 @@ half is `pair_contacts.py` on each re-fold leg: mean simultaneous designed side 
 `pair_contacts_o3cof_design.csv`, the nulls under `pair_contacts_o3cof_nulls.csv` and the BoltzGen
 legs under `pair_contacts_o3cof_boltzgen.csv`.
 
-**Still to land in these tables.** Four of the eight new OF3 BoltzGen legs: `bgox31_2/3/4/5_o3cof`
-(oxybenzone, in batch job `fold_oxb_1`). Octinoxate's four — `bg33_1/2/3/4_o3cof` — are complete.
-Rows are added as each leg's drain completes, not in a batch at the end.
+**Still to land in these tables.** Three of the eight new OF3 BoltzGen legs: `bgox31_3/4/5_o3cof`
+(oxybenzone, in batch job `fold_oxb_1`). Octinoxate's four — `bg33_1/2/3/4_o3cof` — are complete,
+and `bgox31_2_o3cof` has landed. Rows are added as each leg's drain completes, not in a batch at the
+end.
+
+**The oxybenzone BoltzGen rows carry no pair data, and that is a gap in the inputs rather than an
+omission.** `pair_contacts.py` needs a design json naming the designed slots, and oxybenzone has
+`design_shell1/2/3.json` only — there is no BoltzGen equivalent of octinoxate's `design.json` for
+the `bgox31` arm. The committed baseline rows in `RESULTS.md` already show `—` in those columns for
+the same reason. Deriving slots from the sequence's non-glycine positions would be inventing a
+design definition, so the columns stay dashed until a real `bgox31` design json exists; the
+consequence is that the arm's one useful quality signal on octinoxate — simultaneity — cannot be
+read on oxybenzone at all.
 
 ## The RF3 re-folds: two further sets of five tables
 

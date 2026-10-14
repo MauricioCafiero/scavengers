@@ -185,6 +185,14 @@ are rewritten wholesale over only the structures named, so a run naming only the
 other row — the same trap `md_stability.py` has. On 2026-10-06 docking two nulls cut
 `dock_summary.csv` from five structures to two.
 
+**`pair_contacts.py --csv` is in this family too**, and was missing from this list until 2026-10-14,
+when writing `bg33_2_o3cof` alone silently dropped `bg33_1_o3cof`'s row from
+`pair_contacts_o3cof_boltzgen.csv`. It has no `--allow-shrink` guard, so nothing warns you. Name
+every leg on every run:
+`$OMD/bin/python code/pair_contacts.py <leg dirs...> --design design.json --csv runs/<mol>/md/pair_contacts_<lane>_<arm>.csv`
+— and note `--design` resolves against `--run-dir` (default `runs/octinoxate`), so it takes
+`design.json`, not a full path.
+
 **The route that avoids the damage rather than repairing it:** `vina_redock.py` has an `--out`, so
 dock the new structures into a scratch directory and append the rows to the real tables, which leaves
 committed legs' pose files untouched; verify with `git diff --numstat` that the change is
