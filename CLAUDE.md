@@ -30,6 +30,22 @@ leg at 7,384 atoms) and real on elongated ones: `s2_esm2_control` built to 33,05
 23,142 dodecahedral, costing $0.41 and 24 minutes on one leg. Switching to dodecahedral *restores*
 comparability with the baselines, so it is always safe to fix.
 
+**Figures are a pipeline step too, and they need their own environment.** `code/render_md_figures.py`
+renders a leg's `frame_medoid.pdb` to a PNG headlessly and runs at the end of the tail, so every leg
+gets its figure as it lands instead of by hand months later. It needs **PyMOL, which is not in the MD
+env** — it has its own conda env because the `pymol-open-source` wheel on PyPI links to libraries
+that do not exist on this machine and cannot be made to load:
+```sh
+~/miniforge3/bin/mamba create -y -n pymol-render -c conda-forge python=3.12 pymol-open-source
+~/miniforge3/envs/pymol-render/bin/pip install pillow   # alpha-channel cropping
+```
+Two things about these structures that are not obvious. mdtraj writes the trajectory PDBs with **no
+HELIX/SHEET records**, so PyMOL loads every residue as coil and an automatic cartoon draws a helix
+flat — the script runs `dss` first to assign secondary structure from geometry, without which every
+helical leg in the campaign renders as a meaningless squiggle. And the committed figures are
+**transparent RGBA**, not white-backed, which is why `figures_shell*/style.pml` says `bg_color black`
+while its own output reads white: there is no background in them at all.
+
 **`md_contacts.py` and `md_frames.py` are pipeline steps, not extras.** Contacts give residence and
 separation, which a scalar ΔG cannot and which separated every design from every null. Frames give the
 end-of-run ensemble, needed because the predicted pose and the pose after 20 ns are different

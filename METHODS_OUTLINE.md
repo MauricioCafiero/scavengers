@@ -311,6 +311,10 @@ record does not currently contain.
   - Derived measures: mean side chains engaged, % frames with ≥2 engaged, pairs realised, band
     position, pairs held ≥5%, long-range pairs (gap ≥ 7), dead slots.
 - `md_frames.py`: representative frames for figures — ten-model ensemble superposed on the peptide
+- `render_md_figures.py`: renders each medoid to a PNG without a display, so every leg gets a figure
+  as it lands rather than by hand afterwards. Cartoon secondary structure is assigned geometrically
+  (`dss`) because the trajectory PDBs carry no HELIX/SHEET records — without it every fold draws as
+  featureless coil and helices and sheets are invisible
   and the **medoid** (frame nearest the window mean) of the last `--last-fraction 0.10` of the run,
   or an explicit `--window-ns` interval.
   - Disclosure that belongs in a caption, not hidden: `orig_f12` is shown at 11.0 ns rather than at

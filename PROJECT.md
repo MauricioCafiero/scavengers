@@ -66,7 +66,7 @@ Eight stages. The cost column is what it actually takes on this machine or on a 
 | 5 | co-folding | `boltz_hints.py` (or `boltz_check.py`) | ~3 min a fold | the structure, with 0, 4, 8 or 12 designed contacts forced |
 | 6 | geometry check | `check_fold.py` | seconds, no GPU | enclosure, wrapping, engagement, Rg, helicity, hints honoured |
 | 7 | pose interrogation | `vina_redock.py` → `make_gnina_bundle.py` → GNINA | minutes of local CPU | whether the pose is findable, and the best static predictor of ΔG available |
-| 8 | dynamics + MM/GBSA | `cif_to_md.py` → `omd` → `modal_md.py` → `md_contacts.py`, `pair_contacts.py`, `md_frames.py` | $0.45 + $0.041 per 1,000 particles | the verdict: free energy, retention, release, what the complex does in water |
+| 8 | dynamics + MM/GBSA | `cif_to_md.py` → `omd` → `modal_md.py` → `md_contacts.py`, `pair_contacts.py`, `md_frames.py`, `render_md_figures.py` | $0.45 + $0.041 per 1,000 particles | the verdict: free energy, retention, release, what the complex does in water |
 
 Stages 1–4 are the design method and the part that is novel. Stages 6–8 are the judgement, and
 their order matters: stage 6 costs seconds and should run on everything, stage 7 costs minutes of
@@ -447,7 +447,7 @@ the seven scripts the README's tables do not mention.
 | nulls | `shuffle_control.py`, `random_control.py` |
 | docking and rescoring | `vina_redock.py`, `dock_compare.py`, `dock_vs_md.py`, **`dock_pose_to_sdf.py`**, **`make_gnina_bundle.py`** |
 | MD and MM/GBSA | `cif_to_md.py`, `modal_md.py`, **`run_dock_pose_md.sh`**, **`md_window_live.py`**, **`run_windows_live.sh`** |
-| trajectory analysis | `md_contacts.py`, `pair_contacts.py`, `md_frames.py` |
+| trajectory analysis | `md_contacts.py`, `pair_contacts.py`, `md_frames.py`, `render_md_figures.py` |
 | correlation and figures | `correlate.py`, `make_figures.py` |
 | shell runners | `run_shell.sh`, **`run_shell2.sh`**, **`run_shell2_forced.sh`** |
 
