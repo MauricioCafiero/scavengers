@@ -1513,6 +1513,30 @@ replicates, and the ordering could be coincidence. But it is the only comparison
 is immune to both the baseline slide and the Boltz-pose question, which makes it the one to watch as
 the remaining RF3 legs land.
 
+**Against `pepgraph`, this comparison points the other way — and the two have not been reconciled.**
+Inverse-folding perplexity lives in the paper outline, not here: see
+`$ODLOC/publications/peptidebuilder/paper_outline.md` §3.5, **Table 5** (six lanes, 202 structures)
+and **Table 5b** (paired across the ligand boundary), sourced from `pepgraph/RESULTS.md` §1. Do not
+restate those tables in this file — one authoritative copy, or the two drift.
+
+What they say is that **OF3 is the better co-folder on sequence–structure self-consistency**: px mean
+10.7 against RF3's 12.2, lowest perplexity on 12 of 21 sequences against the next lane's 3, and on
+the paired test that holds sequences fixed, `openfold3 vs of3apo` gains +1.4 px at **+3.6σ** where
+`rf3 vs rf3apo` gains +2.6 at only +1.7σ.
+
+What the table above says is that **RF3 is the better co-folder on dynamics**, on all three
+octinoxate shell designs run so far. **The lane that wins on self-consistency is not the lane that
+wins on binding.** Both halves are worth stating because they are measured on the same 21 sequences
+by independent means, and the pepgraph side is the stronger of the two — 21 paired sequences against
+four one-per-peptide dynamics pairs with no replicates. Per-peptide the two measures agree on only
+2 of those 4 (`orig_f12` and `ox1_esm1_f8` agree; `s2_esm2_control` and `s3_esm2_f4` do not), and
+the sharpest single cell is `s2_esm2_control`, whose RF3 backbone scores **px 21.60 — at or past the
+no-information limit — and whose leg still binds 4.8 kcal/mol better than OF3's px 13.84 backbone
+for the same sequence**.
+
+This is recorded as an unresolved tension for the paper to address, not as a result either way, and
+it is the reason the RF3-vs-OF3 column above is worth watching as the remaining legs land.
+
 ### Octinoxate — RF3 co-folds, residence and release
 
 | leg | residence | released frames | episodes | longest | late |
