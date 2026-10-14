@@ -8,6 +8,13 @@ runs/*
 # note file beside them if one is ever needed. The staged replicate leg dirs themselves are matched
 # by the negations above, like their originals.
 !runs/replicates/
+# The fold-cofold campaign's leg lists, same rationale as the replicate lists above: these name
+# which legs went into which batch job and are the only record of that. The driver that consumed
+# them lives in code/feed_chain.sh with the other racc scripts. Logs here stay ignored -- they are
+# feeder/drain chatter, not results.
+!runs/folds_md/
+runs/folds_md/*.log
+runs/folds_md/feed_chain.sh
 # Run logs belong beside the results they describe, in runs/<ligand>/logs/, which the line above
 # already keeps. This negation is only a safety net for one redirected to runs/ by mistake: never
 # ignore a run log, because it is the only record of how long a calculation took, whether it
