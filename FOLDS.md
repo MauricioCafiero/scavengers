@@ -1463,6 +1463,24 @@ moves while the ligand does all the travelling.
 | `orig_f12_rf3cof` | −21.63 | −22.03 | −19.99 | **−19.51** |
 | `s2_esm2_control_rf3cof` | −12.43 | −13.84 | −15.75 | **−14.98** |
 
+**Prediction for `s3_esm2_f4_rf3cof`, written 2026-10-14 19:06 — leg drained, tail running, no ΔG
+read — and offered with low confidence, for a reason worth stating.** Both readings I would
+normally use were damaged in the preceding hour: centroid separation was withdrawn as predictive
+by `s2_esm2_control_rf3cof`, and the pose-level reading lost its support from the same cell. What
+remains is the enclosure-change split, and on that: `s3_esm2_f4` has a good Boltz pose (**0.795**
+enclosed at 7.0 Å) and RF3 changes it substantially (**0.46** at 9.3 Å, with the fold compact at
+Rg 10.5 against OF3's extended 15.2), which predicts a **substantially weaker cell, perhaps near
+OF3's −13.76**.
+
+The asymmetry matters more than the guess: a weaker reading is only weak evidence for that split
+given how much else failed today, whereas a **stronger** reading would be the third strike
+against the static read in one evening.
+
+**And this cell cannot settle much either way**, because its baseline slid 7.81 Å (see the note at
+the head of this section). The ΔG will be sound; the Δ against −21.08 will not be a measurement
+of re-folding against the Boltz pose. Recorded so that a convenient result here is not read as
+support it cannot provide.
+
 ### Octinoxate — RF3 co-folds, residence and release
 
 | leg | residence | released frames | episodes | longest | late |
