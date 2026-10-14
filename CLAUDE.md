@@ -257,16 +257,17 @@ the summary CSV with their full component set (parse the `Differences (Complex -
 block, not the complex section — a naive grep of `VDWAALS`/`EEL` returns the complex's −hundreds).
 
 Every result goes in **its own molecule's** `runs/<mol>/md/mmgbsa_summary.csv` **as it is computed**,
-not in a batch at the end. This file once held the whole campaign, which is why
-`collect_mmgbsa_rows.py` still defaults `--outdir` to `runs/octinoxate`; oxybenzone has had its own
-summary since its legs landed, and `--md-root` (where legs are *read*) does **not** redirect the
-output. Passing only `--md-root runs/oxybenzone/md` therefore reads the right legs and appends to
-octinoxate's table — it put 16 oxybenzone rows in the wrong file on 2026-10-14. Pass **both**:
-`--md-root runs/<mol>/md --outdir runs/<mol>`, and check with
-`grep -c '^<leg>,' runs/<mol>/md/mmgbsa_summary.csv` that the rows landed where intended.
-**`--outdir` is now required with no default** (2026-10-14, at the user's instruction: a script that
-points at one molecule by default should error instead of guessing), and it refuses an `--outdir`
-whose summary does not exist, listing the molecules that have one.
+not in a batch at the end. One file per molecule: oxybenzone has had its own summary since its legs
+landed. Pass **both** of `collect_mmgbsa_rows.py`'s paths —
+`--md-root runs/<mol>/md --outdir runs/<mol>` — because they do different jobs: `--md-root` says
+where legs are *read* and `--outdir` says which summary is *written*, so pointing only `--md-root` at
+another molecule reads the right legs and appends to the wrong table. That put 16 oxybenzone rows into
+octinoxate's file on 2026-10-14.
+
+**`--outdir` is required and has no default** (changed 2026-10-14 at the user's instruction: a script
+that points at one molecule or the other should error rather than guess), and it refuses an `--outdir`
+whose summary does not exist, listing the molecules that have one. Still worth the check afterwards:
+`grep -c '^<leg>,' runs/<mol>/md/mmgbsa_summary.csv`.
 
 Nothing reads these files — `make_gnina_bundle.py` carries the same numbers in a hardcoded `REFERENCE`
 dict — so a new row has to be added in both places or the next GNINA bundle is built on stale values.
