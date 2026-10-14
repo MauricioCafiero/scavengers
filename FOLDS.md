@@ -747,9 +747,12 @@ re-folds** at the end of this file.
 > where run-to-run variation is larger than many of the gaps compared here. A signed difference
 > between a re-fold leg and its Boltz baseline is written "+N weaker" or "−N stronger" and means only
 > that two runs of two structures gave different numbers — nothing is "lost" or "gained" by the
-> re-folding. 21 of the campaign's 29 legs were still unrun as of 2026-10-14, so any ordering,
-> grouping or apparent predictor in this file is provisional bookkeeping awaiting the rest, and
-> several such claims written during collection have already had to be withdrawn further down.
+> re-folding. 21 of the campaign's 29 legs were still unrun as of 2026-10-14, so every ordering,
+> grouping and apparent predictor here is an **interpretation of the data in hand, revisable by the
+> next leg** — not a rule the remaining legs are expected to satisfy. Predicting from a reading is
+> how it gets tested and is encouraged; what is not allowed is letting the reading decide what a leg
+> means. Where a claim written mid-collection has since failed, it is marked withdrawn in place
+> rather than quietly deleted, so the record shows what was believed when.
 
 The campaign question, answered first across the ten Modal legs and now being extended on racc:
 **is the OF3 re-fold worth running dynamics on, or does the Boltz co-fold remain the start the
@@ -766,8 +769,8 @@ a strong OF3-cofold ΔG is legible on any sequence, designed or shuffled — pro
 is compact and the site survives the re-fold. That is a discussion point against over-reading any
 single cross-model agreement.
 
-**The four BoltzGen cells come out in baseline order, which is worth noting and not yet worth
-believing.**
+**The four BoltzGen cells come out in baseline order — a reading to carry into the RF3 legs, not a
+settled one.**
 `bg33_1` (−11.31) and `bg33_2` (−8.02), the two weakest co-folds in the octinoxate set, each gained
 3.6 kcal/mol on re-folding. `bg33_3` has a *better* baseline (−11.86) and its re-fold reads **+1.8
 weaker** with retention falling 41.0% → 14.9%. That was the stated test of whether the difference tracked
@@ -1070,7 +1073,8 @@ centroid separation). Its re-fold reads **−5.82, i.e. 9.62 kcal/mol weaker, wi
 15.8%** — the third-largest difference on this molecule after `ox2_orig_f8` and `ox3_orig_f8`, which
 are also the two strongest Boltz co-folds here. The direction was noted before the tail finished, on
 the two orderings this file had been tracking; it came out that way, which makes three cells
-consistent and still does not make either ordering a rule at n=3.
+consistent with the reading. Stating the direction first is what made that worth anything; it is
+still three single trajectories.
 
 Two consequences for how this arm gets reported. First, **`bgox31_2`'s sign disagreement does not
 generalise**: here ΔG and retention move together, both sharply down, so the opposite-sign case
@@ -1243,12 +1247,14 @@ frames**, and windows flat to strengthening (−11.35 / −10.00 / −11.19 / �
 stated above — that the arm's strongest baseline would show the largest difference — was wrong: this
 is the second-smallest difference in the arm.
 
-**What that does and does not license.** It does not establish a predictor. Each cell is **one 20 ns
-trajectory with no replicate**, and the ±0.02–0.05 figures beside each ΔG are within-trajectory
-standard errors, not uncertainty on a difference between two runs of two different structures —
-run-to-run variation is larger than several of the gaps being compared here. With four cells per arm
-there is no basis for calling any ordering a rule, and the orderings below are recorded as
-bookkeeping for the RF3 legs to speak to, not as results:
+**How to hold this.** The orderings below are a *reading* of the data in hand, offered as such and
+revisable by the next leg — not a rule the remaining legs are expected to obey. The distinction
+matters because it decides what happens when a leg disagrees: a reading gets revised, an imposed rule
+makes the disagreeing leg look like an anomaly. Each cell is **one 20 ns trajectory with no
+replicate**, and the ±0.02–0.05 beside each ΔG is a within-trajectory standard error, not uncertainty
+on a difference between two runs of two structures, where run-to-run spread is larger than several of
+the gaps compared here. So these are worth stating and worth predicting from, at four cells per arm,
+provided the prediction is a test and not a commitment:
 
 | ordered by | cells, in that order | signed ΔΔG, in that order |
 |---|---|---|
@@ -1259,12 +1265,16 @@ bookkeeping for the RF3 legs to speak to, not as results:
 | octinoxate, enclosure change first | 2, 4, 3, 1 | −3.60, +2.55, +1.80, −3.60 |
 | octinoxate, separation change first | 2, 3, 4, 1 | −3.60, +1.80, +2.55, −3.60 |
 
-Two of those six happen to come out monotone — separation on oxybenzone, baseline strength on
-octinoxate — and **that is not a finding.** Four points admit many orderings, six orderings were
-examined, and nothing here is replicated or resolvable against run-to-run spread. The earlier claim
-in this file that the static read "carries signal on oxybenzone where it carried none on octinoxate"
-**overstated four single trajectories and is withdrawn**; what remains is the bare observation that
-the two arms' numbers do not line up the same way, which is a question for the remaining legs.
+Two of the six come out monotone — separation on oxybenzone, baseline strength on octinoxate — and
+the reason to be careful is that six orderings over four points will often hand you one or two by
+arithmetic alone, so the monotonicity is suggestive rather than evidential. Taken as a reading: the
+two arms' numbers do not line up the same way, and separation change is the more promising thing to
+watch on oxybenzone. What **is** withdrawn is the stronger form I committed earlier — that the static
+read "carries signal on oxybenzone where it carried none on octinoxate" — because `bgox31_5`
+contradicted it and because four single trajectories cannot carry a claim about a molecule. The
+21 RF3 legs are the test; predictions made from this reading should be recorded before each leg
+lands, as `bg33_4`'s and `bgox31_5`'s were, which is what made them informative when one of them
+failed.
 
 The caveat on this cell: `ligand_slide.py` flags **2.68 Å**, so like `bgox31_4` it is slid, though far
 less. Its separation trace excursions to 12.7–13.4 Å at 6–8 ns without a single *released* frame also
