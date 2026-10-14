@@ -1545,6 +1545,31 @@ it is the reason the RF3-vs-OF3 column above is worth watching as the remaining 
 | `s2_esm2_control_rf3cof` | 57.2% | 2 (0.1%) | 2 | 10 ps | 50% |
 | `s3_esm2_f4_rf3cof` | 88.2% | **0 (0.0%)** | 0 | — | — |
 
+**Prediction for `s3_orig_f12_rf3cof`, written 2026-10-14 19:55 — production ~6 min from done,
+tail not started, no ΔG in existence.** This is the sharpest test of the pepgraph-vs-dynamics
+tension in the campaign, because the two measures disagree *strongly* on this one peptide and
+its baseline slide is a clean 2.34 Å, so unlike `s3_esm2_f4` its Δ is interpretable.
+
+| pose | pepgraph px | enclosed | engaged | cent sep | ΔG |
+|---|---|---|---|---|---|
+| Boltz co-fold | — | 0.965 | 20 | 3.6 Å | **−24.33 (100.0%)**, campaign's strongest cell |
+| OF3 re-fold | **8.19** | 0.43 | 14 | 10.4 Å | −10.10 (44.8%) |
+| RF3 re-fold | 13.31 | **0.72** | **19** | **8.5 Å** | ? |
+
+pepgraph rates OF3's backbone here among its best anywhere (px 8.19 against a 10.7 lane mean)
+and RF3's as poor (13.31). The static pose read says the opposite, and by a wide margin. The
+RF3-beats-OF3 dynamics pattern holds 3 of 3 on octinoxate shells so far.
+
+**Stated expectation: RF3 reads substantially better than OF3's −10.10, somewhere around −16 to
+−21, and still weaker than the −24.33 baseline.** The closest precedent is `orig_f12`, where RF3's
+static read was likewise far better than OF3's and the leg came in at −19.51 against OF3's
+−5.90 — there it beat its baseline, but that baseline was −13.71, not −24.33.
+
+Confidence is moderate at best: of four predictions recorded today two were right (`bg33_4`,
+`orig_f12` in direction) and two wrong (`bgox31_5`, `s2_esm2_control`). If RF3 comes in at or
+below OF3's −10.10, the RF3-beats-OF3 pattern is 3 of 4 rather than 4 of 4 and pepgraph's
+ordering gains its first dynamics support on this ligand.
+
 ### Octinoxate — RF3 co-folds, peptide structural stability
 
 | leg | Cα final | Cα max | Rg start→end |
