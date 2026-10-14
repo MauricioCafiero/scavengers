@@ -284,6 +284,21 @@ dict — so a new row has to be added in both places or the next GNINA bundle is
 When a peptide's docked legs land, extend its `REFERENCE` entry with the flat `vina_p1_*`/`gnina_p9_*`
 fields, as both shuffle peers now have.
 
+**Audit the recording set per leg; do not tick it off from memory.** Working from memory is how
+`ligand_slide.py`'s `--csv` got dropped on ten consecutive legs on 2026-10-14 — each slide was read
+off stdout, quoted in `FOLDS.md`, and never written to a table, which left a 10.62 Å cell being
+cited as a counterexample for weeks. One query over the finished leg catches it:
+
+```
+leg dir: <n>/4 FINAL_RESULTS_MMPBSA.dat, md_contacts.csv, prod_20ns/{frames_last,frame_medoid}.pdb,
+         and no reference.frc / _MMPBSA_* / traj.nc anywhere
+tables : 4 rows in runs/<mol>/md/mmgbsa_summary.csv, 1 in protein_stability.csv,
+         1 in runs/<mol>/md/ligand_slide.csv, 1 in a pair_contacts_<lane>_<arm>.csv
+```
+
+Match `pair_contacts_*.csv` on its **`structure`** column, not its first column — `leg` holds the
+full production path, and matching that reports every row missing.
+
 A leg is not done until `protein_stability.csv` has its row: `md_stability.py` takes the leg list from
 argv, so a **no-argument run writes nothing** — pass the full glob
 (`runs/octinoxate/md/*/prod_20ns runs/octinoxate/md/*/prod_L1_modal ~/python_mac/boltzgen_local/md/*/prod_20ns`),
