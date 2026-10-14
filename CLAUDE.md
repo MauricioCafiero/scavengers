@@ -30,6 +30,12 @@ leg at 7,384 atoms) and real on elongated ones: `s2_esm2_control` built to 33,05
 23,142 dodecahedral, costing $0.41 and 24 minutes on one leg. Switching to dodecahedral *restores*
 comparability with the baselines, so it is always safe to fix.
 
+**`run_md20.sh` is not in this repo.** It lives in the sibling BoltzGen repo at
+`~/python_mac/boltzgen_local/md/run_md20.sh`, which is where `racc_drain.sh` calls it from
+(`$BG/md/run_md20.sh`). Only `run_dock_pose_md.sh` is in `code/`. A change to the co-folded tail
+therefore lands in a different repo and a different git history — noted 2026-10-14 after an earlier
+version of this file implied both were local.
+
 **Figures are a pipeline step too, and they need their own environment.** `code/render_md_figures.py`
 renders a leg's `frame_medoid.pdb` to a PNG headlessly and runs at the end of the tail, so every leg
 gets its figure as it lands instead of by hand months later. It needs **PyMOL, which is not in the MD
