@@ -185,6 +185,16 @@ are rewritten wholesale over only the structures named, so a run naming only the
 other row — the same trap `md_stability.py` has. On 2026-10-06 docking two nulls cut
 `dock_summary.csv` from five structures to two.
 
+**`ligand_slide.py --csv` is in this family as well**, and worse, it had no table at all for the
+octinoxate lane until 2026-10-14 — ten legs' slides had been read off stdout, quoted in `FOLDS.md`
+and never persisted. It writes with mode `w` over only the legs named, and its leg list has the same
+lane problem as `md_stability.py`: the BoltzGen baselines live in
+`~/python_mac/boltzgen_local/md/<leg>/prod_20ns`, so a run globbing only `runs/<mol>/md/*` silently
+dropped `bgox31_2`–`bgox31_5`. Pass every lane, same globs as `md_stability.py`, and **write the
+table on every leg** — the number is what says whether a cell is worth reading, and back-filling it
+retired a counterexample this file had relied on for weeks (`shuffle_control_esm0_o3cof`, 10.62 Å:
+production never started from the OF3 pose). Tables now at `runs/{octinoxate,oxybenzone}/md/ligand_slide.csv`.
+
 **`pair_contacts.py --csv` is in this family too**, and was missing from this list until 2026-10-14,
 when writing `bg33_2_o3cof` alone silently dropped `bg33_1_o3cof`'s row from
 `pair_contacts_o3cof_boltzgen.csv`. It has no `--allow-shrink` guard, so nothing warns you. Name

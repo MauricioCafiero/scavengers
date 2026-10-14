@@ -753,6 +753,16 @@ re-folds** at the end of this file.
 > how it gets tested and is encouraged; what is not allowed is letting the reading decide what a leg
 > means. Where a claim written mid-collection has since failed, it is marked withdrawn in place
 > rather than quietly deleted, so the record shows what was believed when.
+>
+> **Read the slide column before reading any cell.** Equilibration restrains protein heavy atoms
+> only, so the ligand moves before production starts, and `runs/<mol>/md/ligand_slide.csv` records
+> how far. Three re-fold cells moved so far that production did not begin from the predicted pose
+> and they are **not tests of that pose**: `ox2_shuffle_esm0_o3cof` (13.14 Å),
+> `shuffle_control_esm0_o3cof` (10.62 Å) and `shuffle_control_o3cof` (7.59 Å) — all three nulls,
+> which is itself expected, since a shuffled sequence has no site to hold the ligand through
+> equilibration. Seven more sit in a 2.5–3.8 Å grey band and are flagged in place. Those tables
+> were written and discussed for weeks before the slide was tabulated for the octinoxate lane at
+> all, which is how a 10.62 Å cell came to be cited as a counterexample; see the correction below.
 
 The campaign question, answered first across the ten Modal legs and now being extended on racc:
 **is the OF3 re-fold worth running dynamics on, or does the Boltz co-fold remain the start the
@@ -761,13 +771,24 @@ pipeline should use?** Of the twenty-two OF3 cells that have run, eighteen read 
 produce (plus the $0.78 erroneous dock-pose leg), one at a time; the fold-lane extension runs free
 on racc.
 
-**Four counterexamples, and what they have in common.** `ox1_esm1_f8` (a design, oxybenzone, −7.2),
-`shuffle_control_esm0` (a **null**, octinoxate, −1.3), `bg33_1` (BoltzGen, octinoxate, −3.6) and
-`bg33_2` (BoltzGen, octinoxate, −3.6) are the cells where the OF3 pose beats the model that
-predicted the baseline. One of the four is a null and **none is a shell design on octinoxate**, so
-a strong OF3-cofold ΔG is legible on any sequence, designed or shuffled — provided the Boltz fold
-is compact and the site survives the re-fold. That is a discussion point against over-reading any
-single cross-model agreement.
+**The counterexamples, and a correction forced by the slide table (2026-10-14).** Four cells read
+stronger than the model that predicted their baseline: `ox1_esm1_f8` (a design, oxybenzone, −7.2),
+`shuffle_control_esm0` (a **null**, octinoxate, −1.3), `bg33_1` and `bg33_2` (BoltzGen, octinoxate,
+−3.6 each). **Only three of them are readable as statements about the OF3 pose.**
+
+`ligand_slide.py` had never been written to a table for the octinoxate lane, and back-filling it
+shows `shuffle_control_esm0_o3cof`'s ligand moved **10.62 Å** relative to its peptide during
+equilibration. Production therefore did not start from the OF3 pose, and per this repo's own rule —
+record the slide, it is what says whether a cell is worth reading — that cell **cannot support the
+claim that the OF3 pose beat the Boltz model**. It remains a real −15.62 at 92.5% residence for
+whatever pose it equilibrated into; it is not evidence about OF3's prediction. The earlier gloss
+here, that "one of the four is a null, so a strong OF3-cofold ΔG is legible on any sequence,
+designed or shuffled", **rested on that cell and is withdrawn.**
+
+What survives is narrower and no longer has a null in it: the three readable counterexamples are
+`bg33_1` (slide 1.10 Å), `bg33_2` (1.33 Å) and `ox1_esm1_f8` (3.00 Å, itself borderline), i.e. two
+BoltzGen shells on octinoxate and one design on oxybenzone, and **still none is a shell design on
+octinoxate**.
 
 **The four BoltzGen cells come out in baseline order — a reading to carry into the RF3 legs, not a
 settled one.**
@@ -1033,7 +1054,7 @@ the pre-dynamics read at all, which is the finding to report rather than a repai
 | `ox1_esm1_f8` | −10.70 (75.0%) | **−17.95 (100.0%)** | **−7.2 stronger, held all run** |
 | `ox2_esm1_f8` | **−20.81 (100.0%)** | −16.68 (93.2%) | +4.1 weaker but held, 0 releases |
 | `ox2_shuffle` (null) | −5.30 (7.1%) | −2.98 (14.8%) | +2.3 weaker; both legs poor, the baseline binds nowhere either |
-| `ox2_shuffle_esm0` (null) | **−12.04 (94.7%)** | −0.92 (1.1%) | +11.1 weaker, OF3 placement misses the site entirely |
+| `ox2_shuffle_esm0` (null) | **−12.04 (94.7%)** | −0.92 (1.1%) | +11.1 weaker; **slide 13.14 Å — not a test of the OF3 pose** |
 | `bgox31_2` (boltzgen) | −10.89 (33.7%) | −7.45 (65.9%) | +3.45 weaker **yet retention doubled**; one 2.0 ns exit and return |
 | `bgox31_3` (boltzgen) | **−15.44 (99.7%)** | −5.82 (15.8%) | **+9.62 weaker, retention collapsed** 99.7% → 15.8% |
 | `bgox31_4` (boltzgen) | **−14.05 (100.0%)** | −5.74 (17.9%) | +8.31 weaker, retention 100% → 17.9%; bound first, then lost it (slid 3.83 Å) |
@@ -1292,8 +1313,10 @@ oxybenzone's `bgox31_2/3/4/5_o3cof`. The two OF3 table sets are therefore comple
 campaign; what remains is the RF3 lane below. Rows are added as each leg's drain completes, not in a batch at the
 end.
 
-**The oxybenzone BoltzGen rows carry no pair data, and that is a gap in the inputs rather than an
-omission.** `pair_contacts.py` needs a design json naming the designed slots, and oxybenzone has
+**The oxybenzone *BoltzGen* rows carry no pair data — a gap in the inputs, and it applies to the
+`bgox31` arm only.** The shell designs (`ox1`/`ox2`/`ox3`) all have a design json and do get pair
+numbers; on 2026-10-14 I wrongly extended this caveat to `ox1_esm1_f8_rf3cof` and left its pair
+columns dashed, which was my omission and not a missing input. Corrected the same day. `pair_contacts.py` needs a design json naming the designed slots, and oxybenzone has
 `design_shell1/2/3.json` only — there is no BoltzGen equivalent of octinoxate's `design.json` for
 the `bgox31` arm. The committed baseline rows in `RESULTS.md` already show `—` in those columns for
 the same reason. Deriving slots from the sequence's non-glycine positions would be inventing a
@@ -1432,4 +1455,4 @@ Eleven legs, each as `<pep>_rf3cof`: `ox1_orig_f12`, `ox1_esm1_f8`, `ox2_orig_f8
 | peptide | pose | enclosed | wrapped | engaged | cent sep | sim | pairs | band% |
 |---|---|---|---|---|---|---|---|---|
 | `ox1_esm1_f8` | Boltz co-fold | 0.94 | 1.00 | 17 | 4.1 Å | | 30/45 | |
-| | RF3 re-fold | 0.53 | 0.77 | 13 | **9.3 Å** | — | — | — |
+| | RF3 re-fold | 0.53 | 0.77 | 13 | **9.3 Å** | 1.79 | 10/45 | 3 |
