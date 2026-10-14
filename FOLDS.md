@@ -1698,6 +1698,20 @@ like `orig_f12_rf3cof` this is a ligand held by a fold that is itself rearrangin
 | `ox1_esm1_f8_rf3cof` | −8.77 | −9.95 | −11.47 | **−12.12** |
 | `ox1_orig_f12_rf3cof` | −10.28 | −10.84 | −12.40 | **−12.27** |
 
+**Prediction for `ox2_esm1_f8_rf3cof`, 2026-10-14 21:55, tail running, no ΔG read.** This is the
+first direct test of the **floor-dependence** reading from `ox1_orig_f12`: OF3's cell here is
+**strong** (−16.68 at 93.2%, against a −20.81 baseline), so floor-dependence predicts RF3 gains
+little or loses — the same regime as `ox1_esm1_f8`, the one cell OF3 has won.
+
+The other two measures split, which makes it a cleaner test than most: the static pose read
+favours **OF3** (0.745 enclosed, 16 engaged at 5.3 Å against RF3's 0.57, 12 at 6.4 Å), while
+pepgraph favours **RF3** for the only time in the campaign (px 11.94 against 12.57).
+
+**Stated expectation: RF3 lands near or below OF3's −16.68, roughly −14 to −17** — no large gain.
+If RF3 instead wins by a wide margin from this high floor, floor-dependence goes the way the
+shrinking-margin reading already did, and the RF3-beats-OF3 count stops being explainable as
+regression to the mean.
+
 ### Oxybenzone — RF3 co-folds, residence and release
 
 | leg | residence | released frames | episodes | longest | late |
