@@ -1397,6 +1397,7 @@ rearranging, and the windows decay mildly (−21.63 → −19.51). Slide 1.29 Å
 | peptide | Boltz co-fold ΔG (ret.) | RF3 re-fold ΔG (ret.) | Δ (refold − Boltz) |
 |---|---|---|---|
 | `orig_f12` | −13.71 (77.3%) | **−19.51 (99.9%)** | **−5.79 stronger, 0 releases**; OF3's same cell read −5.90 at 7.4% |
+| `s2_esm2_control` | **−16.25 (59.6%)** | −14.98 (57.2%) | +1.27 weaker, residence held; OF3's cell read −10.21 at 33.9% |
 
 **Prediction for `s2_esm2_control_rf3cof`, written 2026-10-14 17:58 with the leg drained and its
 tail running, so before any ΔG was read.** Unlike `orig_f12`, where RF3 was far gentler than OF3,
@@ -1420,23 +1421,53 @@ weak, low residence, and **not** rescued by the cutoff-artefact explanation that
 second time a pose starting outside the cutoff pulled in (after `bgox31_4`) and the static
 separation column loses much of its remaining value.
 
+**OUTCOME (18:19, after the tail): wrong on both counts, and the stated consequence applies.**
+`s2_esm2_control_rf3cof` reads **−14.98 at 57.2% residence with 2 released frames** — 1.27 kcal/mol
+weaker than its −16.25 baseline, where OF3's cell on the same peptide read −10.21 at 33.9%. I
+predicted weak and low-residence; it is neither. Residence essentially matches the baseline's 59.6%.
+
+The ligand **pulled in from 13.5 Å**: separation 11.08 → **5.84 Å** by 12 ns with contacts 14.2 →
+**32.4**, before drifting back to 11.59 Å by 20 ns. So this is the second pose to start outside the
+10 Å cutoff and bind anyway, after `bgox31_4` — and because I named that consequence in advance, it
+is applied rather than argued around: **the static centroid-separation column does not support
+predicting a leg's outcome.** It failed here on a compact fold, where the rod-artefact excuse that
+covered the OF3 version of this peptide was explicitly unavailable. Together with its four-way split
+on the `bg33` legs, what survives of the static read is description of a pose, not prediction of a
+leg.
+
+Two further things this cell settles. The **pose-level reading from `orig_f12` is weakened**: there
+RF3's gentle static transition went with a strong leg, which looked like the pose explaining the
+result, but here RF3's static read is as bad as OF3's and the leg is 4.8 kcal/mol *better* than OF3's,
+so the static pose quality is not what separated them. And the **cutoff-artefact explanation is now
+load-bearing in four cells** (`bg33_4`, `bgox31_5`, `ox1_esm1_f8_rf3cof`, and the in-and-out trace
+here), which is frequent enough that residence below ~60% should be treated as uninterpretable
+without its separation trace rather than as evidence of release.
+
+Slide 2.14 Å. Pairs 15/66 with `design_shell2.json`, sim 1.58, 4 dead slots, 7/15 long-range —
+against `orig_f12_rf3cof`'s 35/66 and 0 dead slots, so the stronger-binding leg of the two is also
+the one engaging far more of its designed surface. Cα 1.0 Å final, Rg 10.5 → 10.8: the fold barely
+moves while the ligand does all the travelling.
+
 ### Octinoxate — RF3 co-folds, window convergence
 
 | leg | 5 ns | 10 ns | 15 ns | 20 ns |
 |---|---|---|---|---|
 | `orig_f12_rf3cof` | −21.63 | −22.03 | −19.99 | **−19.51** |
+| `s2_esm2_control_rf3cof` | −12.43 | −13.84 | −15.75 | **−14.98** |
 
 ### Octinoxate — RF3 co-folds, residence and release
 
 | leg | residence | released frames | episodes | longest | late |
 |---|---|---|---|---|---|
 | `orig_f12_rf3cof` | **99.9%** | **0 (0.0%)** | 0 | — | — |
+| `s2_esm2_control_rf3cof` | 57.2% | 2 (0.1%) | 2 | 10 ps | 50% |
 
 ### Octinoxate — RF3 co-folds, peptide structural stability
 
 | leg | Cα final | Cα max | Rg start→end |
 |---|---|---|---|
 | `orig_f12_rf3cof` | 9.2 | 12.4 | 8.8 → 9.9 |
+| `s2_esm2_control_rf3cof` | 1.0 | 3.1 | 10.5 → 10.8 |
 
 ### Octinoxate — the pre-dynamics static read and the pairs the RF3 re-folds realise
 
@@ -1444,6 +1475,8 @@ separation column loses much of its remaining value.
 |---|---|---|---|---|---|---|---|---|
 | `orig_f12` | Boltz co-fold | 0.96 | 1.00 | 20 | 4.2 Å | | 22/66 | |
 | | RF3 re-fold | 0.80 | 0.90 | 18 | 5.8 Å | **1.96** | **35/66** | 44 |
+| `s2_esm2_control` | Boltz co-fold | 0.51 | 0.85 | 17 | 6.7 Å | | 10/66 | |
+| | RF3 re-fold | 0.42 | 0.65 | 13 | **13.5 Å** | 1.58 | 15/66 | 7 |
 
 ### Oxybenzone — RF3 co-folds, ΔG and retention
 
