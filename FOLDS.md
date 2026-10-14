@@ -763,6 +763,14 @@ re-folds** at the end of this file.
 > equilibration. Seven more sit in a 2.5–3.8 Å grey band and are flagged in place. Those tables
 > were written and discussed for weeks before the slide was tabulated for the octinoxate lane at
 > all, which is how a 10.62 Å cell came to be cited as a counterexample; see the correction below.
+>
+> **Baselines slide too, and one of them badly.** The Δ column compares a re-fold leg to a *Boltz
+> co-fold leg*, and that leg has its own equilibration slide. Twenty of the twenty-one baselines
+> are under 3.5 Å, but **`s3_esm2_f4` slid 7.81 Å**, so its −21.08 is the ΔG of a pose nearly 8 Å
+> from the Boltz prediction. Every Δ for that peptide — OF3's "+7.3 weaker, best oct refold" and
+> the RF3 cell — is therefore **not** a measurement of re-folding against the Boltz pose, and that
+> peptide's rows are marked ⚠. Found 2026-10-14 by checking the baselines after the re-fold cells;
+> I had only checked the re-folds.
 
 The campaign question, answered first across the ten Modal legs and now being extended on racc:
 **is the OF3 re-fold worth running dynamics on, or does the Boltz co-fold remain the start the
@@ -838,7 +846,7 @@ counterexample above. The `ox2_shuffle` pairing also shows the baseline itself c
 | `orig_f12` (Vina p1 in the OF3 shell) | −13.71 (77.3%) | −9.65 (50.2%) | +4.1 weaker, partial loss |
 | `s3_orig_f12` | **−24.33 (100.0%)** | −10.10 (44.8%) | +14.2 weaker, partial loss |
 | `s2_esm2_control` | **−16.25 (59.6%)** | −10.21 (33.9%) | +6.0 weaker, one long exit-and-return |
-| `s3_esm2_f4` | **−21.08 (99.6%)** | −13.76 (84.8%) | +7.3 weaker but held (best oct refold) |
+| `s3_esm2_f4` | −21.08 (99.6%) ⚠ | −13.76 (84.8%) | +7.3 weaker but held (best oct refold); **Δ compromised — baseline slid 7.81 Å** |
 | `shuffle_control` (null) | **−15.13 (75.9%)** | −9.39 (25.7%) | +5.7 weaker, late progressive release |
 | `shuffle_control_esm0` (null) | −14.32 (80.2%) | **−15.62 (92.5%)** | **−1.3 stronger on the OF3 fold, retention higher** |
 | `bg33_1` (boltzgen) | −11.31 (14.5%) | **−14.90 (56.4%)** | **−3.6 stronger, retention 4× higher** |
