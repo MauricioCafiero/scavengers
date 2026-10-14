@@ -743,7 +743,7 @@ re-folds** at the end of this file.
 
 The campaign question, answered first across the ten Modal legs and now being extended on racc:
 **is the OF3 re-fold worth running dynamics on, or does the Boltz co-fold remain the start the
-pipeline should use?** Of the twenty-one OF3 cells that have run, seventeen read 2–18 kcal/mol
+pipeline should use?** Of the twenty-two OF3 cells that have run, eighteen read 2–18 kcal/mol
 *weaker* than their Boltz baseline with degraded or lost retention. Spend: ten Modal legs at ≈ $8.2 of
 produce (plus the $0.78 erroneous dock-pose leg), one at a time; the fold-lane extension runs free
 on racc.
@@ -1024,8 +1024,9 @@ the pre-dynamics read at all, which is the finding to report rather than a repai
 | `bgox31_2` (boltzgen) | −10.89 (33.7%) | −7.45 (65.9%) | +3.45 weaker **yet retention doubled**; one 2.0 ns exit and return |
 | `bgox31_3` (boltzgen) | **−15.44 (99.7%)** | −5.82 (15.8%) | **+9.62 weaker, retention collapsed** 99.7% → 15.8% |
 | `bgox31_4` (boltzgen) | **−14.05 (100.0%)** | −5.74 (17.9%) | +8.31 weaker, retention 100% → 17.9%; bound first, then lost it (slid 3.83 Å) |
+| `bgox31_5` (boltzgen) | **−16.78 (100.0%)** | −11.55 (70.7%) | +5.23 weaker but **held, 0 releases**; strongest baseline, second-smallest loss |
 
-Nine of the ten oxybenzone cells are weaker, and this is where the campaign's **largest** losses
+Ten of the eleven oxybenzone cells are weaker, and this is where the campaign's **largest** losses
 sit: `ox2_orig_f8` +17.0 and `ox3_orig_f8` +16.8, the two best Boltz co-folds on this molecule,
 both of which lose the ligand under the re-fold (49.5% and 2.4%). The one cell that goes the other
 way, `ox1_esm1_f8` at −7.2 and 100% retention, is the campaign's strongest counterexample and the
@@ -1110,6 +1111,7 @@ again nothing structural fails — the peptide holds its shape and simply stops 
 | `bgox31_2_o3cof` | −9.88 | −9.68 | −7.50 | −7.45 |
 | `bgox31_3_o3cof` | −9.15 | −6.44 | −5.20 | −5.82 |
 | `bgox31_4_o3cof` | −8.80 | −7.64 | −5.70 | −5.74 |
+| `bgox31_5_o3cof` | −11.35 | −9.998 | −11.19 | **−11.55** |
 
 `ox2_orig_f8_o3cof` gives back ~7.6 across its windows and `ox1_orig_f12_o3cof` ~3.6 — the decay
 signature of a starting pose coming apart. The two esm1 re-folds hold a flat −16 to −19 band the
@@ -1130,6 +1132,7 @@ whole run, so their numbers are settled poses rather than starting-pose artifact
 | `bgox31_2_o3cof` | 65.9% | 347 (17.35%) | 18 | 2040 ps | **98%** |
 | `bgox31_3_o3cof` | 15.8% | 476 (23.8%) | 31 | **2360 ps** | 61% |
 | `bgox31_4_o3cof` | 17.9% | 414 (20.7%) | 39 | 1430 ps | **90%** |
+| `bgox31_5_o3cof` | 70.7% | **0 (0.0%)** | 0 | — | — |
 
 The two esm1 re-folds are the only genuine retainers in this set, both with **zero** released
 frames. At the other end, `ox2_shuffle_esm0_o3cof` spends a single **9.27 ns** episode detached and
@@ -1151,6 +1154,7 @@ opposite failure: a ligand that never settled anywhere.
 | `bgox31_2_o3cof` | 2.4 | 5.1 | 13.6 → 13.6 |
 | `bgox31_3_o3cof` | 1.5 | 2.2 | 8.6 → 8.5 |
 | `bgox31_4_o3cof` | 0.7 | 1.9 | 8.8 → 9.1 |
+| `bgox31_5_o3cof` | 2.8 | 3.6 | 9.3 → 9.3 |
 
 No oxybenzone re-fold unravels either: Cα drift is 2.4–5.9 Å with Rg flat to within 1 Å in every
 leg, including the two that lost the ligand outright. Fold stability and ligand retention are
@@ -1182,6 +1186,8 @@ weak ΔG here cannot be explained away as a peptide falling apart.
 | | OF3 re-fold | 0.615 | 0.82 | 14 | 8.5 Å | — | — | — |
 | `bgox31_4` (boltzgen) | Boltz co-fold | 0.65 | 0.94 | 16 | 6.7 Å | | — | — |
 | | OF3 re-fold | 0.47 | 0.65 | 11 | **11.2 Å** | — | — | — |
+| `bgox31_5` (boltzgen) | Boltz co-fold | 0.50 | 0.77 | 13 | 7.0 Å | | — | — |
+| | OF3 re-fold | **0.55** | 0.71 | 12 | **7.0 Å** | — | — | — |
 
 The static read priced these re-folds before the GPU did: the Boltz co-folds enclose 0.58–0.995 at
 1.2–9.3 Å, the OF3 placements enclose 0.47–0.81 at 5.3–10.3 Å, and every leg that read weaker in the
@@ -1223,14 +1229,53 @@ Both cannot hold. If the loss is large, the baseline's own quality is doing the 
 read adds nothing even on oxybenzone, which would withdraw the molecule-level claim made above for
 `bgox31_3`. If the loss is small, the static read is the better predictor and `bgox31_3`'s big loss
 should be attributed to its enclosure collapse (0.955 → 0.615) rather than to its strong baseline.
-The octinoxate precedent favours the first branch — `bg33_3` also had a near-flat static read and
+**OUTCOME (recorded after the leg landed, 2026-10-14 14:55): the prediction above was wrong, and the
+second branch is the one that held.** `bgox31_5_o3cof` read **−11.55, i.e. +5.23 weaker** — the
+*second-smallest* loss in the arm, not the largest — with retention **100% → 70.7% and zero released
+frames**, and windows that are flat to strengthening (−11.35 / −10.00 / −11.19 / −11.55), i.e.
+converged rather than decaying. The arm's strongest baseline produced one of its smallest losses, so
+**baseline strength does not drive the loss on this molecule.**
+
+Checked over all four cells, with the losses ranked by each candidate predictor (verified
+programmatically, not by eye):
+
+| predictor | order of cells | losses in that order | orders them? |
+|---|---|---|---|
+| baseline strength, strongest first | 5, 3, 4, 2 | +5.23, +9.62, +8.31, +3.45 | **no** |
+| enclosure drop, biggest first | 3, 4, 2, 5 | +9.62, +8.31, +3.45, +5.23 | no (one inversion) |
+| **centroid separation increase, biggest first** | **3, 4, 5, 2** | **+9.62, +8.31, +5.23, +3.45** | **yes, 4 of 4** |
+
+And the same three tests on octinoxate's `bg33` arm inverted:
+
+| predictor | order of cells | Δ in that order | orders them? |
+|---|---|---|---|
+| **baseline strength, strongest first** | **4, 3, 1, 2** | **+2.55, +1.80, −3.60, −3.60** | **yes, 4 of 4** |
+| enclosure drop, biggest first | 2, 4, 3, 1 | −3.60, +2.55, +1.80, −3.60 | no |
+| separation increase, biggest first | 2, 3, 4, 1 | −3.60, +1.80, +2.55, −3.60 | no |
+
+So the two molecules have **different working predictors, and each one's predictor fails on the
+other**: on oxybenzone the change in centroid separation orders all four losses exactly while
+baseline strength does not; on octinoxate baseline strength orders all four exactly while neither
+static measure does. That is a sharper and more defensible statement than the molecule-level claim
+made for `bgox31_3` above, and it **corrects that claim in one respect**: what carries the signal on
+oxybenzone is *separation*, not enclosure — enclosure drop still misorders the arm (`bgox31_2` and
+`bgox31_5` swap). Four points per arm is thin, and with `bgox31_5` held at 70.7% the honest reading
+is a hypothesis for the RF3 legs to test, not an established law.
+
+The caveat on this cell: `ligand_slide.py` flags **2.68 Å**, so like `bgox31_4` it is slid, though far
+less. Its separation trace excursions to 12.7–13.4 Å at 6–8 ns without a single *released* frame also
+confirm what `bg33_4` showed — the release detector counts sustained detachment, so brief excursions
+beyond 10 Å depress residence without registering an episode, and residence and release have to be
+read together.
+
+The original octinoxate precedent favoured the first branch — `bg33_3` also had a near-flat static read and
 its leg got *worse* — so the stated expectation is a **large loss with retention falling from
 100%**, and a small loss would be the more informative outcome because it breaks the octinoxate
 pattern.
 
-**Still to land in these tables.** One of the eight new OF3 BoltzGen legs: `bgox31_5_o3cof`
-(oxybenzone, in batch job `fold_oxb_1`). Octinoxate's four — `bg33_1/2/3/4_o3cof` — are complete,
-as are `bgox31_2/3/4_o3cof`. Rows are added as each leg's drain completes, not in a batch at the
+**All eight new OF3 BoltzGen legs have landed** (2026-10-14): octinoxate's `bg33_1/2/3/4_o3cof` and
+oxybenzone's `bgox31_2/3/4/5_o3cof`. The two OF3 table sets are therefore complete for this
+campaign; what remains is the RF3 lane below. Rows are added as each leg's drain completes, not in a batch at the
 end.
 
 **The oxybenzone BoltzGen rows carry no pair data, and that is a gap in the inputs rather than an
