@@ -1398,6 +1398,28 @@ rearranging, and the windows decay mildly (−21.63 → −19.51). Slide 1.29 Å
 |---|---|---|---|
 | `orig_f12` | −13.71 (77.3%) | **−19.51 (99.9%)** | **−5.79 stronger, 0 releases**; OF3's same cell read −5.90 at 7.4% |
 
+**Prediction for `s2_esm2_control_rf3cof`, written 2026-10-14 17:58 with the leg drained and its
+tail running, so before any ΔG was read.** Unlike `orig_f12`, where RF3 was far gentler than OF3,
+here **both re-folders put the ligand outside the fold** and the pose-level reading predicts a
+weak cell, plausibly no better than OF3's −10.21:
+
+| `s2_esm2_control` pose | enclosed | wrapped | engaged | cent sep | peptide Rg |
+|---|---|---|---|---|---|
+| Boltz co-fold | 0.51 | 0.85 | 17 | 6.7 Å | — |
+| OF3 re-fold | 0.38 | 0.50 | 10 | 13.5 Å | 15.3 → 14.7 (extended) |
+| RF3 re-fold | 0.42 | 0.65 | 13 | **13.5 Å** | **10.2 (compact)** |
+
+Separation rises 6.7 → 13.5 Å, the largest increase in the octinoxate set, and RF3 only marginally
+beats OF3 on enclosure (0.42 vs 0.38) and engagement (13 vs 10). **The sharper point is that the
+13.5 Å means something different here.** On the OF3 leg this peptide was extended (Rg 15.3 Å), so
+a far centroid was partly the rod artefact this file warns about — the centroid of a rod is not
+where its site is. RF3 folds it **compact** at Rg 10.2 Å, so 13.5 Å of centroid separation now
+means the ligand really is outside the fold rather than off the end of one. Stated expectation:
+weak, low residence, and **not** rescued by the cutoff-artefact explanation that covered
+`bg33_4`, `bgox31_5` and `ox1_esm1_f8_rf3cof`. If instead it binds well from 13.5 Å, that is the
+second time a pose starting outside the cutoff pulled in (after `bgox31_4`) and the static
+separation column loses much of its remaining value.
+
 ### Octinoxate — RF3 co-folds, window convergence
 
 | leg | 5 ns | 10 ns | 15 ns | 20 ns |
