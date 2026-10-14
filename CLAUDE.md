@@ -253,8 +253,16 @@ silently aborts a multi-path `rm` and leaves the old files in place.
 the summary CSV with their full component set (parse the `Differences (Complex - Receptor - Ligand)`
 block, not the complex section — a naive grep of `VDWAALS`/`EEL` returns the complex's −hundreds).
 
-Every result goes in `runs/octinoxate/md/mmgbsa_summary.csv` **as it is computed**, not in a batch at the
-end. Nothing reads that file — `make_gnina_bundle.py` carries the same numbers in a hardcoded `REFERENCE`
+Every result goes in **its own molecule's** `runs/<mol>/md/mmgbsa_summary.csv` **as it is computed**,
+not in a batch at the end. This file once held the whole campaign, which is why
+`collect_mmgbsa_rows.py` still defaults `--outdir` to `runs/octinoxate`; oxybenzone has had its own
+summary since its legs landed, and `--md-root` (where legs are *read*) does **not** redirect the
+output. Passing only `--md-root runs/oxybenzone/md` therefore reads the right legs and appends to
+octinoxate's table — it put 16 oxybenzone rows in the wrong file on 2026-10-14. Pass **both**:
+`--md-root runs/<mol>/md --outdir runs/<mol>`, and check with
+`grep -c '^<leg>,' runs/<mol>/md/mmgbsa_summary.csv` that the rows landed where intended.
+
+Nothing reads these files — `make_gnina_bundle.py` carries the same numbers in a hardcoded `REFERENCE`
 dict — so a new row has to be added in both places or the next GNINA bundle is built on stale values.
 When a peptide's docked legs land, extend its `REFERENCE` entry with the flat `vina_p1_*`/`gnina_p9_*`
 fields, as both shuffle peers now have.
