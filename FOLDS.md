@@ -1642,6 +1642,7 @@ Eleven legs, each as `<pep>_rf3cof`: `ox1_orig_f12`, `ox1_esm1_f8`, `ox2_orig_f8
 |---|---|---|---|
 | `ox1_esm1_f8` | −10.70 (75.0%) | **−12.12 (35.2%)** | **−1.42 stronger**; residence is a cutoff artefact, see below |
 | `ox1_orig_f12` | −10.31 (49.1%) | **−12.27 (89.1%)** | **−1.96 stronger**, residence up; OF3's cell read −3.96 at 20.5%, so RF3 better by 8.3 |
+| `ox2_esm1_f8` | **−20.81 (100.0%)** | −10.90 (90.4%) | +9.91 weaker, residence held; OF3's cell read −16.68, so **RF3 is 5.78 worse** |
 
 **Prediction for `ox1_orig_f12_rf3cof`, 2026-10-14 20:52, tail running, no ΔG read.** Both
 pre-dynamics measures favour OF3 here — pepgraph px **7.09** against RF3's 14.26, and enclosure
@@ -1697,6 +1698,7 @@ like `orig_f12_rf3cof` this is a ligand held by a fold that is itself rearrangin
 |---|---|---|---|---|
 | `ox1_esm1_f8_rf3cof` | −8.77 | −9.95 | −11.47 | **−12.12** |
 | `ox1_orig_f12_rf3cof` | −10.28 | −10.84 | −12.40 | **−12.27** |
+| `ox2_esm1_f8_rf3cof` | −12.61 | −11.47 | −11.15 | **−10.90** |
 
 **Prediction for `ox2_esm1_f8_rf3cof`, 2026-10-14 21:55, tail running, no ΔG read.** This is the
 first direct test of the **floor-dependence** reading from `ox1_orig_f12`: OF3's cell here is
@@ -1712,12 +1714,48 @@ If RF3 instead wins by a wide margin from this high floor, floor-dependence goes
 shrinking-margin reading already did, and the RF3-beats-OF3 count stops being explainable as
 regression to the mean.
 
+**OUTCOME (22:07): direction right, magnitude wrong again, and floor-dependence survives its first
+real test.** `ox2_esm1_f8_rf3cof` reads **−10.90 at 90.4% residence**, 2 released frames, windows
+decaying gently (−12.61 → −10.90), slide 1.77 Å. That is **+9.91 weaker than its −20.81 baseline and
+5.78 weaker than OF3's −16.68** — no gain, as predicted, but further below my stated −14 to −17 than
+I allowed for. Four of five predictions today have been directionally right and numerically loose.
+
+**This is now the better explanation of the whole RF3-vs-OF3 column, and it is not "RF3 is better".**
+Ordering all seven pairs by how OF3 did, RF3's advantage falls away and reverses:
+
+| peptide | OF3 | RF3 | RF3 − OF3 |
+|---|---|---|---|
+| `ox1_orig_f12` | −3.96 | −12.27 | −8.3 |
+| `orig_f12` | −5.90 | −19.51 | −13.6 |
+| `s3_orig_f12` | −10.10 | −12.10 | −2.0 |
+| `s2_esm2_control` | −10.21 | −14.98 | −4.8 |
+| `s3_esm2_f4` | −13.76 | −16.18 | −2.4 |
+| `ox2_esm1_f8` | −16.68 | −10.90 | **+5.8** |
+| `ox1_esm1_f8` | −17.95 | −12.12 | **+5.8** |
+
+**The two cells OF3 wins are its two best cells, and the two where RF3 gains most are its two worst.**
+Meanwhile RF3's seven cells span −10.90 to −19.51 (8.6 kcal/mol) against OF3's −3.96 to −17.95
+(14.0) — **RF3 is the more consistent lane, not the better one.** That is the regression-to-the-mean
+account flagged when floor-dependence was first written down, and with seven pairs it now explains
+the column better than any claim that one predictor produces better complexes. The earlier framing
+— "RF3 beats OF3 4 of 4 on octinoxate" — **should not be carried into the paper**; the count is 5 of
+7 overall and the pattern is a spread effect.
+
+It also removes the cross-molecule story: the two OF3 wins are both oxybenzone, but they are also
+both high-floor cells, so molecule and floor are confounded here and the oxybenzone-vs-octinoxate
+split needs a high-floor octinoxate cell to separate them. None of the remaining legs is guaranteed
+to provide one.
+
+pepgraph missed this cell too: it favoured **RF3** here (px 11.94 against 12.57), the only cell in the
+campaign where it does, and RF3 lost by 5.78.
+
 ### Oxybenzone — RF3 co-folds, residence and release
 
 | leg | residence | released frames | episodes | longest | late |
 |---|---|---|---|---|---|
 | `ox1_esm1_f8_rf3cof` | 35.2% | 8 (0.4%) | 8 | 10 ps | 0% |
 | `ox1_orig_f12_rf3cof` | 89.1% | 11 (0.55%) | 8 | 30 ps | 27% |
+| `ox2_esm1_f8_rf3cof` | 90.4% | 2 (0.1%) | 2 | 10 ps | 100% |
 
 ### Oxybenzone — RF3 co-folds, peptide structural stability
 
@@ -1725,6 +1763,7 @@ regression to the mean.
 |---|---|---|---|
 | `ox1_esm1_f8_rf3cof` | 1.5 | 4.2 | 10.7 → 10.5 |
 | `ox1_orig_f12_rf3cof` | 8.4 | 10.9 | 7.9 → 8.7 |
+| `ox2_esm1_f8_rf3cof` | 2.2 | 3.3 | 9.6 → 9.3 |
 
 ### Oxybenzone — the pre-dynamics static read and the pairs the RF3 re-folds realise
 
@@ -1734,3 +1773,5 @@ regression to the mean.
 | | RF3 re-fold | 0.53 | 0.77 | 13 | **9.3 Å** | 1.79 | 10/45 | 3 |
 | `ox1_orig_f12` | Boltz co-fold | 0.995 | 1.00 | 17 | 1.2 Å | | 42/45 | |
 | | RF3 re-fold | 0.55 | 0.71 | 13 | 6.1 Å | 1.63 | **29/45** | 56 |
+| `ox2_esm1_f8` | Boltz co-fold | 0.665 | 1.00 | 17 | 6.5 Å | | 36/55 | |
+| | RF3 re-fold | 0.57 | 0.71 | 12 | 6.4 Å | — | — | 6 dead |
