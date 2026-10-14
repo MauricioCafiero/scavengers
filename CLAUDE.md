@@ -189,9 +189,12 @@ other row — the same trap `md_stability.py` has. On 2026-10-06 docking two nul
 when writing `bg33_2_o3cof` alone silently dropped `bg33_1_o3cof`'s row from
 `pair_contacts_o3cof_boltzgen.csv`. It has no `--allow-shrink` guard, so nothing warns you. Name
 every leg on every run:
-`$OMD/bin/python code/pair_contacts.py <leg dirs...> --design design.json --csv runs/<mol>/md/pair_contacts_<lane>_<arm>.csv`
-— and note `--design` resolves against `--run-dir` (default `runs/octinoxate`), so it takes
-`design.json`, not a full path.
+`$OMD/bin/python code/pair_contacts.py <leg dirs...> --run-dir runs/<mol> --design design.json --csv runs/<mol>/md/pair_contacts_<lane>_<arm>.csv`
+— `--design` resolves against `--run-dir`, so it takes `design.json`, not a full path. **`--run-dir`
+is required and has no default** (changed 2026-10-14, with `collect_mmgbsa_rows.py`'s `--outdir`): it
+chooses which molecule's design json defines the slots, and a default would score one molecule's legs
+against another's slots and print plausible-looking counts. The script also refuses a run whose legs
+are not under `runs/<that molecule>/`.
 
 **The route that avoids the damage rather than repairing it:** `vina_redock.py` has an `--out`, so
 dock the new structures into a scratch directory and append the rows to the real tables, which leaves
@@ -261,6 +264,9 @@ output. Passing only `--md-root runs/oxybenzone/md` therefore reads the right le
 octinoxate's table — it put 16 oxybenzone rows in the wrong file on 2026-10-14. Pass **both**:
 `--md-root runs/<mol>/md --outdir runs/<mol>`, and check with
 `grep -c '^<leg>,' runs/<mol>/md/mmgbsa_summary.csv` that the rows landed where intended.
+**`--outdir` is now required with no default** (2026-10-14, at the user's instruction: a script that
+points at one molecule by default should error instead of guessing), and it refuses an `--outdir`
+whose summary does not exist, listing the molecules that have one.
 
 Nothing reads these files — `make_gnina_bundle.py` carries the same numbers in a hardcoded `REFERENCE`
 dict — so a new row has to be added in both places or the next GNINA bundle is built on stale values.

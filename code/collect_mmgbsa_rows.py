@@ -38,7 +38,14 @@ def main(argv=None):
     ap = argparse.ArgumentParser()
     ap.add_argument("structures", nargs="*")
     ap.add_argument("--all", action="store_true")
-    ap.add_argument("--outdir", default="runs/octinoxate")
+    # No default on purpose: this picks which molecule's summary gets written, and defaulting it to
+    # octinoxate silently filed 16 oxybenzone rows in the wrong table on 2026-10-14. Naming the
+    # molecule is cheap; guessing it is not recoverable without noticing first.
+    ap.add_argument("--outdir", required=True, metavar="runs/<mol>",
+                    help="the molecule's run directory whose md/mmgbsa_summary.csv is written, "
+                         "e.g. runs/octinoxate or runs/oxybenzone. Required -- there is no default. "
+                         "Note this is separate from --md-root, which only says where legs are READ "
+                         "from; pointing --md-root at another molecule does not redirect the output.")
     ap.add_argument("--md-root", action="append", default=None, metavar="DIR",
                     help="extra directory of prepared MD runs to look in, repeatable. Co-folded "
                          "BoltzGen legs live outside this repo (~/python_mac/boltzgen_local/md), but "
@@ -47,6 +54,10 @@ def main(argv=None):
     a = ap.parse_args(argv)
     md = REPO / a.outdir / "md"
     summary = md / "mmgbsa_summary.csv"
+    if not summary.is_file():
+        ap.error(f"no summary at {summary} -- is --outdir {a.outdir!r} the right molecule? "
+                 f"molecules with a summary: "
+                 f"{', '.join(sorted('runs/' + p.parent.parent.name for p in REPO.glob('runs/*/md/mmgbsa_summary.csv')))}")
     # Roots to resolve a named structure against, in order. The summary stays where it is: one file
     # per ligand, whichever lane a leg ran in.
     roots = [md] + [Path(r).expanduser() for r in (a.md_root or [])]

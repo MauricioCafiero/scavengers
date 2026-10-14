@@ -128,7 +128,13 @@ def main(argv=None):
     p = argparse.ArgumentParser(description=__doc__.split("\n\n")[0],
                                formatter_class=argparse.RawDescriptionHelpFormatter)
     p.add_argument("legs", nargs="+", help="production directories with traj_wrapped.xtc/.pdb")
-    p.add_argument("--run-dir", default="runs/octinoxate", help="where the design jsons live")
+    # Required, no default: this resolves the design json that defines the designed slots, so a
+    # default of runs/octinoxate would score another molecule's legs against octinoxate's slots and
+    # print plausible-looking pair counts. Same reasoning as collect_mmgbsa_rows.py's --outdir.
+    p.add_argument("--run-dir", required=True, metavar="runs/<mol>",
+                   help="the molecule's run directory where the design jsons live, e.g. "
+                        "runs/octinoxate or runs/oxybenzone. Required -- there is no default, "
+                        "because --design is resolved relative to it.")
     p.add_argument("--design", help="design json for every leg, instead of guessing per name")
     p.add_argument("--cutoff", type=float, default=4.0, help="contact cutoff, A (default 4.0)")
     p.add_argument("--persist", type=float, default=0.05,
@@ -136,6 +142,15 @@ def main(argv=None):
     p.add_argument("--csv", help="write the summary here")
     p.add_argument("--gaps", action="store_true", help="also print the per-gap breakdown")
     args = p.parse_args(argv)
+    if not os.path.isdir(args.run_dir):
+        p.error(f"--run-dir {args.run_dir!r} is not a directory")
+    # Catch the cross-molecule mistake early: every leg's path should sit under the same molecule
+    # the designs are read from, otherwise the slots belong to a different peptide set.
+    mol = os.path.basename(os.path.normpath(args.run_dir))
+    stray = [l for l in args.legs if f"runs/{mol}/" not in l and "boltzgen_local" not in l]
+    if stray:
+        p.error(f"--run-dir names {mol!r} but these legs are not under runs/{mol}/: "
+                f"{', '.join(stray)} -- the design json would define the wrong slots")
 
     rows = []
     for leg in args.legs:
