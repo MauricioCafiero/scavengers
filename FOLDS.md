@@ -1757,6 +1757,20 @@ campaign where it does, and RF3 lost by 5.78.
 | `ox1_orig_f12_rf3cof` | 89.1% | 11 (0.55%) | 8 | 30 ps | 27% |
 | `ox2_esm1_f8_rf3cof` | 90.4% | 2 (0.1%) | 2 | 10 ps | 100% |
 
+**Prediction for `ox2_orig_f8_rf3cof`, 2026-10-14 22:50, tail running, no ΔG read.** `ox2_orig_f8`
+has the **campaign's strongest oxybenzone baseline** (−24.21 at 100%) and a poor OF3 cell
+(−7.23 at 49.5%, +17.0 weaker — one of the two largest drops anywhere). On the regression reading
+a low OF3 floor is where RF3 gains most, so: **RF3 beats −7.23, roughly −10 to −16**, and still
+falls well short of −24.21.
+
+The static read mildly favours RF3 (0.595 enclosed, 16 engaged at 6.2 Å against OF3's 0.655, 17 at
+7.5 Å — better separation, slightly worse enclosure) and pepgraph favours OF3 (px 7.79 against
+9.35), the usual split. Neither has earned weight.
+
+This is a **confirmation, not a test** — the regression reading already predicts it and a hit adds
+little. The informative outcome is the miss: if RF3 fails to beat a −7.23 floor, the spread
+account loses its main support.
+
 ### Oxybenzone — RF3 co-folds, peptide structural stability
 
 | leg | Cα final | Cα max | Rg start→end |
