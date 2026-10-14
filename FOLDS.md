@@ -1322,6 +1322,28 @@ copied from the same source as the OF3 sets so the two lanes stay directly compa
 Ten legs, each as `<pep>_rf3cof`: `orig_f12`, `s3_orig_f12`, `s2_esm2_control`, `s3_esm2_f4`,
 `shuffle_control`, `shuffle_control_esm0`, `bg33_1`–`bg33_4`.
 
+**Prediction for `orig_f12_rf3cof`, written 2026-10-14 16:45 with the leg drained and its tail
+still running, so before any ΔG was read.** Recorded as a reading under test, not a rule.
+
+`orig_f12`'s OF3 cell is the campaign's worst retention failure: −13.71 (77.3%) → −5.90 (7.4%),
+ligand effectively gone, windows decaying −9.62 → −5.90. Two readings in this file disagree about
+what RF3 should do with the same sequence:
+
+- **Sequence-level** — a peptide behaves similarly across re-folders, which `ox1_esm1_f8` supports
+  by reading stronger under both OF3 (−7.2) and RF3 (−1.42). This predicts `orig_f12_rf3cof` also
+  does badly.
+- **Pose-level** — the static read says RF3 barely disturbed this site, where OF3 wrecked it:
+  enclosure 0.96 → **0.80** against OF3's 0.68, engaged 20 → **18** against 14, centroid separation
+  4.2 → **5.8 Å** against 9.4 Å. That is the gentlest re-fold transition in the octinoxate set and
+  predicts it holds the ligand far better than 7.4%, with ΔG nearer −13.71 than −5.90.
+
+**Stated expectation: the pose-level one** — it holds, well above 7.4%. The reason for preferring
+it is that the static read's failures on octinoxate were all on `bg33` legs, BoltzGen shells with
+weak Boltz baselines, whereas this is a designed shell with a near-perfect Boltz pose, a different
+regime. That is itself a reading of four cells and is the kind I have over-trusted today, so if
+the leg goes the other way the sequence-level reading gains and this note should not be used to
+explain the result away.
+
 | peptide | Boltz co-fold ΔG (ret.) | RF3 re-fold ΔG (ret.) | Δ (refold − Boltz) |
 |---|---|---|---|
 
