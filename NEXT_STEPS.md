@@ -704,6 +704,49 @@ in dir:leg format for `racc_feed.sh BATCH=1`). The remaining actions on a go are
 `SYSNAME` set to the batch's molecule, a `racc_drain.sh` watcher per molecule, and the same-day tails.
 
 
+## Oxybenzone ABFE set: complementary campaign, proposed 2026-10-14, not launched
+
+**Plan only; no leg is submitted until you approve it.** The octinoxate ABFE cross-check campaign
+(fep repo `RESULTS.md`) finished 9/9 points on 2026-10-14 — OpenFE 1.12 `AbsoluteBindingProtocol`,
+30×10 ns complex + 14×10 ns solvent, ~10–14 h/leg on the racc H100s (dock7 took 11.6 h) — and its
+working rule ("MM/GBSA dynamics screens, ABFE prices the survivors") is written. Oxybenzone already
+has one ABFE point: `ox2_orig_f8` co-folded → −2.60 ± 0.61. The set below adds the cells that make
+oxybenzone ligand-matched with it. Oxybenzone is achiral, so no S/R prep confound — solvent-leg
+estimates are directly comparable across legs.
+
+Core tier (one-to-one parallels of the cells that discriminated on octinoxate):
+
+| # | leg (20 ns peptidebuilder record) | cell type | MM/GBSA / residence | what it tests |
+|---|---|---|---|---|
+| 1 | `ox2` GNINA p4 (aromatic, docked) | docked & **retained** −24.00/100% | −24.00 | The one ligand-matched cell where docking did not fail. On octinoxate every docked leg priced unbound (−0.60…+0.91); here the docked pose *retains*. Does it price like its co-fold sibling (−2.60), or is octi's 2–6 kcal prep-route gap about the pose, not the route? |
+| 2 | `ox2_esm1_f8` co-folded | aromatic·esm2 linker −20.81/100% | −20.81 | Linker invariance, the parallel of `s3_esm2_f4` (ABFE −6.53 vs fold-parent −5.47). |
+| 3 | `ox2_shuffle_esm0` co-folded | null rod that **retains** −12.04/94.7% | −12.04 | The sharpest single test: the octi null rod priced −9.68 (exterior groove). Does a *retaining* null price like the designed set or like the octi null? "ABFE ranks the site, not the design" hangs on this. |
+| 4 | `ox2_shuffle` co-folded | **released** null −5.30/**7.1%** | −5.30 | The octi adsorption-control surrogate (`s2_esm2_control` → −4.52): released by MD, so ABFE prices the surface it lands on. |
+
+Second tier (fills the remaining chemistry axes):
+
+| # | leg | cell type | what it tests |
+|---|---|---|---|
+| 5 | `ox1_orig_f12` co-folded | charged shell, weak −10.31/**49.1%** | dose-response: octi showed −8.40 MM/GBSA → ABFE ≈ unbound (−1.25). Does a weak-designed cell fall the same way? |
+| 6 | `bgox31_3_dock1` | BoltzGen best, docked & retained −22.23/100% | MM/GBSA says the shell beats BoltzGen by only 2.0 kcal on oxybenzone (octi BoltzGen never enclosed at all). ABFE tests whether that 2-kcal ranking is real. |
+| 7 | `ox3_orig_f8` co-folded | hydrophilic shell −18.84/100% | third shell chemistry; completes the per-shell ABFE-offset spread at fixed ligand. |
+
+Practical notes (all learned the hard way):
+
+* Prep: all-atom ligand is only in the MD `complex.pdb` (peptidebuilder `runs/oxybenzone/md/<leg>/`);
+  rebuild the SDF by the graft-Hs-to-prepped-SDF path (fep `scratch/make_allatom_lig_b2.py` lineage),
+  heavy coords verified 0.000 Å.
+* Boresch: apply wide settings on principle to any null/shuffle rod
+  (`--rmsf-cutoff 0.3 --anchor-strategy multi-residue --host-max-distance 2.0`) and validate the
+  geometry stage *before* submitting (host-pool + all-anchor sweep, fep `scratch/dock7_diagnose2.py`
+  lineage) — dock7 burned a job on the defaults even with banked equils.
+* Check the release column of any BoltzGen pick before submitting (5 of the 12 `bgox31` legs are
+  ligand releases; their ΔG is computed partly on an unbound ligand).
+* Core tier ≈ 2 days of scavenger GPU at the measured pace; submit top-up ≤3 via the
+  drain/feeder pair (fep `code/racc_abfe_feed.sh` + `code/abfe_feed_legs.txt` pattern), and never
+  without a validated wide-Boresch tf if the peptide is a rod.
+
+
 ## Environment map
 
 Nothing extra is installed in this repo; each external tool is called from its own environment.
