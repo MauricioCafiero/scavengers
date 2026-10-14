@@ -1207,6 +1207,27 @@ half is `pair_contacts.py` on each re-fold leg: mean simultaneous designed side 
 `pair_contacts_o3cof_design.csv`, the nulls under `pair_contacts_o3cof_nulls.csv` and the BoltzGen
 legs under `pair_contacts_o3cof_boltzgen.csv`.
 
+**Pre-registered prediction for `bgox31_5_o3cof`, written 2026-10-14 while the leg was at 7.4M of
+10M steps.** This is the first cell in the arm where the file's two working rules *disagree*, so it
+discriminates between them rather than adding another confirmation.
+
+- `bgox31_5` is the arm's **strongest and only non-decaying baseline**: −16.78 at 100.0% retention,
+  with windows that *strengthen* (−15.62 → −16.45 → −16.59 → −16.78) where every other bgox31
+  baseline decays. The rule that a good co-fold has more to lose therefore predicts the **largest
+  loss in the arm**, beyond `bgox31_3`'s +9.62.
+- But its static read is the **flattest transition anywhere in the campaign**: enclosure 0.50 → 0.55
+  (it rises), centroid separation 7.0 → 7.0 Å (unchanged), engaged 13 → 12. The rule that the
+  enclosure-and-separation drop predicts the loss therefore predicts **little or no loss**.
+
+Both cannot hold. If the loss is large, the baseline's own quality is doing the work and the static
+read adds nothing even on oxybenzone, which would withdraw the molecule-level claim made above for
+`bgox31_3`. If the loss is small, the static read is the better predictor and `bgox31_3`'s big loss
+should be attributed to its enclosure collapse (0.955 → 0.615) rather than to its strong baseline.
+The octinoxate precedent favours the first branch — `bg33_3` also had a near-flat static read and
+its leg got *worse* — so the stated expectation is a **large loss with retention falling from
+100%**, and a small loss would be the more informative outcome because it breaks the octinoxate
+pattern.
+
 **Still to land in these tables.** One of the eight new OF3 BoltzGen legs: `bgox31_5_o3cof`
 (oxybenzone, in batch job `fold_oxb_1`). Octinoxate's four — `bg33_1/2/3/4_o3cof` — are complete,
 as are `bgox31_2/3/4_o3cof`. Rows are added as each leg's drain completes, not in a batch at the
