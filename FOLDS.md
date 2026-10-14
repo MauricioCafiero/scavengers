@@ -1643,6 +1643,7 @@ Eleven legs, each as `<pep>_rf3cof`: `ox1_orig_f12`, `ox1_esm1_f8`, `ox2_orig_f8
 | `ox1_esm1_f8` | −10.70 (75.0%) | **−12.12 (35.2%)** | **−1.42 stronger**; residence is a cutoff artefact, see below |
 | `ox1_orig_f12` | −10.31 (49.1%) | **−12.27 (89.1%)** | **−1.96 stronger**, residence up; OF3's cell read −3.96 at 20.5%, so RF3 better by 8.3 |
 | `ox2_esm1_f8` | **−20.81 (100.0%)** | −10.90 (90.4%) | +9.91 weaker, residence held; OF3's cell read −16.68, so **RF3 is 5.78 worse** |
+| `ox2_orig_f8` | **−24.21 (100.0%)** | −4.95 (19.6%) | +19.3 weaker, **the campaign's largest drop**; OF3's cell read −7.23, so RF3 is 2.28 worse |
 
 **Prediction for `ox1_orig_f12_rf3cof`, 2026-10-14 20:52, tail running, no ΔG read.** Both
 pre-dynamics measures favour OF3 here — pepgraph px **7.09** against RF3's 14.26, and enclosure
@@ -1699,6 +1700,7 @@ like `orig_f12_rf3cof` this is a ligand held by a fold that is itself rearrangin
 | `ox1_esm1_f8_rf3cof` | −8.77 | −9.95 | −11.47 | **−12.12** |
 | `ox1_orig_f12_rf3cof` | −10.28 | −10.84 | −12.40 | **−12.27** |
 | `ox2_esm1_f8_rf3cof` | −12.61 | −11.47 | −11.15 | **−10.90** |
+| `ox2_orig_f8_rf3cof` | −9.40 | −8.11 | −5.55 | **−4.95** |
 
 **Prediction for `ox2_esm1_f8_rf3cof`, 2026-10-14 21:55, tail running, no ΔG read.** This is the
 first direct test of the **floor-dependence** reading from `ox1_orig_f12`: OF3's cell here is
@@ -1756,6 +1758,7 @@ campaign where it does, and RF3 lost by 5.78.
 | `ox1_esm1_f8_rf3cof` | 35.2% | 8 (0.4%) | 8 | 10 ps | 0% |
 | `ox1_orig_f12_rf3cof` | 89.1% | 11 (0.55%) | 8 | 30 ps | 27% |
 | `ox2_esm1_f8_rf3cof` | 90.4% | 2 (0.1%) | 2 | 10 ps | 100% |
+| `ox2_orig_f8_rf3cof` | 19.6% | 622 (31.1%) | 27 | 1290 ps | **99%** |
 
 **Prediction for `ox2_orig_f8_rf3cof`, 2026-10-14 22:50, tail running, no ΔG read.** `ox2_orig_f8`
 has the **campaign's strongest oxybenzone baseline** (−24.21 at 100%) and a poor OF3 cell
@@ -1771,6 +1774,38 @@ This is a **confirmation, not a test** — the regression reading already predic
 little. The informative outcome is the miss: if RF3 fails to beat a −7.23 floor, the spread
 account loses its main support.
 
+**OUTCOME (22:57): the miss. Both surviving readings are dead.** `ox2_orig_f8_rf3cof` reads
+**−4.95 at 19.6% residence**, 622 released frames in 27 episodes, 99% late, windows decaying
+−9.40 → −4.95. Against its −24.21 baseline that is **+19.3 weaker, the largest drop in the
+campaign**, and it is **2.28 worse than OF3's −7.23** — from a low floor, which is exactly where the
+regression reading said RF3 should gain most.
+
+Two accounts die on this one cell:
+
+- **Floor-dependence.** `ox2_orig_f8` sits at OF3 −7.23, between `orig_f12` (−5.90, RF3 gained 13.6)
+  and `s3_orig_f12` (−10.10, RF3 gained 2.0). RF3 lost 2.28 there. A low floor no longer predicts a
+  gain.
+- **Regression to the mean**, which required RF3 to be the narrower lane. **It is now the wider one:
+  RF3 spans 14.56 kcal/mol (−4.95 to −19.51) against OF3's 13.99 (−3.96 to −17.95).** The entire
+  argument rested on that comparison and it has reversed.
+
+**What is left after eight pairs is one split, and it is now deconfounded.** RF3 beats OF3 on
+**4 of 4 octinoxate** cells and **1 of 4 oxybenzone** cells. When that was last noted it was
+confounded with floor, because both oxybenzone losses were high-floor cells; `ox2_orig_f8` is a
+**low**-floor oxybenzone cell that RF3 also loses, so molecule and floor are now separated and the
+molecule split survives while floor does not.
+
+That is the only pattern standing, it rests on eight single trajectories with no replicates, and
+every other reading built during collection today — shrinking margins, static separation,
+floor-dependence, regression to the mean — has been falsified by a later leg. **The honest position
+is that these are not yet predictable**, and the file should say so rather than offer the
+molecule split as the next candidate law. The remaining 13 legs are what decide whether even that
+survives.
+
+Slide 3.37 Å, flagged. The ligand engages well before it leaves — 22/55 pairs with **0 dead slots**
+against OF3's 15/55 — so this is not a pose that never bound; it is one that bound and then lost the
+ligand progressively, 99% of the detachment in the second half.
+
 ### Oxybenzone — RF3 co-folds, peptide structural stability
 
 | leg | Cα final | Cα max | Rg start→end |
@@ -1778,6 +1813,7 @@ account loses its main support.
 | `ox1_esm1_f8_rf3cof` | 1.5 | 4.2 | 10.7 → 10.5 |
 | `ox1_orig_f12_rf3cof` | 8.4 | 10.9 | 7.9 → 8.7 |
 | `ox2_esm1_f8_rf3cof` | 2.2 | 3.3 | 9.6 → 9.3 |
+| `ox2_orig_f8_rf3cof` | 2.7 | 8.0 | 9.3 → 8.7 |
 
 ### Oxybenzone — the pre-dynamics static read and the pairs the RF3 re-folds realise
 
@@ -1789,3 +1825,5 @@ account loses its main support.
 | | RF3 re-fold | 0.55 | 0.71 | 13 | 6.1 Å | 1.63 | **29/45** | 56 |
 | `ox2_esm1_f8` | Boltz co-fold | 0.665 | 1.00 | 17 | 6.5 Å | | 36/55 | |
 | | RF3 re-fold | 0.57 | 0.71 | 12 | 6.4 Å | — | — | 6 dead |
+| `ox2_orig_f8` | Boltz co-fold | 0.975 | 1.00 | 17 | 2.7 Å | | 10/55 | |
+| | RF3 re-fold | 0.595 | 0.94 | 16 | 6.2 Å | 0.73 | 22/55 | 27 |
