@@ -741,6 +741,16 @@ Each molecule carries its **own** set of five tables below, the same five and in
 a different fold lane, not a second pose within this one, and are reported separately in **The RF3
 re-folds** at the end of this file.
 
+> **Status: data collection, not analysis.** Read everything below as a record of numbers as they
+> arrived. Every cell is **one 20 ns trajectory with no replicate**; the ± beside each ΔG is a
+> within-trajectory standard error and is **not** uncertainty on the difference between two legs,
+> where run-to-run variation is larger than many of the gaps compared here. A signed difference
+> between a re-fold leg and its Boltz baseline is written "+N weaker" or "−N stronger" and means only
+> that two runs of two structures gave different numbers — nothing is "lost" or "gained" by the
+> re-folding. 21 of the campaign's 29 legs were still unrun as of 2026-10-14, so any ordering,
+> grouping or apparent predictor in this file is provisional bookkeeping awaiting the rest, and
+> several such claims written during collection have already had to be withdrawn further down.
+
 The campaign question, answered first across the ten Modal legs and now being extended on racc:
 **is the OF3 re-fold worth running dynamics on, or does the Boltz co-fold remain the start the
 pipeline should use?** Of the twenty-two OF3 cells that have run, eighteen read 2–18 kcal/mol
@@ -756,31 +766,31 @@ a strong OF3-cofold ΔG is legible on any sequence, designed or shuffled — pro
 is compact and the site survives the re-fold. That is a discussion point against over-reading any
 single cross-model agreement.
 
-**The BoltzGen re-fold gain tracks the baseline, not the arm — and the arm is now complete, 4 of 4
-in order.**
+**The four BoltzGen cells come out in baseline order, which is worth noting and not yet worth
+believing.**
 `bg33_1` (−11.31) and `bg33_2` (−8.02), the two weakest co-folds in the octinoxate set, each gained
 3.6 kcal/mol on re-folding. `bg33_3` has a *better* baseline (−11.86) and its re-fold reads **+1.8
-weaker** with retention falling 41.0% → 14.9%. That was the stated test of whether the gain belonged
-to the arm or to the weak baselines, set before the leg ran, and it answered **the baselines**: the
+weaker** with retention falling 41.0% → 14.9%. That was the stated test of whether the difference tracked
+the arm or the weak baselines, set before the leg ran, and it came out on the side of the baselines: the
 re-fold helps where the Boltz co-fold had already failed to enclose the ligand and hurts where it
-had not. So the arm-level claim is now 2 of 3 and should not be made at all; the correct statement
-is that **a weak Boltz co-fold has more to gain from re-folding than a good one, on either
-pipeline** — which is the same pattern the oxybenzone set shows, where the charged shell `ox1` is the
+had not. So the arm-level claim is not supportable; the most that can be said from four
+single trajectories is that **the weaker Boltz co-folds here happened to be the ones whose re-folds
+read stronger** — which is the same pattern the oxybenzone set shows, where the charged shell `ox1` is the
 one whose re-fold improves.
 
 `bg33_4` was then run as a pre-registered test of that statement: at −19.66 it is the strongest
 BoltzGen baseline, so the reading predicted its re-fold would lose the most of the four. It does —
-**+2.55 weaker, the largest loss in the arm** — and the four legs rank in baseline order with no
+**+2.55 weaker, the largest difference in the arm** — and the four legs rank in baseline order with no
 inversions: −8.02 → −3.6, −11.31 → −3.6, −11.86 → +1.8, −19.66 → +2.55. Monotone in four points is
 weak evidence on its own, but the direction was called in advance rather than fitted afterwards.
 
-**What `bg33_4` costs the simple story is the "re-folding breaks the site" reading.** Its loss is
-*not* a retention failure: residence is **93.0%** with **zero** released frames in 20 ns, the only
+**What `bg33_4` costs the simple story is the "re-folding breaks the site" reading.** Its weaker ΔG
+is *not* accompanied by a retention failure: residence is **93.0%** with **zero** released frames in 20 ns, the only
 clean-zero release in the octinoxate set, and the fold barely moves (Cα 2.0 Å final, Rg 9.5 → 9.2).
 It is also the most *engaged* leg in the arm by a wide margin — 1.93 side chains on the ligand on
 average against 0.99–1.22 for the other three, ≥2 in 65% of frames against 24–34%, and 8 pairs held
 ≥5% of the run against 1–4. So the re-fold keeps the ligand, keeps its shape and makes **more**
-contact than any of its peers, and still gives back 2.55 kcal/mol. The loss is in the quality of the
+contact than any of its peers, and still reads 2.55 kcal/mol weaker. The difference is in the quality of the
 enclosure the Boltz pose had (enclosed 0.595 → 0.52, engaged 19 → 14), not in whether the complex
 survives. Like `bg33_1` it is **still strengthening at 20 ns** (−14.90 → −17.11 across its windows,
 +2.21 and not converged), so −17.11 is an upper bound and the true gap to −19.66 is smaller than
@@ -1024,9 +1034,9 @@ the pre-dynamics read at all, which is the finding to report rather than a repai
 | `bgox31_2` (boltzgen) | −10.89 (33.7%) | −7.45 (65.9%) | +3.45 weaker **yet retention doubled**; one 2.0 ns exit and return |
 | `bgox31_3` (boltzgen) | **−15.44 (99.7%)** | −5.82 (15.8%) | **+9.62 weaker, retention collapsed** 99.7% → 15.8% |
 | `bgox31_4` (boltzgen) | **−14.05 (100.0%)** | −5.74 (17.9%) | +8.31 weaker, retention 100% → 17.9%; bound first, then lost it (slid 3.83 Å) |
-| `bgox31_5` (boltzgen) | **−16.78 (100.0%)** | −11.55 (70.7%) | +5.23 weaker but **held, 0 releases**; strongest baseline, second-smallest loss |
+| `bgox31_5` (boltzgen) | **−16.78 (100.0%)** | −11.55 (70.7%) | +5.23 weaker but **held, 0 releases**; strongest baseline, second-smallest difference |
 
-Ten of the eleven oxybenzone cells are weaker, and this is where the campaign's **largest** losses
+Ten of the eleven oxybenzone cells are weaker, and this is where the campaign's **largest** differences
 sit: `ox2_orig_f8` +17.0 and `ox3_orig_f8` +16.8, the two best Boltz co-folds on this molecule,
 both of which lose the ligand under the re-fold (49.5% and 2.4%). The one cell that goes the other
 way, `ox1_esm1_f8` at −7.2 and 100% retention, is the campaign's strongest counterexample and the
@@ -1054,24 +1064,21 @@ residence) disagrees in sign, and the `late` column plus the separation trace ar
 legible. It also means the octinoxate rule that a weak Boltz baseline has more to gain does *not*
 transfer here: `bgox31_2` is a weak baseline (−10.89, 33.7%) and its re-fold still lost 3.45.
 
-**`bgox31_3_o3cof` is the opposite case within the same arm, and it was called in advance.** Before
-the leg's tail finished, the two rules in this file — the re-fold costs most where the Boltz co-fold
-was best, and a good baseline has more to lose — both predicted a substantial loss, larger than
-`bgox31_2`'s, with retention falling rather than rising. `bgox31_3` is the arm's strong baseline
-(−15.44 at **99.7%** retention, enclosure **0.955** with all seventeen ligand atoms engaged at 4.0 Å
-centroid separation). Its re-fold reads **−5.82, i.e. +9.62 weaker, with retention collapsing to
-15.8%** — the third-largest loss on this molecule after `ox2_orig_f8` and `ox3_orig_f8`, which are
-likewise the two best Boltz co-folds here. Both rules held.
+**`bgox31_3_o3cof` goes the other way within the same arm.** `bgox31_3` is the arm's strong baseline
+(−15.44 at **99.7%** residence, enclosure **0.955** with all seventeen ligand atoms engaged at 4.0 Å
+centroid separation). Its re-fold reads **−5.82, i.e. 9.62 kcal/mol weaker, with residence at
+15.8%** — the third-largest difference on this molecule after `ox2_orig_f8` and `ox3_orig_f8`, which
+are also the two strongest Boltz co-folds here. The direction was noted before the tail finished, on
+the two orderings this file had been tracking; it came out that way, which makes three cells
+consistent and still does not make either ordering a rule at n=3.
 
 Two consequences for how this arm gets reported. First, **`bgox31_2`'s sign disagreement does not
 generalise**: here ΔG and retention move together, both sharply down, so the opposite-sign case
-remains a single well-characterised cell rather than a property of the BoltzGen arm. Second, the
-static read *does* carry signal on oxybenzone where it carried none on octinoxate — the enclosure
-drop 0.955 → 0.615 with separation doubling 4.0 → 8.5 Å is the largest static degradation in the
-arm and it sits on the largest ΔG loss, whereas across octinoxate's four `bg33` legs the same read
-pointed four different ways. That is a **molecule-level difference in whether the pre-dynamics read
-is usable**, not a global verdict on it, and it is the more defensible way to state the static-read
-result in the paper.
+remains a single well-characterised cell rather than a property of the BoltzGen arm. Second, this cell has the arm's largest static
+change (enclosure 0.955 → 0.615, separation 4.0 → 8.5 Å) alongside its largest ΔG difference. I wrote
+that up as evidence the static read "works on oxybenzone where it failed on octinoxate"; **`bgox31_5`
+later contradicted that and the claim is withdrawn** — see the OUTCOME note below, where six
+candidate orderings over four single trajectories are recorded as bookkeeping rather than signal.
 
 **`bgox31_4_o3cof` tests a hypothesis the static read raises and refutes it.** Its OF3 pose starts at
 **11.2 Å** centroid separation — the worst in the arm and already *outside* the 10 Å residence
@@ -1084,7 +1091,7 @@ reports a real loss rather than a placement artefact. The peptide meanwhile is t
 whole campaign (Cα **0.7 Å** final, 1.9 Å max, Rg 8.8 → 9.1).
 
 Its ΔG, **−5.74 against −14.05 (+8.31 weaker)**, lands between `bgox31_2` and `bgox31_3` where the
-two rules jointly put it: strong on retention at baseline (100%, zero releases) but only mid-range on
+two orderings jointly suggested: strong on residence at baseline (100%, zero releases) but only mid-range on
 enclosure (0.65, against `bgox31_3`'s 0.955), so it had less enclosure to lose and lost somewhat less
 energy. **One caveat belongs on this cell specifically**: `ligand_slide.py` flags it at **3.83 Å**,
 the largest equilibration slide in the arm, so production started from a pose appreciably displaced
@@ -1229,38 +1236,35 @@ Both cannot hold. If the loss is large, the baseline's own quality is doing the 
 read adds nothing even on oxybenzone, which would withdraw the molecule-level claim made above for
 `bgox31_3`. If the loss is small, the static read is the better predictor and `bgox31_3`'s big loss
 should be attributed to its enclosure collapse (0.955 → 0.615) rather than to its strong baseline.
-**OUTCOME (recorded after the leg landed, 2026-10-14 14:55): the prediction above was wrong, and the
-second branch is the one that held.** `bgox31_5_o3cof` read **−11.55, i.e. +5.23 weaker** — the
-*second-smallest* loss in the arm, not the largest — with retention **100% → 70.7% and zero released
-frames**, and windows that are flat to strengthening (−11.35 / −10.00 / −11.19 / −11.55), i.e.
-converged rather than decaying. The arm's strongest baseline produced one of its smallest losses, so
-**baseline strength does not drive the loss on this molecule.**
 
-Checked over all four cells, with the losses ranked by each candidate predictor (verified
-programmatically, not by eye):
+**OUTCOME (recorded after the leg landed, 2026-10-14 14:55).** `bgox31_5_o3cof` read **−11.55**,
+i.e. 5.23 kcal/mol weaker than its Boltz baseline, with residence 100% → 70.7% and **zero released
+frames**, and windows flat to strengthening (−11.35 / −10.00 / −11.19 / −11.55). The expectation
+stated above — that the arm's strongest baseline would show the largest difference — was wrong: this
+is the second-smallest difference in the arm.
 
-| predictor | order of cells | losses in that order | orders them? |
-|---|---|---|---|
-| baseline strength, strongest first | 5, 3, 4, 2 | +5.23, +9.62, +8.31, +3.45 | **no** |
-| enclosure drop, biggest first | 3, 4, 2, 5 | +9.62, +8.31, +3.45, +5.23 | no (one inversion) |
-| **centroid separation increase, biggest first** | **3, 4, 5, 2** | **+9.62, +8.31, +5.23, +3.45** | **yes, 4 of 4** |
+**What that does and does not license.** It does not establish a predictor. Each cell is **one 20 ns
+trajectory with no replicate**, and the ±0.02–0.05 figures beside each ΔG are within-trajectory
+standard errors, not uncertainty on a difference between two runs of two different structures —
+run-to-run variation is larger than several of the gaps being compared here. With four cells per arm
+there is no basis for calling any ordering a rule, and the orderings below are recorded as
+bookkeeping for the RF3 legs to speak to, not as results:
 
-And the same three tests on octinoxate's `bg33` arm inverted:
+| ordered by | cells, in that order | signed ΔΔG, in that order |
+|---|---|---|
+| oxybenzone, baseline strength first | 5, 3, 4, 2 | +5.23, +9.62, +8.31, +3.45 |
+| oxybenzone, enclosure change first | 3, 4, 2, 5 | +9.62, +8.31, +3.45, +5.23 |
+| oxybenzone, separation change first | 3, 4, 5, 2 | +9.62, +8.31, +5.23, +3.45 |
+| octinoxate, baseline strength first | 4, 3, 1, 2 | +2.55, +1.80, −3.60, −3.60 |
+| octinoxate, enclosure change first | 2, 4, 3, 1 | −3.60, +2.55, +1.80, −3.60 |
+| octinoxate, separation change first | 2, 3, 4, 1 | −3.60, +1.80, +2.55, −3.60 |
 
-| predictor | order of cells | Δ in that order | orders them? |
-|---|---|---|---|
-| **baseline strength, strongest first** | **4, 3, 1, 2** | **+2.55, +1.80, −3.60, −3.60** | **yes, 4 of 4** |
-| enclosure drop, biggest first | 2, 4, 3, 1 | −3.60, +2.55, +1.80, −3.60 | no |
-| separation increase, biggest first | 2, 3, 4, 1 | −3.60, +1.80, +2.55, −3.60 | no |
-
-So the two molecules have **different working predictors, and each one's predictor fails on the
-other**: on oxybenzone the change in centroid separation orders all four losses exactly while
-baseline strength does not; on octinoxate baseline strength orders all four exactly while neither
-static measure does. That is a sharper and more defensible statement than the molecule-level claim
-made for `bgox31_3` above, and it **corrects that claim in one respect**: what carries the signal on
-oxybenzone is *separation*, not enclosure — enclosure drop still misorders the arm (`bgox31_2` and
-`bgox31_5` swap). Four points per arm is thin, and with `bgox31_5` held at 70.7% the honest reading
-is a hypothesis for the RF3 legs to test, not an established law.
+Two of those six happen to come out monotone — separation on oxybenzone, baseline strength on
+octinoxate — and **that is not a finding.** Four points admit many orderings, six orderings were
+examined, and nothing here is replicated or resolvable against run-to-run spread. The earlier claim
+in this file that the static read "carries signal on oxybenzone where it carried none on octinoxate"
+**overstated four single trajectories and is withdrawn**; what remains is the bare observation that
+the two arms' numbers do not line up the same way, which is a question for the remaining legs.
 
 The caveat on this cell: `ligand_slide.py` flags **2.68 Å**, so like `bgox31_4` it is slid, though far
 less. Its separation trace excursions to 12.7–13.4 Å at 6–8 ns without a single *released* frame also
@@ -1334,27 +1338,33 @@ Ten legs, each as `<pep>_rf3cof`: `orig_f12`, `s3_orig_f12`, `s2_esm2_control`, 
 ### Oxybenzone — RF3 co-folds, ΔG and retention
 
 Eleven legs, each as `<pep>_rf3cof`: `ox1_orig_f12`, `ox1_esm1_f8`, `ox2_orig_f8`, `ox2_esm1_f8`,
-`ox3_orig_f8`, `ox2_shuffle`, `ox2_shuffle_esm0`, `bgox31_2`–`bgox31_5`.
+`ox3_orig_f8`, `ox2_shuffle`, `ox2_shuffle_esm0`, `bgox31_2`–`bgox31_5`. One has landed.
 
 | peptide | Boltz co-fold ΔG (ret.) | RF3 re-fold ΔG (ret.) | Δ (refold − Boltz) |
 |---|---|---|---|
+| `ox1_esm1_f8` | −10.70 (75.0%) | **−12.12 (35.2%)** | **−1.42 stronger**; residence is a cutoff artefact, see below |
 
 ### Oxybenzone — RF3 co-folds, window convergence
 
 | leg | 5 ns | 10 ns | 15 ns | 20 ns |
 |---|---|---|---|---|
+| `ox1_esm1_f8_rf3cof` | −8.77 | −9.95 | −11.47 | **−12.12** |
 
 ### Oxybenzone — RF3 co-folds, residence and release
 
 | leg | residence | released frames | episodes | longest | late |
 |---|---|---|---|---|---|
+| `ox1_esm1_f8_rf3cof` | 35.2% | 8 (0.4%) | 8 | 10 ps | 0% |
 
 ### Oxybenzone — RF3 co-folds, peptide structural stability
 
 | leg | Cα final | Cα max | Rg start→end |
 |---|---|---|---|
+| `ox1_esm1_f8_rf3cof` | 1.5 | 4.2 | 10.7 → 10.5 |
 
 ### Oxybenzone — the pre-dynamics static read and the pairs the RF3 re-folds realise
 
 | peptide | pose | enclosed | wrapped | engaged | cent sep | sim | pairs | band% |
 |---|---|---|---|---|---|---|---|---|
+| `ox1_esm1_f8` | Boltz co-fold | 0.94 | 1.00 | 17 | 4.1 Å | | 30/45 | |
+| | RF3 re-fold | 0.53 | 0.77 | 13 | **9.3 Å** | — | — | — |
