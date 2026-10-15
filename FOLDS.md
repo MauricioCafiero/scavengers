@@ -1780,6 +1780,7 @@ like `orig_f12_rf3cof` this is a ligand held by a fold that is itself rearrangin
 | `ox2_shuffle_esm0_rf3cof` | −14.33 | −10.99 | −10.21 | **−11.44** |
 | `ox2_shuffle_rf3cof` | −13.09 | −13.78 | −13.45 | **−13.35** |
 | `bgox31_2_rf3cof` | −9.10 | −8.33 | −8.80 | **−9.06** |
+| `bgox31_3_rf3cof` | −14.23 | −14.45 | −14.51 | **−14.36** |
 
 **Prediction for `ox2_esm1_f8_rf3cof`, 2026-10-14 21:55, tail running, no ΔG read.** This is the
 first direct test of the **floor-dependence** reading from `ox1_orig_f12`: OF3's cell here is
@@ -1842,6 +1843,7 @@ campaign where it does, and RF3 lost by 5.78.
 | `ox2_shuffle_esm0_rf3cof` | 32.6% | 38 (1.9%) | 2 | 370 ps | **0%** |
 | `ox2_shuffle_rf3cof` | 51.0% | 1 (0.05%) | 1 | 10 ps | 100% |
 | `bgox31_2_rf3cof` | 84.6% | 70 (3.5%) | 10 | 610 ps | 3% |
+| `bgox31_3_rf3cof` | **99.2%** | **0 (0.0%)** | 0 | — | — |
 
 **Prediction for `ox2_orig_f8_rf3cof`, 2026-10-14 22:50, tail running, no ΔG read.** `ox2_orig_f8`
 has the **campaign's strongest oxybenzone baseline** (−24.21 at 100%) and a poor OF3 cell
@@ -1933,6 +1935,11 @@ Oxybenzone RF3-beats-OF3 is now 4/7; tally **10 of 15**.
 4.9). Slide 3.12 Å. No pair columns (no design json for the bgox31 arm). Oxybenzone 5/8; tally
 **11 of 16**.
 
+**`bgox31_3_rf3cof` (2026-10-15).** **−14.36 ± 0.02 at 99.2% residence, zero releases** — 8.55
+better than OF3's −5.82 (clean, slid 2.11 Å), 1.08 weaker than its −15.44 baseline. Windows flat
+(−14.23 / −14.45 / −14.51 / −14.36). The most rigid fold in the RF3 set (Cα 1.2 / 1.8, Rg 8.9
+unchanged). Slide 2.46 Å. Oxybenzone 6/9; tally **12 of 17**.
+
 ### Oxybenzone — RF3 co-folds, peptide structural stability
 
 | leg | Cα final | Cα max | Rg start→end |
@@ -1945,6 +1952,7 @@ Oxybenzone RF3-beats-OF3 is now 4/7; tally **10 of 15**.
 | `ox2_shuffle_esm0_rf3cof` | 5.9 | 7.0 | 9.8 → 10.7 |
 | `ox2_shuffle_rf3cof` | 5.1 | 7.4 | 8.4 → 7.9 |
 | `bgox31_2_rf3cof` | 1.6 | 4.9 | 13.4 → 13.9 |
+| `bgox31_3_rf3cof` | 1.2 | 1.8 | 8.9 → 8.9 |
 
 ### Oxybenzone — the pre-dynamics static read and the pairs the RF3 re-folds realise
 
