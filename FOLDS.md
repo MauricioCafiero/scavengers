@@ -1492,6 +1492,7 @@ standing from yesterday, so this is its first real test.
 | `shuffle_control_esm0_rf3cof` | −19.48 | −21.48 | −22.25 | **−21.53** |
 | `shuffle_control_rf3cof` | −12.90 | −10.74 | −10.95 | **−11.13** |
 | `bg33_1_rf3cof` | −9.41 | −11.20 | −12.05 | **−12.43** |
+| `bg33_2_rf3cof` | −11.09 | −11.00 | −10.94 | **−11.52** |
 
 **Prediction for `s3_esm2_f4_rf3cof`, written 2026-10-14 19:06 — leg drained, tail running, no ΔG
 read — and offered with low confidence, for a reason worth stating.** Both readings I would
@@ -1576,6 +1577,7 @@ it is the reason the RF3-vs-OF3 column above is worth watching as the remaining 
 | `shuffle_control_esm0_rf3cof` | **99.3%** | **0 (0.0%)** | 0 | — | — |
 | `shuffle_control_rf3cof` | 38.7% | 13 (0.65%) | 11 | 30 ps | 8% |
 | `bg33_1_rf3cof` | 68.3% | 42 (2.1%) | 12 | 290 ps | 2% |
+| `bg33_2_rf3cof` | 58.7% | 5 (0.25%) | 5 | 10 ps | 0% |
 
 **Prediction for `s3_orig_f12_rf3cof`, written 2026-10-14 19:55 — production ~6 min from done,
 tail not started, no ΔG in existence.** This is the sharpest test of the pepgraph-vs-dynamics
@@ -1651,6 +1653,7 @@ sharpens it.
 | `shuffle_control_esm0_rf3cof` | 1.8 | 3.0 | 11.2 → 11.0 |
 | `shuffle_control_rf3cof` | 4.0 | 9.3 | 9.5 → 9.5 |
 | `bg33_1_rf3cof` | 10.8 | 12.3 | 14.8 → 9.9 |
+| `bg33_2_rf3cof` | 5.0 | 7.3 | 14.9 → 14.0 |
 
 **`shuffle_control_esm0_rf3cof` (2026-10-15): pre-registered call wrong.** Called to lose to OF3
 (−15.62); it reads **−21.53 ± 0.03 at 99.3% residence, zero released frames** — 7.21 stronger than
@@ -1679,6 +1682,17 @@ late; contacts climb 5.5 → 16.3. The fold collapses and re-forms around the li
 weak cell and got a middling one (not the weakest RF3 read: `s3_orig_f12` −12.10, `shuffle_control`
 −11.13 sit below it). **RF3-beats-OF3 on octinoxate is now 6/7, and its first clean-comparator loss
 is here.** Tally 9 of 13.
+
+**`bg33_2_rf3cof` (2026-10-15): a tie with OF3, and the static read misses again.** It reads
+**−11.52 ± 0.02 at 58.7% residence** against OF3's −11.58 (clean, slid 1.33 Å) — a 0.06 difference,
+a tie at any honest uncertainty — and **3.50 stronger than its −8.02 baseline**. Windows flat
+(−11.09 / −11.00 / −10.94 / −11.52). 5 single-frame releases, none late; separation closes 9.5 →
+4.4 Å and contacts rise 11.7 → 20.6, so residence is low from an early park outside the cutoff, not
+loss. Slide 3.33 Å; Cα 5.0 / 7.3; pairs **27/55 (band 38%), 0 dead slots** — the best pair
+realisation in the RF3 octinoxate design arm, from the static read with only 4 of 20 atoms engaged.
+**Both `bg33` cells:** neither beat its clean OF3 counterpart (−2.47, −0.06), and both beat their
+baselines; the static read's "weakest cells yet" was wrong on both. Neither pre-registered reading
+held. Tally (tie counted as no win): 9 of 14.
 
 ### Octinoxate — the pre-dynamics static read and the pairs the RF3 re-folds realise
 
