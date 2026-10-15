@@ -1493,6 +1493,7 @@ standing from yesterday, so this is its first real test.
 | `shuffle_control_rf3cof` | −12.90 | −10.74 | −10.95 | **−11.13** |
 | `bg33_1_rf3cof` | −9.41 | −11.20 | −12.05 | **−12.43** |
 | `bg33_2_rf3cof` | −11.09 | −11.00 | −10.94 | **−11.52** |
+| `bg33_3_rf3cof` | −11.55 | −12.18 | −11.96 | **−12.44** |
 
 **Prediction for `s3_esm2_f4_rf3cof`, written 2026-10-14 19:06 — leg drained, tail running, no ΔG
 read — and offered with low confidence, for a reason worth stating.** Both readings I would
@@ -1578,6 +1579,7 @@ it is the reason the RF3-vs-OF3 column above is worth watching as the remaining 
 | `shuffle_control_rf3cof` | 38.7% | 13 (0.65%) | 11 | 30 ps | 8% |
 | `bg33_1_rf3cof` | 68.3% | 42 (2.1%) | 12 | 290 ps | 2% |
 | `bg33_2_rf3cof` | 58.7% | 5 (0.25%) | 5 | 10 ps | 0% |
+| `bg33_3_rf3cof` | **1.9%** | 5 (0.25%) | 5 | 10 ps | 100% |
 
 **Prediction for `s3_orig_f12_rf3cof`, written 2026-10-14 19:55 — production ~6 min from done,
 tail not started, no ΔG in existence.** This is the sharpest test of the pepgraph-vs-dynamics
@@ -1654,6 +1656,7 @@ sharpens it.
 | `shuffle_control_rf3cof` | 4.0 | 9.3 | 9.5 → 9.5 |
 | `bg33_1_rf3cof` | 10.8 | 12.3 | 14.8 → 9.9 |
 | `bg33_2_rf3cof` | 5.0 | 7.3 | 14.9 → 14.0 |
+| `bg33_3_rf3cof` | 2.0 | 2.6 | 8.7 → 8.9 |
 
 **`shuffle_control_esm0_rf3cof` (2026-10-15): pre-registered call wrong.** Called to lose to OF3
 (−15.62); it reads **−21.53 ± 0.03 at 99.3% residence, zero released frames** — 7.21 stronger than
@@ -1693,6 +1696,14 @@ realisation in the RF3 octinoxate design arm, from the static read with only 4 o
 **Both `bg33` cells:** neither beat its clean OF3 counterpart (−2.47, −0.06), and both beat their
 baselines; the static read's "weakest cells yet" was wrong on both. Neither pre-registered reading
 held. Tally (tie counted as no win): 9 of 14.
+
+**`bg33_3_rf3cof` (2026-10-15).** **−12.44 ± 0.02**, 2.34 better than OF3's −10.10 (clean, slid
+2.63 Å) and 0.58 stronger than its −11.86 baseline. Windows −11.55 / −12.18 / −11.96 / −12.44.
+**Residence 1.9% is a cutoff artefact, not loss:** centroid separation holds at 11.4–11.5 Å the
+whole run while contacts *rise* 13.2 → 29.9 and only 5 single frames count as released — the
+ligand sits bound against the side of a fold whose centroid is just past 10 Å. Read this cell by
+its separation trace, as the file warns. Fold rigid (Cα 2.0 / 2.6). Slide 2.86 Å; pairs 10/55
+(band 0%), 6 dead slots. Octinoxate RF3-beats-OF3 7/9; tally **15 of 20**.
 
 ### Octinoxate — the pre-dynamics static read and the pairs the RF3 re-folds realise
 
