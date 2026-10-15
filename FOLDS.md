@@ -1490,6 +1490,7 @@ standing from yesterday, so this is its first real test.
 | `s3_esm2_f4_rf3cof` | −17.93 | −17.98 | −17.39 | **−16.18** |
 | `s3_orig_f12_rf3cof` | −11.64 | −12.85 | −12.04 | **−12.10** |
 | `shuffle_control_esm0_rf3cof` | −19.48 | −21.48 | −22.25 | **−21.53** |
+| `shuffle_control_rf3cof` | −12.90 | −10.74 | −10.95 | **−11.13** |
 
 **Prediction for `s3_esm2_f4_rf3cof`, written 2026-10-14 19:06 — leg drained, tail running, no ΔG
 read — and offered with low confidence, for a reason worth stating.** Both readings I would
@@ -1572,6 +1573,7 @@ it is the reason the RF3-vs-OF3 column above is worth watching as the remaining 
 | `s3_esm2_f4_rf3cof` | 88.2% | **0 (0.0%)** | 0 | — | — |
 | `s3_orig_f12_rf3cof` | 68.9% | 2 (0.1%) | 2 | 10 ps | 50% |
 | `shuffle_control_esm0_rf3cof` | **99.3%** | **0 (0.0%)** | 0 | — | — |
+| `shuffle_control_rf3cof` | 38.7% | 13 (0.65%) | 11 | 30 ps | 8% |
 
 **Prediction for `s3_orig_f12_rf3cof`, written 2026-10-14 19:55 — production ~6 min from done,
 tail not started, no ΔG in existence.** This is the sharpest test of the pepgraph-vs-dynamics
@@ -1645,6 +1647,7 @@ sharpens it.
 | `s3_esm2_f4_rf3cof` | 1.2 | 3.0 | 10.5 → 10.5 |
 | `s3_orig_f12_rf3cof` | 4.4 | 5.6 | 8.9 → 9.6 |
 | `shuffle_control_esm0_rf3cof` | 1.8 | 3.0 | 11.2 → 11.0 |
+| `shuffle_control_rf3cof` | 4.0 | 9.3 | 9.5 → 9.5 |
 
 **`shuffle_control_esm0_rf3cof` (2026-10-15): pre-registered call wrong.** Called to lose to OF3
 (−15.62); it reads **−21.53 ± 0.03 at 99.3% residence, zero released frames** — 7.21 stronger than
@@ -1653,6 +1656,15 @@ its −14.32 baseline and 5.91 better than OF3, on a **null**. Windows −19.48 
 7.8 → 8.3 Å; pairs 20/66 (band 16%), sim 3.94, 5 dead slots. The OF3 cell it was called against slid
 10.62 Å, so the call rested on a broken comparator. A null re-fold out-binding its own baseline by 7
 kcal/mol is the strongest RF3 cell in the octinoxate set after `orig_f12`. RF3-beats-OF3: **8 of 11**.
+
+**`shuffle_control_rf3cof` (2026-10-15): half right.** Called the strongest RF3 cell (best static
+read: 0.83 / 18 / 6.3 Å); it reads **−11.13 ± 0.03 at 38.7% residence**, 4.00 *weaker* than its
+−15.13 baseline, though 1.74 better than OF3's −9.39 (whose cell slid 7.59 Å). Windows −12.90 /
+−10.74 / −10.95 / −11.13. 13 released frames in 11 brief episodes (longest 30 ps, 8% late);
+separation 9.9 → 10.4 Å (max 18.6), so low residence is mostly parking at the cutoff. Slide 1.69 Å;
+Cα 4.0 final / 9.3 max; pairs 24/66 (band 24%), sim 2.11. **The best static read gave a weak cell
+and the null `esm0` sibling with a worse read gave the strongest** — static read again does not
+predict. RF3-beats-OF3: **9 of 12**, but three of the last four wins are against slid OF3 cells.
 
 ### Octinoxate — the pre-dynamics static read and the pairs the RF3 re-folds realise
 
