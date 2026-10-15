@@ -2011,3 +2011,24 @@ RF3 set. **All four bgox31 RF3 cells beat OF3 and all four fall short of their B
 | | RF3 re-fold | 0.595 | 0.94 | 16 | 6.2 Å | 0.73 | 22/55 | 27 |
 | `ox3_orig_f8` | Boltz co-fold | 0.995 | 1.00 | 17 | 2.0 Å | | 26/45 | |
 | | RF3 re-fold | 0.465 | 0.71 | 12 | **11.4 Å** | — | — | — |
+
+## Fold-lane docked legs: Vina pose 1 and GNINA pick (2026-10-15 →)
+
+76 legs on racc (`runs/folds_md/dock_legs.txt`, `dk_oct_1` + `dk5_*` batches): every OF3 and RF3
+co-fold structure's Vina pose 1, plus its `receptor_score_only` max-`CNNaffinity` pose where that is
+not pose 1. Same receptor as the structure's cofold-pose leg, so each row compares against that leg.
+Pose `GNINA ✓` = pick corroborated (same in all three passes and `minimizedAffinity` argmin; 4 of 35) —
+an uncorroborated pick rests on `CNNaffinity` alone, which RESULTS.md treats as unsupported. ΔG
+marker: • stable / ↓ still strengthening / ↑ still weakening (20 ns vs first-10 ns, 0.5 kcal/mol).
+Rows are appended by `code/record_leg.py` as legs land.
+
+| leg | mol | pose | ΔG 20 ns | residence | released | slide Å | cofold-pose ΔG | Δ vs cofold |
+|---|---|---|---|---|---|---|---|---|
+| `bg33_1_o3cof_dock1` | oct | p1 Vina | **−13.16** • | 22.6% | 1 | 1.46 | −14.90 | +1.74 |
+| `bg33_3_rf3cof_dock5` | oct | p5 GNINA | **−11.47** ↑ | 0.1% | 11 | 1.41 | −12.44 | +0.96 |
+| `bg33_4_o3cof_dock1` | oct | p1 Vina | **−16.04** • | 99.2% | 0 | 1.23 | −17.11 | +1.07 |
+| `bg33_4_o3cof_dock7` | oct | p7 GNINA | **−16.24** ↑ | 82.8% | 0 | 2.6 | −17.11 | +0.87 |
+| `bg33_4_rf3cof_dock1` | oct | p1 Vina | **−18.59** ↓ | 97.6% | 0 | 3.01 | −16.13 | −2.46 |
+| `bg33_4_rf3cof_dock4` | oct | p4 GNINA ✓ | **−19.06** • | 99.6% | 0 | 2.25 | −16.13 | −2.92 |
+| `bgox31_2_o3cof_dock1` | oxy | p1 Vina | **−5.85** ↓ | 10.0% | 684 | 2.05 | −7.45 | +1.59 |
+| `bgox31_2_rf3cof_dock1` | oxy | p1 Vina | **−7.36** ↑ | 47.9% | 347 | 1.17 | −9.06 | +1.70 |
