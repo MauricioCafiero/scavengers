@@ -6,7 +6,7 @@ set -u
 REPO=${0:A:h:h}
 cd $REPO
 caffeinate -w $$ &
-# A leg-list file ("<mol> <leg>" per line, # comments) overrides the built-in list -- used for the
+# A leg-list file ("<mol> <leg> [pose]" per line, # comments) overrides the built-in list -- used for the
 # remaining cofold legs (8 OF3 BoltzGen + 21 RF3), runs/folds_md/cofold_legs.txt.
 if (( $# )); then
     specs=("${(@f)$(grep -v '^#' $1 | grep -v '^$')}")
@@ -17,7 +17,9 @@ else
 fi
 OMD=${OMD_ENV:-$HOME/miniforge3/envs/openmm-md}/bin/omd
 for spec in $specs; do
-    SYSNAME=${spec%% *}; STRUCT=${spec##* }
+    # An optional third word is a Vina pose rank: builds the docked leg <leg>_dock<pose> on the
+    # cofold leg's receptor (runs/folds_md/dock_legs.txt). Absent, the leg is the cofold pose.
+    w=(${=spec}); SYSNAME=$w[1]; STRUCT=$w[2]; POSE=${w[3]:-cofold}
     echo "=== build $SYSNAME/$STRUCT ($(date '+%H:%M:%S'))"
     # A leg never staged by a campaign build needs its receptor prepped from the docking grid's
     # protonated protein (FOLDS.md, cofold staging chain); --out takes the FILE path.
@@ -26,7 +28,7 @@ for spec in $specs; do
         mkdir -p $M
         $OMD prep-protein --pdb runs/$SYSNAME/dock/$STRUCT/${STRUCT}_protein.pdb --out $M/protein_fixed.pdb
     fi
-    STRUCT=$STRUCT POSE=cofold SYSNAME=$SYSNAME SRC=$M code/run_dock_pose_md.sh BUILD_ONLY=1
+    STRUCT=$STRUCT POSE=$POSE SYSNAME=$SYSNAME SRC=$M code/run_dock_pose_md.sh BUILD_ONLY=1
     echo "--- exit $? ($(date '+%H:%M:%S'))"
 done
 echo "ALL COFOLD BUILDS DONE"
