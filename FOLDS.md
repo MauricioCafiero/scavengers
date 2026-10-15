@@ -1782,6 +1782,7 @@ like `orig_f12_rf3cof` this is a ligand held by a fold that is itself rearrangin
 | `bgox31_2_rf3cof` | −9.10 | −8.33 | −8.80 | **−9.06** |
 | `bgox31_3_rf3cof` | −14.23 | −14.45 | −14.51 | **−14.36** |
 | `bgox31_4_rf3cof` | −10.65 | −11.45 | −11.81 | **−11.02** |
+| `bgox31_5_rf3cof` | −15.03 | −15.20 | −15.28 | **−14.69** |
 
 **Prediction for `ox2_esm1_f8_rf3cof`, 2026-10-14 21:55, tail running, no ΔG read.** This is the
 first direct test of the **floor-dependence** reading from `ox1_orig_f12`: OF3's cell here is
@@ -1846,6 +1847,7 @@ campaign where it does, and RF3 lost by 5.78.
 | `bgox31_2_rf3cof` | 84.6% | 70 (3.5%) | 10 | 610 ps | 3% |
 | `bgox31_3_rf3cof` | **99.2%** | **0 (0.0%)** | 0 | — | — |
 | `bgox31_4_rf3cof` | 72.0% | 2 (0.1%) | 2 | 10 ps | 100% |
+| `bgox31_5_rf3cof` | **96.4%** | **0 (0.0%)** | 0 | — | — |
 
 **Prediction for `ox2_orig_f8_rf3cof`, 2026-10-14 22:50, tail running, no ΔG read.** `ox2_orig_f8`
 has the **campaign's strongest oxybenzone baseline** (−24.21 at 100%) and a poor OF3 cell
@@ -1947,6 +1949,12 @@ unchanged). Slide 2.46 Å. Oxybenzone 6/9; tally **12 of 17**.
 −11.81 / −11.02. Two single-frame releases; separation 8.0 → 9.3 Å, so the residence gap is parking
 near the cutoff. Fold rigid (Cα 1.4 / 1.9). Slide 1.50 Å. Oxybenzone 7/10; tally **13 of 18**.
 
+**`bgox31_5_rf3cof` (2026-10-15).** **−14.69 ± 0.02 at 96.4% residence, zero releases** — 3.14
+better than OF3's −11.55 (clean, slid 2.68 Å), 2.10 weaker than its −16.78 baseline. Windows flat
+(−15.03 / −15.20 / −15.28 / −14.69). Fold rigid (Cα 1.4 / 2.8). Slide 0.61 Å, the smallest in the
+RF3 set. **All four bgox31 RF3 cells beat OF3 and all four fall short of their BoltzGen baselines**
+(by 1.1–3.0) — the most regular pattern in the campaign. Oxybenzone 8/11; tally **14 of 19**.
+
 ### Oxybenzone — RF3 co-folds, peptide structural stability
 
 | leg | Cα final | Cα max | Rg start→end |
@@ -1961,6 +1969,7 @@ near the cutoff. Fold rigid (Cα 1.4 / 1.9). Slide 1.50 Å. Oxybenzone 7/10; tal
 | `bgox31_2_rf3cof` | 1.6 | 4.9 | 13.4 → 13.9 |
 | `bgox31_3_rf3cof` | 1.2 | 1.8 | 8.9 → 8.9 |
 | `bgox31_4_rf3cof` | 1.4 | 1.9 | 9.1 → 8.9 |
+| `bgox31_5_rf3cof` | 1.4 | 2.8 | 9.3 → 9.4 |
 
 ### Oxybenzone — the pre-dynamics static read and the pairs the RF3 re-folds realise
 
