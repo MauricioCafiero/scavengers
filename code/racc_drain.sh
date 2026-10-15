@@ -9,6 +9,7 @@
 #
 # This orchestrates; it does not reimplement. The tail is whichever existing script owns that leg:
 #   <leg>_dock<N>   ->  code/run_dock_pose_md.sh   (STRUCT/POSE/SYSNAME/SRC; guards skip the run)
+#   <pep>_o3cof / <pep>_rf3cof  ->  code/run_dock_pose_md.sh POSE=cofold (fold-lane cofold legs)
 #   <leg>           ->  boltzgen_local/md/run_md20.sh <leg>
 # Both are racc-aware: they skip the dynamics when only traj_wrapped.xtc is present, and slice their
 # windows from the wrapped solute rather than loading a full box this 8 GB Mac cannot hold.
@@ -101,6 +102,12 @@ while (( remaining > 0 )); do
                     struct=$base; pose=1
                     [[ $base == *_dock<-> ]] && { struct=${base%_dock*}; pose=${base##*_dock}; }
                     STRUCT=$struct POSE=$pose LEGNAME=$leg SYSNAME=$SYSNAME SRC=$BG/md/$struct \
+                        zsh $REPO/code/run_dock_pose_md.sh >> $src/tail.log 2>&1
+                    rc=$?
+                elif [[ $leg == *_o3cof || $leg == *_rf3cof ]]; then
+                    # A fold-lane cofold leg (FOLDS.md): the ligand is the cofolder's own placement,
+                    # the receptor is the leg's own prepped protein, so SRC is the leg dir itself.
+                    STRUCT=$leg POSE=cofold SYSNAME=$SYSNAME SRC=$src \
                         zsh $REPO/code/run_dock_pose_md.sh >> $src/tail.log 2>&1
                     rc=$?
                 elif [[ $leg == *_dock<-> ]]; then

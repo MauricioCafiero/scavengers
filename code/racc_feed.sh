@@ -27,12 +27,22 @@ BATCH_NAME=${BATCH_NAME:-oxyb_batch}
 CEILING=${CEILING:-3}
 INTERVAL=${INTERVAL:-300}        # seconds between queue checks
 SOCK=$HOME/.ssh/cm-racc
-WORKREL=runs/oxybenzone/md
+SYSNAME=${SYSNAME:-oxybenzone}  # the molecule; one batch carries one molecule's legs
+# Extra sbatch options, e.g. "--time=6:00:00 --cpus-per-task=8". submit_gpu.sh takes none, so they go
+# in through a shadowing sbatch() function exported to it. The SBATCH_* env vars are no substitute:
+# gpu.slurm's own --cpus-per-task=1 directive beats SBATCH_TRES_PER_TASK (tested 2026-10-14). 8 CPUs
+# lifts the job's JOBSIZE priority; racc's AGE weight is 0, so waiting longer earns nothing.
+SBATCH_OPTS=${SBATCH_OPTS:-}
+SUBMIT="sbatch() { command sbatch $SBATCH_OPTS \"\$@\"; }; export -f sbatch; ~/bin/submit_gpu.sh"
+WORKREL=runs/$SYSNAME/md
 REMOTE=racc.rdg.ac.uk
 
 caffeinate -w $$ &               # dies with this script
 
 r() { ssh -n -o ControlPath=$SOCK -o ConnectTimeout=15 -o BatchMode=yes $REMOTE "$@"; }
+# Staging pipes a tar stream INTO ssh, so it must not carry -n (which ties ssh's stdin to /dev/null
+# and drops the stream -- "gzip: unexpected end of file", 2026-10-12).
+rs() { ssh -o ControlPath=$SOCK -o ConnectTimeout=15 -o BatchMode=yes $REMOTE "$@"; }
 
 log() { print -r -- "[$(date '+%Y-%m-%d %H:%M:%S')] $*"; }
 
@@ -55,7 +65,7 @@ if [[ $BATCH == 1 ]]; then
             exit 1
         fi
         log "staging $leg"
-        tar czf - -C $src . | r "mkdir -p ~/remote_work/openmm/$WORKREL/$leg && tar xzf - -C ~/remote_work/openmm/$WORKREL/$leg" \
+        tar czf - -C $src . | rs "mkdir -p ~/remote_work/openmm/$WORKREL/$leg && tar xzf - -C ~/remote_work/openmm/$WORKREL/$leg" \
             || { log "ABORT: staging failed for $leg"; exit 1; }
     done
 
@@ -66,7 +76,7 @@ if [[ $BATCH == 1 ]]; then
         [[ -n $njobs ]] && (( njobs < CEILING )) && break
         sleep $INTERVAL
     done
-    out=$(r "bash -lc 'module load anaconda >/dev/null 2>&1; source activate openmm-md; cd ~/remote_work/openmm; cp racc_run.py ${BATCH_NAME}_run.py; export LEGS=$legcsv RUNREL=$WORKREL; ~/bin/submit_gpu.sh ${BATCH_NAME}_run.py'" 2>&1 | tail -3)
+    out=$(r "bash -lc 'module load anaconda >/dev/null 2>&1; source activate openmm-md; cd ~/remote_work/openmm; cp racc_run.py ${BATCH_NAME}_run.py; export LEGS=$legcsv RUNREL=$WORKREL; $SUBMIT ${BATCH_NAME}_run.py'" 2>&1 | tail -3)
     log "batch submitted: $(print -r -- $out | tr '\n' ' ')"
     log "feeder done (batch mode): nothing further needs the ssh socket"
     exit 0
@@ -107,14 +117,14 @@ while (( i <= ${#LEGS} )); do
     fi
 
     log "staging $leg from $src ($(du -sh $src | cut -f1))"
-    if ! tar czf - -C $src . | r "mkdir -p ~/remote_work/openmm/$WORKREL/$leg && tar xzf - -C ~/remote_work/openmm/$WORKREL/$leg"; then
+    if ! tar czf - -C $src . | rs "mkdir -p ~/remote_work/openmm/$WORKREL/$leg && tar xzf - -C ~/remote_work/openmm/$WORKREL/$leg"; then
         log "STAGE FAILED $leg -- will retry in ${INTERVAL}s"
         sleep $INTERVAL
         continue
     fi
 
     log "submitting $leg"
-    out=$(r "bash -lc 'module load anaconda >/dev/null 2>&1; source activate openmm-md; cd ~/remote_work/openmm; cp racc_run.py ${leg}_run.py; export LEG=$leg RUNREL=$WORKREL; ~/bin/submit_gpu.sh ${leg}_run.py'" 2>&1 | tail -3)
+    out=$(r "bash -lc 'module load anaconda >/dev/null 2>&1; source activate openmm-md; cd ~/remote_work/openmm; cp racc_run.py ${leg}_run.py; export LEG=$leg RUNREL=$WORKREL; $SUBMIT ${leg}_run.py'" 2>&1 | tail -3)
     log "  $(print -r -- $out | tr '\n' ' ')"
     i=$((i+1))
     sleep 20          # let squeue reflect the new job before counting again
