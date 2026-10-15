@@ -1458,6 +1458,29 @@ against `orig_f12_rf3cof`'s 35/66 and 0 dead slots, so the stronger-binding leg 
 the one engaging far more of its designed surface. Cα 1.0 Å final, Rg 10.5 → 10.8: the fold barely
 moves while the ligand does all the travelling.
 
+**Pre-registration for the six legs drained 2026-10-15 06:36–08:00, written before any ΔG was
+read.** One note for all six rather than six notes, and deliberately thin: every mechanistic
+reading built during yesterday's collection was falsified by a later leg, so there is no model
+here worth defending. What follows is what the static read *would* say, recorded only so it can be
+scored rather than quietly forgotten.
+
+| leg | Boltz | OF3 cell | RF3 static (enc / eng / sep) | what the static read implies |
+|---|---|---|---|---|
+| `shuffle_control_rf3cof` | −15.13 (75.9%) | −9.39 (25.7%) | **0.83 / 18 / 6.3 Å** | best RF3 read in the set, far better than OF3's — a strong cell |
+| `shuffle_control_esm0_rf3cof` | −14.32 (80.2%) | −15.62 (92.5%) | 0.52 / 13 / 8.5 Å | worse than OF3's; OF3 won this one, so RF3 should lose |
+| `bg33_1_rf3cof` | −11.31 (14.5%) | −14.90 (56.4%) | **0.30 / 7 / 8.1 Å** | worst read in the campaign — a weak cell |
+| `bg33_2_rf3cof` | −8.02 (50.9%) | −11.58 (70.2%) | **0.345 / 4 / 9.5 Å** | only 4 of 20 atoms engaged — weaker still |
+| `ox2_shuffle_esm0_rf3cof` | −12.04 (94.7%) | −0.92 (1.1%) | 0.505 / 16 / 10.3 Å | better than OF3's, from the campaign's lowest floor — a gain |
+| `ox2_shuffle_rf3cof` | −5.30 (7.1%) | −2.98 (14.8%) | 0.48 / 12 / 12.1 Å | both legs poor at baseline; no strong expectation |
+
+**The one thing worth scoring is the `bg33` pair.** On octinoxate the static read pointed four
+different ways across the four OF3 `bg33` cells, which is why it was withdrawn as predictive.
+Here it is unusually emphatic — 0.30 and 0.345 enclosed, 7 and 4 atoms engaged — and octinoxate is
+also the molecule where RF3 has beaten OF3 4 of 4. **Those two expectations conflict**: the static
+read says these should be the weakest RF3 cells yet, the molecule split says they should still beat
+OF3's −14.90 and −11.58. Both cannot hold, and the molecule split is the only reading left
+standing from yesterday, so this is its first real test.
+
 ### Octinoxate — RF3 co-folds, window convergence
 
 | leg | 5 ns | 10 ns | 15 ns | 20 ns |
