@@ -260,17 +260,21 @@ def main():
             pose_rows = list(csv.DictReader(open(pose_csv)))
         os.makedirs(stage, exist_ok=True)
 
-        # Leg-ready cofold poses for the o3cof lane, independent of the docking
-        # resume guard (which skips docked names without staging these).
+        # Leg-ready cofold poses for both cofold lanes (o3cof, rf3cof), independent of
+        # the docking resume guard (which skips docked names without staging these).
         for pep in peps:
-            fold = os.path.join(REPO, "runs", mol, "folds", "openfold3", f"{pep}.pdb")
-            pose_out = os.path.join(stage, "openfold3", f"{pep}_o3cof_ligand_cofold.sdf")
-            if not (os.path.exists(fold) and not os.path.exists(pose_out)):
-                continue
-            _, lig_lines = fold_lines(fold)
-            if lig_lines:
-                cofold_pose_sdf(lig_lines, template_sdf_path(mol, pep), pose_out)
-                print(f"cofold pose staged: {pep}_o3cof")
+            for lane, suffix, has_lig in LANES:
+                if not has_lig:
+                    continue
+                fold = os.path.join(REPO, "runs", mol, "folds", lane, f"{pep}.pdb")
+                pose_out = os.path.join(stage, lane, f"{pep}_{suffix}_ligand_cofold.sdf")
+                if not (os.path.exists(fold) and not os.path.exists(pose_out)):
+                    continue
+                _, lig_lines = fold_lines(fold)
+                if lig_lines:
+                    os.makedirs(os.path.dirname(pose_out), exist_ok=True)
+                    cofold_pose_sdf(lig_lines, template_sdf_path(mol, pep), pose_out)
+                    print(f"cofold pose staged: {pep}_{suffix}")
 
         # Cofold lanes first: the apo lanes need their staged reference SDFs.
         for pep in peps:
