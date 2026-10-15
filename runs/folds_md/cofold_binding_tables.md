@@ -1,8 +1,4 @@
-# Co-fold MD: binding energy (retention) by folding model
-
-ΔG = MM/GBSA binding free energy (kcal/mol) over the whole 20 ns run; retention (in parentheses) = % of the run with the ligand within 10 Å of the peptide. Boltz/BoltzGen is the original co-fold; BoltzGen for bg* peptides, Boltz for the rest.
-
-## Octinoxate
+**Table 1. Octinoxate: MM/GBSA binding free energy, ΔG (kcal/mol), and ligand retention (%) from 20 ns MD started at each folding model's co-folded pose.**
 
 | Peptide | Boltz / BoltzGen co-fold | OpenFold3 co-fold | RoseTTAFold3 co-fold |
 |---|---|---|---|
@@ -17,7 +13,9 @@
 | bg33_3 | −11.86 (41.0%) | −10.10 (14.9%) | −12.44 (1.9%) |
 | bg33_4 | −19.66 (100.0%) | −17.11 (93.0%) | −16.13 (81.2%) |
 
-## Oxybenzone
+Values are ΔG in kcal/mol with retention in parentheses. ΔG is the MM/GBSA binding free energy over the whole 20 ns production run; retention is the percentage of the run with the ligand within 10 Å of the peptide. The Boltz / BoltzGen column is the original co-fold: BoltzGen for the bg* peptides, Boltz for the rest.
+
+**Table 2. Oxybenzone: MM/GBSA binding free energy, ΔG (kcal/mol), and ligand retention (%) from 20 ns MD started at each folding model's co-folded pose.**
 
 | Peptide | Boltz / BoltzGen co-fold | OpenFold3 co-fold | RoseTTAFold3 co-fold |
 |---|---|---|---|
@@ -32,3 +30,5 @@
 | bgox31_3 | −15.44 (99.7%) | −5.82 (15.8%) | −14.36 (99.2%) |
 | bgox31_4 | −14.05 (100.0%) | −5.74 (17.9%) | −11.02 (72.0%) |
 | bgox31_5 | −16.78 (100.0%) | −11.55 (70.7%) | −14.69 (96.4%) |
+
+Values are ΔG in kcal/mol with retention in parentheses. ΔG is the MM/GBSA binding free energy over the whole 20 ns production run; retention is the percentage of the run with the ligand within 10 Å of the peptide. The Boltz / BoltzGen column is the original co-fold: BoltzGen for the bg* peptides, Boltz for the rest.
