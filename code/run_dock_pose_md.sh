@@ -47,10 +47,12 @@ BUILD_ONLY=${BUILD_ONLY:-0}   # stop after the build, to read the particle count
 # tables) rather than a Vina dock: the leg name carries no _dock suffix and the ligand SDF is the
 # leg-ready cofold pose code/dock_folds.py staged at
 # runs/$SYSNAME/folds/dock_stage/openfold3/<name>_ligand_cofold.sdf. Run for the fold campaign's
-# OF3-cofold legs (FOLDS.md): <pep>_o3cof with the ligand where the cofolder put it.
+# OF3- and RF3-cofold legs (FOLDS.md): <pep>_o3cof / <pep>_rf3cof with the ligand where the
+# cofolder put it; the stage lane follows the suffix.
 if [[ $POSE == cofold ]]; then
     N=${LEGNAME:-$STRUCT}
-    DOCK_STAGE=runs/$SYSNAME/folds/dock_stage/openfold3/$N"_ligand_cofold.sdf"
+    [[ $STRUCT == *_rf3cof ]] && LANE_DIR=rf3 || LANE_DIR=openfold3
+    DOCK_STAGE=runs/$SYSNAME/folds/dock_stage/$LANE_DIR/$STRUCT"_ligand_cofold.sdf"
 else
     N=${LEGNAME:-${STRUCT}_dock${POSE}}
 fi
@@ -62,6 +64,13 @@ LEGNAME=${LEGNAME:-}   # override N outright: a replicate leg (<leg>_r2) is its 
 # only reading the env var let a bare positional word through and the "build-only" launch ran a full
 # 20 ns (2026-10-04, two accidental runs). `set -u` is set; loop over "$@" explicitly.
 for a in "$@"; do [[ $a == BUILD_ONLY=1 ]] && BUILD_ONLY=1; done
+# One tail at a time: concurrent MM/GBSA tails OOM this 8 GB Mac (2026-10-15, three at once, 282 MB
+# free), and racc_drain.sh launches tails with no exclusion. Re-exec under lockf, which holds a kernel
+# lock for the script's life, so a crash cannot leave it stale. Builds skip it.
+if [[ $BUILD_ONLY != 1 && -z ${TAIL_LOCKED:-} ]]; then
+  echo "$(date '+%F %T') waiting for tail lock"
+  TAIL_LOCKED=1 exec lockf -k /tmp/peptidebuilder_tail.lock zsh $0 "$@"
+fi
 M=runs/${SYSNAME}/md/$N                   # SYSNAME parameterizes the run dir (was hardcoded octinoxate)
 SRC=${SRC:-runs/${SYSNAME}/md/$STRUCT}   # the cofolded leg: supplies the already-prepped, frame-matched receptor
                                          # boltzgen cofolds live under boltzgen_local/md/<STRUCT>; pass
@@ -175,5 +184,23 @@ done
 # that separated every design from every null.
 $PY $ROOT/code/md_contacts.py $P --csv $M/md_contacts.csv || true
 $PY $ROOT/code/md_frames.py $P || true
+
+# The leg's figure, from the medoid md_frames.py just wrote. A pipeline step rather than something
+# remembered afterwards, because an optional step is a skipped step -- but guarded so it can never
+# fail the leg: a missing env or a broken render is logged and the tail carries on, since an MD leg
+# is not invalid because a picture did not draw. Its own interpreter, as this needs PyMOL and the
+# MD env has none. Only this leg's medoid is named -- never a glob, which would rewrite other legs'
+# images. render_md_figures.py skips an existing PNG, so re-running a tail costs nothing.
+#
+# --crop none deliberately: cropping is decided across a whole batch, and one leg cannot know the
+# campaign's shared box. Leaving it uncropped matches what the whole-campaign run produces, and
+# that run is what re-establishes a common crop if one is wanted.
+PYMOL_ENV=${PYMOL_ENV:-$HOME/miniforge3/envs/pymol-render}
+if [[ -x $PYMOL_ENV/bin/python ]]; then
+    $PYMOL_ENV/bin/python $ROOT/code/render_md_figures.py --crop none $P/frame_medoid.pdb \
+        || echo "FIGURE_FAILED (ignored, the leg is fine)"
+else
+    echo "FIGURE_SKIPPED no pymol env at $PYMOL_ENV"
+fi
 echo "DONE $N"
 date
