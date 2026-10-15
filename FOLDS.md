@@ -1494,6 +1494,7 @@ standing from yesterday, so this is its first real test.
 | `bg33_1_rf3cof` | −9.41 | −11.20 | −12.05 | **−12.43** |
 | `bg33_2_rf3cof` | −11.09 | −11.00 | −10.94 | **−11.52** |
 | `bg33_3_rf3cof` | −11.55 | −12.18 | −11.96 | **−12.44** |
+| `bg33_4_rf3cof` | −16.79 | −17.81 | −16.06 | **−16.13** |
 
 **Prediction for `s3_esm2_f4_rf3cof`, written 2026-10-14 19:06 — leg drained, tail running, no ΔG
 read — and offered with low confidence, for a reason worth stating.** Both readings I would
@@ -1580,6 +1581,7 @@ it is the reason the RF3-vs-OF3 column above is worth watching as the remaining 
 | `bg33_1_rf3cof` | 68.3% | 42 (2.1%) | 12 | 290 ps | 2% |
 | `bg33_2_rf3cof` | 58.7% | 5 (0.25%) | 5 | 10 ps | 0% |
 | `bg33_3_rf3cof` | **1.9%** | 5 (0.25%) | 5 | 10 ps | 100% |
+| `bg33_4_rf3cof` | 81.2% | **0 (0.0%)** | 0 | — | — |
 
 **Prediction for `s3_orig_f12_rf3cof`, written 2026-10-14 19:55 — production ~6 min from done,
 tail not started, no ΔG in existence.** This is the sharpest test of the pepgraph-vs-dynamics
@@ -1657,6 +1659,7 @@ sharpens it.
 | `bg33_1_rf3cof` | 10.8 | 12.3 | 14.8 → 9.9 |
 | `bg33_2_rf3cof` | 5.0 | 7.3 | 14.9 → 14.0 |
 | `bg33_3_rf3cof` | 2.0 | 2.6 | 8.7 → 8.9 |
+| `bg33_4_rf3cof` | 2.5 | 4.3 | 9.7 → 10.0 |
 
 **`shuffle_control_esm0_rf3cof` (2026-10-15): pre-registered call wrong.** Called to lose to OF3
 (−15.62); it reads **−21.53 ± 0.03 at 99.3% residence, zero released frames** — 7.21 stronger than
@@ -1704,6 +1707,18 @@ whole run while contacts *rise* 13.2 → 29.9 and only 5 single frames count as 
 ligand sits bound against the side of a fold whose centroid is just past 10 Å. Read this cell by
 its separation trace, as the file warns. Fold rigid (Cα 2.0 / 2.6). Slide 2.86 Å; pairs 10/55
 (band 0%), 6 dead slots. Octinoxate RF3-beats-OF3 7/9; tally **15 of 20**.
+
+**`bg33_4_rf3cof` (2026-10-15), the last RF3 cofold leg.** **−16.13 ± 0.03 at 81.2% residence,
+zero releases** — **0.98 weaker than OF3's −17.11** (clean, slid 2.43 Å) and 3.52 weaker than its
+−19.66 baseline. Windows −16.79 / −17.81 / −16.06 / −16.13. Fold stable (Cα 2.5 / 4.3). Slide
+1.28 Å; pairs 14/55 (band 9%), 5 dead slots.
+
+**Campaign close (all 29 cofold legs in).** RF3 beats OF3 in **15 of 21** cells: octinoxate **7/10**
+(every non-win is a `bg33` BoltzGen cell — `bg33_1` −2.47, `bg33_2` a tie, `bg33_4` −0.98 — all
+against clean OF3 comparators), oxybenzone **8/11**. Three of the octinoxate wins and one oxybenzone
+win are against OF3 cells that slid > 7 Å, so the clean-comparator count is lower than the headline.
+The one regular pattern is BoltzGen-specific: every `bgox31` RF3 cell beats OF3 and falls short of
+its BoltzGen baseline; on `bg33` RF3 does not reliably beat OF3 at all.
 
 ### Octinoxate — the pre-dynamics static read and the pairs the RF3 re-folds realise
 
