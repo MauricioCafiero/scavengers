@@ -1489,6 +1489,7 @@ standing from yesterday, so this is its first real test.
 | `s2_esm2_control_rf3cof` | −12.43 | −13.84 | −15.75 | **−14.98** |
 | `s3_esm2_f4_rf3cof` | −17.93 | −17.98 | −17.39 | **−16.18** |
 | `s3_orig_f12_rf3cof` | −11.64 | −12.85 | −12.04 | **−12.10** |
+| `shuffle_control_esm0_rf3cof` | −19.48 | −21.48 | −22.25 | **−21.53** |
 
 **Prediction for `s3_esm2_f4_rf3cof`, written 2026-10-14 19:06 — leg drained, tail running, no ΔG
 read — and offered with low confidence, for a reason worth stating.** Both readings I would
@@ -1570,6 +1571,7 @@ it is the reason the RF3-vs-OF3 column above is worth watching as the remaining 
 | `s2_esm2_control_rf3cof` | 57.2% | 2 (0.1%) | 2 | 10 ps | 50% |
 | `s3_esm2_f4_rf3cof` | 88.2% | **0 (0.0%)** | 0 | — | — |
 | `s3_orig_f12_rf3cof` | 68.9% | 2 (0.1%) | 2 | 10 ps | 50% |
+| `shuffle_control_esm0_rf3cof` | **99.3%** | **0 (0.0%)** | 0 | — | — |
 
 **Prediction for `s3_orig_f12_rf3cof`, written 2026-10-14 19:55 — production ~6 min from done,
 tail not started, no ΔG in existence.** This is the sharpest test of the pepgraph-vs-dynamics
@@ -1642,6 +1644,15 @@ sharpens it.
 | `s2_esm2_control_rf3cof` | 1.0 | 3.1 | 10.5 → 10.8 |
 | `s3_esm2_f4_rf3cof` | 1.2 | 3.0 | 10.5 → 10.5 |
 | `s3_orig_f12_rf3cof` | 4.4 | 5.6 | 8.9 → 9.6 |
+| `shuffle_control_esm0_rf3cof` | 1.8 | 3.0 | 11.2 → 11.0 |
+
+**`shuffle_control_esm0_rf3cof` (2026-10-15): pre-registered call wrong.** Called to lose to OF3
+(−15.62); it reads **−21.53 ± 0.03 at 99.3% residence, zero released frames** — 7.21 stronger than
+its −14.32 baseline and 5.91 better than OF3, on a **null**. Windows −19.48 / −21.48 / −22.25 /
+−21.53, converged. Slide 2.64 Å; fold stable (Cα 1.8 final / 3.0 max); contacts 35.3 → 20.3, separation
+7.8 → 8.3 Å; pairs 20/66 (band 16%), sim 3.94, 5 dead slots. The OF3 cell it was called against slid
+10.62 Å, so the call rested on a broken comparator. A null re-fold out-binding its own baseline by 7
+kcal/mol is the strongest RF3 cell in the octinoxate set after `orig_f12`. RF3-beats-OF3: **8 of 11**.
 
 ### Octinoxate — the pre-dynamics static read and the pairs the RF3 re-folds realise
 
