@@ -2044,3 +2044,10 @@ Rows are appended by `code/record_leg.py` as legs land.
 | `bg33_1_rf3cof_dock8` | oct | p8 GNINA | **−11.78** • | 62.6% | 17 | 2.68 | −12.43 | +0.65 |
 | `bgox31_4_o3cof_dock1` | oxy | p1 Vina | **−10.39** ↑ | 49.9% | 0 | 1.0 | −5.74 | −4.65 |
 | `s2_esm2_control_o3cof_dock5` | oct | p5 GNINA | **−6.84** ↓ | 9.4% | 1003 | 2.46 | −10.21 | +3.37 |
+| `bgox31_4_o3cof_dock7` | oxy | p7 GNINA | **−6.71** ↓ | 11.3% | 342 | 0.83 | −5.74 | −0.97 |
+| `bgox31_4_rf3cof_dock1` | oxy | p1 Vina | **−15.86** • | 99.9% | 0 | 1.18 | −11.02 | −4.85 |
+| `bg33_3_o3cof_dock1` | oct | p1 Vina | **−14.89** • | 99.7% | 0 | 2.09 | −10.10 | −4.79 |
+| `bg33_2_o3cof_dock1` | oct | p1 Vina | **−11.55** • | 14.8% | 1 | 2.28 | −11.58 | +0.03 |
+| `bg33_2_rf3cof_dock1` | oct | p1 Vina | **−10.95** • | 81.5% | 0 | 2.36 | −11.52 | +0.57 |
+| `bg33_2_rf3cof_dock8` | oct | p8 GNINA ✓ | **−12.19** • | 36.7% | 4 | 1.57 | −11.52 | −0.67 |
+| `bgox31_4_rf3cof_dock3` | oxy | p3 GNINA | **−13.91** • | 100.0% | 0 | 1.24 | −11.02 | −2.90 |
