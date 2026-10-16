@@ -2056,3 +2056,4 @@ Rows are appended by `code/record_leg.py` as legs land.
 | `bgox31_5_rf3cof_dock1` | oxy | p1 Vina | **−14.93** • | 99.8% | 1 | 1.44 | −14.69 | −0.24 |
 | `bgox31_5_rf3cof_dock8` | oxy | p8 GNINA | **−14.76** • | 94.9% | 1 | 1.49 | −14.69 | −0.08 |
 | `ox1_esm1_f8_o3cof_dock1` | oxy | p1 Vina | **−10.60** ↑ | 89.9% | 15 | 2.91 | −17.95 | +7.35 |
+| `bg33_3_o3cof_dock6` | oct | p6 GNINA | **−14.92** • | 99.6% | 0 | 1.73 | −10.10 | −4.82 |
