@@ -205,7 +205,11 @@ def main(argv=None):
 
     ref_csv = os.path.join(out_root, "reference.csv")
     with open(ref_csv, "w", newline="") as fh:
-        w = csv.DictWriter(fh, fieldnames=list(rows[0].keys()))
+        # union of keys across rows, order preserved: structures carry different
+        # flat fields (e.g. gnina_p3_* vs gnina_p6_*), and rows[0] alone crashes
+        # DictWriter on the first row with extra fields
+        fieldnames = list(dict.fromkeys(k for r in rows for k in r))
+        w = csv.DictWriter(fh, fieldnames=fieldnames)
         w.writeheader()
         w.writerows(rows)
     print(f"wrote {ref_csv} ({len(rows)} poses across {len(names)} structures)")
