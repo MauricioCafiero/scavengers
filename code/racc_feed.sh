@@ -33,6 +33,29 @@ SYSNAME=${SYSNAME:-oxybenzone}  # the molecule; one batch carries one molecule's
 # gpu.slurm's own --cpus-per-task=1 directive beats SBATCH_TRES_PER_TASK (tested 2026-10-14). 8 CPUs
 # lifts the job's JOBSIZE priority; racc's AGE weight is 0, so waiting longer earns nothing.
 SBATCH_OPTS=${SBATCH_OPTS:-}
+# --time and --cpus-per-task are REQUIRED, not options to remember; the house settings are
+# **estimate + 1 h 30 min**, and **8 cores**. Without --time a job takes the partition DEFAULTTIME
+# (1-00:00:00 on gpuscavenger, against a 5-day cap), which is 3-5x any real batch here: a long
+# request scores worse on JOBSIZE priority, cannot backfill into a short gap, and sits exposed to
+# preemption for hours it will never use. Estimate a batch as the sum of
+# 8 min + 39.3 min x (N/5838)^0.4 over its legs, N read off each build, then add 1.5 h.
+# Five batches went out on 2026-10-18 with neither setting; the fix after the fact was
+# `scontrol update JobId=<id> TimeLimit=<hh:mm:ss>` plus `NumCPUs=8`, and NumCPUs took only on the
+# PENDING ones -- a running job keeps the cores it started with, so getting this right at submission
+# is the only reliable route.
+for required in --time --cpus-per-task; do
+    if [[ $SBATCH_OPTS != *$required* ]]; then
+        print -u2 "racc_feed.sh: SBATCH_OPTS must set $required. The house settings are"
+        print -u2 "  SBATCH_OPTS=\"--time=<est+1h30> --cpus-per-task=8\" BATCH=1 SYSNAME=<mol> \\"
+        print -u2 "      code/racc_feed.sh <legfile>"
+        print -u2 "(--time: estimate + 1.5 h. Omitted, it is the partition's 24 h DEFAULTTIME --"
+        print -u2 " worse JOBSIZE priority, no backfill into a short gap, hours of needless"
+        print -u2 " preemption exposure. --cpus-per-task=8 lifts JOBSIZE priority; gpu.slurm's own"
+        print -u2 " --cpus-per-task=1 directive beats SBATCH_TRES_PER_TASK, so it must come through"
+        print -u2 " here. Each runs/folds_md/*.legs header carries that batch's own values.)"
+        exit 2
+    fi
+done
 SUBMIT="sbatch() { command sbatch $SBATCH_OPTS \"\$@\"; }; export -f sbatch; ~/bin/submit_gpu.sh"
 WORKREL=runs/$SYSNAME/md
 REMOTE=racc.rdg.ac.uk

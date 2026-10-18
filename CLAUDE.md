@@ -186,7 +186,26 @@ redundant. The real consequence is that one-leg-per-slot needs the socket re-tou
 minutes to submit the next, and that socket needs a password and TFA only the user can give. For any
 unattended stretch, bank the remainder in one job: `racc_run.py` takes `LEGS` as a comma-separated
 list and runs them in sequence, guarding each on its own `traj_wrapped.xtc` on scratch so a
-resubmission after preemption skips what is already done. 24 h partition cap, so ~24 compact legs.
+resubmission after preemption skips what is already done. The partition's **DEFAULTTIME is
+1-00:00:00 against a 5-day cap**, so an unspecified request is 24 h.
+
+**Every submission passes `SBATCH_OPTS="--time=<estimate + 1 h 30 min> --cpus-per-task=8"`, and a
+batch is sized to ≤6 h of estimate.** Those are the campaign's settings, not suggestions:
+`racc_feed.sh` *refuses* to run (exit 2) unless `SBATCH_OPTS` carries both, because an optional
+step is a skipped one. The estimate is the sum of `8 min + 39.3 min × (N/5838)^0.4` over the
+batch's legs, N read off each build; the ≤6 h split is why `dk5_*`/`dk6_*` are many small legfiles
+rather than one — a preempted leg restarts from zero, so a smaller batch bounds the loss. A 24 h
+default request scores worse on JOBSIZE priority, cannot backfill into a short gap, and sits
+exposed to preemption for hours it will never use; 8 cores lift JOBSIZE priority and must come
+through `SBATCH_OPTS`, since `gpu.slurm`'s own `--cpus-per-task=1` beats `SBATCH_TRES_PER_TASK`.
+Each legfile header carries its batch's values (`runs/folds_md/bzfree_*.legs`).
+
+**This was learned by getting it wrong on 2026-10-18**, when five batches went out with
+`SBATCH_OPTS` empty — the convention was in `racc_feed.sh`'s own parameter comment, which had been
+read and not applied, and is in neither RACC.md nor this file until now. The after-the-fact repair
+is `scontrol update JobId=<id> TimeLimit=<hh:mm:ss> NumCPUs=8`, and **`NumCPUs` took only on the
+PENDING jobs**: a running job keeps the cores it started with, so the one already executing stayed
+at 2. Getting it right at submission is the only reliable route.
 
 **Submission is socket-free once batched; draining is not.** A network loss stops nothing on the
 cluster — the legs keep computing and their wrapped solutes wait on scratch indefinitely — but the
