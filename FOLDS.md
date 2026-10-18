@@ -2086,3 +2086,8 @@ Rows are appended by `code/record_leg.py` as legs land.
 | `shuffle_control_esm0_o3cof_dock3` | oct | p3 GNINA ✓ | **−18.19** • | 98.5% | 0 | 2.06 | −15.62 | −2.57 |
 | `shuffle_control_esm0_rf3cof_dock1` | oct | p1 Vina | **−12.47** • | 44.1% | 7 | 4.28 | −21.53 | +9.06 |
 | `ox2_shuffle_esm0_o3cof_dock1` | oxy | p1 Vina | **−9.44** ↓ | 60.4% | 4 | 1.07 | −0.92 | −8.52 |
+| `ox2_shuffle_esm0_o3cof_dock6` | oxy | p6 GNINA | **−6.84** ↑ | 56.3% | 534 | 1.76 | −0.92 | −5.92 |
+| `ox2_shuffle_esm0_rf3cof_dock1` | oxy | p1 Vina | **−9.18** ↑ | 54.8% | 96 | 1.71 | −11.44 | +2.25 |
+| `ox2_shuffle_o3cof_dock1` | oxy | p1 Vina | **−5.91** ↓ | 27.3% | 595 | 1.75 | −2.98 | −2.93 |
+| `shuffle_control_esm0_rf3cof_dock3` | oct | p3 GNINA | **−12.03** ↑ | 36.9% | 162 | 1.81 | −21.53 | +9.50 |
+| `shuffle_control_o3cof_dock1` | oct | p1 Vina | **−10.89** • | 23.3% | 12 | 2.26 | −9.39 | −1.51 |
