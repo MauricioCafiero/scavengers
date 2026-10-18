@@ -80,6 +80,11 @@ proposals below:
   same — Vina *scores* it 7th of 8 while MM/GBSA puts it 3rd, so the number is wrong while the pose
   agreement is right. Next test: three or four more structures with intermediate release, since three of
   the eight are still tied at zero episodes and one pair supplies both ends of the correlation.
+  **Done at campaign scale 2026-10-18 (n = 63 structures + 115 docked legs): the headline does not
+  survive — pooled ρ = −0.27, and oxybenzone alone −0.14 (n.s.), because OF3/RF3 refold folds
+  routinely redock closely and still lose the ligand; the score, not the geometry, is the surviving
+  cheap signal.** Full account in [POSE_REPRODUCIBILITY.md](POSE_REPRODUCIBILITY.md); tables at
+  `runs/<mol>/md/pose_reproducibility*.csv`, script `code/pose_reproducibility.py`.
 * **Three folds of eight contain the mirror-image ligand, and it is not a BoltzGen quirk.** The source
   `ligand.xyz` is **S** at the 2-ethylhexyl carbon; `shuffle_control_esm0` (this repository's own Boltz
   run), `bg33_3` and `bg33_4` came out **R**, the other five kept S. The SDFs carry the fold geometry
