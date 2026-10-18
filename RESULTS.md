@@ -31,14 +31,25 @@ model produced, the **top-AutoDock** pose (Vina's rank-1), and the **top-GNINA**
 `CNNaffinity`, pose number given). All values are 20 ns, kcal/mol. A blank cell is a pose not yet
 simulated; the convergence windows behind each number are in the dynamics sections below.
 
+**Forced and unforced folds are now labelled, 2026-10-18.** Most co-folds here were produced with
+Boltz contact hints (the `_f4`/`_f8`/`_f12` suffix = that many `contact ... force: true` constraints);
+the rows marked **unforced** in the source column are hint-free folds of the same kind of sequence,
+and three of them (`s2_esm2_control`, `shuffle_control`, `shuffle_control_esm0`) have sat in this
+table since it was written without the distinction being visible. It is being made explicit because
+eight further unforced co-folds — the hint-free twins of `orig_f12`, `s3_esm2_f4`, `s3_orig_f12` and
+all five oxybenzone designs — are in dynamics now, so that the forced column has a like-for-like
+partner (NEXT_STEPS.md, "Forced vs unforced co-folds"). Their rows join this table as the legs land;
+their static read is already in the pre-dynamics table below. **A forced row and an unforced row are
+not two runs of one protocol** — the hints change the starting structure, so compare them as such.
+
 | peptide | source | co-folded ΔG (ret.) | top-AutoDock p1 ΔG (ret.) | top-GNINA ΔG (ret., pose) | CNNscore-top ΔG (ret.) |
 |---|---|---|---|---|---|
 | `s3_orig_f12` | peptidebuilder | **−24.33** (100.0%) | −20.79 (98.7%) | −13.23 (70.5%, p9) | |
 | `s3_esm2_f4` | peptidebuilder | −21.08 (99.6%) | −22.42 (99.9%) \* | −19.55 (59.6%, p6) \* | |
 | `bg33_4` | boltzgen | −19.66 (100.0%) | −14.81 (59.3%) | −16.53 (97.2%, p6) | |
-| `s2_esm2_control` | peptidebuilder | −16.25 (59.6%) | −15.49 (0.0%) † | −17.09 (50.3%, p6) | |
-| `shuffle_control` | pb (null) | −15.13 (75.9%) | −16.15 (57.8%) | −11.15 (46.4%, p9) | −8.40 (22.4%) ‡ |
-| `shuffle_control_esm0` | pb (null) | −14.32 (80.2%) | −15.50 (76.1%) | **−14.76 (90.5%, p9)** | |
+| `s2_esm2_control` | pb (unforced) | −16.25 (59.6%) | −15.49 (0.0%) † | −17.09 (50.3%, p6) | |
+| `shuffle_control` | pb (null, unforced) | −15.13 (75.9%) | −16.15 (57.8%) | −11.15 (46.4%, p9) | −8.40 (22.4%) ‡ |
+| `shuffle_control_esm0` | pb (null, unforced) | −14.32 (80.2%) | −15.50 (76.1%) | **−14.76 (90.5%, p9)** | |
 | `orig_f12` | peptidebuilder | −13.71 (77.3%) | −22.11 (100.0%) | −17.17 (83.3%, p5) | |
 | `bg33_3` | boltzgen | −11.86 (41.0%) | −10.84 (25.7%) | −13.09 (77.6%, p6) | |
 | `bg33_1` | boltzgen | −11.31 (14.5%) | **−13.47 (44.7%)** | −12.55 (42.5%, p2) | |
@@ -275,6 +286,35 @@ note below — and their pair cells are struck.)
 | `bg33_2` | co-folded | 0.585 | 0.75 | 15/20 | 5.2 Å | — | — | — |
 | | Vina p1 | 0.51 | 0.85 | 17/20 | 8.7 Å | — | — | — |
 | | GNINA p4 | 0.60 | 1.00 | 20/20 | 6.0 Å | — | — | — |
+| `orig_control` (unforced) | co-folded | 0.495 | 0.75 | 15/20 | **20.9 Å** | | | |
+| | Vina p1 | 0.44 | 0.85 | 17/20 | 16.3 Å | | | |
+| `s3_esm2_control` (unforced) | co-folded | 0.36 | 0.45 | 9/20 | 13.6 Å | | | |
+| | Vina p1 | 0.535 | 0.95 | 19/20 | 11.9 Å | | | |
+| | GNINA p7 | 0.71 | 0.95 | 19/20 | 12.9 Å | | | |
+| `s3_orig_control` (unforced) | co-folded | 0.735 | 0.80 | 16/20 | 9.5 Å | | | |
+| | Vina p1 | 0.76 | 1.00 | 20/20 | 9.1 Å | | | |
+| | GNINA p9 | 0.735 | 1.00 | 20/20 | 7.9 Å | | | |
+
+**The unforced rows' static read, added 2026-10-18 with their dynamics still running.** These are
+the hint-free Boltz co-folds of three of the same sequences — the `_control` twins of `orig_f12`,
+`s3_esm2_f4` and `s3_orig_f12` — queued so the forced column of
+`runs/folds_md/cofold_binding_tables.md` has a like-for-like unforced partner rather than being
+compared against unforced OF3/RF3 (NEXT_STEPS.md, "Forced vs unforced co-folds"). Their pair and ΔG
+cells stay blank until the legs land; the four static columns are complete, and they already answer
+part of the question. **Without hints, Boltz does not put the ligand on the peptide.**
+`orig_control`'s co-fold leaves the centroid **20.9 Å** away — the furthest cell in this table, well
+past `bg33_1`'s 17.3 Å — and `s3_esm2_control`'s 13.6 Å at 0.45 wrapped is the lowest wrapped
+fraction here. Only `s3_orig_control` (9.5 Å, 0.80) starts anywhere near contact. Against their
+forced twins' co-folds (4.2 Å, 7.0 Å and 3.6 Å) the hints are worth 5–17 Å of placement before any
+energy is computed.
+
+Two consequences to read with care. The MD legs for the two far rows **start from unbound poses**,
+so their MM/GBSA will price an unbound ligand (as `ox3_orig_f8_o3cof`'s never-bound leg did at
+−2.06); that is the measurement working, not failing, but it means the forced-minus-unforced ΔG
+difference for those peptides is partly bound-versus-unbound rather than a pose-quality
+comparison. And Vina's p1 pulls the ligand back in every case (20.9 → 16.3 Å, 13.6 → 11.9 Å,
+wrapped 0.45 → 0.95), so the docked legs test something different from the co-folded ones here than
+they do on the forced rows, where co-fold and dock start close together.
 
 Three reads the merged rows support. **The static half separates the pipelines without any energy
 computation at all.** The shell-pipeline co-folds taken through dynamics enclose 0.795–0.965 with
@@ -339,9 +379,9 @@ The `_f8`/`_f12` suffix is the fold version used for each peptide — `ox1_orig`
 | peptide | shell | co-folded | top-AutoDock p1 | top-GNINA |
 |---|---|---|---|---|
 | `ox2_orig_f8` | aromatic | **−24.21 (100%)** | −17.22 (99.9%) | **−24.00 (100%, p4)** |
-| `ox2_shuffle` | aromatic·**null** | −5.30 (7.1%) | −5.86 (26.2%) | −2.09 (1.2%, p4) |
+| `ox2_shuffle` | aromatic·**null**·unforced | −5.30 (7.1%) | −5.86 (26.2%) | −2.09 (1.2%, p4) |
 | `ox2_esm1_f8` | aromatic·esm2 | −20.81 (100%) | −15.22 (80.5%) | −7.40 (33.9%, p3) |
-| `ox2_shuffle_esm0` | aromatic·esm2·**null** | −12.04 (94.7%) | −12.78 (97.4%) | −11.87 (95.5%, p9) |
+| `ox2_shuffle_esm0` | aromatic·esm2·**null**·unforced | −12.04 (94.7%) | −12.78 (97.4%) | −11.87 (95.5%, p9) |
 | `ox3_orig_f8` | hydrophilic | −18.84 (100%) | −19.98 (94.2%) | =p1 |
 | `ox1_esm1_f8` | charged·esm2 | −10.70 (75.0%) | −16.87 (98.5%) | =p1 |
 | `ox1_orig_f12` | charged | −10.31 (49.1%) | −8.80 (51.0%) | −10.42 (77.2%, p4) |
@@ -593,6 +633,34 @@ pairs against the [n−1, n(n−1)/2] band; `sim` is the best MM/GBSA predictor 
 | `bgox31_2` (BoltzGen) | co-folded | 0.44 | 0.77 | 13/17 | 9.1 Å | | — | — | — |
 | | Vina p1 | 0.54 | 0.94 | 16/17 | 9.6 Å | | — | — | — |
 | | GNINA p6 | 0.535 | 1.00 | 17/17 | 11.8 Å | | — | — | — |
+| `ox1_esm1_control` (unforced) | co-folded | 0.765 | 0.94 | 16/17 | 5.9 Å | | | | |
+| | Vina p1 | 0.77 | 1.00 | 17/17 | 5.4 Å | | | | |
+| | GNINA p4 | 0.72 | 0.82 | 14/17 | 4.3 Å | | | | |
+| `ox1_orig_control` (unforced) | co-folded | 0.52 | 0.71 | 12/17 | 7.2 Å | | | | |
+| | Vina p1 | 0.70 | 1.00 | 17/17 | 6.7 Å | | | | |
+| | GNINA p6 | 0.57 | 0.88 | 15/17 | 6.4 Å | | | | |
+| `ox2_esm1_control` (unforced) | co-folded | 0.61 | 1.00 | 17/17 | 7.6 Å | | | | |
+| | Vina p1 | 0.75 | 0.94 | 16/17 | 7.9 Å | | | | |
+| | GNINA p9 | 0.585 | 0.88 | 15/17 | 7.8 Å | | | | |
+| `ox2_orig_control` (unforced) | co-folded | 0.535 | 1.00 | 17/17 | 9.0 Å | | | | |
+| | Vina p1 | 0.515 | 0.88 | 15/17 | 9.1 Å | | | | |
+| | GNINA p9 | 0.595 | 0.88 | 15/17 | 7.9 Å | | | | |
+| `ox3_orig_control` (unforced) | co-folded | 0.615 | 0.82 | 14/17 | 5.8 Å | | | | |
+| | Vina p1 | 0.625 | 1.00 | 17/17 | 5.3 Å | | | | |
+| | GNINA p6 | 0.61 | 0.88 | 15/17 | 5.8 Å | | | | |
+
+**The unforced rows, added 2026-10-18 with their dynamics still running** (the hint-free Boltz
+co-folds of all five designed oxybenzone sequences; ΔG, slots, sim and pairs cells fill as the legs
+land). Oxybenzone's unforced folds behave quite unlike octinoxate's: every co-fold starts in
+contact, 5.8–9.0 Å with 0.71–1.00 wrapped, where octinoxate's `orig_control` sat 20.9 Å out. But
+each is clearly looser than its own forced twin — `ox1_orig_control` 0.52 enclosed at 7.2 Å against
+`ox1_orig_f12`'s **0.995 at 1.2 Å**, `ox3_orig_control` 0.615/5.8 Å against `ox3_orig_f8`'s
+0.995/2.1 Å, `ox2_orig_control` 0.535/9.0 Å against `ox2_orig_f8`'s 0.975/2.7 Å. So on this
+molecule the hints buy enclosure and 3–6 Å of centroid distance rather than the difference between
+bound and unbound, which should make its forced-minus-unforced ΔG the cleaner of the two
+comparisons. Note also that the unforced co-folds land at or below their own shuffle nulls
+(`ox2_shuffle` 0.58 at 9.2 Å), so **enclosure alone will not separate design from null in this
+column** — the forced folds are what put the designs above their shuffles on the static read.
 
 The static half carries the design-vs-null argument by itself, no dynamics required: the aromatic
 design folds to **0.975 enclosed at 2.7 Å** against its shuffle's 0.58 at 9.2 Å, and the ESM2 pair

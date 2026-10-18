@@ -808,8 +808,32 @@ are already unforced need nothing new.
    strict comparison is unforced Boltz vs OF3 vs RF3, and the forced-minus-unforced Boltz difference is
    a direct per-peptide measure of what the hints bought in MD.
 
-Out of scope unless you ask: Vina/GNINA docked legs on the new folds; pepgraph/morph (these
-are Boltz folds under `runs/<mol>/boltz/`, not a new `folds/` lane).
+Out of scope unless you ask: pepgraph/morph (these are Boltz folds under `runs/<mol>/boltz/`, not a
+new `folds/` lane).
+
+**Table convention, fixed 2026-10-18 before the data landed.** The eight unforced peptides extend
+the **existing** per-molecule RESULTS.md tables rather than getting their own set: the forced and
+unforced co-folds of one sequence belong in the same column so the pair reads down it. The
+distinction goes in the label column — `pb (unforced)` for octinoxate, `·unforced` appended to the
+shell label for oxybenzone — and the five co-folds that were **already** unforced but unlabelled
+(`s2_esm2_control`, `shuffle_control`, `shuffle_control_esm0`, `ox2_shuffle`, `ox2_shuffle_esm0`)
+have been relabelled to match, with a note under the headline table saying a forced and an unforced
+row are not two runs of one protocol. The pre-dynamics table's four static columns were filled for
+all 23 poses the same day, from `dock_poses.csv`, which needs no trajectory; ΔG, slots, sim and
+pairs cells stay blank until `record_leg.py` has the leg. Per-leg CSVs
+(`mmgbsa_summary.csv`, `protein_stability.csv`, `ligand_slide.csv`, `pair_contacts_*.csv`) are
+written by `record_leg.py` as each leg lands and need no manual step; RESULTS.md's ten headline
+tables are the curated layer and are updated per molecule once its legs are in, not per leg.
+
+**What the static read already says, before any dynamics** (detail under both pre-dynamics tables):
+octinoxate's unforced folds do not put the ligand on the peptide — `orig_control` at **20.9 Å**
+centroid separation is the furthest cell in that table — so two of its three legs start unbound and
+their ΔG will be partly a bound-versus-unbound difference rather than a pose-quality one. All five
+oxybenzone unforced folds do start in contact (5.8–9.0 Å) but every one is looser than its forced
+twin (e.g. `ox1_orig_control` 0.52 enclosed/7.2 Å against `ox1_orig_f12`'s 0.995/1.2 Å), which
+makes oxybenzone the cleaner of the two forced-vs-unforced comparisons. The unforced co-folds also
+land at or below their own shuffle nulls on enclosure, so enclosure alone does not separate design
+from null without the hints.
 
 ### Part 2 (next campaign): forced OF3 and RF3 folds
 
