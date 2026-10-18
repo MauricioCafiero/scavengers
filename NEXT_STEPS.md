@@ -814,17 +814,51 @@ are Boltz folds under `runs/<mol>/boltz/`, not a new `folds/` lane).
 ### Part 2 (next campaign): forced OF3 and RF3 folds
 
 The fold repo (`~/python_mac/fold`) has no constraint plumbing today: no `constraint`/`contact`/`pocket`
-handling in its OF3 or RF3 apps (checked 2026-10-18). The first step is therefore to **establish
-whether each model accepts residue–ligand contact restraints at all, and in what form**, before
-anything else is planned. That has not been checked against upstream yet, and nothing below is assumed.
-If both do:
-* reuse each peptide's existing Boltz hint set (the same residue→ligand-atom contacts as its `_fN`
-  yaml), so forced OF3/RF3 match forced Boltz exactly;
-* new `LANE`s in `fold_batch.sh` (e.g. `openfold3f`, `rf3f`) and leg suffixes `_o3fcof`/`_rf3fcof`,
-  which need their own branch in `run_dock_pose_md.sh`'s `LANE_DIR` and in `racc_drain.sh`;
-* the MD then reuses Part 1's flow exactly, and the tables gain forced OF3/RF3 columns. Then
-  every model appears both forced and unforced.
-If only one model supports restraints, the comparison is partial, and that goes in the table caption.
+handling in its OF3 or RF3 apps (checked 2026-10-18). **Upstream support was researched 2026-10-18 by
+reading the two projects' released source and issues — nothing was installed or run, so every
+behavioural claim below is code-reading, not measurement.** The answer differs per model, and neither
+reproduces a forced Boltz fold.
+
+**OF3 has a pocket hint, and the pinned image already carries it.** `pocket_constraint` arrived in
+OpenFold3 0.4.5 and `fold`'s image is 0.5.0, so no upgrade is needed:
+
+```json
+"pocket_constraint": {"ligand_chain_id": "Z", "pocket_residues": [["A",4],["A",24]], "max_distance": 4.0}
+```
+
+One per query, residue-level, `max_distance` default 4.0. It is **weaker than a Boltz `contact` in
+three ways that matter here**: (1) it names no ligand atom, so each hint's `token2` is discarded;
+(2) it works by generating ~1,024 rigid ligand placements around the pocket residues of an
+*unconstrained parent* fold, ranking them on clash and proximity, then partial-diffusion refining with
+`noise_frac=0.75` — so the peptide's fold comes from the unconstrained parent and never folds *around*
+the ligand, which is the whole point of a wrapping shell; (3) no potential enforces the contacts
+through diffusion the way Boltz's `force: true` does.
+
+**RF3 has nothing to use.** Its README says the model was trained with random pairwise contacts and
+that the inference API "could be further extended" to accept them, but it does not; interface
+templates are not exposed either, and the request for interface/ligand distance restraints is open
+(RosettaCommons/foundry issue #160, unanswered since a maintainer's 2026-02 "next 2 weeks"). The only
+restraint input is covalent `bonds`. An upgrade would not help — there is nothing to upgrade to. The
+`template_selection` route is not a workaround: `ground_truth_template.py` masks inter-molecule
+distances unless `p_provide_inter_molecule_distances > 0` (default 0.0), it would need a 3D pose
+templated from the forced Boltz fold (circular), and it fixes intra-set distances as well.
+
+So the plan is **OF3 only, labelled honestly**:
+* add an optional `pocket_constraint` to the query built in `openfold3_core.run_predict`, taking the
+  residue list from each Boltz yaml's `contact` `token1` entries and `max_distance` from the largest of
+  that yaml's values (~4.2 Å) — a new input-file field, or a parser over the yaml we already have;
+* new `LANE=openfold3p` in `fold_batch.sh` and leg suffix `_o3pcof`, with its own branch in
+  `run_dock_pose_md.sh`'s `LANE_DIR` and in `racc_drain.sh`;
+* MD reuses Part 1's flow exactly; the table gains **one** new column, named "OF3 pocket-guided" —
+  **not "forced"**, because it is not the same intervention.
+* pin `rc-foundry` in `rf3_app.py` while in there regardless: it installs unpinned, so the version in
+  Modal's cached image is unknowable.
+
+**Caveats to carry into the caption, not discover later.** f4/f8/f12 collapse to pocket sets of
+different sizes, which is not the same dose of restraint; OF3's guided ipTM/ipSAE are not comparable
+to its unguided ones (same issue #160 warning applies to guided runs generally); and a pocket-guided
+OF3 column answers "does naming the designed residues help OF3 place the ligand", not "what do the
+hints buy", which only Part 1's Boltz forced-minus-unforced difference measures.
 
 
 ## Environment map
