@@ -10,6 +10,7 @@
 # This orchestrates; it does not reimplement. The tail is whichever existing script owns that leg:
 #   <leg>_dock<N>   ->  code/run_dock_pose_md.sh   (STRUCT/POSE/SYSNAME/SRC; guards skip the run)
 #   <pep>_o3cof / <pep>_rf3cof  ->  code/run_dock_pose_md.sh POSE=cofold (fold-lane cofold legs)
+#   <leg> under $REPO  ->  code/run_dock_pose_md.sh POSE=cofold (bare-named Boltz co-folds, e.g. *_control)
 #   <leg>           ->  boltzgen_local/md/run_md20.sh <leg>
 # Both are racc-aware: they skip the dynamics when only traj_wrapped.xtc is present, and slice their
 # windows from the wrapped solute rather than loading a full box this 8 GB Mac cannot hold.
@@ -94,6 +95,13 @@ launch_tail() {    # launch_tail <src> <leg> -- detached, queued on the tail loc
         struct=${leg%_dock*}
         pose=${leg##*_dock}
         ( export STRUCT=$struct POSE=$pose SYSNAME=$SYSNAME SRC=$BG/md/$struct
+          exec zsh $REPO/code/run_dock_pose_md.sh ) >> $src/tail.log 2>&1 &
+        echo $! > $src/.tail_pid
+    elif [[ $src == $REPO/* ]]; then
+        # A bare-named Boltz co-fold leg living in this repo (the unforced *_control folds,
+        # NEXT_STEPS.md "Forced vs unforced co-folds"): run_md20.sh only knows boltzgen_local legs,
+        # so tail it like a fold-lane cofold leg -- its ligand SDF came from cif_to_md.py.
+        ( export STRUCT=$leg POSE=cofold SYSNAME=$SYSNAME SRC=$src
           exec zsh $REPO/code/run_dock_pose_md.sh ) >> $src/tail.log 2>&1 &
         echo $! > $src/.tail_pid
     else

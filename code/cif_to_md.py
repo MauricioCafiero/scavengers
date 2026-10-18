@@ -28,7 +28,8 @@ def main(argv=None):
                                formatter_class=argparse.RawDescriptionHelpFormatter)
     p.add_argument("outdir", help="a run directory, e.g. runs/octinoxate")
     p.add_argument("--structure", required=True, help="fold name, e.g. orig_f12 or s3_orig_f12")
-    p.add_argument("--out-dir", help="where to write (default <outdir>/md/<structure>)")
+    p.add_argument("--out-dir", help="where to write (default <outdir>/md/<name>)")
+    p.add_argument("--name", help="leg name for the output files and dir (default: --structure)")
     args = p.parse_args(argv)
 
     sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
@@ -42,6 +43,7 @@ def main(argv=None):
     if not hits:
         sys.exit(f"no folded complex for {name!r} under {args.outdir}/boltz")
     cif = hits[0]
+    name = args.name or name   # e.g. orig_control for the 33-letter shell-1 control fold
 
     out = args.out_dir or os.path.join(args.outdir, "md", name)
     os.makedirs(out, exist_ok=True)

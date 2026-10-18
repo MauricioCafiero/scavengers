@@ -752,6 +752,81 @@ Practical notes (all learned the hard way):
   without a validated wide-Boresch tf if the peptide is a rod.
 
 
+## Forced vs unforced co-folds: making the cofold tables like-for-like, proposed 2026-10-18, not launched
+
+**Plan only; nothing is built or submitted until you approve it.** `runs/folds_md/cofold_binding_tables.md`
+sets the Boltz co-fold of each peptide against its OpenFold3 and RF3 co-folds, but most Boltz cells are
+**hint-forced** folds (`_f4`/`_f8`/`_f12`: that many `contact` constraints in the yaml) while the OF3
+and RF3 lanes were run with **no constraints at all** (`fold_batch.sh` passes sequence + SMILES only).
+A column difference therefore mixes "which model" with "forced or not". Two fixes:
+
+### Part 1 (now): MD/MM-GBSA on the Boltz *unforced* folds that already exist
+
+Every forced fold in the tables has an unconstrained Boltz twin of the identical sequence already on
+disk (`runs/<mol>/boltz/boltz_results_<x>_control`, 0 `contact` lines, checked 2026-10-18). Rows that
+are already unforced need nothing new.
+
+| table row | Boltz cell now | unforced twin (Boltz dir) | new leg |
+|---|---|---|---|
+| `orig_f12` (oct) | forced, 12 | `RGGDGGKGGGGLGGGGKGIGEGWGGDGSGGEGS_control` | `orig_control` |
+| `s3_esm2_f4` (oct) | forced, 4 | `s3_esm2_control` | `s3_esm2_control` |
+| `s3_orig_f12` (oct) | forced, 12 | `s3_orig_control` | `s3_orig_control` |
+| `ox1_esm1_f8` | forced, 8 | `ox1_esm1_control` | `ox1_esm1_control` |
+| `ox1_orig_f12` | forced, 9 | `ox1_orig_control` | `ox1_orig_control` |
+| `ox2_esm1_f8` | forced, 8 | `ox2_esm1_control` | `ox2_esm1_control` |
+| `ox2_orig_f8` | forced, 8 | `ox2_orig_control` | `ox2_orig_control` |
+| `ox3_orig_f8` | forced, 8 | `ox3_orig_control` | `ox3_orig_control` |
+| `s2_esm2_control`, `shuffle_control`, `shuffle_control_esm0`, `ox2_shuffle`, `ox2_shuffle_esm0` | already unforced | — | none (reuse) |
+| `bg33_*`, `bgox31_*` | BoltzGen design, no hints | — | none (reuse) |
+
+**8 new co-fold legs** (3 octinoxate, 5 oxybenzone), all on racc. Steps, each an existing script:
+
+1. **Stage** each leg: `code/cif_to_md.py runs/<mol> --structure <boltz name> --out-dir runs/<mol>/md/<leg>`
+   (model_0, the same model the forced legs used), check the printed formula (C17H24O3 / C14H12O3),
+   then `omd prep-protein --pdb <leg>_protein.pdb --out protein_fixed.pdb`.
+   One small parameter to add: `cif_to_md.py --name` (default = `--structure`) so the shell-1
+   octinoxate fold's files come out as `orig_control_*` instead of the 33-letter sequence name.
+2. **Build** with the one driver: `STRUCT=<leg> POSE=cofold SYSNAME=<mol> SRC=runs/<mol>/md/<leg>
+   code/run_dock_pose_md.sh BUILD_ONLY=1`. Its ligand guard finds `<leg>_ligand.sdf` from step 1, so it
+   never reads the OF3 dock stage; dodecahedral box by default. Read the particle counts. Unforced
+   folds tend to be rods, so some may be large (`s2_esm2_control` was 23,142); quote wall time from
+   `8 min + 10M × 0.236 ms × (N/5838)^0.4`.
+3. **Submit**: two legfiles `runs/folds_md/bzfree_oct_1.legs` (3) and `bzfree_oxb_1.legs` (5),
+   `racc_feed.sh BATCH=1` each. That is two jobs, which run one after the other under `MaxJobsPU=1`.
+   Estimated ~7 h of racc wall at compact sizes; free (gpuscavenger).
+4. **Drain**: `racc_drain.sh` per legfile. One change is needed: a bare `<leg>` name currently goes to
+   `boltzgen_local/md/run_md20.sh`, which `cd`s into boltzgen_local and would not find a
+   peptidebuilder leg. Add a branch: a bare leg whose local dir is under `$REPO` tails through
+   `run_dock_pose_md.sh POSE=cofold`, same as `_o3cof`/`_rf3cof` legs.
+5. **Record**: `record_leg.py <mol> <leg>` per leg. No pair table holds these structures yet, so seed
+   one per shell with the first leg via `pair_contacts.py` (`--run-dir runs/<mol>`). Use
+   `pair_contacts_bzfree_design.csv` (`design.json`) and `_shell3` (`design_shell3.json`) for octinoxate,
+   and `_shell1/_shell2/_shell3` for oxybenzone. After that `record_leg.py` finds the table itself.
+   Audit line `-> OK` per leg; strip check; commit additions-only.
+6. **Tables**: `cofold_binding_tables.md` gains a **"Boltz unforced"** column beside the existing Boltz
+   one, which is relabelled "Boltz forced (f*N*)". Already-unforced rows carry the same value in both. Then the
+   strict comparison is unforced Boltz vs OF3 vs RF3, and the forced-minus-unforced Boltz difference is
+   a direct per-peptide measure of what the hints bought in MD.
+
+Out of scope unless you ask: Vina/GNINA docked legs on the new folds; pepgraph/morph (these
+are Boltz folds under `runs/<mol>/boltz/`, not a new `folds/` lane).
+
+### Part 2 (next campaign): forced OF3 and RF3 folds
+
+The fold repo (`~/python_mac/fold`) has no constraint plumbing today: no `constraint`/`contact`/`pocket`
+handling in its OF3 or RF3 apps (checked 2026-10-18). The first step is therefore to **establish
+whether each model accepts residue–ligand contact restraints at all, and in what form**, before
+anything else is planned. That has not been checked against upstream yet, and nothing below is assumed.
+If both do:
+* reuse each peptide's existing Boltz hint set (the same residue→ligand-atom contacts as its `_fN`
+  yaml), so forced OF3/RF3 match forced Boltz exactly;
+* new `LANE`s in `fold_batch.sh` (e.g. `openfold3f`, `rf3f`) and leg suffixes `_o3fcof`/`_rf3fcof`,
+  which need their own branch in `run_dock_pose_md.sh`'s `LANE_DIR` and in `racc_drain.sh`;
+* the MD then reuses Part 1's flow exactly, and the tables gain forced OF3/RF3 columns. Then
+  every model appears both forced and unforced.
+If only one model supports restraints, the comparison is partial, and that goes in the table caption.
+
+
 ## Environment map
 
 Nothing extra is installed in this repo; each external tool is called from its own environment.
