@@ -98,27 +98,53 @@ def pick_leg(mol, p, suf):
 def cell(leg):
     if leg is None: return "—"
     v, r = dg.get(leg), res.get(leg)
-    if v is None: return "—"
+    if v is None:
+        return "*running*" if os.path.exists(os.path.join("runs", MOL, "md", leg, "system", "system.xml")) else "—"
     s = f"{v:.2f}".replace("-", "−")
     rs = "" if r is None else f" ({r:.1f}%)"
     return f"**{s}**{rs}{mark(leg)}" if v <= -18 else f"{s}{rs}{mark(leg)}"
 
+# The Boltz column must be UNFORCED to be comparable with the OF3 and RF3 columns, which were run
+# with no constraints at all. That is the whole reason the unforced campaign exists: the published
+# version of these tables set hint-forced Boltz legs (_f4/_f8/_f12) against unforced OF3/RF3, so a
+# row mixed "which model" with "forced or not". Each forced peptide therefore maps to the hint-free
+# Boltz fold of the SAME sequence (its *_control twin); a peptide that was already unforced -- the
+# shuffles, s2_esm2_control, and every BoltzGen bg* design, which the generator makes without hints
+# -- maps to itself and its published numbers stand.
+UNFORCED = {'orig_f12': 'orig_control', 's3_esm2_f4': 's3_esm2_control',
+            's3_orig_f12': 's3_orig_control', 'ox1_esm1_f8': 'ox1_esm1_control',
+            'ox1_orig_f12': 'ox1_orig_control', 'ox2_esm1_f8': 'ox2_esm1_control',
+            'ox2_orig_f8': 'ox2_orig_control', 'ox3_orig_f8': 'ox3_orig_control'}
+
 PEPS = {"octinoxate": ['orig_f12','s2_esm2_control','s3_esm2_f4','s3_orig_f12','shuffle_control','shuffle_control_esm0','bg33_1','bg33_2','bg33_3','bg33_4'],
         "oxybenzone": ['ox1_esm1_f8','ox1_orig_f12','ox2_esm1_f8','ox2_orig_f8','ox2_shuffle','ox2_shuffle_esm0','ox3_orig_f8','bgox31_2','bgox31_3','bgox31_4','bgox31_5']}
-out, missing = {}, []
+out, missing, pending = {}, [], []
 for mol, peps in PEPS.items():
+    MOL = mol
     lines = ["| peptide | pose | Boltz / BoltzGen co-fold | OpenFold3 co-fold | RoseTTAFold3 co-fold |",
              "|---|---|---|---|---|"]
     for p in peps:
         for i, pose in enumerate(("co-fold", "Vina p1", "GNINA pick")):
             legs = []
             for suf in ("", "_o3cof", "_rf3cof"):
-                legs.append(f"{p}{suf}" if pose == "co-fold" else
-                            (f"{p}{suf}_dock1" if pose == "Vina p1" else pick_leg(mol, p, suf)))
+                # the Boltz column (suf == "") takes the unforced twin; OF3/RF3 were already unforced
+                base = UNFORCED.get(p, p) if suf == "" else p
+                legs.append(f"{base}{suf}" if pose == "co-fold" else
+                            (f"{base}{suf}_dock1" if pose == "Vina p1" else pick_leg(mol, base, suf)))
             for L in legs:
-                if L is not None and (dg.get(L) is None or res.get(L) is None):
+                if L is None or dg.get(L) is not None and res.get(L) is not None: continue
+                # a staged-but-unfinished leg of the running unforced campaign is pending, not missing
+                if os.path.exists(f"runs/{mol}/md/{L}/system/system.xml") and dg.get(L) is None:
+                    pending.append(L)
+                else:
                     missing.append((L, "dG" if dg.get(L) is None else "residence"))
-            label = f"`{p}`" if i == 0 else ""
+            # Row label is the SEQUENCE, so drop the _fN fold-version suffix on a remapped
+            # peptide: the row's Boltz cell is <stem>_control and its OF3/RF3 cells are
+            # <stem>_fN_{o3,rf3}cof, all three unforced folds of one sequence. The _fN survives in
+            # the OF3/RF3 leg names only because they were named after the forced Boltz structure
+            # whose sequence they refold -- no constraint was applied to them.
+            stem = re.sub(r"_f\d+$", "", p) if p in UNFORCED else p
+            label = f"`{stem}`" if i == 0 else ""
             pl = pose
             if pose == "GNINA pick":
                 ns = [l.split("_dock")[-1] if l else None for l in legs]
@@ -126,5 +152,6 @@ for mol, peps in PEPS.items():
             lines.append(f"| {label} | {pl} | " + " | ".join(cell(l) for l in legs) + " |")
     out[mol] = "\n".join(lines)
 open(os.environ.get("OUT", "/tmp/tables.md"), "w").write(f"## octinoxate\n{out['octinoxate']}\n\n## oxybenzone\n{out['oxybenzone']}\n")
-print(f"missing: {len(missing)}")
+print(f"missing: {len(missing)}   pending (legs still running): {len(sorted(set(pending)))}")
+for q in sorted(set(pending)): print("   pending", q)
 for m in sorted(set(missing)): print("  ", m)
