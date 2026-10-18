@@ -47,3 +47,24 @@ RACC.md
 runs/*/md/**/.drained
 runs/*/md/**/tail.log
 runs/*/logs/racc_*.log
+
+# Process logs whose content is fully redundant with committed files (added 2026-10-18 after they
+# had been committed in bulk -- ~1,100 of them, none read by any analysis). mmpbsa.log is
+# MMPBSA.py's own stdout (setup and timing only; the numbers live in FINAL_RESULTS_MMPBSA.dat);
+# the gnina per-structure logs are mirrored in the gnina_local repo, and _scored.sdf is their
+# analysis input. The fold- and UMA-side logs (runs/<mol>/{logs,uma_logs,modal,boltz,folds}) and
+# the dock/*/vina.log raw scorer output stay tracked: those hold detail no table re-captures
+# (per-pose energy terms, box settings) or describe hours of relaxation, not seconds of parsing.
+runs/*/md/**/mmpbsa.log
+runs/*/gnina/**/*.log
+runs/*/md/*_build.log
+runs/*/md/*_run.log
+runs/*/md/*_produce.log
+runs/*/md/*_windows.log
+runs/*/md/*_windows_live.log
+runs/*/md/*_stability.log
+runs/*/md/*_mmgbsa.log
+runs/*/md/*_driver.log
+runs/tail_*.log
+runs/pairs_o3cof_*.log
+runs/build_nulls*.log

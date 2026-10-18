@@ -162,6 +162,22 @@ strips the MM/GBSA scatter. Launch both detached (`start_new_session`), and give
 `ConnectTimeout` — a wedged ControlMaster with the network gone under it blocked one poll for 40
 minutes on 2026-10-07, where a timeout costs seconds.
 
+**The drain loop as reworked (2026-10-16).** `racc_drain.sh <legfile>` eager-fetches each poll's
+completions rather than checking then fetching, so a poll lag never costs analysis time. Each
+completion's tail (`run_dock_pose_md.sh` continuation or `md_window_modal.sh`-style record) launches
+**detached under the global tail lock** `lockf -k /tmp/peptidebuilder_tail.lock` — one heavy tail at
+a time, ~10–18 min per tail — with the drain never blocked on it; markers `.drained`, `.tail_launched`
+and `.tail_pid` in `runs/folds_md/` make the bookkeeping safe against reconnects and restarts (a
+re-launched drain resumes rather than refetches). Recording goes through
+`code/record_leg.py <mol> <leg>`, which appends to all the molecule's tables and to FOLDS.md; the
+per-leg log `runs/folds_md/record_<leg>.log` ends with
+`<leg>: dG ... | windows ... | residence ... | slide ... | Ca ... | pairs ...` and an
+`audit: windows 4/4, summary rows 4, frames True, scatter 0 -> OK` line, which is the
+leg-is-done signal. A campaign is a chain of legfiles `runs/folds_md/dk*.legs` (lines
+`<abs local dir>:<leg name>`, `#` comments), one drain per legfile; a committed batch is every
+recorded leg since the last commit, verified additions-only. Host/access facts and the measured
+H100 rate model live in `RACC.md`, which is untracked on purpose.
+
 **`gpuscavenger` is `MaxSubmitJobsPU=3`, `MaxJobsPU=1`.** Only three jobs may exist and only one
 runs, so **spare slots cannot add throughput** — a second job holding different legs just waits its
 turn, exactly as those legs would have inside the first. The only thing idle slots can usefully hold
