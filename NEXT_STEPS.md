@@ -811,7 +811,24 @@ are already unforced need nothing new.
 Out of scope unless you ask: pepgraph/morph (these are Boltz folds under `runs/<mol>/boltz/`, not a
 new `folds/` lane).
 
-**Table convention, fixed 2026-10-18 before the data landed.** The eight unforced peptides extend
+**Table convention, fixed 2026-10-18 before the data landed. Two different rules, and which applies
+depends on what the table is for.**
+
+* **Everywhere else — RESULTS.md's ten headline tables, FOLDS.md — the new dynamics are *added*.**
+  Those tables are inventories of every leg taken through dynamics, so an unforced leg is another
+  row beside the forced ones, labelled as unforced. Nothing existing is rewritten or removed.
+* **`runs/folds_md/cofold_binding_tables.md` Tables 1 and 2 are *replaced*, because they are a
+  different comparison.** Their whole job is one sequence across three folding models, so every
+  column must be the same treatment. Adding unforced rows beside forced ones there would leave the
+  very confound the campaign exists to remove: the published version set hint-forced Boltz against
+  unconstrained OF3/RF3, which is not a model comparison. So the Boltz column *becomes* the
+  `<row>_control` legs, forced values come out (they survive in RESULTS.md and in Table 3's
+  forced-vs-unforced static read), and row labels become the sequence with the `_fN` suffix
+  dropped. **Getting this wrong once already cost a cycle**: on 2026-10-18 the tables were
+  restructured into pose sub-rows while the forced column was left in place, which changed the
+  shape and fixed nothing.
+
+The additive half, in detail. The eight unforced peptides extend
 the **existing** per-molecule RESULTS.md tables rather than getting their own set: the forced and
 unforced co-folds of one sequence belong in the same column so the pair reads down it. The
 distinction goes in the label column — `pb (unforced)` for octinoxate, `·unforced` appended to the
