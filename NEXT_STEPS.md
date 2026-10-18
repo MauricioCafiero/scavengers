@@ -826,22 +826,55 @@ OpenFold3 0.4.5 and `fold`'s image is 0.5.0, so no upgrade is needed:
 "pocket_constraint": {"ligand_chain_id": "Z", "pocket_residues": [["A",4],["A",24]], "max_distance": 4.0}
 ```
 
-One per query, residue-level, `max_distance` default 4.0. It is **weaker than a Boltz `contact` in
-three ways that matter here**: (1) it names no ligand atom, so each hint's `token2` is discarded;
-(2) it works by generating ~1,024 rigid ligand placements around the pocket residues of an
-*unconstrained parent* fold, ranking them on clash and proximity, then partial-diffusion refining with
-`noise_frac=0.75` — so the peptide's fold comes from the unconstrained parent and never folds *around*
-the ligand, which is the whole point of a wrapping shell; (3) no potential enforces the contacts
-through diffusion the way Boltz's `force: true` does.
+One per query (the field is singular; the docs state no maximum), residue-level, `max_distance`
+default 4.0 and documented only as "the distance threshold used when scoring whether ligand atoms
+contact the specified pocket". Verified against upstream 2026-10-18 — `docs/source/input_format_reference.md`,
+`core/config/pocket_sampling_config.py` and `core/model/structure/pocket_constraints.py` at v0.5.0.
+It is **weaker than a Boltz `contact` in two ways that matter here**:
 
-**RF3 has nothing to use.** Its README says the model was trained with random pairwise contacts and
-that the inference API "could be further extended" to accept them, but it does not; interface
-templates are not exposed either, and the request for interface/ligand distance restraints is open
-(RosettaCommons/foundry issue #160, unanswered since a maintainer's 2026-02 "next 2 weeks"). The only
-restraint input is covalent `bonds`. An upgrade would not help — there is nothing to upgrade to. The
-`template_selection` route is not a workaround: `ground_truth_template.py` masks inter-molecule
-distances unless `p_provide_inter_molecule_distances > 0` (default 0.0), it would need a 3D pose
-templated from the forced Boltz fold (circular), and it fixes intra-set distances as well.
+1. **It names no ligand atom**, so each hint's `token2` is discarded; `[chain_id, residue_id]` pairs are
+   the only granularity the schema has.
+2. **Placement is a ranking preference, not a constraint.** Enabling the field triggers "pocket
+   proposal and partial-diffusion refinement": 1,024 rigid ligand proposals (32 RDKit conformers,
+   random rotation plus a translation onto the pocket centroid or a random pocket atom) are scored and
+   sorted — pocket-centroid distance, in-pocket atom count, a contact penalty
+   `relu(lig_to_pocket - contact_distance)²`, vdW overlap — then greedily diversity-filtered at 0.5 Å
+   RMSD and handed to refinement as seeds for the last 25% of the diffusion schedule
+   (`noise_frac=0.75`, 16 parents). **Nothing rejects a seed that fails to contact the pocket**: if the
+   diversity filter leaves too few poses the remaining slots are filled from the top of the sorted list
+   regardless of contact quality. So there is no equivalent of `force: true`'s potential.
+
+A third concern — that the peptide fold comes from an *unconstrained* parent and so never folds
+around the ligand — is **plausible but unverified, and an earlier draft of this section overstated
+it**. `pocket_constraints.py` only builds seeds: it copies every non-ligand atom from the parent
+unchanged and overwrites ligand coordinates. Where the parents come from (`xl_base`) and whether the
+peptide moves during the refinement that follows are both outside that file. Worth settling before
+the campaign, because if it holds, a pocket-guided leg cannot show a shell closing around the ligand.
+
+**RF3 has nothing to use.** Confirmed against the `production` README and issue thread 2026-10-18.
+The README states the limitation itself — "The model was trained with random pairwise contacts; our
+inference API could be further extended to support specification" — and its interface-templating
+section ("We have yet to extend our inference API to support this use case") is commented out, so it
+is not live documentation. A fold job's documented fields are `name`, `components`, `bonds` and
+`template_selection`; there is no contact, restraint or hotspot input, and covalent `bonds` is the
+only restraint-like one.
+
+Issue #160 (open, created 2026-01-08) is the request, and its thread is the useful part. A maintainer
+called it "just an inference API change", then reported that on their de novo binder set **a single
+pairwise interface contact "significantly hindered the model's ability to act as a filter"** —
+because monomer prediction is strong, one contact collapses the degrees of freedom — and that they
+were exploring softer constraints the model can ignore. Inter-chain templating was promised "within
+the next 2 weeks" on 2026-02-14 and the thread never confirms a release; two separate requests for
+*ligand*–protein contacts (2026-02-06, 2026-04-28) went unanswered. So an upgrade would not help:
+there is nothing to upgrade to.
+
+The `template_selection` route is not a workaround — it would need a 3D pose templated from the
+forced Boltz fold, which is circular, and it fixes intra-set distances too. One thing to check rather
+than assume: the README advertises `ground_truth_conformer_selection` as "useful for keeping known
+ligand conformations while allowing the model to predict protein structure around them", which is
+closer to what we want than the agent-report characterisation ("fixes the ligand's own conformer, not
+where it sits") allowed. Whether it also fixes *placement* is unverified and worth one look before
+writing RF3 off entirely.
 
 So the plan is **OF3 only, labelled honestly**:
 * add an optional `pocket_constraint` to the query built in `openfold3_core.run_predict`, taking the
