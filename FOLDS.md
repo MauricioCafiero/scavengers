@@ -1007,13 +1007,13 @@ that.
 | `shuffle_control_esm0` | Boltz co-fold | 0.54 | 0.85 | 17 | 11.0 Å | | 12/66 | 2 |
 | | OF3 re-fold (null) | 0.31 | 0.30 | 6 | 9.4 Å | 1.26 | 4/66 | −13 |
 | `bg33_1` (boltzgen) | Boltz co-fold | 0.38 | 0.75 | 15 | 17.3 Å | | — | |
-| | OF3 re-fold | 0.415 | 0.65 | 13 | 9.5 Å | 1.22 | — | — |
+| | OF3 re-fold | 0.415 | 0.65 | 13 | 9.5 Å | — | — | — |
 | `bg33_2` (boltzgen) | Boltz co-fold | 0.585 | 0.75 | 15 | 5.2 Å | | — | |
-| | OF3 re-fold | 0.35 | 0.40 | 8 | 8.0 Å | 0.99 | — | — |
+| | OF3 re-fold | 0.35 | 0.40 | 8 | 8.0 Å | — | — | — |
 | `bg33_3` (boltzgen) | Boltz co-fold | 0.48 | 1.00 | 20 | 8.6 Å | | — | |
-| | OF3 re-fold | 0.485 | 0.65 | 13 | 9.4 Å | 1.17 | — | — |
+| | OF3 re-fold | 0.485 | 0.65 | 13 | 9.4 Å | — | — | — |
 | `bg33_4` (boltzgen) | Boltz co-fold | 0.595 | 0.95 | 19 | 6.3 Å | | — | |
-| | OF3 re-fold | 0.52 | 0.70 | 14 | 7.0 Å | **1.93** | — | — |
+| | OF3 re-fold | 0.52 | 0.70 | 14 | 7.0 Å | — | — | — |
 
 **Pair columns on the `bg33` rows retracted (2026-10-18).** `pair_contacts.py` counts
 co-contacting pairs among the designed slots — the non-glycine positions of the parent design's
@@ -1025,7 +1025,10 @@ previous session borrowed the peptidebuilder shell design's slot positions as a 
 numbers are not the same measure as the shell rows' and are struck here and in RESULTS.md. The
 three computed tables (`pair_contacts_bg33_missing.csv`, `pair_contacts_bg33_cofold.csv`,
 `pair_contacts_o3cof_boltzgen.csv`) stay on disk as raw output but are no longer cited. The
-oxybenzone `bgox31` columns are dashed on the same ground, permanently.
+same ground strikes these rows' `sim` column: the script derives that term from the slot side
+chains as well, so every column `pair_contacts.py` emits (pairs, band, dead slots, `sim`) is
+part of the borrowed-grid analysis and none of it is valid on a generator arm. The oxybenzone
+`bgox31` columns are dashed on the same ground, permanently.
 
 `bg33_1` is the one row where the OF3 re-fold reads *better* than the Boltz co-fold on the static
 half — enclosure essentially unchanged (0.38 → 0.415) but the ligand centroid pulled from **17.3 Å
@@ -1050,10 +1053,11 @@ static read moved sharply down and the leg improved (`bg33_2`), stayed flat and 
 with the leg moderately worse (`bg33_4`, enclosure 0.595 → 0.52, engaged 19 → 14, ΔG +2.55) —
 **one of four points the right way, and the three before it in three different directions**.
 
-What does separate `bg33_4` from the rest is the *simultaneity* column rather than any static
-one — 1.93 side chains on the ligand at once against 0.99–1.22 — and that is a dynamics
-measurement, available only after the leg has run. So the arm's one usable quality signal is not in
-the pre-dynamics read at all, which is the finding to report rather than a repaired static rule.
+The simultaneity column does not survive the retraining of the measure either: `sim` counts the
+slot side chains in contact with the ligand (the term `pair_contacts.py` derives from the
+designed positions), so the 1.93 figure was read on the borrowed grid with the rest (retraction
+note above). The generator arms are left with plain dynamics measures — contacts, releases,
+separation traces — and the static pose geometry, none of which reference a design.
 
 ### Oxybenzone — co-folds, ΔG and retention: Boltz pose vs OF3 re-fold
 
@@ -1336,8 +1340,9 @@ design definition, and no real `bgox31` design json can exist — the generator 
 and ligand only. Ruling of 2026-10-18: the design-derived pair measure applies to no generator
 arm, so these columns stay dashed permanently, and the octinoxate `bg33` pair numbers published
 alongside the shell rows are retracted on the same ground (retraction note under the o3cof pairs
-set). The arm's one useful quality signal on octinoxate — simultaneity — cannot be
-read on oxybenzone at all, as before.
+set). The `sim` column goes with it on every generator arm — `pair_contacts.py` derives that
+term from the slot side chains too — leaving those arms the plain dynamics measures (contacts,
+releases, separation traces) and the static pose geometry.
 
 ## The RF3 re-folds: two further sets of five tables
 
@@ -1691,7 +1696,7 @@ weaker than OF3's −14.90**, and that OF3 cell slid only 1.1 Å, so this is a *
 (unlike the three slid-OF3 wins before it). Windows strengthen steadily (−9.41 / −11.20 / −12.05 /
 −12.43, not converged, so an upper bound). 42 released frames in 12 episodes, longest 290 ps, 2%
 late; contacts climb 5.5 → 16.3. The fold collapses and re-forms around the ligand (Cα 10.8 final /
-12.3 max, Rg 14.8 → 9.9). Slide 2.51 Å; sim 0.94. The static read called a
+12.3 max, Rg 14.8 → 9.9). Slide 2.51 Å. The static read called a
 weak cell and got a middling one (not the weakest RF3 read: `s3_orig_f12` −12.10, `shuffle_control`
 −11.13 sit below it). **RF3-beats-OF3 on octinoxate is now 6/7, and its first clean-comparator loss
 is here.** Tally 9 of 13.
