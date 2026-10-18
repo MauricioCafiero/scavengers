@@ -2100,3 +2100,42 @@ Rows are appended by `code/record_leg.py` as legs land.
 | `ox3_orig_f8_o3cof_dock4` | oxy | p4 GNINA | **−5.99** • | 33.2% | 271 | 2.69 | −2.06 | −3.92 |
 | `ox3_orig_f8_rf3cof_dock1` | oxy | p1 Vina | **−4.32** • | 19.5% | 517 | 2.24 | −7.41 | +3.08 |
 | `ox3_orig_f8_rf3cof_dock8` | oxy | p8 GNINA | **−4.90** ↑ | 10.0% | 598 | 0.81 | −7.41 | +2.51 |
+
+### The docked campaign, aggregated (2026-10-18, closed at 85 legs)
+
+Averages of the table above — the comparison that matters is Δ vs cofold (docked MD ΔG minus the
+same structure's cofold-pose MD ΔG) and retention (residence ≥50%, 0-release frames ideal).
+
+| mol | arm | docked from | n | mean ΔG | mean Δ vs cofold | held ≥50% | tighter than cofold |
+|---|---|---|---|---|---|---|---|
+| oct | OF3 | p1 Vina | 7 | −12.90 | −1.37 | | |
+| oct | OF3 | GNINA pick | 7 | −12.09 | −0.08 | | |
+| oct | RF3 | p1 Vina | 9 | −14.22 | +0.43 | | |
+| oct | RF3 | GNINA pick | 8 | −13.20 | +1.72 | | |
+| oxy | OF3 | p1 Vina | 9 | −9.45 | −1.77 | | |
+| oxy | OF3 | GNINA pick | 9 | −9.06 | −1.07 | | |
+| oxy | RF3 | p1 Vina | 10 | −9.57 | +1.68 | | |
+| oxy | RF3 | GNINA pick | 7 | −10.17 | +0.47 | | |
+| oct | OF3 | all | 14 | −12.50 | −0.72 | 4/14 | 7/14 |
+| oct | RF3 | all | 17 | −13.74 | +1.04 | 11/17 | 8/17 |
+| oxy | OF3 | all | 18 | −9.26 | −1.42 | 9/18 | 14/18 |
+| oxy | RF3 | all | 17 | −9.82 | +1.18 | 10/17 | 6/17 |
+
+How this reads:
+
+- **Oxybenzone's OF3 arm is the one place docking into a fold consistently strengthens the
+  binding** — 14 of 18 legs sit tighter than their cofold, some by more than the cofold's own
+  depth (`bgox31_3_o3cof_dock4` −12.48 vs −5.82; `bgox31_4_o3cof_dock1` −10.39 vs −5.74). The RF3
+  arm is the reverse (6 of 17).
+- **Retention splits by arm, not by score strength.** Octinoxate's OF3 docked starts hold poorly
+  (4/14 ≥50%) despite their tighter ΔG; its RF3 arm holds well (11/17). Oxybenzone sits in
+  between both ways (9/18, 10/17). The same lesson the pose-reproducibility screen closed with:
+  the static score does not decide whether a docked pose survives — the shell does.
+- **Retention leaders** across the chain: `bgox31_4_rf3cof_dock1`/`_dock3` (99.9/100.0%),
+  `bg33_3_o3cof_dock1`/`_dock6` (99.7/99.6%), `s3_esm2_f4_rf3cof_dock1`/`_dock3` (99.4/99.3%).
+  **Floor**: `bg33_3_rf3cof_dock5` (0.1%), `s2_esm2_control_o3cof_dock5` (9.4%),
+  `ox3_orig_f8_rf3cof_dock8` (10.0%), `ox3_orig_f8_o3cof_dock1` (11.8%).
+- A tighter-than-cofold ΔG with poor retention recurs (`bg33_2_o3cof_dock1` −11.55 at 14.8%;
+  `s3_esm2_f4_o3cof_dock1` −14.53 at 12.6%; `ox2_shuffle_esm0_rf3cof_dock1` −9.18 at 54.8% with
+  96 release frames) — MM/GBSA depth and residence stay separate measurements, and both columns
+  are needed to read a row.
