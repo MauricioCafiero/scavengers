@@ -2096,3 +2096,6 @@ Rows are appended by `code/record_leg.py` as legs land.
 | `shuffle_control_rf3cof_dock7` | oct | p7 GNINA | **−13.86** ↓ | 60.3% | 0 | 1.61 | −11.13 | −2.73 |
 | `ox2_shuffle_rf3cof_dock1` | oxy | p1 Vina | **−8.60** ↓ | 72.1% | 181 | 2.26 | −13.35 | +4.74 |
 | `ox2_shuffle_rf3cof_dock2` | oxy | p2 GNINA | **−9.29** ↓ | 32.0% | 51 | 1.8 | −13.35 | +4.05 |
+| `ox3_orig_f8_o3cof_dock1` | oxy | p1 Vina | **−4.12** ↑ | 11.8% | 763 | 1.79 | −2.06 | −2.05 |
+| `ox3_orig_f8_o3cof_dock4` | oxy | p4 GNINA | **−5.99** • | 33.2% | 271 | 2.69 | −2.06 | −3.92 |
+| `ox3_orig_f8_rf3cof_dock1` | oxy | p1 Vina | **−4.32** • | 19.5% | 517 | 2.24 | −7.41 | +3.08 |
