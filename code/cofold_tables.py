@@ -90,13 +90,39 @@ def mark(leg):
     d = a - b
     return " •" if abs(d) < 0.5 else (" ↓" if d < 0 else " ↑")
 
+# A GNINA-pick cell can be empty for two unrelated reasons, and rendering both the same way was
+# wrong (caught 2026-10-18). runs/folds_md/dock_legs.txt is the campaign's own record of which pose
+# each structure's pick was, and its convention is the one CLAUDE.md states: a structure gets a
+# `gnina` line only when the pick differs from pose 1, because "if the pick is pose 1 it coincides
+# with the Vina-p1 leg, so no new leg". So a `vina`-only entry means the pick WAS pose 1 -- not that
+# GNINA never ran. The scored poses themselves live in the gnina_local repo and only some were
+# pulled into runs/<mol>/gnina/, so the local scores file is not evidence of absence; this function
+# must consult dock_legs.txt first or it will report 44 structures as unscored that were all scored.
+def gnina_pick(mol, struct):
+    """(pose, status): 'ok' = its own leg, 'is_p1' = the Vina-p1 leg, 'unknown' = no record."""
+    for line in open("runs/folds_md/dock_legs.txt"):
+        w = line.split()
+        if len(w) >= 4 and w[0] == mol and w[1] == struct and w[3] == "gnina":
+            return int(w[2]), "ok"
+    for line in open("runs/folds_md/dock_legs.txt"):
+        w = line.split()
+        if len(w) >= 4 and w[0] == mol and w[1] == struct and w[3] == "vina":
+            return 1, "is_p1"
+    f = f"runs/{mol}/gnina/results_receptor_score_only/gnina_scores.csv"
+    if os.path.exists(f):
+        rs = [r for r in csv.DictReader(open(f))
+              if r["structure"] == struct and int(r["pose"]) >= 1 and r.get("CNNaffinity")]
+        if rs: return int(max(rs, key=lambda r: float(r["CNNaffinity"]))["pose"]), "ok"
+    return None, "unknown"
+
+
 def pick_leg(mol, p, suf):
     c = [os.path.basename(x) for x in glob.glob(f"runs/{mol}/md/{p}{suf}_dock*") + glob.glob(f"{BG}/{p}{suf}_dock*")]
     c = [x for x in c if not x.endswith("_dock1") and "_r2" not in x]
     return sorted(c)[0] if c else None
 
-def cell(leg):
-    if leg is None: return "—"
+def cell(leg, kind=None):
+    if leg is None: return kind or "—"
     v, r = dg.get(leg), res.get(leg)
     if v is None:
         return "*running*" if os.path.exists(os.path.join("runs", MOL, "md", leg, "system", "system.xml")) else "—"
@@ -118,7 +144,7 @@ UNFORCED = {'orig_f12': 'orig_control', 's3_esm2_f4': 's3_esm2_control',
 
 PEPS = {"octinoxate": ['orig_f12','s2_esm2_control','s3_esm2_f4','s3_orig_f12','shuffle_control','shuffle_control_esm0','bg33_1','bg33_2','bg33_3','bg33_4'],
         "oxybenzone": ['ox1_esm1_f8','ox1_orig_f12','ox2_esm1_f8','ox2_orig_f8','ox2_shuffle','ox2_shuffle_esm0','ox3_orig_f8','bgox31_2','bgox31_3','bgox31_4','bgox31_5']}
-out, missing, pending = {}, [], []
+out, missing, pending, unscored = {}, [], [], []
 for mol, peps in PEPS.items():
     MOL = mol
     lines = ["| peptide | pose | Boltz / BoltzGen co-fold | OpenFold3 co-fold | RoseTTAFold3 co-fold |",
@@ -132,6 +158,7 @@ for mol, peps in PEPS.items():
                 legs.append(f"{base}{suf}" if pose == "co-fold" else
                             (f"{base}{suf}_dock1" if pose == "Vina p1" else pick_leg(mol, base, suf)))
             for L in legs:
+                if pose == "GNINA pick" and L is None: continue
                 if L is None or dg.get(L) is not None and res.get(L) is not None: continue
                 # a staged-but-unfinished leg of the running unforced campaign is pending, not missing
                 if os.path.exists(f"runs/{mol}/md/{L}/system/system.xml") and dg.get(L) is None:
@@ -147,11 +174,25 @@ for mol, peps in PEPS.items():
             label = f"`{stem}`" if i == 0 else ""
             pl = pose
             if pose == "GNINA pick":
-                ns = [l.split("_dock")[-1] if l else None for l in legs]
-                pl = "GNINA pick (p" + "/".join(n or "—" for n in ns) + ")"
-            lines.append(f"| {label} | {pl} | " + " | ".join(cell(l) for l in legs) + " |")
+                tags = []
+                for suf, l in zip(("", "_o3cof", "_rf3cof"), legs):
+                    struct = (UNFORCED.get(p, p) if suf == "" else p) + suf
+                    pk, st = gnina_pick(mol, struct)
+                    if l: tags.append(f"p{l.split('_dock')[-1]}")
+                    elif st == "is_p1": tags.append("p1")
+                    else: tags.append("?"); unscored.append(struct)
+                pl = "GNINA pick (" + "/".join(tags) + ")"
+            kinds = [None, None, None]
+            if pose == "GNINA pick":
+                kinds = []
+                for suf, l in zip(("", "_o3cof", "_rf3cof"), legs):
+                    struct = (UNFORCED.get(p, p) if suf == "" else p) + suf
+                    pk, st = gnina_pick(mol, struct)
+                    kinds.append("*no record*" if st == "unknown" else "see Vina p1")
+            lines.append(f"| {label} | {pl} | " + " | ".join(cell(l, k) for l, k in zip(legs, kinds)) + " |")
     out[mol] = "\n".join(lines)
 open(os.environ.get("OUT", "/tmp/tables.md"), "w").write(f"## octinoxate\n{out['octinoxate']}\n\n## oxybenzone\n{out['oxybenzone']}\n")
+print(f"structures never GNINA-scored: {len(sorted(set(unscored)))} -> {sorted(set(unscored))}")
 print(f"missing: {len(missing)}   pending (legs still running): {len(sorted(set(pending)))}")
 for q in sorted(set(pending)): print("   pending", q)
 for m in sorted(set(missing)): print("  ", m)
