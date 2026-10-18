@@ -1,0 +1,112 @@
+| Run on Sun Oct 18 06:49:26 2026
+|
+|Input file:
+|--------------------------------------------------------------
+|Sample MM/GBSA input -- single trajectory, GBn2
+|&general
+|   verbose=2,
+|   startframe=1, endframe=20000, interval=1,
+|   receptor_mask="!:LIG", ligand_mask=":LIG",
+|/
+|&gb
+|   igb=8, saltcon=0.15,
+|/
+|--------------------------------------------------------------
+|MMPBSA.py Version=14.0
+|Complex topology file:           mmgbsa/complex.prmtop
+|Receptor topology file:          mmgbsa/receptor.prmtop
+|Ligand topology file:            mmgbsa/ligand.prmtop
+|Initial mdcrd(s):                mmgbsa/traj.nc
+|
+|Receptor mask:                  "!:LIG"
+|Ligand mask:                    ":LIG"
+|Ligand residue name is "LIG"
+|
+|Calculations performed using 20000.0 complex frames.
+|
+|Generalized Born ESURF calculated using 'LCPO' surface areas
+|
+|All units are reported in kcal/mole.
+-------------------------------------------------------------------------------
+-------------------------------------------------------------------------------
+
+GENERALIZED BORN:
+
+Complex:
+Energy Component            Average              Std. Dev.   Std. Err. of Mean
+-------------------------------------------------------------------------------
+BOND                        79.2744                7.1711              0.0507
+ANGLE                      187.8543               10.7497              0.0760
+DIHED                      251.8350                7.1260              0.0504
+VDWAALS                   -151.9525                8.6348              0.0611
+EEL                      -2520.7527               43.3444              0.3065
+1-4 VDW                     90.7419                4.0510              0.0286
+1-4 EEL                   2223.7072               13.3487              0.0944
+EGB                       -525.8265               41.0848              0.2905
+ESURF                       18.5892                0.8736              0.0062
+
+G gas                      160.7076               45.4734              0.3215
+G solv                    -507.2373               40.6720              0.2876
+
+TOTAL                     -346.5298               16.0992              0.1138
+
+
+Receptor:
+Energy Component            Average              Std. Dev.   Std. Err. of Mean
+-------------------------------------------------------------------------------
+BOND                        72.7170                6.8909              0.0487
+ANGLE                      169.8061               10.2646              0.0726
+DIHED                      239.0541                6.7018              0.0474
+VDWAALS                   -131.2801                8.5082              0.0602
+EEL                      -2512.2154               42.6770              0.3018
+1-4 VDW                     83.0646                3.9432              0.0279
+1-4 EEL                   2256.5111               13.3081              0.0941
+EGB                       -525.0291               41.1776              0.2912
+ESURF                       17.5094                0.9589              0.0068
+
+G gas                      177.6576               45.6700              0.3229
+G solv                    -507.5197               40.6069              0.2871
+
+TOTAL                     -329.8621               15.2064              0.1075
+
+
+Ligand:
+Energy Component            Average              Std. Dev.   Std. Err. of Mean
+-------------------------------------------------------------------------------
+BOND                         6.5574                2.0155              0.0143
+ANGLE                       18.0481                3.2316              0.0229
+DIHED                       12.7808                2.3896              0.0169
+VDWAALS                     -1.2307                1.0164              0.0072
+EEL                         -5.2534                0.9373              0.0066
+1-4 VDW                      7.6773                0.9530              0.0067
+1-4 EEL                    -32.8040                0.9958              0.0070
+EGB                        -12.3672                0.3151              0.0022
+ESURF                        3.7859                0.0449              0.0003
+
+G gas                        5.7756                4.4067              0.0312
+G solv                      -8.5813                0.3016              0.0021
+
+TOTAL                       -2.8057                4.4043              0.0311
+
+
+Differences (Complex - Receptor - Ligand):
+Energy Component            Average              Std. Dev.   Std. Err. of Mean
+-------------------------------------------------------------------------------
+BOND                         0.0000                0.0001              0.0000
+ANGLE                       -0.0000                0.0001              0.0000
+DIHED                        0.0000                0.0001              0.0000
+VDWAALS                    -19.4417                4.5761              0.0324
+EEL                         -3.2839                3.9319              0.0278
+1-4 VDW                     -0.0000                0.0001              0.0000
+1-4 EEL                      0.0000                0.0000              0.0000
+EGB                         11.5698                4.4286              0.0313
+ESURF                       -2.7061                0.5651              0.0040
+
+DELTA G gas                -22.7257                6.8001              0.0481
+DELTA G solv                 8.8637                4.0839              0.0289
+
+DELTA TOTAL                -13.8620                3.6280              0.0257
+
+
+-------------------------------------------------------------------------------
+-------------------------------------------------------------------------------
