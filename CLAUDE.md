@@ -219,9 +219,21 @@ Each legfile header carries its batch's values (`runs/folds_md/bzfree_*.legs`).
 **This was learned by getting it wrong on 2026-10-18**, when five batches went out with
 `SBATCH_OPTS` empty — the convention was in `racc_feed.sh`'s own parameter comment, which had been
 read and not applied, and is in neither RACC.md nor this file until now. The after-the-fact repair
-is `scontrol update JobId=<id> TimeLimit=<hh:mm:ss> NumCPUs=8`, and **`NumCPUs` took only on the
-PENDING jobs**: a running job keeps the cores it started with, so the one already executing stayed
-at 2. Getting it right at submission is the only reliable route.
+is `scontrol update JobId=<id> TimeLimit=<hh:mm:ss> CPUsPerTask=8 MinCPUsNode=8`, and it took only
+on the PENDING jobs: a running job keeps the cores it started with, so the one already executing
+stayed at 2. Getting it right at submission is the only reliable route.
+
+**Do not repair the core count with `NumCPUs` alone — it wedges the job.** `scontrol update
+NumCPUs=8` is accepted silently but raises only the job's total CPU count, leaving `CPUs/Task=1` and
+`MinCPUsNode=1`. The request is then self-inconsistent (8 CPUs on one node, one task of one CPU,
+one-CPU-per-node minimum) and Slurm parks the job at **`Reason=BadConstraints`** forever — it never
+starts and the reason never clears. On 2026-10-18 that silently killed two of the three queue slots;
+because `gpuscavenger` is `MaxSubmitJobsPU=3`, the two dead jobs also blocked the third batch's
+feeder from ever submitting, stalling 12 of 23 legs behind a job that was never going to run. The
+fix is `scontrol update JobId=<id> CPUsPerTask=8 MinCPUsNode=8`, after which the reason becomes
+`QOSMaxJobsPerUserLimit` — which is the *healthy* pending reason here, meaning only "another of your
+jobs is running". **Read a pending job's `Reason` as data, not decoration:** `BadConstraints` on a
+job whose peers run means the request is broken, not that it is queued.
 
 **Submission is socket-free once batched; draining is not.** A network loss stops nothing on the
 cluster — the legs keep computing and their wrapped solutes wait on scratch indefinitely — but the
