@@ -32,3 +32,51 @@ Values are ΔG in kcal/mol with retention in parentheses. ΔG is the MM/GBSA bin
 | bgox31_5 | −16.78 (100.0%) • | −11.55 (70.7%) ↓ | −14.69 (96.4%) ↑ |
 
 Values are ΔG in kcal/mol with retention in parentheses. ΔG is the MM/GBSA binding free energy over the whole 20 ns production run; retention is the percentage of the run with the ligand within 10 Å of the peptide. The trailing marker compares the 20 ns ΔG with the ΔG over the first 10 ns: • stable (within 0.5 kcal/mol), ↓ still decreasing (binding strengthening), ↑ still increasing (binding weakening). The Boltz / BoltzGen column is the original co-fold: BoltzGen for the bg* peptides, Boltz for the rest.
+
+---
+
+**Table 3. The strict comparison, static half: one sequence, four co-folding treatments.** Added
+2026-10-18. Tables 1 and 2 set a mostly **hint-forced** Boltz column against **unforced** OpenFold3
+and RoseTTAFold3 columns, so a difference down a row mixes "which model" with "forced or not". The
+hint-free Boltz twin of each designed sequence (its `_control` fold) is now in dynamics; its
+starting-pose geometry is already measurable, and so is the like-for-like comparison. Enclosed
+fraction and ligand-centroid separation are read off each co-folded pose's own coordinates
+(`runs/<mol>/dock/dock_poses.csv`, pose 0) with the same `geometry()` as `check_fold.py` — no
+energy, no dynamics.
+
+| peptide | Boltz forced | Boltz unforced | OF3 unforced | RF3 unforced |
+|---|---|---|---|---|
+| orig_f12 (oct) | 0.960 / 4.2 Å | 0.495 / **20.9 Å** | 0.680 / 9.4 Å | **0.800** / 5.8 Å |
+| s3_esm2_f4 (oct) | 0.795 / 7.0 Å | 0.360 / 13.6 Å | **0.580** / 7.3 Å | 0.460 / 9.3 Å |
+| s3_orig_f12 (oct) | 0.965 / 3.6 Å | **0.735** / 9.5 Å | 0.430 / 10.4 Å | 0.720 / 8.5 Å |
+| ox1_esm1_f8 | 0.940 / 4.1 Å | **0.765** / 5.9 Å | 0.580 / 6.1 Å | 0.530 / 9.3 Å |
+| ox1_orig_f12 | 0.995 / 1.2 Å | 0.520 / 7.2 Å | **0.810** / 5.7 Å | 0.550 / 6.1 Å |
+| ox2_esm1_f8 | 0.665 / 6.4 Å | 0.610 / 7.6 Å | **0.745** / 5.3 Å | 0.570 / 6.4 Å |
+| ox2_orig_f8 | 0.975 / 2.7 Å | 0.535 / 9.0 Å | **0.655** / 7.5 Å | 0.595 / 6.2 Å |
+| ox3_orig_f8 | 0.995 / 2.1 Å | **0.615** / 5.8 Å | 0.540 / 10.3 Å | 0.465 / 11.4 Å |
+| **mean** | **0.911 / 3.9 Å** | 0.579 / 9.9 Å | 0.628 / 7.8 Å | 0.586 / 7.9 Å |
+
+Each cell is enclosed fraction / ligand-centroid separation. **Bold** marks the best enclosure among
+the three *unforced* lanes in that row (Boltz forced is excluded from that contest — it is the
+treatment under test, not a competitor).
+
+**What the strict comparison says, and it is not what Tables 1 and 2 imply.** The three unforced
+lanes are indistinguishable on this measure: mean enclosure 0.579 (Boltz), 0.628 (OF3), 0.586 (RF3),
+with per-peptide wins splitting 3 / 4 / 1 across eight sequences and every lane's range overlapping
+the others' almost completely. **Forced Boltz is in a different regime from all three** — 0.911
+enclosed at 3.9 Å, against 0.58–0.63 at 7.8–9.9 Å — and no unforced lane's best cell (0.810) reaches
+forced Boltz's mean. So the Boltz column's advantage in Tables 1 and 2 is attributable to the
+**contact hints**, not to Boltz being the better co-folder: strip the hints and it places the ligand
+no better than the other two, and on octinoxate's `orig_f12` it is the worst of the three by a wide
+margin (0.495 at 20.9 Å, the furthest starting pose in the whole campaign).
+
+**Two things this does not yet say.** It is a starting-geometry comparison, not a binding one: the
+unforced Boltz legs' MM/GBSA is still running (23 legs on racc, `runs/folds_md/bzfree_*.legs`), and
+the dynamics three-way — unforced Boltz vs the OF3 and RF3 ΔG already in Tables 1 and 2 — completes
+when they land. And because two octinoxate unforced legs start unbound (20.9 and 13.6 Å), their ΔG
+will be partly a bound-versus-unbound difference; oxybenzone, where all five unforced folds start in
+contact at 5.8–9.0 Å, will be the cleaner arm. Forced OF3 (pocket-guided) and forced RF3 remain the
+next campaign's business, and RF3 has no contact input at all — see NEXT_STEPS.md, "Forced vs
+unforced co-folds".
+
+*(`cofold_binding_tables.pdf` predates this table and has not been regenerated.)*
