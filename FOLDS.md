@@ -1006,32 +1006,39 @@ that.
 | | OF3 re-fold (null) | 0.51 | 0.90 | 18 | 9.2 Å | 1.70 | 33/66 | 40 |
 | `shuffle_control_esm0` | Boltz co-fold | 0.54 | 0.85 | 17 | 11.0 Å | | 12/66 | 2 |
 | | OF3 re-fold (null) | 0.31 | 0.30 | 6 | 9.4 Å | 1.26 | 4/66 | −13 |
-| `bg33_1` (boltzgen) | Boltz co-fold | 0.38 | 0.75 | 15 | 17.3 Å | | 8/55 | |
-| | OF3 re-fold | 0.415 | 0.65 | 13 | 9.5 Å | 1.22 | 15/55 | 11 |
-| `bg33_2` (boltzgen) | Boltz co-fold | 0.585 | 0.75 | 15 | 5.2 Å | | 8/55 | |
-| | OF3 re-fold | 0.35 | 0.40 | 8 | 8.0 Å | 0.99 | 12/55 | 4 |
-| `bg33_3` (boltzgen) | Boltz co-fold | 0.48 | 1.00 | 20 | 8.6 Å | | 3/55 | |
-| | OF3 re-fold | 0.485 | 0.65 | 13 | 9.4 Å | 1.17 | 14/55 | 9 |
-| `bg33_4` (boltzgen) | Boltz co-fold | 0.595 | 0.95 | 19 | 6.3 Å | | 14/55 | |
-| | OF3 re-fold | 0.52 | 0.70 | 14 | 7.0 Å | **1.93** | 14/55 | 9 |
+| `bg33_1` (boltzgen) | Boltz co-fold | 0.38 | 0.75 | 15 | 17.3 Å | | — | |
+| | OF3 re-fold | 0.415 | 0.65 | 13 | 9.5 Å | 1.22 | — | — |
+| `bg33_2` (boltzgen) | Boltz co-fold | 0.585 | 0.75 | 15 | 5.2 Å | | — | |
+| | OF3 re-fold | 0.35 | 0.40 | 8 | 8.0 Å | 0.99 | — | — |
+| `bg33_3` (boltzgen) | Boltz co-fold | 0.48 | 1.00 | 20 | 8.6 Å | | — | |
+| | OF3 re-fold | 0.485 | 0.65 | 13 | 9.4 Å | 1.17 | — | — |
+| `bg33_4` (boltzgen) | Boltz co-fold | 0.595 | 0.95 | 19 | 6.3 Å | | — | |
+| | OF3 re-fold | 0.52 | 0.70 | 14 | 7.0 Å | **1.93** | — | — |
+
+**Pair columns on the `bg33` rows retracted (2026-10-18).** `pair_contacts.py` counts
+co-contacting pairs among the designed slots — the non-glycine positions of the parent design's
+sequence. The `bg33` peptides were never designed that way: the BoltzGen spec
+(`boltzgen_local/specs/octinoxate33.yaml`) fixes the length (33) and the ligand SMILES and leaves
+the sequence free to the generator, so there is no slot set for the pair count to reference. A
+previous session borrowed the peptidebuilder shell design's slot positions as a convention (the
+`design.json` name-guess in `pair_contacts.py`) and computed the pair counts on that grid; those
+numbers are not the same measure as the shell rows' and are struck here and in RESULTS.md. The
+three computed tables (`pair_contacts_bg33_missing.csv`, `pair_contacts_bg33_cofold.csv`,
+`pair_contacts_o3cof_boltzgen.csv`) stay on disk as raw output but are no longer cited. The
+oxybenzone `bgox31` columns are dashed on the same ground, permanently.
 
 `bg33_1` is the one row where the OF3 re-fold reads *better* than the Boltz co-fold on the static
 half — enclosure essentially unchanged (0.38 → 0.415) but the ligand centroid pulled from **17.3 Å
 to 9.5 Å**, i.e. the Boltz co-fold had placed the ligand outside the fold altogether. That is the
 pre-dynamics counterpart of the ΔG result, and it is consistent with the rest of the table rather
 than an exception to it: the drop that predicts a weak leg is enclosure *and* separation together,
-and here only one of the two is poor. Its pairs come from `design.json`'s 11 non-glycine slots
-(band [10, 55], the same convention as the committed `bg33_3`/`bg33_4` rows): 15/55 realised, 2
-slots never in contact, no long-range pair —
-`runs/octinoxate/md/pair_contacts_o3cof_boltzgen.csv`.
+and here only one of the two is poor.
 
 **`bg33_2` is the clearest failure of the static read anywhere in the campaign, and it should be
 reported as such.** Its OF3 re-fold is *worse* than its Boltz co-fold on every static column —
 enclosure 0.585 → **0.35**, wrapped 0.75 → 0.40, engaged 15 → **8**, centroid separation 5.2 → 8.0 Å
 — and it nonetheless binds **3.6 kcal/mol stronger** with higher retention and a converged window
-series. A read that predicts weak legs from low enclosure gets this one exactly backwards. Both
-BoltzGen legs also realise fewer pairs than any shell design (15/55 and 12/55, 3–4 dead slots, no
-long-range pair in either), so the pair count does not rescue the prediction either. The honest
+series. A read that predicts weak legs from low enclosure gets this one exactly backwards. The honest
 statement for the paper is that the static read prices *shell* re-folds well and has no demonstrated
 skill on the BoltzGen arm.
 
@@ -1041,11 +1048,7 @@ engaged 20 → 13) and it is the leg whose ΔG got *worse*. So across the four B
 static read moved sharply down and the leg improved (`bg33_2`), stayed flat and the leg worsened
 (`bg33_3`), improved on separation alone and the leg improved (`bg33_1`), and moved moderately down
 with the leg moderately worse (`bg33_4`, enclosure 0.595 → 0.52, engaged 19 → 14, ΔG +2.55) —
-**one of four points the right way, and the three before it in three different directions**. Notably
-`bg33_3` realises 14/55 pairs with the arm's only **long-range pairs** (3/10) despite being the
-weakest-binding of the four, and `bg33_4` realises the same 14/55 while binding the *strongest* at
-−17.11, which tells against reading the pair count as a quality measure on this arm too: the same
-pair total spans 7 kcal/mol here.
+**one of four points the right way, and the three before it in three different directions**.
 
 What does separate `bg33_4` from the rest is the *simultaneity* column rather than any static
 one — 1.93 side chains on the ligand at once against 0.99–1.22 — and that is a dynamics
@@ -1251,7 +1254,8 @@ half is `pair_contacts.py` on each re-fold leg: mean simultaneous designed side 
 (`sim`) and realised pairs against the [n−1, n(n−1)/2] band. Pair outputs persist as
 `runs/{octinoxate,oxybenzone}/md/pair_contacts_o3cof_shellN.csv`, with the `orig_f12` pair under
 `pair_contacts_o3cof_design.csv`, the nulls under `pair_contacts_o3cof_nulls.csv` and the BoltzGen
-legs under `pair_contacts_o3cof_boltzgen.csv`.
+legs under `pair_contacts_o3cof_boltzgen.csv` (this file and the other two bg33 pair tables are
+no longer citable — 2026-10-18 retraction, note under the o3cof pairs set).
 
 **Pre-registered prediction for `bgox31_5_o3cof`, written 2026-10-14 while the leg was at 7.4M of
 10M steps.** This is the first cell in the arm where the file's two working rules *disagree*, so it
@@ -1328,9 +1332,12 @@ columns dashed, which was my omission and not a missing input. Corrected the sam
 `design_shell1/2/3.json` only — there is no BoltzGen equivalent of octinoxate's `design.json` for
 the `bgox31` arm. The committed baseline rows in `RESULTS.md` already show `—` in those columns for
 the same reason. Deriving slots from the sequence's non-glycine positions would be inventing a
-design definition, so the columns stay dashed until a real `bgox31` design json exists; the
-consequence is that the arm's one useful quality signal on octinoxate — simultaneity — cannot be
-read on oxybenzone at all.
+design definition, and no real `bgox31` design json can exist — the generator spec fixes length
+and ligand only. Ruling of 2026-10-18: the design-derived pair measure applies to no generator
+arm, so these columns stay dashed permanently, and the octinoxate `bg33` pair numbers published
+alongside the shell rows are retracted on the same ground (retraction note under the o3cof pairs
+set). The arm's one useful quality signal on octinoxate — simultaneity — cannot be
+read on oxybenzone at all, as before.
 
 ## The RF3 re-folds: two further sets of five tables
 
@@ -1684,7 +1691,7 @@ weaker than OF3's −14.90**, and that OF3 cell slid only 1.1 Å, so this is a *
 (unlike the three slid-OF3 wins before it). Windows strengthen steadily (−9.41 / −11.20 / −12.05 /
 −12.43, not converged, so an upper bound). 42 released frames in 12 episodes, longest 290 ps, 2%
 late; contacts climb 5.5 → 16.3. The fold collapses and re-forms around the ligand (Cα 10.8 final /
-12.3 max, Rg 14.8 → 9.9). Slide 2.51 Å; pairs 19/55 (band 20%), sim 0.94. The static read called a
+12.3 max, Rg 14.8 → 9.9). Slide 2.51 Å; sim 0.94. The static read called a
 weak cell and got a middling one (not the weakest RF3 read: `s3_orig_f12` −12.10, `shuffle_control`
 −11.13 sit below it). **RF3-beats-OF3 on octinoxate is now 6/7, and its first clean-comparator loss
 is here.** Tally 9 of 13.
@@ -1694,8 +1701,7 @@ is here.** Tally 9 of 13.
 a tie at any honest uncertainty — and **3.50 stronger than its −8.02 baseline**. Windows flat
 (−11.09 / −11.00 / −10.94 / −11.52). 5 single-frame releases, none late; separation closes 9.5 →
 4.4 Å and contacts rise 11.7 → 20.6, so residence is low from an early park outside the cutoff, not
-loss. Slide 3.33 Å; Cα 5.0 / 7.3; pairs **27/55 (band 38%), 0 dead slots** — the best pair
-realisation in the RF3 octinoxate design arm, from the static read with only 4 of 20 atoms engaged.
+loss. Slide 3.33 Å; Cα 5.0 / 7.3.
 **Both `bg33` cells:** neither beat its clean OF3 counterpart (−2.47, −0.06), and both beat their
 baselines; the static read's "weakest cells yet" was wrong on both. Neither pre-registered reading
 held. Tally (tie counted as no win): 9 of 14.
@@ -1705,13 +1711,11 @@ held. Tally (tie counted as no win): 9 of 14.
 **Residence 1.9% is a cutoff artefact, not loss:** centroid separation holds at 11.4–11.5 Å the
 whole run while contacts *rise* 13.2 → 29.9 and only 5 single frames count as released — the
 ligand sits bound against the side of a fold whose centroid is just past 10 Å. Read this cell by
-its separation trace, as the file warns. Fold rigid (Cα 2.0 / 2.6). Slide 2.86 Å; pairs 10/55
-(band 0%), 6 dead slots. Octinoxate RF3-beats-OF3 7/9; tally **15 of 20**.
+its separation trace, as the file warns. Fold rigid (Cα 2.0 / 2.6). Slide 2.86 Å. Octinoxate RF3-beats-OF3 7/9; tally **15 of 20**.
 
 **`bg33_4_rf3cof` (2026-10-15), the last RF3 cofold leg.** **−16.13 ± 0.03 at 81.2% residence,
 zero releases** — **0.98 weaker than OF3's −17.11** (clean, slid 2.43 Å) and 3.52 weaker than its
-−19.66 baseline. Windows −16.79 / −17.81 / −16.06 / −16.13. Fold stable (Cα 2.5 / 4.3). Slide
-1.28 Å; pairs 14/55 (band 9%), 5 dead slots.
+−19.66 baseline. Windows −16.79 / −17.81 / −16.06 / −16.13. Fold stable (Cα 2.5 / 4.3). Slide 1.28 Å.
 
 **Campaign close (all 29 cofold legs in).** RF3 beats OF3 in **15 of 21** cells: octinoxate **7/10**
 (every non-win is a `bg33` BoltzGen cell — `bg33_1` −2.47, `bg33_2` a tie, `bg33_4` −0.98 — all

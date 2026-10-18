@@ -159,9 +159,12 @@ all of it late -- so read the column against that section's caveats rather than 
 
 \* 8 release frames of 20,000 at 1 ps sampling, all isolated single frames.
 
-The racc campaign's remaining legs (`bg33_1`/`bg33_2`, co-folded and docked) were run through
-`pair_contacts.py` from the already-fetched wrapped solutes (2026-10-08,
-`runs/octinoxate/md/pair_contacts_bg33_missing.csv`), so every row of the pairs table is now filled.
+Retracted 2026-10-18: the four `bg33` rows' pair columns are struck in the table below. The
+`bg33` peptides were specified to the BoltzGen generator by length and ligand SMILES only
+(`boltzgen_local/specs/octinoxate33.yaml` — the sequence was freely generated and defines no
+slots), so the shell-design pair measure does not apply; the values previously published here
+were computed against the peptidebuilder `design.json` slot positions as a borrowed convention.
+The static columns are pose geometry and stand.
 
 ### Peptide structural stability, every leg
 
@@ -236,8 +239,8 @@ The trajectory columns are then what those same poses did over their 20 ns runs,
 `pair_contacts.py`: how many pairs of the design's non-glycine slot positions the fold brings onto
 the ligand — total realised, of which the adjacent pairs (which chain connectivity gives for free)
 and the non-adjacent ones (which it must earn). peptidebuilder designs have 12 slots, so the
-denominator band is [11, 66]; the BoltzGen designs have 11, so [10, 55], and their cells are not
-pooled with the others.
+denominator band is [11, 66]. (The BoltzGen rows have no designed slots — 2026-10-18 retraction
+note below — and their pair cells are struck.)
 
 | peptide | pose | enclosed | wrapped | engaged | cent sep | pairs realised | adjacent | non-adjacent |
 |---|---|---|---|---|---|---|---|---|
@@ -247,9 +250,9 @@ pooled with the others.
 | `s3_esm2_f4` | co-folded | 0.795 | 0.90 | 18/20 | 7.0 Å | 32/66 | 6/11 | 26/55 |
 | | Vina p1 | 0.905 | 0.95 | 19/20 | 8.4 Å | 32/66 | 6/11 | 26/55 |
 | | GNINA p6 | 0.94 | 0.95 | 19/20 | 8.0 Å | 17/66 | 3/11 | 14/55 |
-| `bg33_4` | co-folded | 0.59 | 0.95 | 19/20 | 6.3 Å | **14/55** | 1/10 | **13/45** |
-| | Vina p1 | 0.705 | 0.90 | 18/20 | 6.3 Å | 9/55 | 2/10 | 7/45 |
-| | GNINA p6 | 0.635 | 0.95 | 19/20 | 6.2 Å | 5/55 | 0/10 | 5/45 |
+| `bg33_4` | co-folded | 0.59 | 0.95 | 19/20 | 6.3 Å | — | — | — |
+| | Vina p1 | 0.705 | 0.90 | 18/20 | 6.3 Å | — | — | — |
+| | GNINA p6 | 0.635 | 0.95 | 19/20 | 6.2 Å | — | — | — |
 | `s2_esm2_control` | co-folded | 0.51 | 0.85 | 17/20 | 6.7 Å | 10/66 | 3/11 | 7/55 |
 | | Vina p1 | 0.745 | 1.00 | 20/20 | 8.0 Å | 5/66 | 2/11 | 3/55 |
 | | GNINA p6 | 0.755 | 0.85 | 17/20 | 5.0 Å | 10/66 | 3/11 | 7/55 |
@@ -263,15 +266,15 @@ pooled with the others.
 | `orig_f12` | co-folded | 0.96 | 1.00 | 20/20 | 4.2 Å | 22/66 | 4/11 | 18/55 |
 | | Vina p1 | **0.975** | 1.00 | 20/20 | 3.5 Å | 32/66 | 6/11 | 26/55 |
 | | GNINA p5 | 0.975 | 0.90 | 18/20 | 5.0 Å | 30/66 | 6/11 | 24/55 |
-| `bg33_3` | co-folded | 0.48 | 1.00 | 20/20 | 8.6 Å | 3/55 | 1/10 | 2/45 |
-| | Vina p1 | 0.55 | 0.90 | 18/20 | 8.0 Å | 13/55 | 5/10 | 8/45 |
-| | GNINA p6 | 0.53 | 0.95 | 19/20 | 8.1 Å | 3/55 | 1/10 | 2/45 |
-| `bg33_1` | co-folded | 0.38 | 0.75 | 15/20 | 17.3 Å | 8/55 | 4/10 | 4/45 |
-| | Vina p1 | 0.45 | 0.85 | 17/20 | 13.1 Å | 7/55 | 3/10 | 4/45 |
-| | GNINA p2 | 0.59 | 0.95 | 19/20 | 10.5 Å | 10/55 | 4/10 | 6/45 |
-| `bg33_2` | co-folded | 0.585 | 0.75 | 15/20 | 5.2 Å | 8/55 | 3/10 | 5/45 |
-| | Vina p1 | 0.51 | 0.85 | 17/20 | 8.7 Å | 20/55 | 6/10 | 14/45 |
-| | GNINA p4 | 0.60 | 1.00 | 20/20 | 6.0 Å | 27/55 | 6/10 | 21/45 |
+| `bg33_3` | co-folded | 0.48 | 1.00 | 20/20 | 8.6 Å | — | — | — |
+| | Vina p1 | 0.55 | 0.90 | 18/20 | 8.0 Å | — | — | — |
+| | GNINA p6 | 0.53 | 0.95 | 19/20 | 8.1 Å | — | — | — |
+| `bg33_1` | co-folded | 0.38 | 0.75 | 15/20 | 17.3 Å | — | — | — |
+| | Vina p1 | 0.45 | 0.85 | 17/20 | 13.1 Å | — | — | — |
+| | GNINA p2 | 0.59 | 0.95 | 19/20 | 10.5 Å | — | — | — |
+| `bg33_2` | co-folded | 0.585 | 0.75 | 15/20 | 5.2 Å | — | — | — |
+| | Vina p1 | 0.51 | 0.85 | 17/20 | 8.7 Å | — | — | — |
+| | GNINA p4 | 0.60 | 1.00 | 20/20 | 6.0 Å | — | — | — |
 
 Three reads the merged rows support. **The static half separates the pipelines without any energy
 computation at all.** The shell-pipeline co-folds taken through dynamics enclose 0.795–0.965 with
@@ -289,15 +292,13 @@ counts — and that is the one leg where a docked start clearly won (−22.11 at
 leg drifted 12.6 Å to 0.0% residence regardless (footnote †). Enclosure prices the pose given, and
 the ligand left that pose; it is not a stability forecast.
 
-**The `bg33` rows are now complete.** The four racc-campaign legs (`bg33_1`/`bg33_2`, co-folded and
-docked) were computed from the already-fetched wrapped solutes with the same `design.json` slots as
-the committed `bg33_3`/`bg33_4` rows (`runs/octinoxate/md/pair_contacts_bg33_missing.csv`). They
-close the BoltzGen rows the way the ΔG table wants them: `bg33_1` realises 7–10/55 pairs in every
-pose with 4–6 dead slots and no long-range pair anywhere — the weakest pair profile in the table,
-down with its −11 to −13 cells and its 0.38-co-fold static read; `bg33_2`'s co-fold realises 8/55
-but its docked legs rise to 20/55 and 27/55 (38% up the band, the only long-range pair in the
-BoltzGen arm) — the same legs where its ΔG also improves, and still under half of the shell
-designs' 41–53/66 rows.
+**Retracted 2026-10-18: the `bg33` rows' pair columns** — the values struck above. The `bg33`
+peptides were specified to the BoltzGen generator by length and ligand SMILES only (the sequence
+freely generated, so no designed slots exist), and the pair measure the shell rows use does not
+apply to them. The numbers published until this date had been computed against the shell
+design's `design.json` slot positions as a borrowed convention — a grid the generator never
+designed to — and cannot stand beside the shell rows as the same analysis (same ruling as
+FOLDS.md's o3cof pairs set).
 
 ## Oxybenzone: a second molecule through the pipeline
 
@@ -317,8 +318,9 @@ result distinct from octinoxate's.
 **A BoltzGen arm was added for this molecule too** (2026-10-07): four designs at 31 residues, matched
 to the aromatic shell's length, each through co-folded plus Vina pose 1 plus its GNINA pick — twelve
 further legs, same protocol, same cluster, so **25 legs in all** across the two pipelines. The four
-tables below carry both arms; the fifth's pairs half cannot cover BoltzGen, and the static
-fold/pose half of that same table is where those designs' rows now appear instead. The headline is that the
+tables below carry both arms; the fifth's pairs half cannot cover BoltzGen (and per the
+2026-10-18 ruling, never will — a generator arm has no designed slots to count pairs on), and
+the static fold/pose half of that same table is where those designs' rows now appear instead. The headline is that the
 shell pipeline still wins but only by **2.0 kcal/mol** — `ox2_orig_f8` at −24.21/100% against
 `bgox31_3_dock1` at −22.23/100% — where on octinoxate no BoltzGen fold enclosed its ligand at all.
 One caveat carries through every table: five of the twelve BoltzGen legs are ligand **releases**
