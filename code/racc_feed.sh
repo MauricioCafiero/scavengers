@@ -78,6 +78,10 @@ while IFS= read -r line; do
 done < $LEGFILE
 
 log "feeder started: ${#LEGS} legs queued, ceiling $CEILING, interval ${INTERVAL}s, batch=$BATCH"
+# Log the sbatch options, so what a job actually requested is recoverable from the log rather
+# than inferred: macOS will not let you read a running process's environment, so after the fact
+# there is otherwise no record of what SBATCH_OPTS held.
+log "sbatch opts: $SBATCH_OPTS"
 
 if [[ $BATCH == 1 ]]; then
     # Stage every leg first (idempotent -- the tar just overwrites), then wait for one slot.
