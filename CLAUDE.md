@@ -149,6 +149,21 @@ of every leg's wall is fixed JIT-plus-equilibration overhead that does not scale
 Applying the A10G exponent to an 18,650-particle leg predicted 1.6–1.8 h where ~70–80 min is right.
 For a quick figure: **wall ≈ 8 min + 10M × 0.236 ms × (N/5838)^0.4**.
 
+**The 0.4 exponent holds only to ~13k particles. Above that use 0.64** — measured 2026-10-18 on
+`orig_control` at 19,617 particles: 0.512 ms/step net of overhead (9,945,000 steps in 1:32:51 from
+`sacct` start to `energy.csv` mtime, less ~8 min JIT/equilibration), which is 2.17× the 5,838-particle
+rate for 3.36× the particles → exponent 0.64 across that range. The 0.4 model predicted 71 min for
+that leg against ~94 min actual, a 1.3× under-estimate, because it was calibrated only on
+5.4k–12.8k-particle legs. So: **≤13k particles, `(N/5838)^0.4`; above, `(N/5838)^0.64`.** This
+matters for sizing a `--time` request — unforced folds are rods and run 18k–23k particles, where
+the old model silently buys a limit that cannot fit the batch (`bzfree_oct_2`'s three 23k legs came
+out at 5.14 h against the 5:20 limit it had been given, 11 minutes of slack).
+
+**A pending job's TimeLimit can be RAISED, a running one's cannot** (measured 2026-10-18:
+`scontrol update JobId=<pending> TimeLimit=06:40:00` succeeded, the same call on the running job
+returned "Access/permission denied"). So a mis-sized limit is recoverable while the job waits and
+unrecoverable once it starts — which is the real reason to size it correctly at submission.
+
 **energy.csv flushes continuously here, unlike on Modal** — mid-run progress and ms/step are
 readable any time (row cadence 500 steps) without contacting produce. Use it to revise estimates
 within the first 20 minutes instead of waiting for completion to find out.
@@ -192,8 +207,9 @@ resubmission after preemption skips what is already done. The partition's **DEFA
 **Every submission passes `SBATCH_OPTS="--time=<estimate + 1 h 30 min> --cpus-per-task=8"`, and a
 batch is sized to ≤6 h of estimate.** Those are the campaign's settings, not suggestions:
 `racc_feed.sh` *refuses* to run (exit 2) unless `SBATCH_OPTS` carries both, because an optional
-step is a skipped one. The estimate is the sum of `8 min + 39.3 min × (N/5838)^0.4` over the
-batch's legs, N read off each build; the ≤6 h split is why `dk5_*`/`dk6_*` are many small legfiles
+step is a skipped one. The estimate is the sum of `8 min + 39.3 min × (N/5838)^e` over the
+batch's legs (e = 0.4 up to ~13k particles, 0.64 above — see the rate note above), N read off
+each build; the ≤6 h split is why `dk5_*`/`dk6_*` are many small legfiles
 rather than one — a preempted leg restarts from zero, so a smaller batch bounds the loss. A 24 h
 default request scores worse on JOBSIZE priority, cannot backfill into a short gap, and sits
 exposed to preemption for hours it will never use; 8 cores lift JOBSIZE priority and must come
