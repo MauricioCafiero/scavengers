@@ -887,6 +887,48 @@ So the plan is **OF3 only, labelled honestly**:
 * pin `rc-foundry` in `rf3_app.py` while in there regardless: it installs unpinned, so the version in
   Modal's cached image is unknowable.
 
+**Status 2026-10-18: the OF3 side is written, not run.** `fold` commit `fe3abed` adds
+`pocket_constraint` support — a `POCKET:`/`POCKET_MAX_DISTANCE:` pair in the plain-text input
+format, a `--pocket "4,24,29,34"` flag on both CLIs, and `build_pocket_constraint` in
+`openfold3_core`, with six tests. Inputs are generated, not typed:
+`code/pocket_inputs.py <mol> <forced fold names...>` reads each `_fN` yaml's `contact` block and
+writes `runs/<mol>/folds/inputs_pocket/<struct>.txt` with the `token1` positions and the largest of
+that yaml's `max_distance` values (so no contact is tightened relative to Boltz). It refuses an
+unforced fold, which has no hint set to carry. Verified on `s3_esm2_f4` (4 residues, 4.2 Å),
+`orig_f12` and `s3_orig_f12` (12 residues, 5.2 Å). What is left is a `LANE=openfold3p` in
+`fold_batch.sh` and the `_o3pcof` branches, then one smoke fold.
+
+### The three open questions, and how to settle them cheaply
+
+Each is a yes/no answerable in one or two runs, before any campaign is sized. **The first decides
+whether a pocket-guided OF3 column is worth running at all.**
+
+1. **Does the peptide refold during OF3's refinement, or is it the unconstrained parent's fold?**
+   Run `s3_orig_f12` (12 hints, the tightest designed shell) through `LANE=openfold3p`, and run the
+   same sequence unguided — we already have the unguided fold. Compare the two peptides' Cα RMSD
+   and radius of gyration, and the ligand's wrapped/enclosed fractions, with the tools that already
+   do this (`code/compare_folds.py`, `code/folds_metrics.py`). **If the peptide Cα RMSD is ~0 and
+   only the ligand has moved, the hint cannot produce a shell** — report that as the finding and do
+   not run 8 legs of MD on it. If the fold does change, proceed.
+2. **Does RF3's `ground_truth_conformer_selection` fix the ligand's placement or only its internal
+   conformer?** Cheapest decisive test: take one co-folded structure we already have, feed its
+   ligand as the ground-truth conformer, and run RF3 twice with different seeds. Then measure the
+   ligand centroid's position relative to the peptide (superposing on peptide Cα first, exactly as
+   `code/ligand_slide.py` does). Placement fixed → centroid lands in the same place both times and
+   matches the supplied pose; conformer only → internal geometry matches but the centroid wanders.
+   If placement is fixed, RF3 has a usable guided mode after all and question 3 is moot.
+3. **Does RF3's `p_provide_inter_molecule_distances` override reach inference?** Only worth asking
+   if 2 says no. Set it to 1.0 through a Hydra override alongside a `template_selection` naming the
+   hint residues and the ligand, and check whether inter-molecule distances appear in the templated
+   features at all (the quick read is whether the predicted ligand moves toward the templated
+   residues versus the same run without the override). Even a yes is **not** a route to a
+   comparable column: it needs a pose templated from the forced Boltz fold, which is circular, and
+   it fixes intra-set distances too. Treat it as a question about the tool, not a campaign arm.
+
+A fourth, non-blocking one: **ask upstream.** Foundry issue #160 has two unanswered requests for
+ligand–protein contacts; a comment naming this use case (short designed peptide, 4–12 residue–ligand
+contacts) costs nothing and might date the feature.
+
 **Caveats to carry into the caption, not discover later.** f4/f8/f12 collapse to pocket sets of
 different sizes, which is not the same dose of restraint; OF3's guided ipTM/ipSAE are not comparable
 to its unguided ones (same issue #160 warning applies to guided runs generally); and a pocket-guided
