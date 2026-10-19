@@ -695,6 +695,74 @@ record it, but treat a released-frames difference as a flagged cell, not a concl
 Nothing here runs until you say go; the first action on a go is the two one-line edits and the smoke
 leg.
 
+### Targeted replicate strategy (2026-10-19): answer the question with 11 legs, not 202
+
+**Do not run the full sweep first.** The plan above was written for a 62-leg inventory; there are
+now **202** legs with a canonical whole-run MM/GBSA row and only **63** staged `_r2` directories,
+because the unforced campaign, the 66-leg docked campaign, both cofold lanes and the guided lane all
+landed after the 2026-10-08 staging. A full sweep is therefore ~170 h of racc across ~30 batches
+(and the four staged lists `{oct,oxb}_{A,B}`, at 12.7–16.3 h each, are now illegal under the ≤6 h
+rule and must be re-split whatever the scope).
+
+**The question is not "what is the spread of every cell".** It is: **is the 16 kcal/mol spread on
+`ox1_esm1_control` typical, or peculiar to the campaign's largest outlier?** Those two worlds imply
+opposite actions — one invalidates every single-run cell in the headline tables, the other says the
+tables stand and the outliers need an error bar — and they are distinguishable with ~11 legs.
+
+**Stratify on two axes, because the second is the one that bites.** ΔG band (strong ≤ −18, mid −18
+to −8, weak > −8) and *diagnostic quality*: `clean` = released <1% AND |20 ns − 10 ns window drift|
+<1.5 AND slide <2 Å; `flagged` = any of released ≥10%, drift ≥3, slide ≥3 Å. The population is
+heavily skewed toward the mid band, and the interesting cells are small:
+
+| | clean | mixed | flagged |
+|---|---|---|---|
+| strong (≤ −18) | **6** | 8 | 6 |
+| mid | 43 | 42 | 41 |
+| weak (> −8) | 6 | 14 | 22 |
+
+**`strong`+`clean` is the decisive cell, and it holds only six legs in the whole project** — one of
+which is `ox1_esm1_control` itself. That is what makes this cheap: four of six is a near-census, not
+a sample. And it is the cell that matters because run 1 *was* clean by every marker — flat monotone
+windows, zero releases, 1.92 Å slide — and still failed to reproduce. So:
+
+* **if the other strong+clean legs also fail to reproduce, no cell in the headline tables is
+  trustworthy on one run**, and the full 202-leg sweep is justified;
+* **if they reproduce, `ox1_esm1_control` is a genuine outlier**, the tables stand, and the spread
+  column is needed only for the extremes — which is a presentation fix, not a week of queue.
+
+Either way the answer arrives in ~10 h instead of ~170, and the full sweep stays available.
+
+**The eleven legs** (`ox1_esm1_control_r2` is already run and is the twelfth; picked widest-|ΔG|
+first within each cell, no two legs sharing a parent structure so a single bad build cannot carry a
+whole stratum):
+
+| cell | leg | ΔG | drift | released | slide | `_r2` staged |
+|---|---|---|---|---|---|---|
+| strong·clean | `ox2_orig_f8_dock4` (oxy) | −24.00 | −0.66 | 0.0% | 1.7 | yes |
+| strong·clean | `bgox31_3_dock1` (oxy) | −22.23 | −0.89 | 0.0% | 1.6 | yes |
+| strong·clean | `orig_f12_dock1` (oct) | −22.11 | +1.14 | 0.0% | 0.9 | yes |
+| mid·clean | `s2_esm2_control_dock6` (oct) | −17.09 | −0.31 | 0.0% | 1.1 | yes |
+| mid·clean | `ox2_esm1_f8_o3cof` (oxy) | −16.68 | +0.86 | 0.0% | 1.2 | no |
+| mid·clean | `bg33_4_o3cof_dock1` (oct) | −16.04 | −0.39 | 0.0% | 1.2 | no |
+| weak·clean | `bgox31_4_o3cof_dock7` (oxy) | −6.71 | −0.91 | 0.0% | 0.8 | no |
+| weak·clean | `ox1_orig_f12_rf3cof_dock1` (oxy) | −6.40 | +0.90 | 0.0% | 1.4 | no |
+| strong·flagged | `s3_esm2_f4_dock1` (oct) | −22.42 | +0.25 | 0.0% | **10.9** | yes |
+| mid·flagged | `ox1_esm1_f8_o3cof` (oxy) | −17.95 | +1.28 | 0.0% | **3.0** | no |
+| weak·flagged | `shuffle_control_o3cof_dock8` (oct) | −7.78 | +1.81 | 0.0% | **3.2** | no |
+
+Particle counts 4,069–23,142; estimate **607 min = 10.1 h**, so **two batches** under the 6 h cap
+(the 23,142-particle `s2_esm2_control_dock6` at 103 min and `s3_esm2_f4_dock1` at 77 are the only
+large ones). Five are already staged from 2026-10-08; the other six need their `_r2` directory
+copied per the construction recipe above, which is `system/`, `protein_fixed.pdb`,
+`ligand_prepped.sdf` and the leg's `*_ligand.sdf` — and nothing else.
+
+**What to report.** Per leg, |ΔΔG| and the change in released share, since retention moved as
+violently as ΔG did on the first replicate (0% → 9.3%). Then median |ΔΔG| **per cell**, which is the
+actual deliverable: a reproducibility figure that can be quoted against the design-vs-null gaps,
+and a test of whether the convergence marker predicts reproducibility at all. On n=1 it did not.
+**Replicate rows go to `mmgbsa_replicates.csv`, never the canonical summary, and the REFERENCE dict
+is not extended** — a replicate is not a canonical leg.
+
 **One leg of this campaign has now run, out of order, and it landed hard (2026-10-19).**
 `ox1_esm1_control_r2` was run on its own as the highest-value single leg rather than as part of a
 batch, because the leg it replicates carried a headline claim. **|ΔΔG| = 16.16 kcal/mol**
