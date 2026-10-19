@@ -42,8 +42,22 @@ for d in sorted(glob.glob(f"{BG}/*/")):
     w = dat_dg(f"{d}first_10ns/mmgbsa/FINAL_RESULTS_MMPBSA.dat")
     if w is not None: dg10.setdefault(leg, w)
 
-# residence: leg-keyed tables, then peptide/pose sub-row tables, then tail.log
+# residence: the leg's own record log first, then leg-keyed tables, then peptide/pose sub-row
+# tables, then tail.log. Every source below uses setdefault, so first write wins and the order
+# here is the priority order.
+#
+# The record log has to come first because the doc scans are too permissive to trust: they take
+# the first `N%` cell in any leg-keyed row of FOLDS.md / RESULTS.md, and RESULTS.md's *static*
+# fold-geometry tables are keyed by leg too. On 2026-10-19 that harvested `s3_esm2_control`'s
+# 100% from a fold-geometry row (RESULTS.md:1159) and printed it as MD residence beside the MD
+# dG, against the leg's real 29.4%. record_leg.py writes `residence NN.N%` per leg from
+# md_contacts.py's own profile, so it is the pipeline's answer rather than a guess at which
+# column of which table meant retention.
 res = {}
+for _f in glob.glob("runs/folds_md/record_*.log"):
+    _leg = re.sub(r"^record_|\.log$", "", os.path.basename(_f))
+    _m = re.findall(r"residence ([\d.]+)%", open(_f, errors="replace").read())
+    if _m: res.setdefault(_leg, float(_m[-1]))
 def scan_leg_keyed(path):
     for line in open(path):
         if not line.startswith("|"): continue

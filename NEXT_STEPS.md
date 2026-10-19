@@ -752,9 +752,13 @@ Practical notes (all learned the hard way):
   without a validated wide-Boresch tf if the peptide is a rod.
 
 
-## Forced vs unforced co-folds: making the cofold tables like-for-like, proposed 2026-10-18, not launched
+## Forced vs unforced co-folds: making the cofold tables like-for-like — Part 1 DONE 2026-10-19, Part 2 open
 
-**Plan only; nothing is built or submitted until you approve it.** `runs/folds_md/cofold_binding_tables.md`
+**Part 1 ran and is complete: 23 legs, all recorded, Tables 1 and 2 rebuilt.** The plan as written
+below is kept for the reasoning; where it was superseded in execution, the differences are recorded
+in "What actually ran" at the end of Part 1 rather than edited into the steps, except for three
+places where leaving the original text would mislead (the rate exponent, the batch sizing and the
+step-6 table plan, all corrected in place). `runs/folds_md/cofold_binding_tables.md`
 sets the Boltz co-fold of each peptide against its OpenFold3 and RF3 co-folds, but most Boltz cells are
 **hint-forced** folds (`_f4`/`_f8`/`_f12`: that many `contact` constraints in the yaml) while the OF3
 and RF3 lanes were run with **no constraints at all** (`fold_batch.sh` passes sequence + SMILES only).
@@ -790,10 +794,15 @@ are already unforced need nothing new.
    code/run_dock_pose_md.sh BUILD_ONLY=1`. Its ligand guard finds `<leg>_ligand.sdf` from step 1, so it
    never reads the OF3 dock stage; dodecahedral box by default. Read the particle counts. Unforced
    folds tend to be rods, so some may be large (`s2_esm2_control` was 23,142); quote wall time from
-   `8 min + 10M × 0.236 ms × (N/5838)^0.4`.
-3. **Submit**: two legfiles `runs/folds_md/bzfree_oct_1.legs` (3) and `bzfree_oxb_1.legs` (5),
-   `racc_feed.sh BATCH=1` each. That is two jobs, which run one after the other under `MaxJobsPU=1`.
-   Estimated ~7 h of racc wall at compact sizes; free (gpuscavenger).
+   `8 min + 39.3 min × (N/5838)^e` with **e = 0.4 only up to ~13k particles and 0.64 above** —
+   measured 2026-10-18 on `orig_control` at 19,617 particles, where the 0.4 model predicted 71 min
+   against ~94 actual. These rods run 18k–23k, which is exactly where the old exponent under-buys
+   the `--time` request.
+3. **Submit**: legfiles under `runs/folds_md/bzfree_*.legs`, `racc_feed.sh BATCH=1` each.
+   **A batch is capped at ~6 h of estimated wall, so this is five legfiles, not two** — a preempted
+   leg on `gpuscavenger` restarts from zero, so a smaller batch bounds the loss. Every submission
+   must pass `SBATCH_OPTS="--time=<estimate + 1h30> --cpus-per-task=8"`; `racc_feed.sh` exits 2
+   without both. Free (gpuscavenger), one job runs at a time under `MaxJobsPU=1`.
 4. **Drain**: `racc_drain.sh` per legfile. One change is needed: a bare `<leg>` name currently goes to
    `boltzgen_local/md/run_md20.sh`, which `cd`s into boltzgen_local and would not find a
    peptidebuilder leg. Add a branch: a bare leg whose local dir is under `$REPO` tails through
@@ -803,10 +812,13 @@ are already unforced need nothing new.
    `pair_contacts_bzfree_design.csv` (`design.json`) and `_shell3` (`design_shell3.json`) for octinoxate,
    and `_shell1/_shell2/_shell3` for oxybenzone. After that `record_leg.py` finds the table itself.
    Audit line `-> OK` per leg; strip check; commit additions-only.
-6. **Tables**: `cofold_binding_tables.md` gains a **"Boltz unforced"** column beside the existing Boltz
-   one, which is relabelled "Boltz forced (f*N*)". Already-unforced rows carry the same value in both. Then the
-   strict comparison is unforced Boltz vs OF3 vs RF3, and the forced-minus-unforced Boltz difference is
-   a direct per-peptide measure of what the hints bought in MD.
+6. **Tables**: ~~`cofold_binding_tables.md` gains a "Boltz unforced" column beside the existing Boltz
+   one~~ — **superseded, and it was wrong.** Adding a column beside the forced one leaves the
+   confound in place; Tables 1 and 2 exist to vary *one* thing, so the Boltz column is **replaced**
+   by the unforced legs and the forced values come out (they survive in RESULTS.md and in Table 3's
+   static forced-vs-unforced read). See the table convention immediately below, which is the
+   authority here. The forced-minus-unforced difference is still the useful quantity; it lives in
+   Table 3 rather than side-by-side in Tables 1 and 2.
 
 Out of scope unless you ask: pepgraph/morph (these are Boltz folds under `runs/<mol>/boltz/`, not a
 new `folds/` lane).
@@ -851,6 +863,75 @@ twin (e.g. `ox1_orig_control` 0.52 enclosed/7.2 Å against `ox1_orig_f12`'s 0.99
 makes oxybenzone the cleaner of the two forced-vs-unforced comparisons. The unforced co-folds also
 land at or below their own shuffle nulls on enclosure, so enclosure alone does not separate design
 from null without the hints.
+
+### What actually ran (Part 1, completed 2026-10-19)
+
+**Scope grew from 8 legs to 23** at the user's instruction on 2026-10-18: each of the 8 unforced
+co-folds also got its **Vina p1** and **GNINA pick** pose as MD legs, so Tables 1 and 2 compare
+three models × three starting poses rather than three models × one. Vina docking ran locally into a
+scratch `--out` with additions-only appends; the GNINA bundle went out to `gnina_local` and its
+results came back the same day. Submitted as five `bzfree_*.legs` batches (≤6 h each) plus a
+one-leg retry; every leg recorded, audited `-> OK`, and committed (`419e9e6`, `1d08d7f`).
+
+The eight unforced co-folds, ΔG (kcal/mol) with release share — not residence, see below:
+
+| leg | ΔG | released | note |
+|---|---|---|---|
+| `ox1_esm1_control` | **−26.09** | **0.0%** | strongest leg in the campaign; 46.1 mean contacts, vdW-dominated |
+| `s3_esm2_control` | −15.70 | 0.15% | flat windows, converged |
+| `s3_orig_control` | −13.37 | 2.5% | |
+| `ox2_esm1_control` | −12.70 | 9.6% | windows decay −22.17 → −12.70 |
+| `ox3_orig_control` | −10.13 | 13.5% | windows decay −15.28 → −10.13 |
+| `ox2_orig_control` | −8.51 | 5.2% | |
+| `ox1_orig_control` | −8.34 | 13.4% | |
+| `orig_control` | −7.24 | — | starts unbound at 20.9 Å; ΔG is partly bound-vs-unbound |
+
+**Four findings, with their confidence.**
+
+1. **The campaign's strongest binder is an unforced co-fold** (`ox1_esm1_control`, −26.09, never
+   releases, 100% residence). This is the result that bears on the original question: the published
+   Boltz advantage in these tables was not simply "forcing helps". One leg and a 9.5 kcal/mol
+   outlier, so it wants a replicate before it carries weight.
+2. **GNINA's pick beats Vina p1 in 4 of 7 triples, loses 2, ties 1.** A lean, not a result — and
+   recorded here because a single triple was read as a clean win for rescoring partway through,
+   which the next triple contradicted. Both losses are `*_orig` peptides and most wins are
+   esm-substituted, but `s3_orig` breaks that split.
+3. **No consistent winner between co-fold and docked starts.** `ox1_orig` and `ox3_orig` are better
+   from the docked poses than from their own unforced co-fold; `ox2_esm1` and `s3_esm2` the reverse.
+   So the unforced co-fold is not reliably the best starting geometry.
+4. **Release is late-weighted on oxybenzone and near-absent on octinoxate shell 3.** Eight of eight
+   oxybenzone shell-1/2/3 legs release mostly in the second half; the shell-3 octinoxate legs barely
+   release at all. The exception is `ox1_esm1_control`, which never releases — on that molecule a
+   deeply enclosed pose behaves categorically differently from a surface-bound one.
+
+**Read release, not residence.** `md_contacts.py`'s `residence_pct` is a *centre-of-mass* measure
+(ligand centroid within 10 Å of the peptide centroid, line 101) while `released_pct` counts frames
+with zero atom–atom contacts under 4 Å. These unforced folds are rods, so a ligand gripped at one
+end scores low on residence while never letting go: `s3_esm2_control_dock7` is 0.1% residence with
+**0.0%** release — perfect retention — and `s3_esm2_control` 29.4% with 0.15%. Several legs were
+contrasted on residence alone before this was noticed; `CLAUDE.md`'s reporting section now carries it.
+
+**One table bug, found while filling the dock rows.** `cofold_tables.py` sourced residence by
+scanning `FOLDS.md`/`RESULTS.md` for the first `N%` cell in any leg-keyed row — and RESULTS.md's
+*static fold-geometry* tables are leg-keyed too, so `s3_esm2_control` was rendered at **100%** from
+a fold-geometry row (`RESULTS.md:1159`) against its real 29.4%. Fixed by reading
+`runs/folds_md/record_<leg>.log` first, which is what `record_leg.py` writes from the profile
+itself; two cells changed, both in the Boltz column.
+
+**Still outstanding from step 5: the pairs columns are blank for all 23 legs.** Every record log
+ends `no pair table (no design json for this arm)` because only `pair_contacts_bzfree_design.csv`
+(octinoxate shell 1) was ever seeded. The design jsons all exist, so this is four seeding runs over
+kept trajectories — no MD to redo:
+
+```sh
+$OMD/bin/python code/pair_contacts.py <that arm's leg dirs...> --run-dir runs/octinoxate \
+    --design design_shell3.json --csv runs/octinoxate/md/pair_contacts_bzfree_shell3.csv
+# and oxybenzone --design design_shell1.json / _shell2 / _shell3 -> pair_contacts_bzfree_shell{1,2,3}.csv
+```
+
+Name **every** leg of the arm on each run — `pair_contacts.py` writes with mode `w` and has no
+`--allow-shrink` guard. Also still open: RESULTS.md's headline rows for these 23 legs are to be
+*added* per molecule (the ΔG/slots/sim/pairs cells), per the two-rule convention above.
 
 ### Part 2 (next campaign): forced OF3 and RF3 folds
 

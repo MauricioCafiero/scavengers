@@ -235,6 +235,37 @@ fix is `scontrol update JobId=<id> CPUsPerTask=8 MinCPUsNode=8`, after which the
 jobs is running". **Read a pending job's `Reason` as data, not decoration:** `BadConstraints` on a
 job whose peers run means the request is broken, not that it is queued.
 
+**A leg that dies on the cluster is invisible from the queue — grep the job log for it.**
+`racc_run.py` catches a failed leg, prints `!!! <leg> FAILED: <exception>` and moves to the next one,
+which is right for a batch but means the job stays `RUNNING`, `sacct` shows nothing wrong, and the
+drain waits forever for a `traj_wrapped.xtc` that will never appear. Nothing writes a marker, so a
+watcher keyed only on completions is silent on exactly the case it most needs to report. Check with
+`grep -h '^!!!' ~/remote_work/openmm/*_run.out`, and the real stack trace is in
+`~/remote_work/openmm/gpu_out.txt` — the `CalledProcessError` in the job log carries only the command
+line. Found 2026-10-19 when `ox1_esm1_control` NaN'd in restrained equilibration and the batch
+carried on through its other five legs.
+
+**Try a plain resubmission before concluding a leg's build is broken.** That failure looked like a
+steric clash — 1.69 Å between a ligand and a peptide heavy atom, against 2.19 Å on its docked
+siblings — and the obvious fix was a harder minimisation. Both readings were wrong: `minimize_max_iter`
+is already `0` (uncapped, runs to the 10 kJ/mol/nm tolerance), so there was no cap to raise, and the
+*same system through the identical code path* (`omd run --platform CPU --steps 2000` from the leg
+directory) minimises that contact to 2.6 Å and equilibrates clean. The resubmitted leg then produced
+**the strongest result in the campaign** (−26.09, zero release frames, 46 mean contacts): the tight
+contact was a deeply enclosed pose, not a broken one. So reproduce the failure locally with the real
+tool before changing anything, and never "fix" it by nudging the ligand — that would have destroyed
+the result. A one-leg retry legfile (`bzfree_oxb_retry.legs`) resubmits with the protocol untouched.
+
+**A fetch can wedge with its data already complete; check the payload before refetching.** The drain
+streams `ssh ... | tar xzf -`, and if the ssh end dies the `tar` blocks on an EOF that never comes —
+it sat 40 minutes on 2026-10-19 holding `drain_bzfree_oxb_1` behind it, with every file already
+written. Verify before assuming loss: `mdtraj` frame count on `traj_wrapped.xtc` (expect 20,000 at
+20 ns) and `wc -l` on `energy.csv` (expect 20,001). Both were complete, so killing the `tar` was
+enough — the drain re-polled, found the leg, tailed it locally and recorded it with no network at
+all. A mid-tail leg transiently holds ~1.5 GB of MM/GBSA scatter (a 1.2 GB `reference.frc` plus the
+`_MMPBSA_*` mdcrds) which the drain's `find -delete` strips on completion, so a leg directory in the
+gigabytes during its tail is normal and is not a bad fetch.
+
 **Submission is socket-free once batched; draining is not.** A network loss stops nothing on the
 cluster — the legs keep computing and their wrapped solutes wait on scratch indefinitely — but the
 drain cannot fetch until the user rebuilds the two ControlMasters. The worst case is delayed
