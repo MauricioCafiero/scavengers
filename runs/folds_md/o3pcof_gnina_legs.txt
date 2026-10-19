@@ -1,0 +1,20 @@
+# GNINA picks for the pocket-guided OF3 lane, retrieved from gnina_local 2026-10-19 (gnina v1.3.3).
+# Each pick is the max-CNNaffinity DOCKED pose (pose >= 1), identical across all three passes
+# (receptor_score_only / receptor_h_score_only / receptor_minimize) -- 9 of 9 consistent, which is
+# far better than the docked campaign's 4 of 35. NONE is corroborated by minimizedAffinity, whose
+# argmin is pose 1 in seven of nine, so by RESULTS.md's standard every one of these is a pick on
+# CNNaffinity ALONE and must be labelled unsupported.
+#
+# ox3_orig_f8_o3pcof is absent on purpose: its pick IS pose 1, so it coincides with the Vina-p1 leg
+# already queued in o3pc_oxb_2 and needs no new run. Eight legs, not nine.
+#
+# Format is build_cofolds.sh's "<mol> <leg> <vina pose>".
+#   zsh code/build_cofolds.sh runs/folds_md/o3pcof_gnina_legs.txt
+octinoxate orig_f12_o3pcof 4
+octinoxate s2_esm2_control_o3pcof 8
+octinoxate s3_esm2_f4_o3pcof 6
+octinoxate s3_orig_f12_o3pcof 9
+oxybenzone ox1_esm1_f8_o3pcof 8
+oxybenzone ox1_orig_f12_o3pcof 4
+oxybenzone ox2_esm1_f8_o3pcof 6
+oxybenzone ox2_orig_f8_o3pcof 5
