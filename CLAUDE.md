@@ -470,6 +470,18 @@ release, against BoltzGen's two at −15.76, 70.5% and eighteen.
 trajectory (0.04–0.10 kcal/mol). Run-to-run variation is far larger. Never write "this difference is N
 standard errors" as though it bore on reproducibility.
 
+**"Residence" and "release" are different measures, and only release is shape-independent.** In
+`md_contacts.py`, `residence_pct` is the fraction of frames whose **ligand-COM-to-peptide-COM
+distance is ≤ 10 Å** (line 101), while `released_pct` is the fraction with **zero atom–atom contacts
+under 4 Å**. A ligand held firmly at one end of an elongated peptide is never released and yet
+scores low on residence, because the far half of the rod drags the peptide's centre of mass away
+from it. So **a COM-based residence number penalises a fold for being elongated**, and the unforced
+co-folds are rods: `s3_esm2_control` came in at 29.4% residence with 0.15% release — permanent
+atomic contact — against `ox2_esm1_control_dock1`'s 21.2% residence with 31.35% release, which
+really was letting go. Quote release (plus episode count, longest episode and the late share) when
+retention is the claim; use residence only within one shell, where the geometry is comparable.
+Learned 2026-10-19 after several legs had been contrasted on residence alone.
+
 ## Paths
 
 Scripts derive the repo root from their own location (`REPO=${0:A:h:h}`) and read `OMD_ENV`,
