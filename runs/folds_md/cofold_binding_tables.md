@@ -152,4 +152,4 @@ contact at 5.8–9.0 Å, will be the cleaner arm. Forced OF3 (pocket-guided) and
 next campaign's business, and RF3 has no contact input at all — see NEXT_STEPS.md, "Forced vs
 unforced co-folds".
 
-*(`cofold_binding_tables.pdf` predates this table and has not been regenerated.)*
+*(`cofold_binding_tables.pdf` is rebuilt from this file by `code/render_cofold_pdf.py`; regenerated 2026-10-19 with the completed campaign. The markdown is the source of truth — re-run that script after editing a table.)*
