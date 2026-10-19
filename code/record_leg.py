@@ -49,6 +49,7 @@ def rewrite_checked(path, key, run):
 def main(mol, leg):
     import ligand_slide
     import md_stability
+    import pair_contacts
 
     d = f"runs/{mol}/md/{leg}"
     prod = f"{d}/prod_20ns"
@@ -75,11 +76,23 @@ def main(mol, leg):
         if any(r["structure"] == parent for r in rs):
             pair = (f, rs)
             break
-    pair_line = "no pair table (no design json for this arm)"
+    if pair is None:
+        # First leg of a new co-fold lane: there is no table to extend, so start one. Until
+        # 2026-10-19 this fell through to "no design json for this arm", which is simply wrong --
+        # pair_contacts.design_for() resolves the json by peptide name and the files all exist. The
+        # message was read as "nothing to do" and all five legs of the pocket-guided lane landed
+        # with no pair row at all. Name the file the way the lane's others are named:
+        # pair_contacts_<lane>_<arm>.csv, lane off the parent's suffix, arm off the design json.
+        lane = parent.rsplit("_", 1)[-1]
+        if lane.endswith("cof"):
+            design = pair_contacts.design_for(parent)
+            arm = re.sub(r"^design(_)?", "", design[:-len(".json")]) or "design"
+            pair = (f"runs/{mol}/md/pair_contacts_{lane}_{arm}.csv", [])
+    pair_line = "no pair table (not a co-fold lane leg)"
     if pair:
         f, rs = pair
         legs = [r["leg"] for r in rs if r["structure"] != leg] + [prod]
-        design = rs[0]["design"]
+        design = rs[0]["design"] if rs else pair_contacts.design_for(parent)
         before = {r["structure"] for r in rs}
         subprocess.run([py, "code/pair_contacts.py", *legs, "--run-dir", f"runs/{mol}", "--design", design,
                         "--csv", f], check=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
@@ -113,8 +126,20 @@ def main(mol, leg):
     m = re.match(r"(.+_(?:o3p?|rf3)cof)_dock(\d+)$", leg)
     if m and ok:
         why = next((l.split(None, 3)[3].strip() for l in open("runs/folds_md/dock_legs.txt")
-                    if l.split()[:3] == [mol, m.group(1), m.group(2)]), "")
-        pose = f"p{m.group(2)} " + ("Vina" if why == "vina" else "GNINA" + (" ✓" if why.endswith(" corroborated") else ""))
+                    if l.split()[:3] == [mol, m.group(1), m.group(2)]), None)
+        # An unregistered leg used to default to "GNINA", which silently mislabelled the pocket-guided
+        # lane's two Vina p1 legs on 2026-10-19 -- the lane had no dock_legs.txt entries at all. A
+        # missing entry is unknown provenance, not a GNINA pick. Do not exit here: the MM/GBSA rows
+        # were already appended above, so a re-run after fixing the file would duplicate them. Write
+        # a row whose pose cell is visibly wrong instead, and say so on stderr.
+        if why is None:
+            print(f"WARNING {leg}: no entry in runs/folds_md/dock_legs.txt for {mol} {m.group(1)} "
+                  f"pose {m.group(2)} -- pose cell written as UNREGISTERED. Add "
+                  f"'<mol> <struct> <pose> vina|gnina [un]corroborated' and edit the cell by hand.",
+                  file=sys.stderr)
+        pose = (f"p{m.group(2)} UNREGISTERED" if why is None else
+                f"p{m.group(2)} " + ("Vina" if why == "vina"
+                                     else "GNINA" + (" ✓" if why.endswith(" corroborated") else "")))
         pdg = next(float(r["dg_bind"]) for r in csv.DictReader(open(f"runs/{mol}/md/mmgbsa_summary.csv"))
                    if r["structure"] == m.group(1) and not r["leg"].startswith("first_"))
         drift = win[3] - win[1]
