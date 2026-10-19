@@ -1,0 +1,28 @@
+# Pocket-guided OpenFold3 lane (NEXT_STEPS.md Part 2): the nine guided folds, each as its own
+# cofold pose and as its Vina pose 1. GNINA picks are added later, once the bundles pushed in
+# fa0e706 come back from the GPU side -- a pick that lands on pose 1 needs no new leg.
+#
+# Format is build_cofolds.sh's: "<mol> <leg> [vina pose]". STRUCT stays the cofold leg for both
+# rows, so the docked leg builds on the cofold leg's prepped receptor (same peptide, same frame the
+# poses were docked into) and the driver names it <leg>_dock1 itself. Cofold rows come first so the
+# receptor is prepped before the docked row reads it.
+#
+#   zsh code/build_cofolds.sh runs/folds_md/o3pcof_legs.txt
+octinoxate orig_f12_o3pcof
+octinoxate s2_esm2_control_o3pcof
+octinoxate s3_esm2_f4_o3pcof
+octinoxate s3_orig_f12_o3pcof
+oxybenzone ox1_esm1_f8_o3pcof
+oxybenzone ox1_orig_f12_o3pcof
+oxybenzone ox2_esm1_f8_o3pcof
+oxybenzone ox2_orig_f8_o3pcof
+oxybenzone ox3_orig_f8_o3pcof
+octinoxate orig_f12_o3pcof 1
+octinoxate s2_esm2_control_o3pcof 1
+octinoxate s3_esm2_f4_o3pcof 1
+octinoxate s3_orig_f12_o3pcof 1
+oxybenzone ox1_esm1_f8_o3pcof 1
+oxybenzone ox1_orig_f12_o3pcof 1
+oxybenzone ox2_esm1_f8_o3pcof 1
+oxybenzone ox2_orig_f8_o3pcof 1
+oxybenzone ox3_orig_f8_o3pcof 1

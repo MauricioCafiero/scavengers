@@ -84,10 +84,20 @@ launch_tail() {    # launch_tail <src> <leg> -- detached, queued on the tail loc
         ( export STRUCT=$struct POSE=$pose LEGNAME=$leg SYSNAME=$SYSNAME SRC=$BG/md/$struct
           exec zsh $REPO/code/run_dock_pose_md.sh ) >> $src/tail.log 2>&1 &
         echo $! > $src/.tail_pid
-    elif [[ $leg == *_o3cof || $leg == *_rf3cof ]]; then
+    elif [[ $leg == *_o3cof || $leg == *_rf3cof || $leg == *_o3pcof ]]; then
         # A fold-lane cofold leg (FOLDS.md): the ligand is the cofolder's own placement, the
-        # receptor is the leg's own prepped protein, so SRC is the leg dir itself. NOTE: branch
-        # order matters -- <pep>_o3cof_dock<N> matches here BEFORE the *_dock<-> branch below.
+        # receptor is the leg's own prepped protein, so SRC is the leg dir itself. `_o3pcof` is the
+        # pocket-guided OF3 lane (NEXT_STEPS.md Part 2); the driver picks its stage dir off the
+        # same suffix.
+        #
+        # These patterns are END-anchored, so a DOCKED cofold leg (<pep>_o3cof_dock<N>) does NOT
+        # land here -- it falls to the *_dock<-> branch below and is handed SRC=$BG/md/<struct>,
+        # which for a fold-lane structure does not exist. That has been inert through 66 docked
+        # legs because run_dock_pose_md.sh reads SRC only inside its `system.xml` build guard, and
+        # every campaign leg is built locally first (code/build_cofolds.sh) -- so the tail never
+        # looks at it. A comment here used to claim the opposite ("branch order matters -- matches
+        # here BEFORE the *_dock<-> branch"); tested false 2026-10-19. If a docked leg is ever
+        # drained UNBUILT, that branch needs the repo-local SRC before it will build.
         ( export STRUCT=$leg POSE=cofold SYSNAME=$SYSNAME SRC=$src
           exec zsh $REPO/code/run_dock_pose_md.sh ) >> $src/tail.log 2>&1 &
         echo $! > $src/.tail_pid
