@@ -18,7 +18,7 @@ The output is pasted into cofold_binding_tables.md under each table's caption. C
 co-fold cells against the published values before replacing them -- that check found 0 mismatches on
 2026-10-18 and is what makes the rebuild safe.
 """
-import csv, re, os, glob
+import csv, re, os, glob, sys
 BG = os.path.expanduser("~/python_mac/boltzgen_local/md")
 
 def dat_dg(path):
@@ -156,19 +156,33 @@ UNFORCED = {'orig_f12': 'orig_control', 's3_esm2_f4': 's3_esm2_control',
             'ox1_orig_f12': 'ox1_orig_control', 'ox2_esm1_f8': 'ox2_esm1_control',
             'ox2_orig_f8': 'ox2_orig_control', 'ox3_orig_f8': 'ox3_orig_control'}
 
-PEPS = {"octinoxate": ['orig_f12','s2_esm2_control','s3_esm2_f4','s3_orig_f12','shuffle_control','shuffle_control_esm0','bg33_1','bg33_2','bg33_3','bg33_4'],
+# The pocket-guided OpenFold3 lane (NEXT_STEPS.md Part 2) covers only the nine non-null, non-BoltzGen
+# rows of these two tables -- one guided fold per peptide that has a designed shell to take a pocket
+# from. The nulls deliberately get none (a shuffled sequence has no designed pocket to restrain to,
+# and two ways of manufacturing one were considered and declined on 2026-10-19), and the BoltzGen
+# designs are made without hints by construction. So a blank `_o3pcof` cell on those rows means "not
+# attempted, by design", which is why those legs must not be built into `missing` below.
+GUIDED = {'orig_f12', 's2_esm2_control', 's3_esm2_f4', 's3_orig_f12',
+          'ox1_esm1_f8', 'ox1_orig_f12', 'ox2_esm1_f8', 'ox2_orig_f8', 'ox3_orig_f8'}
+SUFFIXES = ("", "_o3cof", "_rf3cof", "_o3pcof")
+
+PEPS = {"octinoxate":['orig_f12','s2_esm2_control','s3_esm2_f4','s3_orig_f12','shuffle_control','shuffle_control_esm0','bg33_1','bg33_2','bg33_3','bg33_4'],
         "oxybenzone": ['ox1_esm1_f8','ox1_orig_f12','ox2_esm1_f8','ox2_orig_f8','ox2_shuffle','ox2_shuffle_esm0','ox3_orig_f8','bgox31_2','bgox31_3','bgox31_4','bgox31_5']}
 out, missing, pending, unscored = {}, [], [], []
 for mol, peps in PEPS.items():
     MOL = mol
-    lines = ["| peptide | pose | Boltz / BoltzGen co-fold | OpenFold3 co-fold | RoseTTAFold3 co-fold |",
-             "|---|---|---|---|---|"]
+    lines = ["| peptide | pose | Boltz / BoltzGen co-fold | OpenFold3 co-fold | RoseTTAFold3 co-fold "
+             "| OpenFold3 pocket-guided |",
+             "|---|---|---|---|---|---|"]
     for p in peps:
         for i, pose in enumerate(("co-fold", "Vina p1", "GNINA pick")):
             legs = []
-            for suf in ("", "_o3cof", "_rf3cof"):
+            for suf in SUFFIXES:
                 # the Boltz column (suf == "") takes the unforced twin; OF3/RF3 were already unforced
                 base = UNFORCED.get(p, p) if suf == "" else p
+                if suf == "_o3pcof" and p not in GUIDED:
+                    legs.append(None)
+                    continue
                 legs.append(f"{base}{suf}" if pose == "co-fold" else
                             (f"{base}{suf}_dock1" if pose == "Vina p1" else pick_leg(mol, base, suf)))
             for L in legs:
@@ -189,23 +203,76 @@ for mol, peps in PEPS.items():
             pl = pose
             if pose == "GNINA pick":
                 tags = []
-                for suf, l in zip(("", "_o3cof", "_rf3cof"), legs):
+                for suf, l in zip(SUFFIXES, legs):
+                    # a lane the peptide was never folded in has no pick to report and is not
+                    # "unscored" -- without this the nulls and bg* designs would all land in the
+                    # never-GNINA-scored list purely for having no pocket-guided fold
+                    if suf == "_o3pcof" and p not in GUIDED: tags.append("—"); continue
                     struct = (UNFORCED.get(p, p) if suf == "" else p) + suf
                     pk, st = gnina_pick(mol, struct)
                     if l: tags.append(f"p{l.split('_dock')[-1]}")
                     elif st == "is_p1": tags.append("p1")
                     else: tags.append("?"); unscored.append(struct)
                 pl = "GNINA pick (" + "/".join(tags) + ")"
-            kinds = [None, None, None]
+            kinds = [None] * len(SUFFIXES)
             if pose == "GNINA pick":
                 kinds = []
-                for suf, l in zip(("", "_o3cof", "_rf3cof"), legs):
+                for suf, l in zip(SUFFIXES, legs):
+                    if suf == "_o3pcof" and p not in GUIDED: kinds.append("—"); continue
                     struct = (UNFORCED.get(p, p) if suf == "" else p) + suf
                     pk, st = gnina_pick(mol, struct)
                     kinds.append("*no record*" if st == "unknown" else "see Vina p1")
             lines.append(f"| {label} | {pl} | " + " | ".join(cell(l, k) for l, k in zip(legs, kinds)) + " |")
     out[mol] = "\n".join(lines)
 open(os.environ.get("OUT", "/tmp/tables.md"), "w").write(f"## octinoxate\n{out['octinoxate']}\n\n## oxybenzone\n{out['oxybenzone']}\n")
+
+
+def splice(path=os.path.join("runs", "folds_md", "cofold_binding_tables.md")):
+    """Replace Tables 1 and 2 in the markdown in place, refusing if a published cell would change.
+
+    Both halves of this were manual until 2026-10-19: the docstring said to paste the blocks under
+    each caption and to "cross-check the co-fold cells against the published values before replacing
+    them", which is the check that found 0 mismatches on 2026-10-18. An optional check is a skipped
+    check (CLAUDE.md), and a manual paste is a step that gets forgotten -- the pocket-guided lane's
+    first six legs sat in the CSVs with no row in this markdown at all. So the paste and the check
+    are one function here, and `--write` is how the markdown gets updated from now on.
+
+    What may legitimately differ, and nothing else: cells in a newly added column, and the
+    GNINA-pick row label, which carries one pose tag per column and so gains a slot when a column
+    is added. Every other published cell must match exactly, compared cell-by-cell after stripping
+    -- a whitespace-sensitive diff of whole rows reports every row as changed and says nothing.
+    """
+    txt = open(path).read()
+    lines = txt.split("\n")
+    heads = [i for i, l in enumerate(lines) if l.startswith("| peptide | pose |")]
+    if len(heads) != 2:
+        raise SystemExit(f"splice: expected 2 'peptide | pose' tables in {path}, found {len(heads)}")
+    changed, newcols = [], 0
+    for start, mol in sorted(zip(heads, ["octinoxate", "oxybenzone"]), reverse=True):
+        end = start
+        while end < len(lines) and lines[end].startswith("|"):
+            end += 1
+        old, new = lines[start:end], out[mol].split("\n")
+        if len(old) != len(new):
+            raise SystemExit(f"splice: {mol} has {len(old)} published rows, generator made {len(new)}")
+        cells = lambda l: [c.strip() for c in l.strip().strip("|").split("|")]
+        newcols = len(cells(new[0])) - len(cells(old[0]))
+        for a, b in zip(old, new):
+            ca, cb = cells(a), cells(b)
+            if cb[1].startswith("GNINA pick"):     # label gains one pose tag per added column
+                ca, cb = ca[:1] + ca[2:], cb[:1] + cb[2:]
+            for j, (x, y) in enumerate(zip(ca, cb[:len(ca)])):
+                if x != y and not set(x) <= set("- "):
+                    changed.append(f"{mol} row {a[:40]!r} col {j}: published {x!r} -> {y!r}")
+        lines[start:end] = new
+    if changed:
+        raise SystemExit("splice REFUSED, published cells would change:\n  " + "\n  ".join(changed))
+    open(path, "w").write("\n".join(lines))
+    print(f"spliced Tables 1 and 2 into {path}" + (f" (+{newcols} column)" if newcols else ""))
+
+
+if "--write" in sys.argv:
+    splice()
 print(f"structures never GNINA-scored: {len(sorted(set(unscored)))} -> {sorted(set(unscored))}")
 print(f"missing: {len(missing)}   pending (legs still running): {len(sorted(set(pending)))}")
 for q in sorted(set(pending)): print("   pending", q)

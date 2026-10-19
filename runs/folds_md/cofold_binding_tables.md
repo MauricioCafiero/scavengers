@@ -1,37 +1,37 @@
-**Table 1. Octinoxate: MM/GBSA binding free energy, ΔG (kcal/mol), and ligand residence (%) from 20 ns MD, started from each of three poses in each of three models' UNFORCED co-folds.**
+**Table 1. Octinoxate: MM/GBSA binding free energy, ΔG (kcal/mol), and ligand residence (%) from 20 ns MD, started from each of three poses in each of three models' UNFORCED co-folds, plus the pocket-guided OpenFold3 lane.**
 
-| peptide | pose | Boltz / BoltzGen co-fold | OpenFold3 co-fold | RoseTTAFold3 co-fold |
-|---|---|---|---|---|
-| `orig` | co-fold | −7.24 (29.9%) • | −5.90 (7.4%) ↑ | **−19.51** (99.9%) ↑ |
-|  | Vina p1 | −2.81 (0.6%) ↑ | −9.65 (50.2%) ↑ | **−18.71** (89.2%) ↑ |
-|  | GNINA pick (p1/p1/p5) | see Vina p1 | see Vina p1 | −11.10 (71.0%) ↑ |
-| `s2_esm2_control` | co-fold | −16.25 (59.6%) • | −10.21 (33.9%) ↓ | −14.98 (57.2%) ↓ |
-|  | Vina p1 | −15.49 (0.0%) ↓ | −17.27 (95.2%) ↓ | −15.86 (78.9%) • |
-|  | GNINA pick (p6/p5/p4) | −17.09 (50.3%) • | −6.84 (9.4%) ↓ | −15.41 (73.7%) ↓ |
-| `s3_esm2` | co-fold | −15.70 (29.4%) ↑ | −13.76 (84.8%) ↑ | −16.18 (88.2%) ↑ |
-|  | Vina p1 | −9.65 (2.4%) ↓ | −14.53 (12.6%) • | **−20.39** (99.4%) • |
-|  | GNINA pick (p7/p8/p3) | −16.64 (0.1%) • | −12.79 (6.9%) ↑ | **−20.79** (99.3%) ↑ |
-| `s3_orig` | co-fold | −13.37 (48.0%) ↑ | −10.10 (44.8%) ↑ | −12.10 (68.9%) ↑ |
-|  | Vina p1 | −9.41 (36.8%) • | −8.92 (25.2%) • | **−19.16** (90.0%) ↓ |
-|  | GNINA pick (p9/p6/p5) | −11.51 (37.5%) ↑ | −11.17 (22.9%) ↑ | −8.43 (7.2%) ↑ |
-| `shuffle_control` | co-fold | −15.13 (75.9%) ↑ | −9.39 (25.7%) ↓ | −11.13 (38.7%) • |
-|  | Vina p1 | −16.15 (57.8%) | −10.89 (23.3%) • | −5.37 (21.8%) ↑ |
-|  | GNINA pick (p7/p8/p7) | −8.40 (22.4%) ↑ | −7.78 (12.6%) ↑ | −13.86 (60.3%) ↓ |
-| `shuffle_control_esm0` | co-fold | −14.32 (80.2%) ↓ | −15.62 (92.5%) ↓ | **−21.53** (99.3%) • |
-|  | Vina p1 | −15.50 (76.1%) ↑ | −12.27 (1.9%) ↓ | −12.47 (44.1%) • |
-|  | GNINA pick (p9/p3/p3) | −14.76 (90.5%) • | **−18.19** (98.5%) • | −12.03 (36.9%) ↑ |
-| `bg33_1` | co-fold | −11.31 (14.5%) ↓ | −14.90 (56.4%) ↓ | −12.43 (68.3%) ↓ |
-|  | Vina p1 | −13.47 (44.7%) ↓ | −13.16 (22.6%) • | −14.02 (60.3%) ↓ |
-|  | GNINA pick (p2/p6/p8) | −12.55 (42.5%) ↓ | −12.93 (44.5%) ↑ | −11.78 (62.6%) • |
-| `bg33_2` | co-fold | −8.02 (50.9%) ↑ | −11.58 (70.2%) • | −11.52 (58.7%) ↓ |
-|  | Vina p1 | −11.82 (43.1%) ↑ | −11.55 (14.8%) • | −10.95 (81.5%) • |
-|  | GNINA pick (p4/p1/p8) | −10.44 (57.2%) ↓ | see Vina p1 | −12.19 (36.7%) • |
-| `bg33_3` | co-fold | −11.86 (41.0%) ↓ | −10.10 (14.9%) • | −12.44 (1.9%) • |
-|  | Vina p1 | −10.84 (25.7%) ↑ | −14.89 (99.7%) • | −11.01 (0.2%) ↑ |
-|  | GNINA pick (p6/p6/p5) | −13.09 (77.6%) ↑ | −14.92 (99.6%) • | −11.47 (0.1%) ↑ |
-| `bg33_4` | co-fold | **−19.66** (100.0%) ↓ | −17.11 (93.0%) ↓ | −16.13 (81.2%) ↑ |
-|  | Vina p1 | −14.81 (59.3%) ↑ | −16.04 (99.2%) • | **−18.59** (97.6%) ↓ |
-|  | GNINA pick (p6/p7/p4) | −16.53 (97.2%) • | −16.24 (82.8%) ↑ | **−19.06** (99.6%) • |
+| peptide | pose | Boltz / BoltzGen co-fold | OpenFold3 co-fold | RoseTTAFold3 co-fold | OpenFold3 pocket-guided |
+|---|---|---|---|---|---|
+| `orig` | co-fold | −7.24 (29.9%) • | −5.90 (7.4%) ↑ | **−19.51** (99.9%) ↑ | −8.06 (21.1%) ↓ |
+|  | Vina p1 | −2.81 (0.6%) ↑ | −9.65 (50.2%) ↑ | **−18.71** (89.2%) ↑ | −12.27 (51.0%) • |
+|  | GNINA pick (p1/p1/p5/p4) | see Vina p1 | see Vina p1 | −11.10 (71.0%) ↑ | *running* |
+| `s2_esm2_control` | co-fold | −16.25 (59.6%) • | −10.21 (33.9%) ↓ | −14.98 (57.2%) ↓ | −16.28 (100.0%) • |
+|  | Vina p1 | −15.49 (0.0%) ↓ | −17.27 (95.2%) ↓ | −15.86 (78.9%) • | *running* |
+|  | GNINA pick (p6/p5/p4/p8) | −17.09 (50.3%) • | −6.84 (9.4%) ↓ | −15.41 (73.7%) ↓ | *running* |
+| `s3_esm2` | co-fold | −15.70 (29.4%) ↑ | −13.76 (84.8%) ↑ | −16.18 (88.2%) ↑ | *running* |
+|  | Vina p1 | −9.65 (2.4%) ↓ | −14.53 (12.6%) • | **−20.39** (99.4%) • | *running* |
+|  | GNINA pick (p7/p8/p3/p6) | −16.64 (0.1%) • | −12.79 (6.9%) ↑ | **−20.79** (99.3%) ↑ | *running* |
+| `s3_orig` | co-fold | −13.37 (48.0%) ↑ | −10.10 (44.8%) ↑ | −12.10 (68.9%) ↑ | −9.78 (43.0%) ↑ |
+|  | Vina p1 | −9.41 (36.8%) • | −8.92 (25.2%) • | **−19.16** (90.0%) ↓ | −11.50 (58.0%) ↓ |
+|  | GNINA pick (p9/p6/p5/p9) | −11.51 (37.5%) ↑ | −11.17 (22.9%) ↑ | −8.43 (7.2%) ↑ | *running* |
+| `shuffle_control` | co-fold | −15.13 (75.9%) ↑ | −9.39 (25.7%) ↓ | −11.13 (38.7%) • | — |
+|  | Vina p1 | −16.15 (57.8%) | −10.89 (23.3%) • | −5.37 (21.8%) ↑ | — |
+|  | GNINA pick (p7/p8/p7/—) | −8.40 (22.4%) ↑ | −7.78 (12.6%) ↑ | −13.86 (60.3%) ↓ | — |
+| `shuffle_control_esm0` | co-fold | −14.32 (80.2%) ↓ | −15.62 (92.5%) ↓ | **−21.53** (99.3%) • | — |
+|  | Vina p1 | −15.50 (76.1%) ↑ | −12.27 (1.9%) ↓ | −12.47 (44.1%) • | — |
+|  | GNINA pick (p9/p3/p3/—) | −14.76 (90.5%) • | **−18.19** (98.5%) • | −12.03 (36.9%) ↑ | — |
+| `bg33_1` | co-fold | −11.31 (14.5%) ↓ | −14.90 (56.4%) ↓ | −12.43 (68.3%) ↓ | — |
+|  | Vina p1 | −13.47 (44.7%) ↓ | −13.16 (22.6%) • | −14.02 (60.3%) ↓ | — |
+|  | GNINA pick (p2/p6/p8/—) | −12.55 (42.5%) ↓ | −12.93 (44.5%) ↑ | −11.78 (62.6%) • | — |
+| `bg33_2` | co-fold | −8.02 (50.9%) ↑ | −11.58 (70.2%) • | −11.52 (58.7%) ↓ | — |
+|  | Vina p1 | −11.82 (43.1%) ↑ | −11.55 (14.8%) • | −10.95 (81.5%) • | — |
+|  | GNINA pick (p4/p1/p8/—) | −10.44 (57.2%) ↓ | see Vina p1 | −12.19 (36.7%) • | — |
+| `bg33_3` | co-fold | −11.86 (41.0%) ↓ | −10.10 (14.9%) • | −12.44 (1.9%) • | — |
+|  | Vina p1 | −10.84 (25.7%) ↑ | −14.89 (99.7%) • | −11.01 (0.2%) ↑ | — |
+|  | GNINA pick (p6/p6/p5/—) | −13.09 (77.6%) ↑ | −14.92 (99.6%) • | −11.47 (0.1%) ↑ | — |
+| `bg33_4` | co-fold | **−19.66** (100.0%) ↓ | −17.11 (93.0%) ↓ | −16.13 (81.2%) ↑ | — |
+|  | Vina p1 | −14.81 (59.3%) ↑ | −16.04 (99.2%) • | **−18.59** (97.6%) ↓ | — |
+|  | GNINA pick (p6/p7/p4/—) | −16.53 (97.2%) • | −16.24 (82.8%) ↑ | **−19.06** (99.6%) • | — |
 
 Values are ΔG in kcal/mol with residence in parentheses — the share of the **whole 20 ns run** with the ligand within 10 Å of the peptide. Each peptide carries three sub-rows: the **co-fold** pose each model produced, **Vina p1** (AutoDock rank 1 docked into that same fold), and the **GNINA pick** (max `CNNaffinity` over poses ≥1). The pick's pose in each lane is in the row label, in column order; where it is **p1 the pick coincides with Vina's rank 1**, so no separate leg was ever run and the cell says *see Vina p1* rather than repeating the number. The trailing marker compares the 20 ns ΔG with the ΔG over the first 10 ns: • stable (within 0.5 kcal/mol), ↓ still decreasing (binding strengthening), ↑ still increasing (binding weakening) — a convergence flag on ΔG, not on residence. Bold marks ΔG ≤ −18. Every cell is a finished 20 ns leg; the campaign completed 2026-10-19.
 
@@ -48,46 +48,52 @@ Built by `code/cofold_tables.py` from `mmgbsa_summary.csv` (plus the BoltzGen le
 Row labels are the **sequence**, so the `_fN` suffix is dropped where a row was remapped: a row's Boltz cell is `<row>_control` and its OF3/RF3 cells are `<row>_fN_o3cof` / `<row>_fN_rf3cof`. The `_fN` survives in those leg names only because they were named after the forced Boltz structure whose sequence they refold — no constraint was applied to them. The forced Boltz numbers this column used to carry are not lost: they remain in RESULTS.md's headline tables, and Table 3 below sets forced against unforced directly on the static read.
 
 Built by `code/cofold_tables.py` from `mmgbsa_summary.csv` (plus the BoltzGen legs' own `FINAL_RESULTS_MMPBSA.dat`) and the per-leg residence tables in FOLDS.md and RESULTS.md; it prints any cell it cannot source.
+
+**Fourth column added 2026-10-19: the pocket-guided OpenFold3 lane.** The first three columns are unforced — no constraint of any kind — and a difference across them is a model difference. The fourth is OpenFold3 run with a `pocket_constraint` built from the peptide's **original designed shell**, not from the Boltz hint subsets: the shell's full non-glycine slot set, with `max_distance` taken as the maximum over that structure's `_f*` contact distances. It is therefore forced, and a difference between the OpenFold3 and pocket-guided columns is the effect of the restraint within one model. OpenFold3's constraint is a single residue set scored by its centroid, so there is no dose analogue to Boltz's 4/8/12 contacts — a subset would move the pocket rather than weaken it, which is why each peptide gets one guided fold rather than three.
+
+The lane covers only the nine rows with a designed shell to take a pocket from. The nulls (`shuffle_control`, `shuffle_control_esm0`, `ox2_shuffle`, `ox2_shuffle_esm0`) get none: a shuffled sequence has no designed pocket, and two ways of manufacturing one were considered and declined. The BoltzGen `bg*` designs get none because the generator makes them without hints by construction. Those cells read `—`, meaning not attempted by design, not missing. `*running*` marks a leg that is built and queued but has not finished.
+
+Every GNINA pick in this column was the same pose in all three rescoring passes but **none was corroborated by `minimizedAffinity`**, whose argmin is pose 1 in seven of nine. By the standard used elsewhere in this campaign these picks are unsupported, and the consistency is not corroboration.
 
 **Restructured 2026-10-18** from one row per peptide to three, so a row now holds one peptide × one starting pose across the three folding models, and a column is one model across every pose. ΔG and the 10 ns markers are rebuilt from `runs/<mol>/md/mmgbsa_summary.csv` (and the BoltzGen legs' own `FINAL_RESULTS_MMPBSA.dat`, which no summary CSV holds); residence is collated from the per-leg tables in FOLDS.md and RESULTS.md. Every co-fold cell was cross-checked against the values published here before the restructure, with no mismatches. **That caveat has since been removed from these two tables**: the Boltz column was replaced with the unforced `_control` legs on 2026-10-18 and the last of them landed 2026-10-19, so all three columns are now unforced and a difference down a row is a model difference. Table 3 keeps the forced-versus-unforced static read.
 
-**Table 2. Oxybenzone: MM/GBSA binding free energy, ΔG (kcal/mol), and ligand residence (%) from 20 ns MD, started from each of three poses in each of three models' UNFORCED co-folds.**
+**Table 2. Oxybenzone: MM/GBSA binding free energy, ΔG (kcal/mol), and ligand residence (%) from 20 ns MD, started from each of three poses in each of three models' UNFORCED co-folds, plus the pocket-guided OpenFold3 lane.**
 
-| peptide | pose | Boltz / BoltzGen co-fold | OpenFold3 co-fold | RoseTTAFold3 co-fold |
-|---|---|---|---|---|
-| `ox1_esm1` | co-fold | **−26.09** (100.0%) ↓ | −17.95 (100.0%) ↑ | −12.12 (35.2%) ↓ |
-|  | Vina p1 | −10.23 (68.6%) ↑ | −10.60 (89.9%) ↑ | −7.26 (27.3%) ↑ |
-|  | GNINA pick (p4/p2/p4) | −10.11 (56.2%) ↑ | −12.79 (66.9%) • | −14.92 (79.8%) ↓ |
-| `ox1_orig` | co-fold | −8.34 (63.8%) ↑ | −3.96 (20.5%) ↑ | −12.27 (89.1%) ↓ |
-|  | Vina p1 | −9.34 (61.6%) • | −4.93 (25.5%) ↑ | −6.40 (37.5%) ↑ |
-|  | GNINA pick (p6/p4/p1) | −4.79 (17.0%) ↑ | −5.84 (33.0%) ↓ | see Vina p1 |
-| `ox2_esm1` | co-fold | −12.70 (71.0%) ↑ | −16.68 (93.2%) ↑ | −10.90 (90.4%) ↑ |
-|  | Vina p1 | −4.80 (21.2%) ↑ | −16.87 (93.9%) ↓ | −11.47 (79.1%) ↓ |
-|  | GNINA pick (p9/p3/p5) | −11.09 (86.2%) ↓ | −10.58 (77.1%) ↑ | −9.27 (62.4%) ↓ |
-| `ox2_orig` | co-fold | −8.51 (43.9%) ↑ | −7.23 (49.5%) ↑ | −4.95 (19.6%) ↑ |
-|  | Vina p1 | −6.71 (44.0%) • | −9.05 (47.2%) ↑ | −4.22 (15.5%) • |
-|  | GNINA pick (p9/p2/p7) | −3.50 (17.0%) ↑ | −5.43 (37.1%) ↑ | −4.11 (8.2%) • |
-| `ox2_shuffle` | co-fold | −5.30 (7.1%) • | −2.98 (14.8%) ↑ | −13.35 (51.0%) • |
-|  | Vina p1 | −5.86 (26.2%) • | −5.91 (27.3%) ↓ | −8.60 (72.1%) ↓ |
-|  | GNINA pick (p4/p1/p2) | −2.09 (1.2%) • | see Vina p1 | −9.29 (32.0%) ↓ |
-| `ox2_shuffle_esm0` | co-fold | −12.04 (94.7%) • | −0.92 (1.1%) • | −11.44 (32.6%) • |
-|  | Vina p1 | −12.78 (97.4%) • | −9.44 (60.4%) ↓ | −9.18 (54.8%) ↑ |
-|  | GNINA pick (p9/p6/p1) | −11.87 (95.5%) • | −6.84 (56.3%) ↑ | see Vina p1 |
-| `ox3_orig` | co-fold | −10.13 (72.0%) ↑ | −2.06 (2.4%) ↓ | −7.41 (45.6%) ↓ |
-|  | Vina p1 | −14.33 (97.9%) ↓ | −4.12 (11.8%) ↑ | −4.32 (19.5%) • |
-|  | GNINA pick (p6/p4/p8) | −15.44 (100.0%) ↑ | −5.99 (33.2%) • | −4.90 (10.0%) ↑ |
-| `bgox31_2` | co-fold | −10.89 (33.7%) ↑ | −7.45 (65.9%) ↑ | −9.06 (84.6%) ↓ |
-|  | Vina p1 | −2.11 (8.8%) ↑ | −5.85 (10.0%) ↓ | −7.36 (47.9%) ↑ |
-|  | GNINA pick (p6/p1/p3) | −8.50 (2.6%) • | see Vina p1 | −9.57 (52.9%) • |
-| `bgox31_3` | co-fold | −15.44 (99.7%) ↑ | −5.82 (15.8%) ↑ | −14.36 (99.2%) • |
-|  | Vina p1 | **−22.23** (100.0%) ↓ | −10.99 (68.5%) ↑ | −13.48 (95.7%) ↑ |
-|  | GNINA pick (p3/p4/p1) | −17.52 (89.9%) ↑ | −12.48 (88.9%) • | see Vina p1 |
-| `bgox31_4` | co-fold | −14.05 (100.0%) ↑ | −5.74 (17.9%) ↑ | −11.02 (72.0%) • |
-|  | Vina p1 | −9.20 (36.5%) ↑ | −10.39 (49.9%) ↑ | −15.86 (99.9%) • |
-|  | GNINA pick (p6/p7/p3) | −4.31 (4.9%) ↑ | −6.71 (11.3%) ↓ | −13.91 (100.0%) • |
-| `bgox31_5` | co-fold | −16.78 (100.0%) • | −11.55 (70.7%) ↓ | −14.69 (96.4%) ↑ |
-|  | Vina p1 | −12.81 (70.3%) • | −13.72 (93.4%) • | −14.93 (99.8%) • |
-|  | GNINA pick (p2/p7/p8) | −14.28 (99.5%) • | −14.84 (99.5%) ↑ | −14.76 (94.9%) • |
+| peptide | pose | Boltz / BoltzGen co-fold | OpenFold3 co-fold | RoseTTAFold3 co-fold | OpenFold3 pocket-guided |
+|---|---|---|---|---|---|
+| `ox1_esm1` | co-fold | **−26.09** (100.0%) ↓ | −17.95 (100.0%) ↑ | −12.12 (35.2%) ↓ | −10.87 (95.3%) • |
+|  | Vina p1 | −10.23 (68.6%) ↑ | −10.60 (89.9%) ↑ | −7.26 (27.3%) ↑ | *running* |
+|  | GNINA pick (p4/p2/p4/p8) | −10.11 (56.2%) ↑ | −12.79 (66.9%) • | −14.92 (79.8%) ↓ | *running* |
+| `ox1_orig` | co-fold | −8.34 (63.8%) ↑ | −3.96 (20.5%) ↑ | −12.27 (89.1%) ↓ | *running* |
+|  | Vina p1 | −9.34 (61.6%) • | −4.93 (25.5%) ↑ | −6.40 (37.5%) ↑ | *running* |
+|  | GNINA pick (p6/p4/p1/p4) | −4.79 (17.0%) ↑ | −5.84 (33.0%) ↓ | see Vina p1 | *running* |
+| `ox2_esm1` | co-fold | −12.70 (71.0%) ↑ | −16.68 (93.2%) ↑ | −10.90 (90.4%) ↑ | *running* |
+|  | Vina p1 | −4.80 (21.2%) ↑ | −16.87 (93.9%) ↓ | −11.47 (79.1%) ↓ | *running* |
+|  | GNINA pick (p9/p3/p5/p6) | −11.09 (86.2%) ↓ | −10.58 (77.1%) ↑ | −9.27 (62.4%) ↓ | *running* |
+| `ox2_orig` | co-fold | −8.51 (43.9%) ↑ | −7.23 (49.5%) ↑ | −4.95 (19.6%) ↑ | *running* |
+|  | Vina p1 | −6.71 (44.0%) • | −9.05 (47.2%) ↑ | −4.22 (15.5%) • | *running* |
+|  | GNINA pick (p9/p2/p7/p5) | −3.50 (17.0%) ↑ | −5.43 (37.1%) ↑ | −4.11 (8.2%) • | *running* |
+| `ox2_shuffle` | co-fold | −5.30 (7.1%) • | −2.98 (14.8%) ↑ | −13.35 (51.0%) • | — |
+|  | Vina p1 | −5.86 (26.2%) • | −5.91 (27.3%) ↓ | −8.60 (72.1%) ↓ | — |
+|  | GNINA pick (p4/p1/p2/—) | −2.09 (1.2%) • | see Vina p1 | −9.29 (32.0%) ↓ | — |
+| `ox2_shuffle_esm0` | co-fold | −12.04 (94.7%) • | −0.92 (1.1%) • | −11.44 (32.6%) • | — |
+|  | Vina p1 | −12.78 (97.4%) • | −9.44 (60.4%) ↓ | −9.18 (54.8%) ↑ | — |
+|  | GNINA pick (p9/p6/p1/—) | −11.87 (95.5%) • | −6.84 (56.3%) ↑ | see Vina p1 | — |
+| `ox3_orig` | co-fold | −10.13 (72.0%) ↑ | −2.06 (2.4%) ↓ | −7.41 (45.6%) ↓ | *running* |
+|  | Vina p1 | −14.33 (97.9%) ↓ | −4.12 (11.8%) ↑ | −4.32 (19.5%) • | *running* |
+|  | GNINA pick (p6/p4/p8/p1) | −15.44 (100.0%) ↑ | −5.99 (33.2%) • | −4.90 (10.0%) ↑ | see Vina p1 |
+| `bgox31_2` | co-fold | −10.89 (33.7%) ↑ | −7.45 (65.9%) ↑ | −9.06 (84.6%) ↓ | — |
+|  | Vina p1 | −2.11 (8.8%) ↑ | −5.85 (10.0%) ↓ | −7.36 (47.9%) ↑ | — |
+|  | GNINA pick (p6/p1/p3/—) | −8.50 (2.6%) • | see Vina p1 | −9.57 (52.9%) • | — |
+| `bgox31_3` | co-fold | −15.44 (99.7%) ↑ | −5.82 (15.8%) ↑ | −14.36 (99.2%) • | — |
+|  | Vina p1 | **−22.23** (100.0%) ↓ | −10.99 (68.5%) ↑ | −13.48 (95.7%) ↑ | — |
+|  | GNINA pick (p3/p4/p1/—) | −17.52 (89.9%) ↑ | −12.48 (88.9%) • | see Vina p1 | — |
+| `bgox31_4` | co-fold | −14.05 (100.0%) ↑ | −5.74 (17.9%) ↑ | −11.02 (72.0%) • | — |
+|  | Vina p1 | −9.20 (36.5%) ↑ | −10.39 (49.9%) ↑ | −15.86 (99.9%) • | — |
+|  | GNINA pick (p6/p7/p3/—) | −4.31 (4.9%) ↑ | −6.71 (11.3%) ↓ | −13.91 (100.0%) • | — |
+| `bgox31_5` | co-fold | −16.78 (100.0%) • | −11.55 (70.7%) ↓ | −14.69 (96.4%) ↑ | — |
+|  | Vina p1 | −12.81 (70.3%) • | −13.72 (93.4%) • | −14.93 (99.8%) • | — |
+|  | GNINA pick (p2/p7/p8/—) | −14.28 (99.5%) • | −14.84 (99.5%) ↑ | −14.76 (94.9%) • | — |
 
 Values are ΔG in kcal/mol with residence in parentheses — the share of the **whole 20 ns run** with the ligand within 10 Å of the peptide. Each peptide carries three sub-rows: the **co-fold** pose each model produced, **Vina p1** (AutoDock rank 1 docked into that same fold), and the **GNINA pick** (max `CNNaffinity` over poses ≥1). The pick's pose in each lane is in the row label, in column order; where it is **p1 the pick coincides with Vina's rank 1**, so no separate leg was ever run and the cell says *see Vina p1* rather than repeating the number. The trailing marker compares the 20 ns ΔG with the ΔG over the first 10 ns: • stable (within 0.5 kcal/mol), ↓ still decreasing (binding strengthening), ↑ still increasing (binding weakening) — a convergence flag on ΔG, not on residence. Bold marks ΔG ≤ −18. Every cell is a finished 20 ns leg; the campaign completed 2026-10-19.
 
@@ -104,6 +110,12 @@ Built by `code/cofold_tables.py` from `mmgbsa_summary.csv` (plus the BoltzGen le
 Row labels are the **sequence**, so the `_fN` suffix is dropped where a row was remapped: a row's Boltz cell is `<row>_control` and its OF3/RF3 cells are `<row>_fN_o3cof` / `<row>_fN_rf3cof`. The `_fN` survives in those leg names only because they were named after the forced Boltz structure whose sequence they refold — no constraint was applied to them. The forced Boltz numbers this column used to carry are not lost: they remain in RESULTS.md's headline tables, and Table 3 below sets forced against unforced directly on the static read.
 
 Built by `code/cofold_tables.py` from `mmgbsa_summary.csv` (plus the BoltzGen legs' own `FINAL_RESULTS_MMPBSA.dat`) and the per-leg residence tables in FOLDS.md and RESULTS.md; it prints any cell it cannot source.
+
+**Fourth column added 2026-10-19: the pocket-guided OpenFold3 lane.** The first three columns are unforced — no constraint of any kind — and a difference across them is a model difference. The fourth is OpenFold3 run with a `pocket_constraint` built from the peptide's **original designed shell**, not from the Boltz hint subsets: the shell's full non-glycine slot set, with `max_distance` taken as the maximum over that structure's `_f*` contact distances. It is therefore forced, and a difference between the OpenFold3 and pocket-guided columns is the effect of the restraint within one model. OpenFold3's constraint is a single residue set scored by its centroid, so there is no dose analogue to Boltz's 4/8/12 contacts — a subset would move the pocket rather than weaken it, which is why each peptide gets one guided fold rather than three.
+
+The lane covers only the nine rows with a designed shell to take a pocket from. The nulls (`shuffle_control`, `shuffle_control_esm0`, `ox2_shuffle`, `ox2_shuffle_esm0`) get none: a shuffled sequence has no designed pocket, and two ways of manufacturing one were considered and declined. The BoltzGen `bg*` designs get none because the generator makes them without hints by construction. Those cells read `—`, meaning not attempted by design, not missing. `*running*` marks a leg that is built and queued but has not finished.
+
+Every GNINA pick in this column was the same pose in all three rescoring passes but **none was corroborated by `minimizedAffinity`**, whose argmin is pose 1 in seven of nine. By the standard used elsewhere in this campaign these picks are unsupported, and the consistency is not corroboration.
 
 **Restructured 2026-10-18** from one row per peptide to three, so a row now holds one peptide × one starting pose across the three folding models, and a column is one model across every pose. ΔG and the 10 ns markers are rebuilt from `runs/<mol>/md/mmgbsa_summary.csv` (and the BoltzGen legs' own `FINAL_RESULTS_MMPBSA.dat`, which no summary CSV holds); residence is collated from the per-leg tables in FOLDS.md and RESULTS.md. Every co-fold cell was cross-checked against the values published here before the restructure, with no mismatches. **That caveat has since been removed from these two tables**: the Boltz column was replaced with the unforced `_control` legs on 2026-10-18 and the last of them landed 2026-10-19, so all three columns are now unforced and a difference down a row is a model difference. Table 3 keeps the forced-versus-unforced static read.
 

@@ -9,8 +9,12 @@ rather than an afternoon of remembering.
 Cells keep their unicode (−, •, ↑, ↓) and lose their markdown: `**bold**` becomes a bold cell and
 `` `code` `` loses its backticks, because a PDF table has no use for the markup.
 
-    python code/render_cofold_pdf.py                 # -> runs/folds_md/cofold_binding_tables.pdf
-    python code/render_cofold_pdf.py --out other.pdf
+Needs matplotlib, which the bare `python3` on this machine does not have -- use the repo venv (or the
+conda openmm-md env, which also carries it). The plain `python code/render_cofold_pdf.py` in an
+earlier version of this docstring fails with ModuleNotFoundError.
+
+    .venv/bin/python code/render_cofold_pdf.py       # -> runs/folds_md/cofold_binding_tables.pdf
+    .venv/bin/python code/render_cofold_pdf.py --out other.pdf
 """
 import argparse
 import os
