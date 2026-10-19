@@ -4,7 +4,12 @@
 # the queue topped up as jobs finish. Each submitted batch gets its own detached racc_drain.sh.
 # Time limits: 1.3 x (8 min + 39.3 min x (N/5838)^0.4 per leg), rounded up to 30 min -- the rule that
 # gave oct_1 5:30 and oxb_1 6:00.
-cd ${0:A:h:h:h}
+# ${0:A:h:h} -- the repo root, two levels up from code/<this>. It was :h:h:h until 2026-10-20,
+# which is correct for a script at runs/folds_md/feed_chain.sh (the old handoff path it was written
+# at) but lands in ~/python_mac from code/. The chain then cannot create runs/folds_md/feed_<b>.log,
+# the >> redirect fails so racc_feed.sh never runs, and the submission check correctly reports
+# "did not submit" and stops. That silently killed the two GNINA-pick batches at 20:35 on 10-19.
+cd ${0:A:h:h}
 caffeinate -w $$ &
 D=runs/folds_md
 # Specs may be given on the command line to resume a partial chain -- a transient
