@@ -54,6 +54,11 @@ not two runs of one protocol** — the hints change the starting structure, so c
 | `bg33_3` | boltzgen | −11.86 (41.0%) | −10.84 (25.7%) | −13.09 (77.6%, p6) | |
 | `bg33_1` | boltzgen | −11.31 (14.5%) | **−13.47 (44.7%)** | −12.55 (42.5%, p2) | |
 | `bg33_2` | boltzgen | −8.02 (50.9%) | **−11.82 (43.1%)** | −10.44 (57.2%, p4) | |
+| `orig_control` | pb (unforced) | −7.24 (29.9%) | −2.81 (0.6%) | =p1 | |
+| `s3_esm2_control` | pb (unforced) | −15.70 (29.4%) | −9.65 (2.4%) | −16.64 (0.1%, p7) | |
+| `s3_orig_control` | pb (unforced) | −13.37 (48.0%) | −9.41 (36.8%) | −11.51 (37.5%, p9) | |
+
+**The `(ret.)` figures are residence, which is a centre-of-mass measure — on the unforced rods it understates retention badly.** Residence is the share of frames with the ligand centroid within 10 Å of the peptide centroid, so a ligand gripped at one end of an elongated fold scores low while never letting go: `s3_esm2_control_dock7` reads **0.1%** here and released **zero** frames of 20 ns, and `s3_esm2_control` reads 29.4% against 0.15% released. The unforced `*_control` rows are the affected ones; the forced folds are compact and their residence tracks retention closely. Read the release table below for these legs, not this column.
 
 \* `s3_esm2_f4`'s docked legs and `s2_esm2_control`'s Vina-p1 leg lost their starting pose during
 equilibration (ligand drift 11.0–15.1 A for `s3_esm2_f4`, 12.6 A for `s2_esm2_control` p1), so those
@@ -121,6 +126,14 @@ unfavourable the pose is rather than converged values.
 | `bg33_1` | co-folded | −7.11 | −10.02 | −11.30 | −11.31 |
 | | Vina p1 | −11.09 | −11.63 | −13.30 | −13.47 |
 | | GNINA p2 | −10.29 | −11.58 | −11.79 | −12.55 |
+| `orig_control` | co-folded | −7.05 | −7.47 | −8.86 | −7.24 |
+|  | Vina p1 | −9.18 | −5.52 | −3.67 | −2.81 |
+| `s3_esm2_control` | co-folded | −15.36 | −16.26 | −15.46 | −15.70 |
+|  | Vina p1 | −12.78 | −8.28 | −8.23 | −9.65 |
+|  | GNINA p7 | −15.13 | −16.39 | −16.16 | −16.64 |
+| `s3_orig_control` | co-folded | −19.12 | −16.84 | −15.64 | −13.37 |
+|  | Vina p1 | −9.37 | −9.66 | −10.20 | −9.41 |
+|  | GNINA p9 | −10.84 | −13.25 | −12.47 | −11.51 |
 
 ### Residence and release, every leg
 
@@ -167,6 +180,14 @@ all of it late -- so read the column against that section's caveats rather than 
 | `bg33_1` | co-folded | 14.5% | 19 | 16 | 30 ps | 0% |
 | | Vina p1 | 44.7% | 9 | 7 | 20 ps | 0% |
 | | GNINA p2 | 42.5% | 14 | 11 | 30 ps | 57% |
+| `orig_control` | co-folded | 29.9% | 286 | 39 | 1720 ps | 89% |
+|  | Vina p1 | 0.6% | 1394 | 20 | 8930 ps | 70% |
+| `s3_esm2_control` | co-folded | 29.4% | 3 | 2 | 20 ps | 0% |
+|  | Vina p1 | 2.4% | 238 | 23 | 1710 ps | 11% |
+|  | GNINA p7 | 0.1% | 0 | 0 | — | — |
+| `s3_orig_control` | co-folded | 48.0% | 50 | 10 | 220 ps | 100% |
+|  | Vina p1 | 36.8% | 120 | 16 | 860 ps | 89% |
+|  | GNINA p9 | 37.5% | 11 | 9 | 20 ps | 55% |
 
 \* 8 release frames of 20,000 at 1 ps sampling, all isolated single frames.
 
@@ -219,6 +240,14 @@ every 10 ps against 1 ps locally — so read `max` as an upper-bound figure.
 | `bg33_1` | co-folded | 5.2 | 7.7 | 14.8 → 14.9 |
 | | Vina p1 | 2.1 | 11.0 | 14.8 → 14.8 |
 | | GNINA p2 | 8.8 | 8.9 | 14.7 → 12.4 |
+| `orig_control` | co-folded | 5.9 | 8.1 | 12.8 → 11.5 |
+|  | Vina p1 | 9.0 | 10.2 | 14.0 → 10.2 |
+| `s3_esm2_control` | co-folded | 2.9 | 4.0 | 14.8 → 15.2 |
+|  | Vina p1 | 12.0 | 12.7 | 14.9 → 10.9 |
+|  | GNINA p7 | 4.3 | 6.0 | 15.1 → 14.3 |
+| `s3_orig_control` | co-folded | 6.4 | 8.6 | 8.8 → 8.8 |
+|  | Vina p1 | 7.9 | 9.4 | 9.5 → 8.2 |
+|  | GNINA p9 | 5.3 | 7.2 | 9.1 → 9.1 |
 
 No leg unravels: every fold keeps its contact network and no Rg climbs — the peptide always stays the
 peptide — but the two racc GNINA-docked extended designs do the opposite of loosening, they compact:
@@ -286,14 +315,14 @@ note below — and their pair cells are struck.)
 | `bg33_2` | co-folded | 0.585 | 0.75 | 15/20 | 5.2 Å | — | — | — |
 | | Vina p1 | 0.51 | 0.85 | 17/20 | 8.7 Å | — | — | — |
 | | GNINA p4 | 0.60 | 1.00 | 20/20 | 6.0 Å | — | — | — |
-| `orig_control` (unforced) | co-folded | 0.495 | 0.75 | 15/20 | **20.9 Å** | | | |
-| | Vina p1 | 0.44 | 0.85 | 17/20 | 16.3 Å | | | |
-| `s3_esm2_control` (unforced) | co-folded | 0.36 | 0.45 | 9/20 | 13.6 Å | | | |
-| | Vina p1 | 0.535 | 0.95 | 19/20 | 11.9 Å | | | |
-| | GNINA p7 | 0.71 | 0.95 | 19/20 | 12.9 Å | | | |
-| `s3_orig_control` (unforced) | co-folded | 0.735 | 0.80 | 16/20 | 9.5 Å | | | |
-| | Vina p1 | 0.76 | 1.00 | 20/20 | 9.1 Å | | | |
-| | GNINA p9 | 0.735 | 1.00 | 20/20 | 7.9 Å | | | |
+| `orig_control` (unforced) | co-folded | 0.495 | 0.75 | 15/20 | **20.9 Å** | 17/66 | 5/11 | 12/55 |
+|  | Vina p1 | 0.44 | 0.85 | 17/20 | 16.3 Å | 7/66 | 2/11 | 5/55 |
+| `s3_esm2_control` (unforced) | co-folded | 0.36 | 0.45 | 9/20 | 13.6 Å | 9/66 | 4/11 | 5/55 |
+|  | Vina p1 | 0.535 | 0.95 | 19/20 | 11.9 Å | 9/66 | 3/11 | 6/55 |
+|  | GNINA p7 | 0.71 | 0.95 | 19/20 | 12.9 Å | 6/66 | 2/11 | 4/55 |
+| `s3_orig_control` (unforced) | co-folded | 0.735 | 0.80 | 16/20 | 9.5 Å | 36/66 | 7/11 | 29/55 |
+|  | Vina p1 | 0.76 | 1.00 | 20/20 | 9.1 Å | 35/66 | 8/11 | 27/55 |
+|  | GNINA p9 | 0.735 | 1.00 | 20/20 | 7.9 Å | 33/66 | 5/11 | 28/55 |
 
 **The unforced rows' static read, added 2026-10-18 with their dynamics still running.** These are
 the hint-free Boltz co-folds of three of the same sequences — the `_control` twins of `orig_f12`,
@@ -390,6 +419,13 @@ The `_f8`/`_f12` suffix is the fold version used for each peptide — `ox1_orig`
 | `bgox31_5` | **BoltzGen** 31 aa | −16.78 (100.0%) | −12.81 (70.3%) | −14.28 (99.5%, p2) |
 | `bgox31_4` | **BoltzGen** 31 aa | −14.05 (100.0%) | −9.20 (36.5%) | −4.31 (4.9%, p6) |
 | `bgox31_2` | **BoltzGen** 31 aa | −10.89 (33.7%) | −2.11 (8.8%) | −8.50 (2.6%, p6) |
+| `ox1_esm1_control` | charged·esm2·unforced | **−26.09 (100.0%)** | −10.23 (68.6%) | −10.11 (56.2%, p4) |
+| `ox1_orig_control` | charged·unforced | −8.34 (63.8%) | −9.34 (61.6%) | −4.79 (17.0%, p6) |
+| `ox2_esm1_control` | aromatic·esm2·unforced | −12.70 (71.0%) | −4.80 (21.2%) | −11.09 (86.2%, p9) |
+| `ox2_orig_control` | aromatic·unforced | −8.51 (43.9%) | −6.71 (44.0%) | −3.50 (17.0%, p9) |
+| `ox3_orig_control` | hydrophilic·unforced | −10.13 (72.0%) | −14.33 (97.9%) | −15.44 (100.0%, p6) |
+
+**The `(ret.)` figures are residence, which is a centre-of-mass measure — on the unforced rods it understates retention badly.** Residence is the share of frames with the ligand centroid within 10 Å of the peptide centroid, so a ligand gripped at one end of an elongated fold scores low while never letting go: `s3_esm2_control_dock7` reads **0.1%** here and released **zero** frames of 20 ns, and `s3_esm2_control` reads 29.4% against 0.15% released. The unforced `*_control` rows are the affected ones; the forced folds are compact and their residence tracks retention closely. Read the release table below for these legs, not this column.
 
 The lower block is the **BoltzGen arm**: four designs from `specs/oxybenzone31.yaml` in the
 `boltzgen_local` repo, length-matched at 31 residues to the aromatic shell, each run co-folded plus
@@ -470,6 +506,21 @@ that released late (cross-check the residence table).
 | `bgox31_2` (co-fold) | −12.22 | −12.00 | −11.31 | −10.89 |
 | `bgox31_2_dock1` (Vina p1) | −6.63 | −3.30 | −2.20 | −2.11 |
 | `bgox31_2_dock6` (GNINA p6) | −8.77 | −8.50 | −8.18 | −8.50 |
+| `ox1_esm1_control` (co-fold) | −24.28 | −25.08 | −25.83 | −26.09 |
+| `ox1_esm1_control_dock1` (Vina p1) | −15.81 | −15.11 | −13.28 | −10.23 |
+| `ox1_esm1_control_dock4` (GNINA p4) | −12.03 | −11.87 | −9.66 | −10.11 |
+| `ox1_orig_control` (co-fold) | −10.08 | −11.50 | −10.21 | −8.34 |
+| `ox1_orig_control_dock1` (Vina p1) | −11.33 | −9.83 | −9.58 | −9.34 |
+| `ox1_orig_control_dock6` (GNINA p6) | −6.33 | −5.62 | −5.06 | −4.79 |
+| `ox2_esm1_control` (co-fold) | −22.17 | −18.58 | −16.04 | −12.70 |
+| `ox2_esm1_control_dock1` (Vina p1) | −5.03 | −6.31 | −5.59 | −4.80 |
+| `ox2_esm1_control_dock9` (GNINA p9) | −6.34 | −10.01 | −11.12 | −11.09 |
+| `ox2_orig_control` (co-fold) | −12.72 | −10.06 | −9.78 | −8.51 |
+| `ox2_orig_control_dock1` (Vina p1) | −6.62 | −6.52 | −6.96 | −6.71 |
+| `ox2_orig_control_dock9` (GNINA p9) | −4.88 | −4.96 | −4.38 | −3.50 |
+| `ox3_orig_control` (co-fold) | −15.28 | −14.81 | −10.97 | −10.13 |
+| `ox3_orig_control_dock1` (Vina p1) | −12.46 | −13.41 | −13.98 | −14.33 |
+| `ox3_orig_control_dock6` (GNINA p6) | −16.54 | −16.51 | −15.33 | −15.44 |
 
 The BoltzGen block makes the point of this table better than the shell legs do. **`bgox31_3_dock1`
 is the only leg in either arm whose four windows sit inside 1 kcal/mol** (−21.57 to −22.23), and it
@@ -521,6 +572,21 @@ Residence within 10 Å of the peptide centroid; `late` is the share of released 
 | `bgox31_2` | 33.7% | 12 | 4 | 90 ps | 92% |
 | `bgox31_2_dock1` | 8.8% | 1373 | 7 | **5580 ps** | 61% |
 | `bgox31_2_dock6` | 2.6% | 10 | 10 | 10 ps | 80% |
+| `ox1_esm1_control` | 100.0% | 0 | 0 | — | — |
+| `ox1_esm1_control_dock1` | 68.6% | 459 | 15 | 1870 ps | 100% |
+| `ox1_esm1_control_dock4` | 56.2% | 200 | 7 | 1480 ps | 99% |
+| `ox1_orig_control` | 63.8% | 268 | 19 | 820 ps | 100% |
+| `ox1_orig_control_dock1` | 61.6% | 95 | 15 | 580 ps | 86% |
+| `ox1_orig_control_dock6` | 17.0% | 587 | 34 | 1440 ps | 42% |
+| `ox2_esm1_control` | 71.0% | 191 | 12 | 1170 ps | 100% |
+| `ox2_esm1_control_dock1` | 21.2% | 627 | 38 | 2060 ps | 66% |
+| `ox2_esm1_control_dock9` | 86.2% | 89 | 9 | 450 ps | 0% |
+| `ox2_orig_control` | 43.9% | 103 | 19 | 480 ps | 95% |
+| `ox2_orig_control_dock1` | 44.0% | 106 | 31 | 220 ps | 81% |
+| `ox2_orig_control_dock9` | 17.0% | 826 | 63 | 2830 ps | 58% |
+| `ox3_orig_control` | 72.0% | 270 | 9 | 1990 ps | 100% |
+| `ox3_orig_control_dock1` | 97.9% | 0 | 0 | — | — |
+| `ox3_orig_control_dock6` | 100.0% | 0 | 0 | — | — |
 
 Two readings this table supports and a scalar ΔG cannot. **`bgox31_2_dock1` is the project record for
 sustained detachment**: 1373 released frames in only 7 episodes, the longest lasting 5.58 ns — 13.7 ns
@@ -572,6 +638,21 @@ Cα RMSD (final, max) and Rg start→end, Å.
 | `bgox31_2` (BoltzGen) | co-folded | 4.3 | 7.0 | 13.7 → 12.5 |
 | | Vina p1 | 6.1 | 7.0 | 13.5 → 12.1 |
 | | GNINA p6 | 3.7 | 5.5 | 13.6 → 13.4 |
+| `ox1_esm1_control` | co-folded | 2.9 | 4.7 | 8.6 → 8.6 |
+|  | Vina p1 | 4.5 | 5.8 | 9.1 → 8.8 |
+|  | GNINA p4 | 3.9 | 4.7 | 9.8 → 8.7 |
+| `ox1_orig_control` | co-folded | 3.4 | 5.2 | 8.0 → 7.7 |
+|  | Vina p1 | 4.4 | 5.9 | 7.8 → 8.5 |
+|  | GNINA p6 | 6.3 | 6.4 | 7.8 → 8.7 |
+| `ox2_esm1_control` | co-folded | 4.2 | 6.3 | 9.1 → 9.0 |
+|  | Vina p1 | 1.1 | 2.5 | 9.1 → 9.0 |
+|  | GNINA p9 | 1.7 | 3.8 | 9.5 → 9.1 |
+| `ox2_orig_control` | co-folded | 7.9 | 9.3 | 8.1 → 9.8 |
+|  | Vina p1 | 6.1 | 8.9 | 9.5 → 8.6 |
+|  | GNINA p9 | 5.4 | 6.2 | 8.9 → 8.9 |
+| `ox3_orig_control` | co-folded | 5.2 | 6.0 | 8.4 → 7.7 |
+|  | Vina p1 | 4.1 | 6.7 | 8.9 → 8.1 |
+|  | GNINA p6 | 6.4 | 9.3 | 8.4 → 8.5 |
 
 **The BoltzGen peptides hold their folds considerably better than the shell designs.** Nine of their
 twelve legs finish within 1.2–2.7 Å Cα RMSD and never exceed 3.5 Å, with Rg flat to within 0.7 Å,
@@ -633,21 +714,21 @@ pairs against the [n−1, n(n−1)/2] band; `sim` is the best MM/GBSA predictor 
 | `bgox31_2` (BoltzGen) | co-folded | 0.44 | 0.77 | 13/17 | 9.1 Å | | — | — | — |
 | | Vina p1 | 0.54 | 0.94 | 16/17 | 9.6 Å | | — | — | — |
 | | GNINA p6 | 0.535 | 1.00 | 17/17 | 11.8 Å | | — | — | — |
-| `ox1_esm1_control` (unforced) | co-folded | 0.765 | 0.94 | 16/17 | 5.9 Å | | | | |
-| | Vina p1 | 0.77 | 1.00 | 17/17 | 5.4 Å | | | | |
-| | GNINA p4 | 0.72 | 0.82 | 14/17 | 4.3 Å | | | | |
-| `ox1_orig_control` (unforced) | co-folded | 0.52 | 0.71 | 12/17 | 7.2 Å | | | | |
-| | Vina p1 | 0.70 | 1.00 | 17/17 | 6.7 Å | | | | |
-| | GNINA p6 | 0.57 | 0.88 | 15/17 | 6.4 Å | | | | |
-| `ox2_esm1_control` (unforced) | co-folded | 0.61 | 1.00 | 17/17 | 7.6 Å | | | | |
-| | Vina p1 | 0.75 | 0.94 | 16/17 | 7.9 Å | | | | |
-| | GNINA p9 | 0.585 | 0.88 | 15/17 | 7.8 Å | | | | |
-| `ox2_orig_control` (unforced) | co-folded | 0.535 | 1.00 | 17/17 | 9.0 Å | | | | |
-| | Vina p1 | 0.515 | 0.88 | 15/17 | 9.1 Å | | | | |
-| | GNINA p9 | 0.595 | 0.88 | 15/17 | 7.9 Å | | | | |
-| `ox3_orig_control` (unforced) | co-folded | 0.615 | 0.82 | 14/17 | 5.8 Å | | | | |
-| | Vina p1 | 0.625 | 1.00 | 17/17 | 5.3 Å | | | | |
-| | GNINA p6 | 0.61 | 0.88 | 15/17 | 5.8 Å | | | | |
+| `ox1_esm1_control` (unforced) | co-folded | 0.765 | 0.94 | 16/17 | 5.9 Å | 10 | 3.76 | 19/45 | 28 |
+|  | Vina p1 | 0.77 | 1.00 | 17/17 | 5.4 Å | 10 | 1.43 | 23/45 | 39 |
+|  | GNINA p4 | 0.72 | 0.82 | 14/17 | 4.3 Å | 10 | 1.67 | 18/45 | 25 |
+| `ox1_orig_control` (unforced) | co-folded | 0.52 | 0.71 | 12/17 | 7.2 Å | 10 | 2.03 | 23/45 | 39 |
+|  | Vina p1 | 0.70 | 1.00 | 17/17 | 6.7 Å | 10 | 1.70 | 34/45 | 69 |
+|  | GNINA p6 | 0.57 | 0.88 | 15/17 | 6.4 Å | 10 | 1.01 | 25/45 | 44 |
+| `ox2_esm1_control` (unforced) | co-folded | 0.61 | 1.00 | 17/17 | 7.6 Å | 11 | 2.62 | 21/55 | 24 |
+|  | Vina p1 | 0.75 | 0.94 | 16/17 | 7.9 Å | 11 | 0.87 | 27/55 | 38 |
+|  | GNINA p9 | 0.585 | 0.88 | 15/17 | 7.8 Å | 11 | 0.74 | 11/55 | 2 |
+| `ox2_orig_control` (unforced) | co-folded | 0.535 | 1.00 | 17/17 | 9.0 Å | 11 | 1.36 | 30/55 | 44 |
+|  | Vina p1 | 0.515 | 0.88 | 15/17 | 9.1 Å | 11 | 1.44 | 33/55 | 51 |
+|  | GNINA p9 | 0.595 | 0.88 | 15/17 | 7.9 Å | 11 | 0.85 | 19/55 | 20 |
+| `ox3_orig_control` (unforced) | co-folded | 0.615 | 0.82 | 14/17 | 5.8 Å | 10 | 2.57 | 24/45 | 42 |
+|  | Vina p1 | 0.625 | 1.00 | 17/17 | 5.3 Å | 10 | 2.42 | 28/45 | 53 |
+|  | GNINA p6 | 0.61 | 0.88 | 15/17 | 5.8 Å | 10 | 2.58 | 29/45 | 56 |
 
 **The unforced rows, added 2026-10-18 with their dynamics still running** (the hint-free Boltz
 co-folds of all five designed oxybenzone sequences; ΔG, slots, sim and pairs cells fill as the legs
