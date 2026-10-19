@@ -754,6 +754,27 @@ Practical notes (all learned the hard way):
 
 ## Forced vs unforced co-folds: making the cofold tables like-for-like — Part 1 DONE 2026-10-19, Part 2 open
 
+> **Start here after a context reset.** Part 1 is finished, audited, committed and pushed (through
+> `c826ff9`); nothing from it is pending. Part 2 — forced OF3 and RF3 folds — has not started, and
+> its plumbing is already written and pushed in the sibling `~/python_mac/fold` repo (`fe3abed`:
+> `POCKET:`/`POCKET_MAX_DISTANCE:` input fields, `build_pocket_constraint`, a `--pocket` flag) plus
+> `code/pocket_inputs.py` here, which writes pocket-guided inputs from a forced fold's own yaml.
+> Nothing has been *run* with any of it, so every claim about OF3's pocket behaviour below is
+> code-reading, not measurement.
+>
+> **Three things to carry forward, each of which cost something to learn:**
+>
+> 1. **Read release, not residence.** Residence is a centre-of-mass measure and understates
+>    retention badly on these elongated folds — `s3_esm2_control_dock7` reads 0.1% residence having
+>    released *zero* frames of 20 ns. Several legs were compared on residence before this surfaced.
+> 2. **Don't generalise from one triple.** GNINA's pick beat Vina p1 in 4 of 7 and lost 2. It was
+>    called a clean win for rescoring after a single triple, and the next triple contradicted it.
+> 3. **The campaign's strongest leg is an unforced co-fold** (`ox1_esm1_control`, −26.09, zero
+>    releases). That cuts against the premise the campaign was built on, so **a replicate of that
+>    one leg is the highest-value next run** — a 9.5 kcal/mol outlier carrying a headline claim
+>    should not rest on n=1. It is also the leg that NaN'd once and ran clean on a plain
+>    resubmission, so treat a single failure as a draw, not a verdict.
+
 **Part 1 ran and is complete: 23 legs, all recorded, Tables 1 and 2 rebuilt.** The plan as written
 below is kept for the reasoning; where it was superseded in execution, the differences are recorded
 in "What actually ran" at the end of Part 1 rather than edited into the steps, except for three
@@ -918,20 +939,28 @@ a fold-geometry row (`RESULTS.md:1159`) against its real 29.4%. Fixed by reading
 `runs/folds_md/record_<leg>.log` first, which is what `record_leg.py` writes from the profile
 itself; two cells changed, both in the Boltz column.
 
-**Still outstanding from step 5: the pairs columns are blank for all 23 legs.** Every record log
-ends `no pair table (no design json for this arm)` because only `pair_contacts_bzfree_design.csv`
-(octinoxate shell 1) was ever seeded. The design jsons all exist, so this is four seeding runs over
-kept trajectories — no MD to redo:
+**Both of Part 1's loose ends are now closed (2026-10-19) — do not redo them.** The four missing
+pair tables were seeded from the kept trajectories (`pair_contacts_bzfree_shell3.csv` for octinoxate
+shell 3, `_shell1/_shell2/_shell3` for oxybenzone), so all 23 legs have pairs data; and RESULTS.md's
+ten headline tables were filled — 77 rows *added* across the eight dynamics tables and the 23 blank
+pairs cells filled in the two static ones. Audited afterwards: every leg has three windows plus the
+whole run, contacts, both frame files, a figure, zero MM/GBSA scatter, four rows in
+`mmgbsa_summary.csv` and one each in `protein_stability.csv`, `ligand_slide.csv` and a pairs table.
+**Nothing is missing.** If a later note claims otherwise, check the tables before believing it —
+a stale "still open" line once cost this project two weeks of false "missing" work.
+
+**The table chain, which is three steps and not one.** `cofold_tables.py` does *not* write the
+markdown: it prints diagnostics and writes table *blocks* to `$OUT` (default `/tmp/tables.md`),
+which are then spliced into `runs/folds_md/cofold_binding_tables.md`, after which
+`code/render_cofold_pdf.py` rebuilds the PDF from that markdown. Miss the third step and the PDF
+goes stale silently, which is exactly what happened for four days in October. Audit those three
+tables' matching whenever a leg is added:
 
 ```sh
-$OMD/bin/python code/pair_contacts.py <that arm's leg dirs...> --run-dir runs/octinoxate \
-    --design design_shell3.json --csv runs/octinoxate/md/pair_contacts_bzfree_shell3.csv
-# and oxybenzone --design design_shell1.json / _shell2 / _shell3 -> pair_contacts_bzfree_shell{1,2,3}.csv
+OUT=/tmp/t.md $OMD/bin/python code/cofold_tables.py   # blocks + "missing/pending" report
+# splice the blocks into runs/folds_md/cofold_binding_tables.md
+.venv/bin/python code/render_cofold_pdf.py            # -> cofold_binding_tables.pdf
 ```
-
-Name **every** leg of the arm on each run — `pair_contacts.py` writes with mode `w` and has no
-`--allow-shrink` guard. Also still open: RESULTS.md's headline rows for these 23 legs are to be
-*added* per molecule (the ΔG/slots/sim/pairs cells), per the two-rule convention above.
 
 ### Part 2 (next campaign): forced OF3 and RF3 folds
 

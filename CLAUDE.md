@@ -294,6 +294,18 @@ the full box and stripping locally OOM'd the analyze at ~4–5 GB. With only the
 run_dock_pose_md.sh's whole-run analyze guard skips and its window loop slices the wrapped solute
 (no full-box load) — the Modal legs always worked this way, the racc lane just hadn't.
 
+**The cofold tables are a three-step chain, and the PDF is the step that gets forgotten.**
+`code/cofold_tables.py` does not write `runs/folds_md/cofold_binding_tables.md` — it prints a
+`missing / pending` report and writes table *blocks* to `$OUT` (default `/tmp/tables.md`) for
+splicing into that markdown. The markdown is then the source of truth, and
+`code/render_cofold_pdf.py` rebuilds `cofold_binding_tables.pdf` from it. Skip the third step and
+the PDF rots invisibly: the committed one went four days stale across a restructure and a whole
+campaign, and had no committed generator at all until 2026-10-19 (its metadata said matplotlib, and
+that was the only clue). Also note `cofold_tables.py` resolves each leg's residence from
+`runs/folds_md/record_<leg>.log` first and only then from the prose tables — scanning the docs alone
+once harvested a *static fold-geometry* percentage (`RESULTS.md`'s leg-keyed geometry rows) and
+printed it as MD residence.
+
 **Whole-table scripts rewrite their table: name every structure, not just the new one.**
 `vina_redock.py` writes `dock_summary.csv` and `dock_poses.csv`; `make_gnina_bundle.py` writes
 `reference.csv` — one script each, not both, whatever an earlier version of this file said. All three
