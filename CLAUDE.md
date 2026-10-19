@@ -294,17 +294,38 @@ the full box and stripping locally OOM'd the analyze at ~4–5 GB. With only the
 run_dock_pose_md.sh's whole-run analyze guard skips and its window loop slices the wrapped solute
 (no full-box load) — the Modal legs always worked this way, the racc lane just hadn't.
 
-**The cofold tables are a three-step chain, and the PDF is the step that gets forgotten.**
-`code/cofold_tables.py` does not write `runs/folds_md/cofold_binding_tables.md` — it prints a
-`missing / pending` report and writes table *blocks* to `$OUT` (default `/tmp/tables.md`) for
-splicing into that markdown. The markdown is then the source of truth, and
-`code/render_cofold_pdf.py` rebuilds `cofold_binding_tables.pdf` from it. Skip the third step and
-the PDF rots invisibly: the committed one went four days stale across a restructure and a whole
+**The cofold tables are a three-step chain; the splice is now scripted and the PDF still is not.**
+`code/cofold_tables.py --write` splices Tables 1 and 2 into `runs/folds_md/cofold_binding_tables.md`
+itself and **refuses if any published cell would change**, allowing only cells in a newly added
+column and the GNINA-pick row label, which carries one pose tag per column. That check is the
+"cross-check the co-fold cells against the published values" the docstring used to ask for in prose,
+and the splice was a manual paste until 2026-10-19 — which is why the pocket-guided lane's first six
+legs sat in the CSVs with no row in the markdown at all. Without `--write` the script only prints a
+`missing / pending` report and writes table *blocks* to `$OUT` (default `/tmp/tables.md`). The
+markdown is still the source of truth, and `code/render_cofold_pdf.py` rebuilds
+`cofold_binding_tables.pdf` from it — **with the venv or conda python, not the bare `python3`, which
+has no matplotlib**. Skip that third step and the PDF rots invisibly: the committed one went four days stale across a restructure and a whole
 campaign, and had no committed generator at all until 2026-10-19 (its metadata said matplotlib, and
 that was the only clue). Also note `cofold_tables.py` resolves each leg's residence from
 `runs/folds_md/record_<leg>.log` first and only then from the prose tables — scanning the docs alone
 once harvested a *static fold-geometry* percentage (`RESULTS.md`'s leg-keyed geometry rows) and
 printed it as MD residence.
+
+**`record_leg.py` can extend a lane's tables but could not start one, and said so misleadingly.**
+It finds the `pair_contacts_<lane>_<arm>.csv` already holding a leg's parent structure and re-runs
+over it; with no such file it printed `no pair table (no design json for this arm)`, which is false —
+`pair_contacts.design_for()` resolves the json by peptide name and every file exists. The real
+situation is a lane with no table yet. That message reads as "nothing to do", so all five of the
+pocket-guided lane's first legs recorded with no pair row while the audit line still said `OK`.
+It now starts the lane's table. The lesson generalises: **`record_leg.py`'s own `audit: ... -> OK`
+is not the done-signal** — it checks windows, summary rows, frames and scatter, and nothing else.
+Run the four-line audit in "Audit the recording set" against the leg, which is what caught this.
+
+**A fold lane also needs a `runs/folds_md/dock_legs.txt` entry per docked leg before it is recorded.**
+That file is where FOLDS.md's pose label comes from, and a missing entry used to default to `GNINA` —
+so the guided lane's two Vina-p1 legs were published as `p1 GNINA`. A missing entry now writes
+`UNREGISTERED` and warns. It deliberately does not abort: the MM/GBSA rows are appended earlier in
+the same `record_leg.py` run, so exiting there would mean a re-run duplicates them.
 
 **Whole-table scripts rewrite their table: name every structure, not just the new one.**
 `vina_redock.py` writes `dock_summary.csv` and `dock_poses.csv`; `make_gnina_bundle.py` writes

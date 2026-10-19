@@ -1442,3 +1442,33 @@ commands in a short `caffeinate -t 300` which expires by itself — that is not 
   folder — every log path but Boltz's comes from a shell redirect, so choose the right one.
 - Credit to the original author stays in the README and in any publication. Keeping her commits out
   of this repository's git history is separate from, and does not affect, that attribution.
+
+### Pocket-guided lane: downstream status (2026-10-19)
+
+Six of twenty-six legs recorded. Tables 1 and 2 of `cofold_binding_tables.md` carry a fourth
+`OpenFold3 pocket-guided` column, spliced by `cofold_tables.py --write` and refreshed by re-running
+it as each leg lands; the PDF is rebuilt from the markdown with `.venv/bin/python
+code/render_cofold_pdf.py`. RESULTS.md needs nothing — it holds no co-fold lane tables at all (zero
+mentions of `rf3cof`), so that campaign lives only in the cofold markdown.
+
+**pepgraph: done.** `openfold3p` added to `LANES` and scored — median perplexity 7.2 / mean 9.7
+across the nine, against the unconstrained `openfold3` lane's 10.2 / 10.7 on the same nine
+sequences (diff +1.0 ± 0.5, 7 of 9 favouring guided), no zero-information structures. The guided
+backbones are markedly more collapsed: 71 contacts against 36, `frac_aR` 0.19 against 0.79, so they
+are not helices. `lane_comparison.json` was **merged, not replaced**: z comes off one RNG stream
+consumed in structure order, so `openfold3`'s z moved on all 21 rows between runs while perplexity
+moved on none. Every existing lane keeps its committed z. Read perplexity, not z, for this lane —
+its own z was drawn in a two-lane run.
+
+**morph: deliberately not extended, and this is the reason, not an omission.** A `--set matched`
+pair is apo → holo within one model so that a ΔE is the ligand's effect. OpenFold3's
+`pocket_constraint` takes a `ligand_chain_id`, so a guided *apo* fold is undefined and cannot be
+built; pairing `of3apo → openfold3p` would measure the ligand's effect and the restraint's at once,
+the exact confound `matched` exists to remove. The comparison the lane wants is
+`openfold3 → openfold3p`, both holo, differing only by the restraint — a strain between two bound
+states, which needs its own set rather than a row in `MATCHED_PAIRS`. Recorded in morph's
+`run_batch.py` beside the pair list.
+
+Still open and unactioned, both the user's call: the form of the `ox1_esm1_control` table cell after
+the replicate (recommended `−26.09 / −9.93 (n=2, spread 16.2)` across `cofold_binding_tables.md`,
+`RESULTS.md:422` and `RESULTS.md:509`), and targeted-11 versus full-202 replicate scope.
