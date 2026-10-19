@@ -695,6 +695,19 @@ record it, but treat a released-frames difference as a flagged cell, not a concl
 Nothing here runs until you say go; the first action on a go is the two one-line edits and the smoke
 leg.
 
+**One leg of this campaign has now run, out of order, and it landed hard (2026-10-19).**
+`ox1_esm1_control_r2` was run on its own as the highest-value single leg rather than as part of a
+batch, because the leg it replicates carried a headline claim. **|ΔΔG| = 16.16 kcal/mol**
+(−26.09 → −9.93), with retention collapsing too: 0% released → 9.3%, 54.3 mean contacts → 23.4.
+So the answer to this plan's own question — "if |ΔΔG| turns out small (a few tenths), the headline
+tables stand as they are; if it is comparable to the design-vs-null gaps, the matrix gains a
+run-to-run spread column" — is, on n=1 of 62, emphatically the second. One replicate does not
+establish the distribution, and this leg may be the worst case rather than typical: it is the
+campaign's largest outlier, and an outlier is exactly where regression to the mean is strongest.
+But it rules out the benign reading, and a 16 kcal/mol spread on any cell is larger than most
+differences the headline tables are asked to carry. Recorded in `mmgbsa_replicates.csv`; the other
+61 staged `_r2` legs are untouched.
+
 **Prepared 2026-10-08 (uncommitted; nothing launched, nothing staged to racc).** Both one-line edits
 are in (`run_dock_pose_md.sh` now honours `LEGNAME`; `racc_drain.sh` parses `..._dock1_r2` by
 stripping the suffix and passing `LEGNAME=$leg`). All **62 `_r2` dirs are staged local** under
@@ -754,11 +767,31 @@ Practical notes (all learned the hard way):
 
 ## Forced vs unforced co-folds: making the cofold tables like-for-like — Part 1 DONE 2026-10-19, Part 2 open
 
-> **2026-10-19 update:** the `ox1_esm1_control` replicate is running as `ox1_esm1_control_r2`
-> (racc job 529604, drain `runs/folds_md/drain_rep_ox1_esm1_control.log`). Its MM/GBSA rows go to
-> `runs/oxybenzone/md/mmgbsa_replicates.csv`; `record_leg.py` now routes any `_r2` leg there. Part 2
-> prep is done: see "Status 2026-10-19" and "Answers, 2026-10-19" under Part 2. RF3 is closed;
-> OF3 pocket-guided is a go.
+> **2026-10-19, and it changes the campaign's headline: `ox1_esm1_control` does NOT reproduce.**
+> The replicate (`ox1_esm1_control_r2`, racc 529604, recorded and audited) came back **−9.93
+> against the original's −26.09 — 16.16 kcal/mol apart**, from a byte-identical system differing
+> only in the initial velocities `openmm_md` never seeds. Released 9.3% of frames in 11 episodes
+> where run 1 released none; mean contacts 23.4 against 54.3; separation 9.3 Å mean and 19.0 Å max
+> against 4.3/5.4. Windows −13.48 / −9.69 / −8.53 / −9.93 against −24.28 / −25.08 / −25.83 / −26.09.
+> Component-wise the engagement simply failed to form: EEL −41.14 → −9.52 (partly offset by EGB
+> 42.61 → 16.19), vdW −23.79 → −14.46.
+>
+> **Three things follow.** (1) Point 3 below — "the campaign's strongest leg is an unforced
+> co-fold, which cuts against the premise the campaign was built on" — **is now unsupported**, and
+> the sentence that called a 9.5 kcal/mol outlier on n=1 too big a claim was right. (2) Run-to-run
+> variation on this system is **~16 kcal/mol** against within-trajectory standard errors of
+> 0.02–0.04: CLAUDE.md's standing warning that those errors are not uncertainty on a comparison now
+> has a number, and it is larger than most design-vs-null gaps in the project. (3) **Convergence
+> did not catch it** — run 1's windows were flat and monotone, textbook converged. Convergence
+> within a trajectory says nothing about reproducibility across them. Replicate rows live in
+> `runs/<mol>/md/mmgbsa_replicates.csv` (never the canonical summary); `record_leg.py` routes any
+> `_r2` leg there. This is the strongest argument yet for the 62-leg replicate campaign already
+> staged below, and it is not started.
+>
+> Part 2 prep is done and **submitted**: nine pocket-guided OF3 folds from the designed shells,
+> docked, GNINA bundles pushed, and 18 MD legs (9 cofold + 9 Vina p1) on racc as four batches
+> `runs/folds_md/o3pc_{oct_1,oct_2,oxb_1,oxb_2}.legs` via `code/feed_chain.sh`. RF3 is closed.
+> See "Status 2026-10-19" and "Answers, 2026-10-19" under Part 2.
 >
 > **Start here after a context reset.** Part 1 is finished, audited, committed and pushed (through
 > `c826ff9`); nothing from it is pending. Part 2 — forced OF3 and RF3 folds — has not started, and

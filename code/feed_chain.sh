@@ -1,33 +1,53 @@
 #!/bin/zsh
-# Feed the remaining fold-cofold batches to racc in order, one racc_feed.sh BATCH=1 call each.
-# racc_feed.sh waits for a free slot itself (3 submitted per user), so running them in sequence keeps
-# the queue topped up as jobs finish. Each submitted batch gets its own detached racc_drain.sh.
-# Time limits: 1.3 x (8 min + 39.3 min x (N/5838)^0.4 per leg), rounded up to 30 min -- the rule that
-# gave oct_1 5:30 and oxb_1 6:00.
-cd ${0:A:h:h:h}
-caffeinate -w $$ &
-D=runs/folds_md
-# Specs may be given on the command line to resume a partial chain -- a transient
-# "Unable to contact slurm controller" killed the 2026-10-14 run at oxb_3 with two batches left,
-# and re-running the whole list would resubmit batches that already ran. No args = the full list.
-SPECS=("$@")
-if (( ${#SPECS} == 0 )); then
-    SPECS=(oct_2:octinoxate:5:00:00 oxb_2:oxybenzone:5:00:00 oct_3:octinoxate:6:00:00 \
-           oxb_3:oxybenzone:6:00:00 oct_4:octinoxate:2:30:00)
-fi
-for spec in $SPECS; do
-    b=${spec%%:*}; rest=${spec#*:}; mol=${rest%%:*}; t=${rest#*:}
-    print -r -- "[$(date '+%F %T')] chain: feeding $b ($mol, --time=$t)"
-    # Check only THIS attempt's output: the log is appended to, so a retry of a batch whose earlier
-    # attempt succeeded would otherwise match that old line and skip a genuine failure.
-    off=0; [[ -f $D/feed_$b.log ]] && off=$(wc -c < $D/feed_$b.log)
-    BATCH=1 BATCH_NAME=fold_$b SYSNAME=$mol SBATCH_OPTS="--time=$t --cpus-per-task=8" \
-        zsh code/racc_feed.sh $D/$b.legs >> $D/feed_$b.log 2>&1
-    if ! tail -c +$((off+1)) $D/feed_$b.log | grep -q 'Submitted batch job'; then
-        print -r -- "[$(date '+%F %T')] chain: $b did not submit -- stopping (see $D/feed_$b.log)"
-        exit 1
-    fi
-    ~/miniforge3/bin/python -c "import subprocess,os; subprocess.Popen(['zsh','code/racc_drain.sh','$D/$b.legs'], stdout=open('$D/drain_$b.log','ab'), stderr=subprocess.STDOUT, stdin=subprocess.DEVNULL, start_new_session=True, env={**os.environ,'SYSNAME':'$mol'})"
-    print -r -- "[$(date '+%F %T')] chain: $b submitted, drain launched"
+# Submit a sequence of racc batches, one after another, and start each one's drain as it goes.
+#
+#   code/feed_chain.sh <legfile base>:<molecule>:<--time> ...
+#   code/feed_chain.sh o3pc_oct_1:octinoxate:06:35:00 o3pc_oxb_1:oxybenzone:05:30:00
+#
+# Each argument names a runs/folds_md/<base>.legs file, the molecule whose runs/<mol>/md the legs
+# live under, and that batch's --time (estimate + 1 h 30 min, per the legfile's own header).
+# Colons in the time are fine -- the time is everything after the second field.
+#
+# This orchestrates and reimplements nothing: every batch goes out through code/racc_feed.sh in
+# BATCH=1 mode (one job per legfile, racc_run.py's LEGS) and is drained by code/racc_drain.sh. The
+# chain exists because gpuscavenger is MaxSubmitJobsPU=3 / MaxJobsPU=1, so a campaign of more than
+# three batches cannot simply be queued at once; racc_feed.sh already blocks until a slot is free,
+# so calling it in sequence is all the throttling needed.
+#
+# A version of this lived in runs/folds_md/ for the dk* campaign and was never committed, so it was
+# gone when the pocket-guided lane needed it (2026-10-19). Hence this file, in code/ and tracked.
+#
+# Launch it detached, or a harness reap takes the whole chain with it:
+#   ~/miniforge3/bin/python -c "import subprocess; subprocess.Popen(['zsh','code/feed_chain.sh',
+#     'o3pc_oct_1:octinoxate:06:35:00', ...], stdout=open('runs/folds_md/feed_chain_o3pc.log','ab'),
+#     stderr=subprocess.STDOUT, stdin=subprocess.DEVNULL, start_new_session=True, cwd='$PWD')"
+set -u
+REPO=${0:A:h:h}
+cd $REPO
+caffeinate -w $$ &                 # dies with this script
+
+log() { print -r -- "[$(date '+%Y-%m-%d %H:%M:%S')] feed_chain: $*"; }
+
+for spec in "$@"; do
+    base=${spec%%:*}; rest=${spec#*:}
+    mol=${rest%%:*}; tlimit=${rest#*:}
+    legfile=runs/folds_md/$base.legs
+    if [[ ! -f $legfile ]]; then log "no such legfile: $legfile -- skipping"; continue; fi
+
+    log "submitting $base ($mol, --time=$tlimit)"
+    # Blocks until a queue slot is free, submits the whole legfile as one job, then returns.
+    BATCH=1 BATCH_NAME=$base SYSNAME=$mol \
+        SBATCH_OPTS="--time=$tlimit --cpus-per-task=8" \
+        zsh $REPO/code/racc_feed.sh $legfile
+    rc=$?
+    log "$base feeder exit $rc"
+    if (( rc != 0 )); then log "$base NOT submitted -- not starting its drain"; continue; fi
+
+    # One drain per legfile, detached, so the chain is never blocked on a tail. Each drain holds
+    # the global tail lock for its own tails, so concurrent drains cannot OOM this 8 GB Mac.
+    SYSNAME=$mol nohup zsh $REPO/code/racc_drain.sh $legfile \
+        >> runs/folds_md/drain_$base.log 2>&1 &
+    disown
+    log "$base drain started (pid $!)"
 done
-print -r -- "[$(date '+%F %T')] chain: all batches submitted"
+log "chain done: every batch submitted"
