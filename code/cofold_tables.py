@@ -262,6 +262,14 @@ def splice(path=os.path.join("runs", "folds_md", "cofold_binding_tables.md")):
             if cb[1].startswith("GNINA pick"):     # label gains one pose tag per added column
                 ca, cb = ca[:1] + ca[2:], cb[:1] + cb[2:]
             for j, (x, y) in enumerate(zip(ca, cb[:len(ca)])):
+                # A cell published as *running* is a placeholder for a queued leg, so its becoming a
+                # real value is the expected transition every time one lands -- not a published
+                # result changing. Refusing it would mean the guard blocks the very update it exists
+                # to make safe (hit 2026-10-19 on the first guided leg to finish after the splice).
+                # An em-dash cell is NOT in this set: that means "not attempted by design", so a
+                # value appearing there is a genuine surprise and should still stop the write.
+                if x in ("*running*", "*no record*"):
+                    continue
                 if x != y and not set(x) <= set("- "):
                     changed.append(f"{mol} row {a[:40]!r} col {j}: published {x!r} -> {y!r}")
         lines[start:end] = new

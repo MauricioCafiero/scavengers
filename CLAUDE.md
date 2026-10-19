@@ -446,7 +446,10 @@ tables : 4 rows in runs/<mol>/md/mmgbsa_summary.csv, 1 in protein_stability.csv,
 ```
 
 Match `pair_contacts_*.csv` on its **`structure`** column, not its first column — `leg` holds the
-full production path, and matching that reports every row missing.
+full production path, and matching that reports every row missing. **The two whole-table rewrites key
+differently from each other**, which is its own false-alarm source: `protein_stability.csv`'s `leg` is
+the full production path (`runs/<mol>/md/<leg>/prod_20ns`) while `ligand_slide.csv`'s is the **bare
+leg name**. Grepping both for `/<leg>/` reports the slide row missing on a leg that has it.
 
 A leg is not done until `protein_stability.csv` has its row: `md_stability.py` takes the leg list from
 argv, so a **no-argument run writes nothing** — pass the full glob
