@@ -65,6 +65,7 @@ from vina_redock import DockError, redock, convert  # noqa: E402
 # reference placement from the openfold3 cofold lane's staged SDF.
 LANES = [("openfold3", "o3cof", True),
          ("rf3", "rf3cof", True),
+         ("openfold3p", "o3pcof", True),   # pocket-guided OF3 (fold_batch.sh LANE=openfold3p)
          ("of3apo", "o3apo", False),
          ("rf3apo", "rf3apo", False),
          ("esmfold", "esmapo", False),

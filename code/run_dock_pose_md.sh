@@ -51,7 +51,7 @@ BUILD_ONLY=${BUILD_ONLY:-0}   # stop after the build, to read the particle count
 # cofolder put it; the stage lane follows the suffix.
 if [[ $POSE == cofold ]]; then
     N=${LEGNAME:-$STRUCT}
-    [[ $STRUCT == *_rf3cof ]] && LANE_DIR=rf3 || LANE_DIR=openfold3
+    case $STRUCT in *_rf3cof) LANE_DIR=rf3 ;; *_o3pcof) LANE_DIR=openfold3p ;; *) LANE_DIR=openfold3 ;; esac
     DOCK_STAGE=runs/$SYSNAME/folds/dock_stage/$LANE_DIR/$STRUCT"_ligand_cofold.sdf"
 else
     N=${LEGNAME:-${STRUCT}_dock${POSE}}

@@ -7,11 +7,14 @@
 #   LANE=of3apo code/fold_batch.sh                  # OpenFold3: protein-only (apo) query
 #   LANE=rf3 code/fold_batch.sh                     # RosettaFold3 cofold, second opinion
 #   LANE=boltzapo code/fold_batch.sh                # Boltz-2 apo, local MPS (no Modal)
+#   LANE=openfold3p code/fold_batch.sh              # OpenFold3 pocket-guided cofold (inputs_pocket/)
 #   MOL=oxybenzone LANE=esmfold code/fold_batch.sh  # restrict to one molecule's peptide set
+#   ONLY="s3_orig_f12" LANE=openfold3p code/fold_batch.sh   # restrict to named entries (smoke runs)
 #
 # Resumable: an entry whose output already exists is skipped, so re-running after an interruption
 # continues where it stopped. Runs are sequential because one Modal run at a time is the house rule;
-# each invocation carries its own caffeinate -i guard -- applied here directly rather than via
+# each invocation carries its own caffeinate -i -s guard (-s since a dark sleep dropped a -i-only
+# Modal client on 2026-10-10, CLAUDE.md "Modal") -- applied here directly rather than via
 # code/modal_run.sh, because the fold repo's apps must run under the fold repo's `uv run modal` for
 # its package to be importable (modal_run.sh hardcodes peptidebuilder's modal_md.py invocation).
 #
@@ -27,6 +30,10 @@
 # boltzapo folds the SEQUENCE: line alone with the same local Boltz-2 that made the co-folds
 # (boltz_env.run_boltz, msa: empty as in runs/<mol>/boltz/*.yaml, no ligand, no hints). It runs on
 # this Mac, so no Modal; the yaml, log and Boltz's raw output stay under boltzapo/raw/.
+# openfold3p is the OpenFold3 cofold with a pocket_constraint: it reads runs/<mol>/folds/inputs_pocket/
+# (written by code/pocket_inputs.py from each forced Boltz yaml -- same SEQUENCE/SMILES as inputs/,
+# plus POCKET/POCKET_MAX_DISTANCE) and names its job <pep>_pocket so it cannot collide with the
+# unguided lane's outputs/<pep>. Pocket-GUIDED, not forced: see NEXT_STEPS.md "Part 2".
 set -u
 REPO=${0:A:h:h}
 cd $REPO
@@ -34,20 +41,24 @@ FOLD=${FOLD_ROOT:-$HOME/python_mac/fold}
 LANE=${LANE:-esmfold}
 
 case $LANE in
-    esmfold|openfold3|rf3|of3apo|rf3apo|boltzapo) ;;
-    *) print -u2 "LANE must be esmfold, openfold3, rf3, of3apo, rf3apo or boltzapo"; exit 1 ;;
+    esmfold|openfold3|openfold3p|rf3|of3apo|rf3apo|boltzapo) ;;
+    *) print -u2 "LANE must be esmfold, openfold3, openfold3p, rf3, of3apo, rf3apo or boltzapo"; exit 1 ;;
 esac
+INDIR=inputs; [[ $LANE == openfold3p ]] && INDIR=inputs_pocket
+MOL=${MOL:-*}
+ONLY=${ONLY:-}
 
-for f in runs/*/folds/inputs/*.txt(N); do
+for f in runs/${~MOL}/folds/$INDIR/*.txt(N); do
     mol=${f:h:h:h:t}
     name=${f:t:r}
+    [[ -n $ONLY && " $ONLY " != *" $name "* ]] && continue
     log=$REPO/runs/$mol/folds/$LANE.batch.log
     echo "=== $LANE $mol/$name ($(date '+%H:%M:%S'))" >> $log
     if [[ $LANE == esmfold ]]; then
         out=$REPO/runs/$mol/folds/esmfold/$name.pdb
         [[ -e $out ]] && { echo "skip $mol/$name (exists)" >> $log; continue; }
         seq=$(awk '/^SEQUENCE:/ {print $2}' $f)
-        ( cd $FOLD && caffeinate -i uv run modal run src/fold/esmfold_app.py::main \
+        ( cd $FOLD && caffeinate -i -s uv run modal run src/fold/esmfold_app.py::main \
               --sequence $seq --out-path $out ) >> $log 2>&1
         rc=$?
         echo "--- $LANE $mol/$name exit $rc ($(date '+%H:%M:%S'))" >> $log
@@ -80,7 +91,7 @@ sys.exit(run_boltz('$raw/$name.yaml', '$raw', '$raw/$name.log'))" >> $log 2>&1
         [[ $LANE == rf3apo ]] && APP=src/fold/rf3_app.py::main || APP=src/fold/app.py::main
         [[ $LANE == rf3apo ]] && dirjob=rf3_${name}_apo || dirjob=${name}_apo
         seq=$(awk '/^SEQUENCE:/ {print $2}' $f)
-        ( cd $FOLD && caffeinate -i uv run modal run $APP \
+        ( cd $FOLD && caffeinate -i -s uv run modal run $APP \
               --sequence $seq --job-name ${name}_apo ) >> $log 2>&1
         rc=$?
         cif=$( cd $FOLD && uv run python -c "
@@ -98,15 +109,16 @@ print(find_best_cif('outputs/$dirjob'))" 2>/dev/null | tail -1 )
     else
         out=$REPO/runs/$mol/folds/$LANE/$name.pdb
         [[ -e $out ]] && { echo "skip $mol/$name (exists)" >> $log; continue; }
-        APP=src/fold/app.py::main; prefix=""
+        APP=src/fold/app.py::main; prefix=""; job=$name
         [[ $LANE == rf3 ]] && { APP=src/fold/rf3_app.py::main; prefix=rf3_; }
-        ( cd $FOLD && caffeinate -i uv run modal run $APP --input-file $REPO/$f --job-name $name ) \
+        [[ $LANE == openfold3p ]] && job=${name}_pocket
+        ( cd $FOLD && caffeinate -i -s uv run modal run $APP --input-file $REPO/$f --job-name $job ) \
             >> $log 2>&1
         rc=$?
         # best-ranked cif -> pdb beside the manifest; raw cifs stay in the fold repo's outputs/
         cif=$( cd $FOLD && uv run python -c "
 from fold.results import find_best_cif
-print(find_best_cif('outputs/$prefix$name'))" 2>/dev/null | tail -1 )
+print(find_best_cif('outputs/$prefix$job'))" 2>/dev/null | tail -1 )
         if [[ -n $cif && -f $FOLD/$cif ]]; then
             mkdir -p runs/$mol/folds/$LANE
             ( cd $FOLD && uv run python -m fold.analyze cif-to-pdb $cif --out-path $out ) >> $log 2>&1

@@ -51,9 +51,14 @@ def main(argv=None):
                          "BoltzGen legs live outside this repo (~/python_mac/boltzgen_local/md), but "
                          "their rows belong in the same mmgbsa_summary.csv -- octinoxate's bg33_1 and "
                          "bg33_2 co-folds are already there. runs/<system>/md is searched first.")
+    # Replicate legs (<leg>_r2) go to their own table, mmgbsa_replicates.csv: the summary holds one
+    # canonical row set per leg, and a second run of a leg is not a new leg (NEXT_STEPS.md,
+    # "Replicate every MM/GBSA leg").
+    ap.add_argument("--summary", default="mmgbsa_summary.csv",
+                    help="file name under <outdir>/md to append to (default mmgbsa_summary.csv)")
     a = ap.parse_args(argv)
     md = REPO / a.outdir / "md"
-    summary = md / "mmgbsa_summary.csv"
+    summary = md / a.summary
     if not summary.is_file():
         ap.error(f"no summary at {summary} -- is --outdir {a.outdir!r} the right molecule? "
                  f"molecules with a summary: "

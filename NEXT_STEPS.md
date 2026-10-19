@@ -754,6 +754,12 @@ Practical notes (all learned the hard way):
 
 ## Forced vs unforced co-folds: making the cofold tables like-for-like — Part 1 DONE 2026-10-19, Part 2 open
 
+> **2026-10-19 update:** the `ox1_esm1_control` replicate is running as `ox1_esm1_control_r2`
+> (racc job 529604, drain `runs/folds_md/drain_rep_ox1_esm1_control.log`). Its MM/GBSA rows go to
+> `runs/oxybenzone/md/mmgbsa_replicates.csv`; `record_leg.py` now routes any `_r2` leg there. Part 2
+> prep is done: see "Status 2026-10-19" and "Answers, 2026-10-19" under Part 2. RF3 is closed;
+> OF3 pocket-guided is a go.
+>
 > **Start here after a context reset.** Part 1 is finished, audited, committed and pushed (through
 > `c826ff9`); nothing from it is pending. Part 2 — forced OF3 and RF3 folds — has not started, and
 > its plumbing is already written and pushed in the sibling `~/python_mac/fold` repo (`fe3abed`:
@@ -1049,6 +1055,54 @@ unforced fold, which has no hint set to carry. Verified on `s3_esm2_f4` (4 resid
 `orig_f12` and `s3_orig_f12` (12 residues, 5.2 Å). What is left is a `LANE=openfold3p` in
 `fold_batch.sh` and the `_o3pcof` branches, then one smoke fold.
 
+**Status 2026-10-19: plumbing done, smoke fold run, questions 1–3 answered (below). RF3 is out;
+OF3 pocket-guided is a go.**
+* **The guided set is 9, one per non-BoltzGen, non-null row of Tables 1 and 2: 4 octinoxate + 5
+  oxybenzone.** Counted wrong twice on 2026-10-19 (reported as 8) by deriving the list from
+  `pocket_inputs.py`'s refusals instead of from the tables' own rows. The script refuses a fold
+  with no `contact` block, which is correct, but a refusal means "*this fold* is unforced", not
+  "this peptide has no hints" — `s2_esm2_control` is the Table 1 row whose Boltz cell has always
+  been the unforced control, while `s2_esm2_f4/_f8/_f12` sit on disk with full contact sets and no
+  MD leg. **Count the rows of the table the column is going into; do not infer a row list from a
+  tool's error messages.** That row has no canonical dose for the same reason (it was never
+  forced), so it takes **f4**, matching `s3_esm2_f4` so both esm2 variants carry the same dose —
+  a choice, recorded here, not an inherited value. Its input is named `s2_esm2_control.txt` after
+  the manifest row rather than after the yaml it came from, so the lane lines up with
+  `folds/openfold3/s2_esm2_control.pdb`; sequence and SMILES verified identical to that fold.
+
+  **Anchor each pocket on the variant that has MD — that is the only thing the guided cell can be
+  compared against** (user, 2026-10-19). Checked against `mmgbsa_summary.csv`, and 8 of the 9 already
+  satisfy it: `orig_f12`, `s3_esm2_f4`, `s3_orig_f12`, `ox1_esm1_f8`, `ox1_orig_f12`, `ox2_esm1_f8`,
+  `ox2_orig_f8`, `ox3_orig_f8` each have a forced MD leg *and* a `_control` leg, so the pocket comes
+  from the dose that was actually simulated. **`s2_esm2` is the lone exception and must be read
+  differently: it has `s2_esm2_control` MD only — no forced MD at any dose** — so its f4 pocket is
+  anchored by nothing, and its guided cell has no forced cell for the same peptide to sit beside.
+  Its reference columns and its guided-vs-unguided comparator do come from MD
+  (`s2_esm2_control` and `s2_esm2_control_o3cof`), so the row is sound as a guided-vs-unguided
+  read and unsound as a forced-vs-guided one. Say so in the caption rather than letting the cell
+  imply a dose comparison it cannot support.
+* **The nulls get no guided fold (user ruling, 2026-10-19).** All four (`shuffle_control`,
+  `shuffle_control_esm0`, `ox2_shuffle`, `ox2_shuffle_esm0`) have zero `contact:` lines, so no
+  pocket can be read off them. Two ways to manufacture one — borrowing a designed peptide's
+  positions onto a null sequence, or shuffling the positions on a designed sequence — were both
+  **declined**. So the guided OF3 column ships without a null, and nothing in it may be phrased as
+  separating design from noise; it compares guided against unguided OF3 on the same peptide only.
+* Pocket inputs written for all **9** rows of the Part 1 table
+  (`runs/{octinoxate,oxybenzone}/folds/inputs_pocket/`): `orig_f12` 12 res/5.2 Å, `s3_esm2_f4`
+  4/4.2, `s3_orig_f12` 12/5.2, `ox1_esm1_f8` 8/4.8, `ox1_orig_f12` 9/4.9, `ox2_esm1_f8` 8/4.7,
+  `ox2_orig_f8` 8/4.7, `ox3_orig_f8` 8/4.6. SEQUENCE and SMILES lines are byte-identical to the
+  unguided lane's `inputs/`, so the pocket is the only difference.
+* `fold_batch.sh` has `LANE=openfold3p` (reads `inputs_pocket/`, job `<pep>_pocket`, output
+  `runs/<mol>/folds/openfold3p/<pep>.pdb`), a working `MOL=` filter (documented before, never
+  implemented) and `ONLY="<names>"`, and every Modal launch now holds `caffeinate -i -s`.
+  `_o3pcof` is wired into `run_dock_pose_md.sh` (stage lane `openfold3p`), `dock_folds.py`'s
+  `LANES` and `record_leg.py`'s FOLDS-row regex. **`racc_drain.sh` still needs `*_o3pcof` added to
+  its `*_o3cof || *_rf3cof` branch** — not done because a drain was running it (never edit a
+  running zsh script).
+* Remaining campaign steps: fold the other 7 (`LANE=openfold3p code/fold_batch.sh`, ~90 s and
+  cents each on the A10G), `folds_metrics.py openfold3p`, `dock_folds.py` (stages
+  `<pep>_o3pcof_ligand_cofold.sdf` and Vina-docks), build + racc exactly as Part 1.
+
 ### The three open questions, and how to settle them cheaply
 
 Each is a yes/no answerable in one or two runs, before any campaign is sized. **The first decides
@@ -1075,6 +1129,75 @@ whether a pocket-guided OF3 column is worth running at all.**
    residues versus the same run without the override). Even a yes is **not** a route to a
    comparable column: it needs a pose templated from the forced Boltz fold, which is circular, and
    it fixes intra-set distances too. Treat it as a question about the tool, not a campaign arm.
+
+**Answers, 2026-10-19.**
+
+1. **The peptide is not a frozen parent copy, so proceed.** One smoke fold (`s3_orig_f12`, seed 42
+   like the unguided run; `pocket_sampling.enabled: true` confirmed in the run's
+   `experiment_config.json`). Peptide Cα RMSD between the two best-ranked models is **7.3 Å**, not
+   ~0. The ligand reading improves on every measure (`folds_metrics.py`, unguided → guided, with the
+   forced Boltz fold in brackets): enclosed 0.43 → **0.785** (0.965), wrapped 0.7 → 0.9 (1.0),
+   engaged 14 → 18 (20), centroid separation 10.4 → 6.4 Å (3.6). Hint residues within 5.2 Å of the
+   ligand go from 3/12 to 6/12. **What this does not show:** that the guidance *shaped* the
+   peptide. OF3's own sample-to-sample spread on this G-rich 34-mer is as large as the
+   guided-vs-unguided gap (5 samples per run, pairwise Cα RMSD: unguided-vs-unguided median 6.50 Å,
+   guided-vs-guided 5.76, across runs 6.19), and the guided peptide is no closer to the forced Boltz
+   fold (Cα RMSD 7.46 vs 6.68). So the peptide changes from run to run, and the guided ligand sits
+   better on it, but there is no sign of a Boltz-like shell closing. One structure: read it as a go
+   <!-- superseded by the all-8 result below; kept because it is the reasoning the campaign was
+        sized on, and because it is the exact shape of error the "don't generalise" rule names -->
+   for the campaign, not as a result.
+
+   **All 8 folded, 2026-10-19 14:42 — the smoke fold was the good case, and the full set is a
+   coin-flip.** Every guided fold against its own unguided twin, forced Boltz in brackets:
+
+   | peptide | enclosed ung → guid (Bz) | engaged (Bz) | centroid sep Å (Bz) |
+   |---|---|---|---|
+   | `orig_f12` | 0.68 → **0.94** (0.96) | 14 → 16 (20) | 9.4 → **4.7** (4.2) |
+   | `s3_esm2_f4` | 0.58 → **0.69** (0.80) | 17 → 18 (18) | 7.3 → **4.9** (7.0) |
+   | `s3_orig_f12` | 0.43 → **0.79** (0.96) | 14 → 18 (20) | 10.4 → **6.4** (3.6) |
+   | `ox1_esm1_f8` | 0.58 → 0.48 (0.94) | 10 → 11 (17) | 6.1 → 7.4 (4.1) |
+   | `ox1_orig_f12` | 0.81 → 0.52 (0.99) | 17 → 15 (17) | 5.7 → 6.0 (1.2) |
+   | `ox2_esm1_f8` | 0.74 → **0.79** (0.67) | 16 → 17 (17) | 5.3 → **4.4** (6.5) |
+   | `ox2_orig_f8` | 0.66 → **0.93** (0.97) | 17 → 17 (17) | 7.5 → **4.6** (2.7) |
+   | `ox3_orig_f8` | 0.54 → 0.45 (0.99) | 15 → 14 (17) | 10.3 → **8.0** (2.0) |
+
+   Guided beats unguided on enclosure **5/8**, engagement 5/8, centroid separation 6/8 — and
+   the three losses on enclosure are large (−0.10, −0.29, −0.09), so this is not a uniform
+   improvement with noise on top. It splits by molecule: **octinoxate 3/3 improved, oxybenzone
+   2/5**, and oxybenzone's guided folds stay far from their forced Boltz twins (0.48/0.52/0.45
+   against 0.94/0.99/0.99) where octinoxate's close most of the gap. Naming the designed residues
+   helps OF3 when its unguided placement was poor and hurts when it was already decent
+   (`ox1_orig_f12`, best unguided cell at 0.81, drops to 0.52) — the same "docking rescues a bad
+   pose and degrades a good one" shape the docked campaign found, which is worth stating as a
+   prediction the MD can test rather than a conclusion.
+
+   **This does not change the go decision** — a column that improves 5/8 and is measurably
+   different in all 8 is worth 20 ns — but it does change what the column is *for*: it answers
+   "does naming the residues help OF3 place the ligand", and the answer already looks like
+   "sometimes, and it depends on the molecule". Size the campaign on that, not on the smoke fold.
+   Metrics: `runs/{octinoxate,oxybenzone}/folds/metrics/openfold3p.csv`.
+
+<!-- the smoke-fold-only reading, left in place above, concluded: a go
+   for the campaign, not as a result.
+2. **Conformer only. Answered from source, so no run was needed** (rc-foundry 0.2.0, the latest on
+   PyPI, plus atomworks 3.0.3). The selection sets `GroundTruthConformerPolicy.REPLACE`, which
+   swaps the RDKit reference conformer for the supplied coordinates. But
+   `af3_reference_molecule.py` then calls `masked_center()` ("to avoid leaking 1D information") and
+   `random_rigid_augmentation()`, and RF3's inference pipeline builds
+   `GetAF3ReferenceMoleculeFeatures` with that augmentation left on (the default). So the input
+   position is discarded before the model sees it: internal geometry survives, placement does not.
+3. **Not reachable without patching, and pointless if patched.** `p_provide_inter_molecule_distances`
+   defaults to 0.0, and `RF3InferenceEngine.__init__` builds `transform_overrides` itself with no
+   entry for it. It also passes `transform_overrides=` explicitly, so supplying the key through
+   `**kwargs` or Hydra would collide rather than merge. With p = 0, `ground_truth_template.py`
+   masks every inter-molecule distogram pair. A subclass could set it to 1.0, but the template
+   would still need a peptide–ligand pose, which only the forced Boltz fold can supply (the
+   circularity noted above).
+   **Upstream as of `production` 2026-10-16** (Foundry 1.0 refactor #404, AtomWorks 3 #401/#405):
+   no contact or interface-template input; the README still says "could be further extended".
+   Issue #160 is open, last updated 2026-04-28. **RF3 has no forced or guided mode to run. Close
+   it unless upstream ships one**; the comment on #160 below is the only open action.
 
 A fourth, non-blocking one: **ask upstream.** Foundry issue #160 has two unanswered requests for
 ligand–protein contacts; a comment naming this use case (short designed peptide, 4–12 residue–ligand

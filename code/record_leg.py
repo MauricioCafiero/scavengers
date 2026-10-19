@@ -53,9 +53,11 @@ def main(mol, leg):
     d = f"runs/{mol}/md/{leg}"
     prod = f"{d}/prod_20ns"
     py = sys.executable
+    # a replicate (<leg>_r2) files its MM/GBSA rows in mmgbsa_replicates.csv, not the canonical summary
+    summary = "mmgbsa_replicates.csv" if leg.endswith("_r2") else "mmgbsa_summary.csv"
 
     subprocess.run([os.path.expanduser("~/miniforge3/bin/python"), "code/collect_mmgbsa_rows.py", leg,
-                    "--md-root", f"runs/{mol}/md", "--outdir", f"runs/{mol}"], check=True,
+                    "--md-root", f"runs/{mol}/md", "--outdir", f"runs/{mol}", "--summary", summary], check=True,
                    stdout=subprocess.DEVNULL)
 
     lanes = lambda m: sorted(glob.glob(f"runs/{m}/md/*/prod_20ns") + glob.glob(f"runs/{m}/md/*/prod_L1_modal"))
@@ -66,7 +68,7 @@ def main(mol, leg):
     stab_legs = lanes("octinoxate") + lanes("oxybenzone") + sorted(glob.glob(f"{BG}/*/prod_20ns"))
     md_stability.main(stab_legs)   # refuses to shrink on its own
 
-    parent = re.sub(r"_dock\d+$", "", leg)
+    parent = re.sub(r"_dock\d+$", "", re.sub(r"_r2$", "", leg))
     pair = None
     for f in glob.glob(f"runs/{mol}/md/pair_contacts_*.csv"):
         rs = list(csv.DictReader(open(f)))
@@ -100,7 +102,7 @@ def main(mol, leg):
     st = next(r for r in csv.DictReader(open("runs/octinoxate/md/protein_stability.csv")) if r["leg"] == prod)
     scatter = [p for p in glob.glob(f"{d}/**/*", recursive=True)
                if os.path.basename(p) in ("reference.frc", "traj.nc") or os.path.basename(p).startswith("_MMPBSA_")]
-    n_sum = sum(1 for r in csv.DictReader(open(f"runs/{mol}/md/mmgbsa_summary.csv")) if r["structure"] == leg)
+    n_sum = sum(1 for r in csv.DictReader(open(f"runs/{mol}/md/{summary}")) if r["structure"] == leg)
     frames = all(os.path.exists(f"{prod}/{x}") for x in ("frames_last.pdb", "frame_medoid.pdb"))
     print(f"{leg}: dG {win[3]:.2f} | windows " + " / ".join(f"{w:.2f}" for w in win)
           + f" | residence {res}% | released {rel.group(1)} ({rel.group(2)}%) in {rel.group(3)}, longest "
@@ -108,7 +110,7 @@ def main(mol, leg):
           f"{st['ca_rmsd_max_A']} | {pair_line}")
     ok = len(whole) + sum(w is not None for w in win[:3]) == 4 and n_sum == 4 and frames and not scatter
     # FOLDS.md: one row per docked fold leg, appended under its table (header written once by hand)
-    m = re.match(r"(.+_(?:o3|rf3)cof)_dock(\d+)$", leg)
+    m = re.match(r"(.+_(?:o3p?|rf3)cof)_dock(\d+)$", leg)
     if m and ok:
         why = next((l.split(None, 3)[3].strip() for l in open("runs/folds_md/dock_legs.txt")
                     if l.split()[:3] == [mol, m.group(1), m.group(2)]), "")

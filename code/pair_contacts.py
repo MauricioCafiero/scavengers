@@ -40,6 +40,14 @@ AA3 = {"ALA": "A", "ARG": "R", "ASN": "N", "ASP": "D", "CYS": "C", "GLN": "Q", "
 
 def design_for(structure):
     """Which design a structure's slots come from, by name. Shuffles inherit their parent's."""
+    # Oxybenzone carries its shell number in the peptide name (ox1_/ox2_/ox3_) and has no
+    # unnumbered design.json, so without this branch every oxybenzone structure fell through to
+    # the octinoxate default and named a file that does not exist. Only reachable when --design
+    # is omitted, which is why it went unnoticed; found 2026-10-19 reusing this from
+    # pocket_inputs.py --from-shell.
+    m = re.match(r"ox(\d)_", structure)
+    if m:
+        return f"design_shell{m.group(1)}.json"
     if structure.startswith("s2_"):
         return "design_shell2.json"
     if structure.startswith("s3_") or structure.startswith("shuffle_control"):
