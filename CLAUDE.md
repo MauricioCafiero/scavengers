@@ -266,6 +266,19 @@ all. A mid-tail leg transiently holds ~1.5 GB of MM/GBSA scatter (a 1.2 GB `refe
 `_MMPBSA_*` mdcrds) which the drain's `find -delete` strips on completion, so a leg directory in the
 gigabytes during its tail is normal and is not a bad fetch.
 
+**But a wedged fetch is sometimes genuinely TRUNCATED, and then killing the `tar` is not enough —
+the partial file must be deleted.** Four fetches wedged on 2026-10-20; three held complete payloads
+and one (`orig_f12_dock1_r2`) held 16,317,952 bytes of a 31,758,108-byte `traj_wrapped.xtc`, with
+`energy.csv` and `traj_wrapped.pdb` never written at all. **Compare the local size against the
+cluster's** (`ls -la` on both) rather than only counting frames — mdtraj cannot even open a
+half-written xtc without its `.pdb` topology, so the frame check reports a confusing
+`No such file: traj_wrapped.pdb` instead of a clean "truncated". The danger is specific and silent:
+`racc_drain.sh`'s `remote_phase` treats *the mere presence* of `prod_20ns/traj_wrapped.xtc` as "leg
+finished, never re-fetch, tail it", so a truncated file left in place yields a tail and an MM/GBSA
+number computed over half a trajectory, which looks entirely plausible. Delete the partial and let
+the drain re-poll; it costs one ~30 MB re-download and no compute. For the same reason, when staging
+a fetch by hand, move `traj_wrapped.xtc` into place **last**, after the small files.
+
 **Submission is socket-free once batched; draining is not.** A network loss stops nothing on the
 cluster — the legs keep computing and their wrapped solutes wait on scratch indefinitely — but the
 drain cannot fetch until the user rebuilds the two ControlMasters. The worst case is delayed
