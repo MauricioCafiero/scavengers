@@ -87,7 +87,13 @@ def main(mol, leg):
         if lane.endswith("cof"):
             design = pair_contacts.design_for(parent)
             arm = re.sub(r"^design(_)?", "", design[:-len(".json")]) or "design"
-            pair = (f"runs/{mol}/md/pair_contacts_{lane}_{arm}.csv", [])
+            f = f"runs/{mol}/md/pair_contacts_{lane}_{arm}.csv"
+            # The file may ALREADY EXIST and hold another peptide: the name keys on the design arm,
+            # not the peptide, and two peptides of the same shell share an arm (s3_esm2_f4 and
+            # s3_orig_f12 are both design_shell3). Starting it from [] then rewrote it with only the
+            # new leg -- and `before <= after` passed vacuously because before was empty. That cost
+            # five rows across three files on 2026-10-19/20 before a `git diff --numstat` caught it.
+            pair = (f, list(csv.DictReader(open(f))) if os.path.exists(f) else [])
     pair_line = "no pair table (not a co-fold lane leg)"
     if pair:
         f, rs = pair
