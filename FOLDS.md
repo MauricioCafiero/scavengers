@@ -2116,6 +2116,7 @@ Rows are appended by `code/record_leg.py` as legs land.
 | `ox1_esm1_f8_o3pcof_dock1` | oxy | p1 Vina | **−8.80** ↑ | 45.2% | 357 | 1.53 | −10.87 | +2.07 |
 | `ox1_orig_f12_o3pcof_dock1` | oxy | p1 Vina | **−3.19** ↑ | 26.2% | 976 | 2.62 | −18.26 | +15.08 |
 | `ox2_esm1_f8_o3pcof_dock1` | oxy | p1 Vina | **−16.73** ↓ | 100.0% | 0 | 2.87 | −9.21 | −7.51 |
+| `ox2_orig_f8_o3pcof_dock1` | oxy | p1 Vina | **−20.42** ↑ | 98.5% | 0 | 1.89 | −13.93 | −6.49 |
 
 ### The docked campaign, aggregated (2026-10-18, closed at 85 legs)
 
