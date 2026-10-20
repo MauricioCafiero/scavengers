@@ -756,10 +756,27 @@ large ones). Five are already staged from 2026-10-08; the other six need their `
 copied per the construction recipe above, which is `system/`, `protein_fixed.pdb`,
 `ligand_prepped.sdf` and the leg's `*_ligand.sdf` — and nothing else.
 
-**What to report.** Per leg, |ΔΔG| and the change in released share, since retention moved as
-violently as ΔG did on the first replicate (0% → 9.3%). Then median |ΔΔG| **per cell**, which is the
-actual deliverable: a reproducibility figure that can be quoted against the design-vs-null gaps,
-and a test of whether the convergence marker predicts reproducibility at all. On n=1 it did not.
+**What to report.** Per leg, ΔΔG **with its sign** and the change in released share, since retention
+moved as violently as ΔG did on the first replicate (0% → 9.3%). The deliverable is the **tally of
+stronger / weaker / unchanged** across the set, plus median |ΔΔG| per cell — a measure of how much
+the random seed moves the dynamics, which is then the basis for deciding between more targeted
+replicates and a full campaign. Take **unchanged = |ΔΔG| < 1.5**, reusing the drift threshold the
+`clean` definition already uses, so the two are on one scale.
+
+**Two framing errors to avoid, both made and corrected on 2026-10-20.**
+
+*A replicate that lands elsewhere is not a "failure to reproduce".* Both trajectories are valid
+samples of the same system under different seeds; neither is the true value and the first is not the
+reference. The pair measures seed sensitivity, and every run is informative — the language should be
+"moved by N kcal/mol", not "failed".
+
+*The convergence windows are not a reproducibility predictor and must not be scored as one.* They
+measure whether **one** trajectory's running mean has settled over its own 20 ns. A leg can be
+perfectly converged internally and still sit far from an independent run of the same system; those
+are different quantities, and faulting the windows for not anticipating the second is a category
+error. (An earlier version of this paragraph asked for exactly that test and called the n=1 result a
+negative; that was wrong.)
+
 **Replicate rows go to `mmgbsa_replicates.csv`, never the canonical summary, and the REFERENCE dict
 is not extended** — a replicate is not a canonical leg.
 
