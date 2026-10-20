@@ -317,7 +317,14 @@ over it; with no such file it printed `no pair table (no design json for this ar
 `pair_contacts.design_for()` resolves the json by peptide name and every file exists. The real
 situation is a lane with no table yet. That message reads as "nothing to do", so all five of the
 pocket-guided lane's first legs recorded with no pair row while the audit line still said `OK`.
-It now starts the lane's table. The lesson generalises: **`record_leg.py`'s own `audit: ... -> OK`
+It now starts the lane's table — but **that file is keyed on the design arm, not the peptide**, so a
+"new" lane table is often one another peptide of the same shell already owns (`s3_esm2_f4` and
+`s3_orig_f12` are both `design_shell3`). Starting it from an empty row list rewrote it with only the
+new leg, and the `before <= set(after)` assertion passed vacuously because `before` was empty: five
+rows went that way across three files before a `git diff --numstat` caught it on 2026-10-20. It now
+loads the file's rows when it exists. **Run `git diff --numstat` on every leg's commit** — an
+additions-only diff is the only thing that actually proves no whole-table rewrite shrank a table.
+The lesson generalises: **`record_leg.py`'s own `audit: ... -> OK`
 is not the done-signal** — it checks windows, summary rows, frames and scatter, and nothing else.
 Run the four-line audit in "Audit the recording set" against the leg, which is what caught this.
 
