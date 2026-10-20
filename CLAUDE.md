@@ -190,7 +190,30 @@ per-leg log `runs/folds_md/record_<leg>.log` ends with
 `audit: windows 4/4, summary rows 4, frames True, scatter 0 -> OK` line, which is the
 leg-is-done signal. A campaign is a chain of legfiles `runs/folds_md/dk*.legs` (lines
 `<abs local dir>:<leg name>`, `#` comments), one drain per legfile; a committed batch is every
-recorded leg since the last commit, verified additions-only. Host/access facts and the measured
+recorded leg since the last commit, verified additions-only.
+
+**The waiter is `code/watch_legs.py`, not a fresh scratchpad script.** It takes `mol/leg` specs,
+`--legfile <racc legfile>` (repeatable) or `--any`, waits for the next leg to finish, prints its
+dG + windows + signed ddG-against-run-1 for a `_r2` leg + contacts, and **exits** -- because the
+harness re-invokes on a background job's exit, not on its output, so a waiter that reports and
+keeps looping is mute however much it prints. Re-arm it after every report. `--on record` (the
+default) keys on the `audit:` line, which `record_leg.py` writes last; `--on mmgbsa` keys on the
+whole-run `FINAL_RESULTS_MMPBSA.dat` and fires ~16 min earlier, while the window slices are still
+computing. **Run `--selftest` before trusting it**: it resolves every trigger path and says which
+already exist, which is the only cheap check against the two bugs that hide longest -- a path that
+can never exist, and a signal that fires early. Both of those shipped in throwaway versions
+(2026-10-19, 2026-10-20); the second swallowed three legs' reports because its check was
+`runs/<mol>/<leg>/...`, missing the `md/`, while the python inside it built the path correctly.
+
+**Report every leg as it lands; commit every five.** These are two different cadences and
+collapsing them into one is a mistake in either direction. The report is the scientific output and
+is owed immediately — it needs nothing committed, because `FINAL_RESULTS_MMPBSA.dat` and the
+leg's tables are already on disk when the tail finishes. The commit is bookkeeping, and one per leg
+turns a 26-leg campaign into 26 pushes of near-identical table deltas. So: read the number out and
+say it the moment the tail is done, let the recorded legs accumulate, and commit in batches of
+about five (or at a natural boundary -- a legfile finishing, a campaign ending, or stopping for the
+day). Re-stated by the user 2026-10-20 after three replicate legs went out as three separate
+pushes. Host/access facts and the measured
 H100 rate model live in `RACC.md`, which is untracked on purpose.
 
 **`gpuscavenger` is `MaxSubmitJobsPU=3`, `MaxJobsPU=1`.** Only three jobs may exist and only one
