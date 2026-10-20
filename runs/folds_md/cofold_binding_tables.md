@@ -62,7 +62,7 @@ Every GNINA pick in this column was the same pose in all three rescoring passes 
 | peptide | pose | Boltz / BoltzGen co-fold | OpenFold3 co-fold | RoseTTAFold3 co-fold | OpenFold3 pocket-guided |
 |---|---|---|---|---|---|
 | `ox1_esm1` | co-fold | **−26.09** (100.0%) ↓ | −17.95 (100.0%) ↑ | −12.12 (35.2%) ↓ | −10.87 (95.3%) • |
-|  | Vina p1 | −10.23 (68.6%) ↑ | −10.60 (89.9%) ↑ | −7.26 (27.3%) ↑ | *running* |
+|  | Vina p1 | −10.23 (68.6%) ↑ | −10.60 (89.9%) ↑ | −7.26 (27.3%) ↑ | −8.80 (45.2%) ↑ |
 |  | GNINA pick (p4/p2/p4/p8) | −10.11 (56.2%) ↑ | −12.79 (66.9%) • | −14.92 (79.8%) ↓ | *running* |
 | `ox1_orig` | co-fold | −8.34 (63.8%) ↑ | −3.96 (20.5%) ↑ | −12.27 (89.1%) ↓ | **−18.26** (100.0%) • |
 |  | Vina p1 | −9.34 (61.6%) • | −4.93 (25.5%) ↑ | −6.40 (37.5%) ↑ | *running* |
