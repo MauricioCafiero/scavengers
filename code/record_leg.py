@@ -100,6 +100,24 @@ def main(mol, leg):
         legs = [r["leg"] for r in rs if r["structure"] != leg] + [prod]
         design = rs[0]["design"] if rs else pair_contacts.design_for(parent)
         before = {r["structure"] for r in rs}
+    # design_for() falls through to the unnumbered "design.json" for any name it does not
+    # recognise. That file exists for octinoxate and NOT for oxybenzone, so a BoltzGen structure
+    # on a co-fold lane (bgox31_4_o3cof_dock7_r2, 2026-10-21) crashed the whole recording here
+    # with FileNotFoundError -- after the MM/GBSA rows had already been appended, leaving the leg
+    # half-recorded. The comment in design_for() documents this exact fall-through being fixed for
+    # ox*_ names; generator-arm names still reach it.
+    #
+    # Skipping is also the right answer on the merits, not just a way to avoid the crash: the pair
+    # measure is entirely slot-derived, a BoltzGen generator arm has no design slots, and its
+    # numbers were retracted on 2026-10-18 for that reason. Borrowing another molecule's design
+    # would compute a plausible-looking number that means nothing. Whether the bg33 rows that DO
+    # exist (octinoxate, where design.json resolves) should also be skipped is a separate question
+    # and the user's call -- this only stops the crash and says why.
+    if pair and not os.path.exists(os.path.join(f"runs/{mol}", design)):
+        pair_line = (f"no pair table (no {design} for {mol}; "
+                     f"{parent} has no design arm -- slot measures do not apply)")
+        pair = None
+    if pair:
         subprocess.run([py, "code/pair_contacts.py", *legs, "--run-dir", f"runs/{mol}", "--design", design,
                         "--csv", f], check=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
         after = {r["structure"]: r for r in csv.DictReader(open(f))}
