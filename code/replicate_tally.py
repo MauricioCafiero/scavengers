@@ -62,6 +62,53 @@ def dg(mol, struct, fname):
     return None
 
 
+def trailing(mol, leg, ns=10):
+    """The leg's trailing-window dG, or None. Written by code/trailing_windows.py, deliberately
+    NOT in any csv -- see that script and collect_mmgbsa_rows.py's skip of last_<ns>ns."""
+    import glob
+    BG = os.path.expanduser("~/python_mac/boltzgen_local/md")
+    for root in (f"runs/{mol}/md", BG):
+        hits = glob.glob(f"{root}/{leg}/last_{ns}ns/mmgbsa/FINAL_RESULTS_MMPBSA.dat")
+        if hits:
+            body = open(hits[0]).read().split("Differences")[1]
+            return float(next(x for x in body.split("\n")
+                              if x.startswith("DELTA TOTAL")).split()[2])
+    return None
+
+
+def trailing_report(ns=10):
+    """Headline ddG against back-half ddG, per pair.
+
+    Every window in this project is a LEADING cumulative mean, so a leg that settles late has its
+    weak early half averaged into the whole-run value. This asks how much of each pair's ddG
+    survives when both runs are compared over their last <ns> ns instead. It is a diagnostic, not a
+    replacement: the whole-run value remains the leg's result.
+    """
+    print(f"{'leg':30s} {'run1':>7s} {'r1 last':>8s} {'run2':>7s} {'r2 last':>8s} "
+          f"{'ddG':>8s} {'ddG late':>9s} {'shift':>7s}")
+    rows = []
+    for mol, struct, _cell in PAIRS:
+        a = dg(mol, struct, "mmgbsa_summary.csv")
+        b = dg(mol, struct + "_r2", "mmgbsa_replicates.csv")
+        la, lb = trailing(mol, struct, ns), trailing(mol, struct + "_r2", ns)
+        if None in (a, b, la, lb):
+            continue
+        d, dl = b - a, lb - la
+        rows.append((struct, d, dl))
+        print(f"{struct:30s} {a:7.2f} {la:8.2f} {b:7.2f} {lb:8.2f} "
+              f"{d:+8.2f} {dl:+9.2f} {abs(dl) - abs(d):+7.2f}")
+    if rows:
+        grew = sum(1 for _s, d, dl in rows if abs(dl) > abs(d))
+        print(f"\n{len(rows)} pairs with both trailing windows   "
+              f"|ddG| grows on the back half in {grew}, shrinks in {len(rows) - grew}")
+        # The PAIRED shift is the statistic here, not two independent medians: each leg is its own
+        # control, and the median of |ddG| whole against the median of |ddG| late compares different
+        # legs at the median position (they came out 5.20 and 3.56 on a set that grows in 11 of 13,
+        # which reads backwards). Quote the per-leg shift.
+        sh = sorted(abs(dl) - abs(d) for _s, d, dl in rows)
+        print(f"median shift in |ddG| {sh[len(sh) // 2]:+.2f}   range {sh[0]:+.2f} to {sh[-1]:+.2f}")
+
+
 def main():
     print(f"{'cell':32s} {'leg':30s} {'run1':>8s} {'run2':>8s} {'ddG':>8s}  {'run3':>8s}  verdict")
     tally = {"stronger": 0, "weaker": 0, "unchanged": 0}

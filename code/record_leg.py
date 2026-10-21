@@ -54,8 +54,13 @@ def main(mol, leg):
     d = f"runs/{mol}/md/{leg}"
     prod = f"{d}/prod_20ns"
     py = sys.executable
-    # a replicate (<leg>_r2) files its MM/GBSA rows in mmgbsa_replicates.csv, not the canonical summary
-    summary = "mmgbsa_replicates.csv" if leg.endswith("_r2") else "mmgbsa_summary.csv"
+    # a replicate (<leg>_r2, _r3, ...) files its MM/GBSA rows in mmgbsa_replicates.csv, never the
+    # canonical summary, which holds one row set per leg. This tested `endswith("_r2")` until
+    # 2026-10-21, so the first THIRD run (orig_f12_dock1_r3) put four rows into octinoxate's
+    # mmgbsa_summary.csv -- and replicate_tally.py, which reads run 3 from the replicates table,
+    # reported the triple as still pending while the canonical table silently carried a second
+    # value for a published leg. Match any run number.
+    summary = "mmgbsa_replicates.csv" if re.search(r"_r\d+$", leg) else "mmgbsa_summary.csv"
 
     subprocess.run([os.path.expanduser("~/miniforge3/bin/python"), "code/collect_mmgbsa_rows.py", leg,
                     "--md-root", f"runs/{mol}/md", "--outdir", f"runs/{mol}", "--summary", summary], check=True,
@@ -69,7 +74,9 @@ def main(mol, leg):
     stab_legs = lanes("octinoxate") + lanes("oxybenzone") + sorted(glob.glob(f"{BG}/*/prod_20ns"))
     md_stability.main(stab_legs)   # refuses to shrink on its own
 
-    parent = re.sub(r"_dock\d+$", "", re.sub(r"_r2$", "", leg))
+    # strip the run suffix first, then the pose suffix: _r\d+ not _r2, so a third run resolves to the
+    # same parent structure its earlier runs did rather than to a name no pair table has ever held
+    parent = re.sub(r"_dock\d+$", "", re.sub(r"_r\d+$", "", leg))
     pair = None
     for f in glob.glob(f"runs/{mol}/md/pair_contacts_*.csv"):
         rs = list(csv.DictReader(open(f)))

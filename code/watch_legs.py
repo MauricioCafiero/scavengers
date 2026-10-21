@@ -29,6 +29,7 @@ import argparse
 import csv
 import glob
 import os
+import re
 import sys
 import time
 from datetime import datetime
@@ -119,13 +120,32 @@ def report(mol, leg):
 
     # A replicate is scored against its own run 1. Neither run is the reference; the pair measures
     # how far the seed moves the dynamics, so the sign is kept and nothing is called a failure.
-    if leg.endswith("_r2"):
+    # _r3 as well as _r2: a third run printed no comparison at all until 2026-10-21, which is the
+    # one leg where the comparison matters most -- a third run exists precisely because its pair
+    # disagreed. Show every run of the structure, in order, with the full spread.
+    m = re.match(r"(.+)_r(\d+)$", leg)
+    if m:
+        parent, n = m.group(1), int(m.group(2))
         summary = os.path.join(REPO, "runs", mol, "md", "mmgbsa_summary.csv")
-        rows = [r for r in csv.DictReader(open(summary))
-                if r["structure"] == leg[:-3] and not r["leg"].startswith("first_")]
-        if rows:
-            first = float(rows[0]["dg_bind"])
-            out.append(f"  run 1 {first:.2f}   run 2 {value:.2f}   signed ddG {value - first:+.2f}")
+        reps = os.path.join(REPO, "runs", mol, "md", "mmgbsa_replicates.csv")
+
+        def whole_of(path, struct):
+            if not os.path.exists(path):
+                return None
+            for r in csv.DictReader(open(path)):
+                if r["structure"] == struct and not r["leg"].startswith(("first_", "last_")):
+                    return float(r["dg_bind"])
+            return None
+
+        runs = [whole_of(summary, parent)]
+        for k in range(2, n + 1):
+            runs.append(value if k == n else whole_of(reps, f"{parent}_r{k}"))
+        if runs[0] is not None:
+            shown = "   ".join(f"run {i + 1} {v:.2f}" for i, v in enumerate(runs) if v is not None)
+            out.append(f"  {shown}   signed ddG vs run 1 {value - runs[0]:+.2f}")
+            got = [v for v in runs if v is not None]
+            if len(got) > 2:
+                out.append(f"  spread over {len(got)} runs {max(got) - min(got):.2f}")
 
     # md_contacts.csv is BINNED -- 10 rows of 2 ns, whose `contacts` column is the bin mean. So a
     # mean over it is fair, but counting its zero rows is not a release measure: a 2 ns average is
