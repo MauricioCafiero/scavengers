@@ -130,7 +130,11 @@ def main(mol, leg):
     for n in (5, 10, 15):
         fs = glob.glob(f"{d}/first_{n}ns/**/FINAL_RESULTS_MMPBSA.dat", recursive=True)
         win.append(dg_total(fs[0]) if fs else None)
-    whole = [f for f in glob.glob(f"{d}/**/FINAL_RESULTS_MMPBSA.dat", recursive=True) if "/first_" not in f]
+    # "/last_" as well as "/first_": a trailing diagnostic window is not the whole run, and because
+    # glob order put last_10ns first, this leg reported its back-half value (-18.72) as its headline
+    # dG in place of -15.03 on 2026-10-21. Exclude every window directory, not the leading ones.
+    whole = [f for f in glob.glob(f"{d}/**/FINAL_RESULTS_MMPBSA.dat", recursive=True)
+             if "/first_" not in f and "/last_" not in f]
     win.append(dg_total(whole[0]) if whole else None)
     log = open(f"{d}/tail.log").read()
     res = re.search(r"residence within 10 A: ([\d.]+)%", log).group(1)

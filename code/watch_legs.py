@@ -105,8 +105,10 @@ def report(mol, leg):
     for n in (5, 10, 15):
         hits = glob.glob(f"{d}/first_{n}ns/**/FINAL_RESULTS_MMPBSA.dat", recursive=True)
         windows.append(dg(hits[0])[0] if hits else None)
+    # "/last_" too -- a trailing diagnostic window (md_window_modal.sh MODE=trailing) is not the
+    # whole run, and glob order let one be reported as the headline dG on 2026-10-21.
     whole = [f for f in glob.glob(f"{d}/**/FINAL_RESULTS_MMPBSA.dat", recursive=True)
-             if "/first_" not in f]
+             if "/first_" not in f and "/last_" not in f]
     if not whole:
         out.append("  no whole-run MM/GBSA yet")
         return "\n".join(out)

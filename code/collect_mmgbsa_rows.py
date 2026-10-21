@@ -79,6 +79,13 @@ def main(argv=None):
             if not fp.exists():
                 continue
             leg = legdir.name
+            # A trailing window (last_<ns>ns, md_window_modal.sh MODE=trailing) is a convergence
+            # diagnostic, not one of the leg's four canonical rows. Letting it in silently made a
+            # recorded leg five rows and tripped record_leg.py's audit to INCOMPLETE on 2026-10-21.
+            # Whether these belong in a table at all is still open; until it is decided they live
+            # only as last_<ns>ns/mmgbsa/FINAL_RESULTS_MMPBSA.dat on disk.
+            if re.fullmatch(r"last_\d+ns", leg):
+                continue
             if (s, leg) in present:
                 continue
             d = parse(fp)
