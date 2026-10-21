@@ -11,7 +11,11 @@
 # "did not submit" and stops. That silently killed the two GNINA-pick batches at 20:35 on 10-19.
 cd ${0:A:h:h}
 caffeinate -w $$ &
-D=runs/folds_md
+# LEGDIR/BATCH_PREFIX so a campaign outside runs/folds_md can use this chain instead of forking it:
+# the replicate campaign keeps its legfiles in runs/replicates and names its jobs rep2_* rather
+# than fold_*. Defaults reproduce the fold campaign's behaviour exactly.
+D=${LEGDIR:-runs/folds_md}
+PREFIX=${BATCH_PREFIX:-fold}
 # Specs may be given on the command line to resume a partial chain -- a transient
 # "Unable to contact slurm controller" killed the 2026-10-14 run at oxb_3 with two batches left,
 # and re-running the whole list would resubmit batches that already ran. No args = the full list.
@@ -26,7 +30,7 @@ for spec in $SPECS; do
     # Check only THIS attempt's output: the log is appended to, so a retry of a batch whose earlier
     # attempt succeeded would otherwise match that old line and skip a genuine failure.
     off=0; [[ -f $D/feed_$b.log ]] && off=$(wc -c < $D/feed_$b.log)
-    BATCH=1 BATCH_NAME=fold_$b SYSNAME=$mol SBATCH_OPTS="--time=$t --cpus-per-task=8" \
+    BATCH=1 BATCH_NAME=${PREFIX}_$b SYSNAME=$mol SBATCH_OPTS="--time=$t --cpus-per-task=8" \
         zsh code/racc_feed.sh $D/$b.legs >> $D/feed_$b.log 2>&1
     if ! tail -c +$((off+1)) $D/feed_$b.log | grep -q 'Submitted batch job'; then
         print -r -- "[$(date '+%F %T')] chain: $b did not submit -- stopping (see $D/feed_$b.log)"
