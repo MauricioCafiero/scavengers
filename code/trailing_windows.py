@@ -53,10 +53,18 @@ def locate(mol, leg):
     return None, None
 
 
-def plan(ns):
+def plan(ns, only=()):
+    """`only` names structures (the PAIRS cell, not the _r2 leg) to restrict the plan to.
+
+    The back-fill of 2026-10-21 showed the back half changes no pair's verdict -- median paired
+    shift +0.80 -- so the whole plan is rarely worth 1.75 h of CPU. What is worth it is one pair
+    whose own diagnostics raise a specific question, which is what this selects.
+    """
     from replicate_tally import PAIRS, THIRD, dg
     todo, skip = [], []
     for mol, struct, _cell in PAIRS:
+        if only and struct not in only:
+            continue
         if dg(mol, struct + "_r2", "mmgbsa_replicates.csv") is None:
             continue                                  # pair not complete yet; nothing to compare
         legs = [struct, struct + "_r2"]
@@ -83,9 +91,11 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--ns", type=int, default=10, help="trailing window length (default 10)")
     ap.add_argument("--list", action="store_true", help="print the plan and exit")
+    ap.add_argument("--only", action="append", default=[], metavar="STRUCT",
+                    help="restrict to this PAIRS structure (repeatable); both its runs are done")
     args = ap.parse_args()
 
-    todo, skip = plan(args.ns)
+    todo, skip = plan(args.ns, tuple(args.only))
     for mol, leg, why in skip:
         print(f"skip  {mol:11s} {leg:34s} {why}")
     for mol, leg, prod in todo:
