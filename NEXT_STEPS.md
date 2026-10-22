@@ -875,14 +875,42 @@ variation sits one level upstream of that — if a second co-fold puts the ligan
 starting structure is itself a draw and every MD leg inherits it. The two are different sources of
 variation and the replicate spread does not bound this one.
 
-**The campaign, and it is cheap.** Boltz-2 runs locally on this Mac's MPS (`~/python_mac/boltz_local`,
-no Modal spend, ~45 s/peptide for the apo lane), the inputs already exist, and a re-fold needs no new
-tooling — the same `run_boltz` call on the same yaml. What to measure on each pair, with tools that
-already do it: peptide Cα RMSD and radius of gyration (`code/compare_folds.py`,
-`code/folds_metrics.py`), the ligand's position relative to its peptide after superposing on peptide
-Cα (`code/ligand_slide.py`'s measure, which is exactly this question), and `check_fold.py`'s wrapping
-and enclosure so a re-fold is scored by identical cutoffs to the original. Scope, order and whether
-to seed from here on are the user's call — **do not launch it unasked**.
+**SET UP 2026-10-22, NOT RUN** (user: "set up but do not yet run folding replicates"). Two pieces,
+both committed and dry-run verified; no fold has been drawn.
+
+```sh
+python3 code/fold_replicates.py <mol> --n 3 --list                  # the plan, nothing folded
+python3 code/fold_replicates.py <mol> --n 3 --only <name>           # draw them
+.venv/bin/python code/compare_folds.py runs/<mol> --replicates      # the RMS comparison
+```
+
+`code/fold_replicates.py` re-folds from the **same yaml the published fold was made from**
+(`runs/<mol>/boltz/<name>.yaml`), so the only difference between a draw and the original is the
+RNG. Output goes to `runs/<mol>/folds/foldrep/<name>/rep<k>/`, which touches no existing path,
+table or leg — the published co-fold stays where it is and remains the published fold. Resumable:
+a draw whose cif exists is skipped. It passes no `--seed` and must never be given one.
+
+`compare_folds.py --replicates` compares each draw against its own original and writes
+`runs/<mol>/folds/fold_replicate_rms.csv`. **Three numbers per draw, because one "RMSD" would hide
+the interesting case:**
+
+| column | superposed on | question |
+|---|---|---|
+| `ca_on_peptide` | the two peptides' CAs | is it even the same fold? |
+| `ca_on_ligand` | the ligand | how differently is the peptide arranged around it? |
+| `lig_on_peptide` | the peptide's CAs | did the ligand land in the same pocket of its own peptide? |
+
+A small `ca_on_peptide` with a large `ca_on_ligand` is the same fold presenting a different face to
+the ligand, which matters more here than a different shape would. `lig_on_peptide` is built exactly
+like `ligand_slide.py`'s measure, so it reads on the same scale as a leg's slide.
+
+**Scale, for scoping.** 81 co-fold yamls for octinoxate and 38 for oxybenzone, so n=3 over
+everything is 243 + 114 = 357 draws. Boltz-2 runs on this Mac's MPS with no Modal spend; the apo
+lane measured ~45 s/peptide and BoltzGen ~100 s/design, so a co-fold draw is probably 1–2 min —
+**not measured, and co-folds carry a ligand, so measure one before trusting any total.** The
+sensible shape is several draws of a few chosen structures (`--only`), not n=3 across 119: the
+question is within-arm spread, which one peptide answers, and the per-structure choice is the
+user's. `--n`, `--only` and the ordering are all still open; **do not launch it unasked**.
 
 **DECIDED by the user 2026-10-22: do not seed.** *"I don't want to seed because I'd like to see
 what the spread is from doing different replicates."* So `run_boltz` keeps passing no `--seed`,
