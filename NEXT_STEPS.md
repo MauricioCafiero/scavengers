@@ -856,6 +856,51 @@ in dir:leg format for `racc_feed.sh BATCH=1`). The remaining actions on a go are
 `SYSNAME` set to the batch's molecule, a `racc_drain.sh` watcher per molecule, and the same-day tails.
 
 
+## Co-fold determinism: are the co-folds reproducible at all? (added 2026-10-22, not started)
+
+**Established fact, checked 2026-10-22: no co-fold in this project has ever been seeded.**
+`boltz_env.run_boltz()` builds `predict <yaml> --num_workers 0 --out_dir <dir>` plus any
+`extra_args`, and nothing in the repo passes `--seed`. Boltz's own help states the default
+explicitly: *"Seed to use for random number generator. Default is None (no seeding)."* Sampling
+defaults are `recycling_steps 3`, `sampling_steps 200`, `diffusion_samples 1` — one diffusion sample
+per fold, from an unseeded stream.
+
+So **a second co-fold of the same peptide and ligand is an independent draw, not a reproduction**,
+and we do not know how far it lands from the first, because no structure has ever been folded twice.
+119 co-fold yamls exist under `runs/{octinoxate,oxybenzone}/boltz/` and each was drawn once.
+
+**Why this matters more than it looks.** The 23-structure replicate campaign (`REPLICATES.md`)
+re-ran *dynamics from a fixed starting structure*: same `system.xml`, different velocity seed. Fold
+variation sits one level upstream of that — if a second co-fold puts the ligand somewhere else, the
+starting structure is itself a draw and every MD leg inherits it. The two are different sources of
+variation and the replicate spread does not bound this one.
+
+**The campaign, and it is cheap.** Boltz-2 runs locally on this Mac's MPS (`~/python_mac/boltz_local`,
+no Modal spend, ~45 s/peptide for the apo lane), the inputs already exist, and a re-fold needs no new
+tooling — the same `run_boltz` call on the same yaml. What to measure on each pair, with tools that
+already do it: peptide Cα RMSD and radius of gyration (`code/compare_folds.py`,
+`code/folds_metrics.py`), the ligand's position relative to its peptide after superposing on peptide
+Cα (`code/ligand_slide.py`'s measure, which is exactly this question), and `check_fold.py`'s wrapping
+and enclosure so a re-fold is scored by identical cutoffs to the original. Scope, order and whether
+to seed from here on are the user's call — **do not launch it unasked**.
+
+One decision it forces either way: **whether to start passing `--seed`**. Seeding makes a fold
+reproducible but freezes one draw; leaving it unseeded keeps every fold an independent sample. The
+honest route for a paper is probably to keep the published folds as they are, measure the spread with
+this campaign, and quote it — the same logic by which replicate rows never overwrote the canonical
+MM/GBSA summary.
+
+## Formal data tables for the paper (added 2026-10-22, awaiting the user's specification)
+
+The user will specify what to build. **Do not start, and do not guess at a table list** — the
+existing tables were restructured on instruction more than once (FOLDS.md's twenty campaign tables,
+five per molecule per fold lane; never pool two molecules in one table; never add a fold lane as
+extra columns), so inventing a paper layout would mean redoing it. What exists to draw on:
+`RESULTS.md`'s ten headline tables, `FOLDS.md`'s twenty campaign tables,
+`runs/folds_md/cofold_binding_tables.md` (Tables 1 and 2, spliced by `cofold_tables.py --write`,
+rendered to PDF by `code/render_cofold_pdf.py`), `REPLICATES.md` and `TRAILING_WINDOWS.md`.
+Note that the replicate reporting question is unresolved, and it lands squarely in this work.
+
 ## Oxybenzone ABFE set: complementary campaign, proposed 2026-10-14, not launched
 
 **Plan only; no leg is submitted until you approve it.** The octinoxate ABFE cross-check campaign
