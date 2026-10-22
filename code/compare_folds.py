@@ -57,66 +57,86 @@ def load(cif):
 
 
 def replicate_report(outdir, out_csv):
-    """Each unseeded re-fold against its own original. See code/fold_replicates.py.
+    """All pairwise distances among a structure's unseeded draws. See code/fold_replicates.py.
 
-    Three numbers per draw, because they answer different questions and a single "RMSD" would hide
-    the interesting case:
+    **No draw is the reference.** The published fold is simply the first sample, so comparing each
+    re-fold against it would privilege one arbitrary draw -- the same mistake as treating run 1 of an
+    MD replicate pair as the truth. With k draws there are k(k-1)/2 pairs and the summary is the mean
+    over all of them, with the largest pair as the spread.
 
-    `ca_on_peptide`  -- superpose the two peptides' CAs and compare them. Is it even the same fold?
-    `ca_on_ligand`   -- superpose on the LIGAND, then compare CAs. How differently is the peptide
-                        arranged around the ligand? This is the quantity the design cares about.
-    `lig_on_peptide` -- superpose on the peptide's CAs, then compare ligand heavy atoms. Did the
-                        ligand land in the same pocket of its own peptide? Same construction as
-                        ligand_slide.py, so the number is read on the same scale as a leg's slide.
+    Two measures, both after a best fit on the peptide's CA atoms (one per residue, paired by
+    position since it is the same sequence folded twice):
 
-    A small `ca_on_peptide` with a large `ca_on_ligand` is the same fold presenting a different face
-    to the ligand -- which would matter more for this project than a different shape would.
+    `rmsd_pep` -- RMSD of those CA atoms. Backbone shape difference; 0 is the same fold.
+    `rmsd_lig` -- RMSD of the ligand's heavy atoms, paired by name, with the peptide in a common
+                  frame. Whether the ligand bound the same place on the peptide. Same construction
+                  as ligand_slide.py, so it reads on that scale.
     """
-    reps = sorted(glob.glob(os.path.join(outdir, "folds", "foldrep", "*", "rep*")))
-    if not reps:
+    import itertools as it
+    BG = os.path.expanduser("~/python_mac/boltzgen_local/md")
+    names = sorted({os.path.basename(d) for d in
+                    glob.glob(os.path.join(outdir, "folds", "foldrep", "*"))})
+    if not names:
         sys.exit(f"no replicate folds under {outdir}/folds/foldrep/ -- run code/fold_replicates.py")
+
+    def original(name):
+        for c in (os.path.join(outdir, "boltz", f"boltz_results_{name}"),
+                  os.path.join(BG, "inputs", "boltz", f"boltz_results_{name}"),
+                  os.path.join(BG, "inputs_oxyb", "boltz", f"boltz_results_{name}")):
+            p = os.path.join(c, "predictions", name, f"{name}_model_0.cif")
+            if os.path.exists(p):
+                return p
+        return None
+
     rows = []
-    for rep in reps:
-        name = os.path.basename(os.path.dirname(rep))
-        k = os.path.basename(rep)
-        rep_cif = os.path.join(rep, f"boltz_results_{name}", "predictions", name,
-                               f"{name}_model_0.cif")
-        orig_cif = os.path.join(outdir, "boltz", f"boltz_results_{name}", "predictions", name,
-                                f"{name}_model_0.cif")
-        if not (os.path.exists(rep_cif) and os.path.exists(orig_cif)):
-            print(f"skipping {name} {k}: missing {'replicate' if not os.path.exists(rep_cif) else 'original'} cif")
+    for name in names:
+        draws = {}
+        orig = original(name)
+        if orig:
+            draws["orig"] = orig
+        for rep in sorted(glob.glob(os.path.join(outdir, "folds", "foldrep", name, "rep*"))):
+            p = os.path.join(rep, f"boltz_results_{name}", "predictions", name,
+                             f"{name}_model_0.cif")
+            if os.path.exists(p):
+                draws[os.path.basename(rep)] = p
+        if len(draws) < 2:
+            print(f"skipping {name}: only {len(draws)} structure(s) found")
             continue
-        ca_o, lig_o = load(orig_cif)
-        ca_r, lig_r = load(rep_cif)
-        if len(ca_o) != len(ca_r) or len(lig_o) != len(lig_r):
-            print(f"skipping {name} {k}: atom counts differ from the original")
+        loaded = {k: load(v) for k, v in draws.items()}
+        n0 = {len(ca) for ca, _ in loaded.values()}
+        if len(n0) > 1:
+            print(f"skipping {name}: draws differ in residue count {sorted(n0)}")
             continue
-        rot, mc, tc = kabsch(ca_r, ca_o)
-        ca_self = rmsd(apply_fit(ca_r, rot, mc, tc), ca_o)
-        lig_self = rmsd(apply_fit(lig_r, rot, mc, tc), lig_o)
-        rot, mc, tc = kabsch(lig_r, lig_o)
-        ca_lig = rmsd(apply_fit(ca_r, rot, mc, tc), ca_o)
-        rows.append({"structure": name, "draw": k, "residues": len(ca_o),
-                     "ca_on_peptide": round(ca_self, 2), "ca_on_ligand": round(ca_lig, 2),
-                     "lig_on_peptide": round(lig_self, 2)})
-        print(f"{name:34s} {k:6s} ca_on_peptide {ca_self:6.2f}   ca_on_ligand {ca_lig:6.2f}   "
-              f"lig_on_peptide {lig_self:6.2f}")
+        for a, b in it.combinations(sorted(draws), 2):
+            ca_a, lig_a = loaded[a]
+            ca_b, lig_b = loaded[b]
+            rot, mc, tc = kabsch(ca_b, ca_a)
+            rows.append({"structure": name, "pair": f"{a}-{b}",
+                         "rmsd_pep": round(rmsd(apply_fit(ca_b, rot, mc, tc), ca_a), 2),
+                         "rmsd_lig": round(rmsd(apply_fit(lig_b, rot, mc, tc), lig_a), 2)})
     if not rows:
         return 1
+
+    by = {}
+    for r in rows:
+        by.setdefault(r["structure"], []).append(r)
+    print(f"{'structure':34s} {'k':>2s} {'pairs':>6s} "
+          f"{'pep mean':>9s} {'pep max':>8s} {'lig mean':>9s} {'lig max':>8s}")
+    for s, rs in sorted(by.items()):
+        p = [x["rmsd_pep"] for x in rs]
+        l = [x["rmsd_lig"] for x in rs]
+        k = int((1 + (1 + 8 * len(rs)) ** 0.5) / 2)      # pairs -> draws
+        print(f"{s[:34]:34s} {k:2d} {len(rs):6d} "
+              f"{sum(p) / len(p):9.2f} {max(p):8.2f} {sum(l) / len(l):9.2f} {max(l):8.2f}")
+
     path = os.path.join(outdir, "folds", out_csv)
     with open(path, "w", newline="") as fh:
         w = csv.DictWriter(fh, fieldnames=list(rows[0]))
         w.writeheader()
         w.writerows(rows)
-    for key in ("ca_on_peptide", "ca_on_ligand", "lig_on_peptide"):
-        v = np.array([r[key] for r in rows])
-        print(f"\n{key:15s} median {np.median(v):.2f} A   range {v.min():.2f}-{v.max():.2f}")
-    print(f"\n{len(rows)} draws over {len({r['structure'] for r in rows})} structures -> {path}")
-    print("These are independent unseeded draws, NOT failed reproductions: the spread is the "
-          "measurement.\nIt gives the resolution at which single-draw comparisons between fold arms "
-          "can be read, and\ndoes not retract any forced-vs-unforced finding.")
+    print(f"\n{len(rows)} pairs over {len(by)} structures -> {path}")
+    print("Unseeded draws: the spread IS the measurement, and no draw is the reference.")
     return 0
-
 
 def main(argv=None):
     parser = argparse.ArgumentParser(description=__doc__,
