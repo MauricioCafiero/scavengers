@@ -866,6 +866,17 @@ reproducibility is independent of where the ligand lands. Nothing from it is fol
 other table. What remains open below is only the seeding policy, which the user settled: do not
 seed.
 
+**STILL TO DO, after 2026-11-01: the same replicates for OpenFold3 and RosettaFold3** (user,
+2026-10-22 — gated on the Modal credit renewal, since unlike Boltz-2 these two do not run on
+this Mac and bill per fold). What was measured above is Boltz-2's seed-to-seed spread only; the
+cofold tables compare three co-folders, so the other two need the same treatment before any
+cross-model difference can be read against each model's own noise. Do not launch before the
+credits renew, and size it first: `code/fold_batch.sh LANE=openfold3` and `LANE=rf3` are the
+lanes, the same structures as the Boltz set, and the per-fold cost is the thing to check against
+the renewed balance rather than assumed. Whether OF3 and RF3 are even unseeded by default is
+unverified — check each lane's invocation the way `boltz_env.run_boltz` was checked, because a
+model that seeds by default would give a spread of zero and that would be a finding, not a bug.
+
 **Established fact, checked 2026-10-22: no co-fold in this project has ever been seeded.**
 `boltz_env.run_boltz()` builds `predict <yaml> --num_workers 0 --out_dir <dir>` plus any
 `extra_args`, and nothing in the repo passes `--seed`. Boltz's own help states the default
