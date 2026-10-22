@@ -38,6 +38,23 @@ AA3 = {"ALA": "A", "ARG": "R", "ASN": "N", "ASP": "D", "CYS": "C", "GLN": "Q", "
        "PRO": "P", "SER": "S", "THR": "T", "TRP": "W", "TYR": "Y", "VAL": "V"}
 
 
+def is_generator_arm(structure):
+    """True for a BoltzGen-generated peptide (bg33_*, bgox31_*), which has NO slots.
+
+    Every number this script produces -- pairs, sim, dead slots, band position -- is derived from
+    the *designed* slots, i.e. the non-glycine positions of a parent design.json. A BoltzGen spec
+    (`boltzgen_local/specs/octinoxate33.yaml`, `oxybenzone31.yaml`) fixes only length and ligand
+    SMILES and the sequence is freely generated, so there is no parent design and no slot set.
+    Scoring one against a shell design's slots is a borrowed convention that produces
+    plausible-looking numbers measuring nothing; the user retracted all such numbers on 2026-10-18
+    and ruled on 2026-10-22 that no generator arm gets pair rows at all.
+
+    The guard lives here rather than in record_leg.py so that a direct `pair_contacts.py` run, a
+    whole-table rewrite, or any future caller is covered -- an optional check is a skipped check.
+    """
+    return bool(re.match(r"bg(ox)?\d+_", structure))
+
+
 def design_for(structure):
     """Which design a structure's slots come from, by name. Shuffles inherit their parent's."""
     # Oxybenzone carries its shell number in the peptide name (ox1_/ox2_/ox3_) and has no
@@ -163,6 +180,10 @@ def main(argv=None):
     rows = []
     for leg in args.legs:
         structure = os.path.basename(os.path.dirname(leg.rstrip("/")))
+        if is_generator_arm(structure):
+            print(f"skipping {structure}: generator arm, no designed slots -- the pair measure "
+                  f"does not apply (see is_generator_arm)")
+            continue
         design = args.design or design_for(structure)
         slots, seq = slots_of(args.run_dir, design)
         r = analyse(leg, slots, args.cutoff, args.persist)

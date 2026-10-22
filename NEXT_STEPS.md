@@ -609,7 +609,16 @@ The September 2026 allocation was spent (about $4 across scoring and six 20 ns r
       predictor**, which ranks that pair backwards. Use `dead_slots` instead (3–5 of 11 against 0).
 
 
-## Replicate every MM/GBSA leg: run-to-run variation, prepared 2026-10-08, not launched
+## Replicate every MM/GBSA leg: run-to-run variation — PARKED 2026-10-22 at 23 structures
+
+**The result and the current state live in `REPLICATES.md`, not here.** A targeted set of 23
+structures (10% of the campaign's 228 original MD legs) ran on racc 2026-10-19 → 2026-10-22 and
+the campaign was then parked by the user, with the expectation of returning to it. Headline:
+stronger 8, weaker 9, unchanged 6; median |ddG| 4.80, range 0.02–16.16; two third runs, neither of
+which resolved its pair. The full ~202-leg sweep described below was NOT run and remains the open
+scope question. Nothing from the set has been folded into any published table, deliberately: a
+reporting form chosen for one peptide has to apply to every structure with a replicate.
+The sections below are the original plan, kept for the recipe.
 
 **Status 2026-10-10: paused until the racc queue reopens Monday 2026-10-12 — nothing submitted.**
 One stale figure when it resumes: the
@@ -695,7 +704,7 @@ record it, but treat a released-frames difference as a flagged cell, not a concl
 Nothing here runs until you say go; the first action on a go is the two one-line edits and the smoke
 leg.
 
-### Targeted replicate strategy (2026-10-19): answer the question with 11 legs, not 202
+### Targeted replicate strategy (2026-10-19): answer the question with 11 legs, not 202 — DONE, see `REPLICATES.md`
 
 **Do not run the full sweep first.** The plan above was written for a 62-leg inventory; there are
 now **202** legs with a canonical whole-run MM/GBSA row and only **63** staged `_r2` directories,
@@ -850,7 +859,15 @@ Practical notes (all learned the hard way):
   without a validated wide-Boresch tf if the peptide is a rod.
 
 
-## Forced vs unforced co-folds: making the cofold tables like-for-like — Part 1 DONE 2026-10-19, Part 2 open
+## Forced vs unforced co-folds: making the cofold tables like-for-like — Part 1 DONE 2026-10-19, Part 2 CLOSED 2026-10-21
+
+**Part 2 is closed, not open.** The pocket-guided OF3 lane ran to 26 legs and every cell of cofold
+Tables 1 and 2 is populated (`cofold_tables.py` reports `pending: 0`); the finding was that the
+pocket constraint damages ligand PLACEMENT rather than the backbone. RF3 was closed on a source
+read — its ground-truth conformer is re-centred and randomly rigid-augmented, and inter-molecule
+template distances are masked and never exposed — so it has no usable guided mode and no
+comparable column was possible. The three "open questions" below are answered; they are kept
+because the reasoning is the record of why RF3 was abandoned.
 
 > **2026-10-19, and it changes the campaign's headline: `ox1_esm1_control` does NOT reproduce.**
 > The replicate (`ox1_esm1_control_r2`, racc 529604, recorded and audited) came back **−9.93
@@ -1086,7 +1103,11 @@ OUT=/tmp/t.md $OMD/bin/python code/cofold_tables.py   # blocks + "missing/pendin
 .venv/bin/python code/render_cofold_pdf.py            # -> cofold_binding_tables.pdf
 ```
 
-### Part 2 (next campaign): forced OF3 and RF3 folds
+### Part 2 (ran 2026-10-19 → 2026-10-21, CLOSED): forced OF3 and RF3 folds
+
+The research below is what the campaign was sized from; it was written before anything ran and
+its code-reading conclusions held up. OF3's pocket-guided lane ran to 26 legs; RF3 was never
+launched because the read showed it has no usable guided mode.
 
 The fold repo (`~/python_mac/fold`) has no constraint plumbing today: no `constraint`/`contact`/`pocket`
 handling in its OF3 or RF3 apps (checked 2026-10-18). **Upstream support was researched 2026-10-18 by
@@ -1221,7 +1242,13 @@ OF3 pocket-guided is a go.**
   cents each on the A10G), `folds_metrics.py openfold3p`, `dock_folds.py` (stages
   `<pep>_o3pcof_ligand_cofold.sdf` and Vina-docks), build + racc exactly as Part 1.
 
-### The three open questions, and how to settle them cheaply
+### The three open questions, and how to settle them cheaply — ALL ANSWERED 2026-10-19/21
+
+**1 — answered: the peptide is not frozen.** The `s3_orig_f12` smoke fold through `LANE=openfold3p`
+refolded the peptide and raised ligand engagement, so the hint can affect more than the ligand and
+the column was worth running. It ran; see the paragraph above. **2 and 3 — moot: RF3 is closed**
+on the source read described above, so neither its ground-truth conformer nor
+`p_provide_inter_molecule_distances` was ever going to give a comparable guided column.
 
 Each is a yes/no answerable in one or two runs, before any campaign is sized. **The first decides
 whether a pocket-guided OF3 column is worth running at all.**

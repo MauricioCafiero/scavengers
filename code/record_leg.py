@@ -117,9 +117,17 @@ def main(mol, leg):
     # Skipping is also the right answer on the merits, not just a way to avoid the crash: the pair
     # measure is entirely slot-derived, a BoltzGen generator arm has no design slots, and its
     # numbers were retracted on 2026-10-18 for that reason. Borrowing another molecule's design
-    # would compute a plausible-looking number that means nothing. Whether the bg33 rows that DO
-    # exist (octinoxate, where design.json resolves) should also be skipped is a separate question
-    # and the user's call -- this only stops the crash and says why.
+    # would compute a plausible-looking number that means nothing.
+    #
+    # The open question above -- whether the bg33 rows that DO exist (octinoxate, where design.json
+    # resolves and so nothing crashed) should be skipped too -- was answered by the user on
+    # 2026-10-22: "No generator arms should have pair rows." So the skip is by ARM, not by whether
+    # the design file happens to resolve, and those 20 rows were struck from the committed tables
+    # that day. The authoritative test is pair_contacts.is_generator_arm().
+    if pair and pair_contacts.is_generator_arm(parent):
+        pair_line = (f"no pair table ({parent} is a generator arm -- no designed slots, "
+                     f"so the pair measure does not apply)")
+        pair = None
     if pair and not os.path.exists(os.path.join(f"runs/{mol}", design)):
         pair_line = (f"no pair table (no {design} for {mol}; "
                      f"{parent} has no design arm -- slot measures do not apply)")

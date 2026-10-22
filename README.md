@@ -29,6 +29,13 @@ mean, and where it goes wrong.
 - [What each file does](#what-each-file-does)
 - [Where output goes](#where-output-goes)
 - [Results](#results) — summary; the full record is in [RESULTS.md](RESULTS.md)
+- How far a 20 ns leg moves when only the random seed changes is
+  [REPLICATES.md](REPLICATES.md) — 23 structures re-run under a second seed (10% of the campaign's
+  228 original legs), parked 2026-10-22 and expected to resume. Its numbers are deliberately in no
+  other table: replicate rows live in `runs/<mol>/md/mmgbsa_replicates.csv`, never in the canonical
+  `mmgbsa_summary.csv`. The convergence diagnostic built alongside it — the *trailing* window, which
+  measures a leg's last 10 ns instead of its leading cumulative mean — is
+  [TRAILING_WINDOWS.md](TRAILING_WINDOWS.md), likewise unfolded into anything else
 - The independent fold-method check (the same peptides folded by six independent fold lanes —
   OpenFold3, RosettaFold3 and Boltz-2 with and without the ligand, plus ESMFold apo, now retired —
   scored for geometry and interface confidence) is [FOLDS.md](FOLDS.md); it also holds the cofold

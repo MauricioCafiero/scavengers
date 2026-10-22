@@ -1226,7 +1226,6 @@ weak ΔG here cannot be explained away as a peptide falling apart.
 | | OF3 re-fold (null) | 0.58 | 0.94 | 16 | 7.9 Å | 0.59 | 7/55 | −7 |
 | `ox2_shuffle_esm0` | Boltz co-fold | 0.64 | 0.94 | 16 | 4.2 Å | 2.21 | 18/55 | 18 |
 | | OF3 re-fold (null) | 0.47 | 0.77 | 13 | 7.3 Å | 0.13 | 3/55 | −16 |
-| | OF3 re-fold (null) | 0.58 | 0.94 | 16 | 7.9 Å | 0.59 | 7/55 | −7 |
 | `bgox31_2` (boltzgen) | Boltz co-fold | 0.44 | 0.77 | 13 | 9.1 Å | | — | — |
 | | OF3 re-fold | 0.36 | 0.77 | 13 | 8.1 Å | — | — | — |
 | `bgox31_3` (boltzgen) | Boltz co-fold | **0.955** | 1.00 | 17 | **4.0 Å** | | — | — |
