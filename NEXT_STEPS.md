@@ -856,7 +856,15 @@ in dir:leg format for `racc_feed.sh BATCH=1`). The remaining actions on a go are
 `SYSNAME` set to the batch's molecule, a `racc_drain.sh` watcher per molecule, and the same-day tails.
 
 
-## Co-fold determinism: are the co-folds reproducible at all? (added 2026-10-22, not started)
+## Co-fold determinism: are the co-folds reproducible at all? — DONE 2026-10-22, see `FOLD_REPLICATES.md`
+
+**Answered.** 29 structures re-folded twice each, unseeded, 87 pairwise comparisons; commit
+e8743bfb. The result and the tables live in `FOLD_REPLICATES.md`. Headline: glycine content
+predicts backbone reproducibility (below 25% glycine ~0.9 A mean RMSD over peptide CAs, at 60%+
+~6.6 A, and the designed orig/shuffle arms are 60-65% glycine by construction), and backbone
+reproducibility is independent of where the ligand lands. Nothing from it is folded into any
+other table. What remains open below is only the seeding policy, which the user settled: do not
+seed.
 
 **Established fact, checked 2026-10-22: no co-fold in this project has ever been seeded.**
 `boltz_env.run_boltz()` builds `predict <yaml> --num_workers 0 --out_dir <dir>` plus any
