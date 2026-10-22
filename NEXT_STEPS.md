@@ -215,10 +215,19 @@ geometry and the hydrogen error cancels.
 
 All 24 existing folds were recomputed; `runs/octinoxate/boltz/strain_global.csv` holds the result.
 
-## Queued on Modal credit: renewed October 2026
+## Queued on Modal credit: renewed October 2026 — items 1 and 2 SUPERSEDED, 3-5 done
 
-The September 2026 allocation was spent (about $4 across scoring and six 20 ns runs). Credit renewed
-**2026-10-01**; item 5 is the first thing drawing on it. In rough priority order:
+**Status 2026-10-22.** Items 1 and 2 were overtaken by the campaigns that followed and are not
+open work: item 1 ("six trajectories is too few") is answered by the **228 legs** now carrying a
+canonical whole-run MM/GBSA row, and item 2 ("a second ligand, whole pipeline") is **oxybenzone**,
+which has had its own full set of tables since 2026-10-14. Items 3-5 carry their own DONE markers
+below. Modal is also no longer the main compute lane -- racc's `gpuscavenger` is, and it is free --
+so a Modal leg is now the exception rather than the queue; per-leg spend is recorded in
+`runs/<mol>/md/modal_receipts.csv`. The item text is kept because the *reasoning* in 2 (skip UMA
+scoring, fold and filter on geometry, spend compute on dynamics for the survivors) is still the
+operating rule, and 3-5's open questions about pose selection are still unanswered.
+
+The original list, for the record:
 
 1. **More dynamics.** Six trajectories is what every conclusion in the README's dynamics section rests
    on, and it is too few: the best predictor found, mean simultaneous side-chain engagement, moved from
