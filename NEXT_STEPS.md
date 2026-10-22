@@ -884,11 +884,26 @@ Cα (`code/ligand_slide.py`'s measure, which is exactly this question), and `che
 and enclosure so a re-fold is scored by identical cutoffs to the original. Scope, order and whether
 to seed from here on are the user's call — **do not launch it unasked**.
 
-One decision it forces either way: **whether to start passing `--seed`**. Seeding makes a fold
-reproducible but freezes one draw; leaving it unseeded keeps every fold an independent sample. The
-honest route for a paper is probably to keep the published folds as they are, measure the spread with
-this campaign, and quote it — the same logic by which replicate rows never overwrote the canonical
-MM/GBSA summary.
+**DECIDED by the user 2026-10-22: do not seed.** *"I don't want to seed because I'd like to see
+what the spread is from doing different replicates."* So `run_boltz` keeps passing no `--seed`,
+every fold stays an independent draw, and the spread is something to *measure* rather than
+something to eliminate. Do not add a seed flag, do not propose one, and do not re-fold anything
+with a fixed seed "for reproducibility" — that would destroy the quantity being measured.
+
+**Two distinct questions, and the second does not undermine the first** (user, 2026-10-22):
+
+1. **Forced vs unforced folding** — the existing comparison, and it remains valid as it stands.
+   A fold either had its contacts forced or it did not, and what we examine is the fold we
+   actually got. That is a real object with real dynamics, whatever other draws might have
+   existed; the cofold tables compare them on identical measures.
+2. **How different the same fold would be under a different seed** — the new, separate question.
+   It asks for the *within-arm* spread: re-fold the same peptide + ligand and see how far the
+   second draw lands from the first.
+
+Keeping these apart matters for how results get written. Answer 2 does not retract answer 1; it
+tells you the resolution at which single-draw comparisons between arms can be read — the same
+role the replicate spread plays for the MM/GBSA tables, one level upstream. Report it that way
+rather than as a correction to the forced/unforced finding.
 
 ## Formal data tables for the paper (added 2026-10-22, awaiting the user's specification)
 
