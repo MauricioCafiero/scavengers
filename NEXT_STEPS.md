@@ -652,8 +652,12 @@ which resolved its pair. The full ~202-leg sweep described below was NOT run.
 a second run and how a replicated cell is written in the published tables are **not two decisions**
 -- they are one, and the user is still thinking about it (2026-10-22). Do not split them, do not
 ask about them separately, and do not edit a single table cell in the meantime: a form chosen for
-one peptide would set a precedent for the other 22 by accident, which is why all 100 affected rows
-across RESULTS.md, FOLDS.md and cofold_binding_tables.md were left untouched. The sections below
+one peptide would set a precedent for the other 22 by accident, which is why every affected row
+across RESULTS.md, FOLDS.md and cofold_binding_tables.md was left untouched. The size of that edit,
+measured 2026-10-22: **100** rows mention one of the 23 structures, **44** of those carry a free
+energy, and **34** actually print the structure's own run-1 value -- 34 is the number a reporting
+rule would rewrite. (`orig_f12` and `ox2_shuffle` account for 64 of the 100 mentions but only 13 of
+the 34, because they appear across many tables that hold no dG.) The sections below
 are the original plan, kept for the recipe.
 
 **Status 2026-10-10: paused until the racc queue reopens Monday 2026-10-12 — nothing submitted.**

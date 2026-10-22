@@ -92,6 +92,9 @@ Read as the state of a parked, partial campaign. **The user has not drawn conclu
    `ox1_esm1_control`, still carried as its run-1 **−26.09** in `cofold_binding_tables.md:64`,
    `RESULTS.md:422` and `RESULTS.md:509` though it is now n=3 across 16.2 kcal/mol. Deliberately
    left as is: a form chosen for one peptide has to apply to every structure with a replicate.
+   Scale of the edit, measured 2026-10-22: 100 table rows mention one of the 23 structures, 44 carry
+   a free energy, and **34 print the structure's own run-1 value** -- those 34 are the cells a rule
+   would rewrite.
 2. **Scope.** Stop at 10%, or run the remaining ~202 structures.
 3. Whether the trailing-window diagnostic ever enters a table — see `TRAILING_WINDOWS.md`.
 
