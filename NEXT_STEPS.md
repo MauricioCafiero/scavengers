@@ -96,7 +96,18 @@ proposals below:
   not the canonical SMILES — the source carries `/C=C/` double-bond stereo that a cif-derived SDF does
   not, so a string comparison flags all eight as different and hides the three that are.
 
-## The information the code currently throws away
+## ARCHIVED 2026-10-22: the fragment-condensation direction (A, B, C) is not being pursued
+
+**Do not re-propose any of this.** The user's ruling, 2026-10-22: *"we're way past using methods A
+and B, so you can archive them in that document but don't bring them up again because we're not
+doing it."* The three sections that follow -- the discarded attachment geometry, A (fragment
+condensation), B (reachability-constrained assignment), the four-step plan built on them, and C
+(already rejected in 2026-09) -- are kept as the record of a direction the project chose not to
+take. The campaigns that followed went a different way: design, fold, filter on geometry, and
+spend compute on dynamics, which is what produced the 228-leg MM/GBSA record. Nothing below is an
+open task, a next step, or a suggestion to revive.
+
+## The information the code currently throws away (archived)
 
 Each fragment is a side-chain analogue capped where the backbone would attach — the capping
 methyl/H marks roughly where CB, and hence CA, would sit. **Nothing in the pipeline uses that.**
@@ -104,7 +115,7 @@ methyl/H marks roughly where CB, and hence CA, would sit. **Nothing in the pipel
 `round(d / 3.8) - 1`, so a design can require a backbone path that no peptide can follow. That is
 the most likely explanation for the 3.6%, and it is what both proposals below exploit.
 
-## A. Fragment condensation
+## A. Fragment condensation (archived)
 
 Keep the fragments where the search put them and join them chemically instead of writing a sequence
 and asking a folder to rediscover the geometry.
@@ -124,7 +135,7 @@ Untested. Note that linking fragments into a lead is routine in small-molecule d
 novelty claim rests on doing it with peptide backbone chemistry judged by an ML potential, from
 ML-scored side-chain poses. Worth a literature check first.
 
-## B. Reachability-constrained assignment
+## B. Reachability-constrained assignment (archived)
 
 Feed A. Rather than nearest-neighbour chaining of centroids, choose which subset of the 170 poses to
 use and in what order, maximising total interaction energy subject to backbone reachability between
@@ -132,7 +143,7 @@ consecutive attachment points — both the distance and the direction the attach
 The output is a shell that is known to be traversable before any compute is spent folding it. The
 current chaining has no notion of traversability at all.
 
-## The plan
+## The plan (archived)
 
 Decided 2026-09-24. The order is **not** fixed as B then A, because B needs a reachability criterion
 and guessing one would bake in an unvalidated assumption. A can measure it instead:
@@ -177,7 +188,7 @@ that prove infeasible and re-solving.
 
 C below is **not** being pursued.
 
-## Superseded ordering note: B feeding A
+## Superseded ordering note: B feeding A (archived)
 
 Decided 2026-09-24: build **B then A** as one pipeline. B chooses a pose subset and ordering that a
 backbone can actually follow; A condenses the peptide onto those poses and relaxes it with UMA. B
@@ -187,7 +198,7 @@ re-solving the assignment.
 
 C below is **not** being pursued.
 
-## C. Grow the peptide, not the fragments (not pursued)
+## C. Grow the peptide, not the fragments (not pursued; archived)
 
 A third option, in the spirit of the repo's own `grow_fragments`: start from the best pose and add
 one residue at a time, enumerating backbone dihedrals, scoring each candidate side-chain placement
@@ -225,7 +236,18 @@ below. Modal is also no longer the main compute lane -- racc's `gpuscavenger` is
 so a Modal leg is now the exception rather than the queue; per-leg spend is recorded in
 `runs/<mol>/md/modal_receipts.csv`. The item text is kept because the *reasoning* in 2 (skip UMA
 scoring, fold and filter on geometry, spend compute on dynamics for the survivors) is still the
-operating rule, and 3-5's open questions about pose selection are still unanswered.
+operating rule.
+
+**What 3-5 leave unanswered is NOT a next step** (user, 2026-10-22: *"something that we will
+resolve while looking at the data, not necessarily a next step but just things to consider down the
+line"*). Treat them as caveats to apply when reading the pose-selection results, not as work to
+queue or propose: (a) the `s3_orig_f12` docked comparison was **still moving at 20 ns** (+0.97
+kcal/mol over the last 5 ns, 24x its standard error), so its -20.79 is an upper bound and the 3.55
+margin against the predicted pose is not a settled number; (b) the predicted pose's own value came
+from a Modal leg with no convergence windows, so its own settling is unmeasured; (c) pose 8, the
+mild-perturbation control that would separate how much of that penalty is reorientation and how
+much is displacement, was never run. Quote the margin with (a) and (b) attached rather than
+proposing legs to close them.
 
 The original list, for the record:
 
@@ -624,10 +646,15 @@ The original list, for the record:
 structures (10% of the campaign's 228 original MD legs) ran on racc 2026-10-19 → 2026-10-22 and
 the campaign was then parked by the user, with the expectation of returning to it. Headline:
 stronger 8, weaker 9, unchanged 6; median |ddG| 4.80, range 0.02–16.16; two third runs, neither of
-which resolved its pair. The full ~202-leg sweep described below was NOT run and remains the open
-scope question. Nothing from the set has been folded into any published table, deliberately: a
-reporting form chosen for one peptide has to apply to every structure with a replicate.
-The sections below are the original plan, kept for the recipe.
+which resolved its pair. The full ~202-leg sweep described below was NOT run.
+
+**There is exactly ONE open question here: what to do about replicates.** How many structures get
+a second run and how a replicated cell is written in the published tables are **not two decisions**
+-- they are one, and the user is still thinking about it (2026-10-22). Do not split them, do not
+ask about them separately, and do not edit a single table cell in the meantime: a form chosen for
+one peptide would set a precedent for the other 22 by accident, which is why all 100 affected rows
+across RESULTS.md, FOLDS.md and cofold_binding_tables.md were left untouched. The sections below
+are the original plan, kept for the recipe.
 
 **Status 2026-10-10: paused until the racc queue reopens Monday 2026-10-12 — nothing submitted.**
 One stale figure when it resumes: the
