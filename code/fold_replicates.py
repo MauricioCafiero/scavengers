@@ -69,9 +69,17 @@ def main():
         print(f"have  {name:34s} rep{k}")
     for name, k, _y, out in todo:
         print(f"TODO  {name:34s} rep{k}  -> {out}")
-    print(f"{len(todo)} draws to fold, {len(done)} already present", flush=True)
+    print(f"{len(todo)} draws NOT YET DRAWN, {len(done)} already present", flush=True)
     if args.list or not todo:
+        # Say this loudly. On 2026-10-22 a --list run printing "243 draws to fold" was read, from
+        # the scrolling output alone, as 243 folds being computed -- the word "fold" is in the
+        # script's name, the structures' names and every line it prints, so "nothing ran" has to be
+        # stated rather than inferred from the absence of timings.
+        print("DRY RUN -- nothing was folded, no boltz process started, no file written.\n"
+              "Re-run without --list to draw them." if args.list else
+              "Nothing to do: every requested draw already exists.", flush=True)
         return 0
+    print(f"FOLDING NOW: {len(todo)} boltz runs, unseeded. Ctrl-C to stop.", flush=True)
 
     from boltz_env import run_boltz
     for i, (name, k, y, out) in enumerate(todo, 1):
