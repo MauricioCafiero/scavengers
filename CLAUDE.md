@@ -220,7 +220,12 @@ H100 rate model live in `RACC.md`, which is untracked on purpose.
 runs, so **spare slots cannot add throughput** — a second job holding different legs just waits its
 turn, exactly as those legs would have inside the first. The only thing idle slots can usefully hold
 is a standby copy for failover, and with `Requeue=1` already set on these jobs even that is close to
-redundant. The real consequence is that one-leg-per-slot needs the socket re-touched every ~50
+redundant. **Except queue depth itself is a priority bid, so always keep 3 jobs in queue (1 running
++ 2 pending)** — user ruling 2026-10-23 after the chain ran lean at 2: a pending job improves our
+priority over another user's fresh submission, and the second pending is the preemption buffer
+(a preempted job's slurm hook line never fires and the chain loses its successor exactly then).
+`code/racc_topup.sh <chain files>` keeps the queue topped from already-generated slurm files in
+order, skipping anything in squeue or sacct, so it coexists with racc_chain.sh's name-guarded hooks. The real consequence is that one-leg-per-slot needs the socket re-touched every ~50
 minutes to submit the next, and that socket needs a password and TFA only the user can give. For any
 unattended stretch, bank the remainder in one job: `racc_run.py` takes `LEGS` as a comma-separated
 list and runs them in sequence, guarding each on its own `traj_wrapped.xtc` on scratch so a
