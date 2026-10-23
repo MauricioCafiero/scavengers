@@ -1,4 +1,8 @@
 #!/bin/zsh
+# *** SHELVED 2026-10-23 — DO NOT USE. Queue filling belongs to racc_feed.sh (see CLAUDE.md). ***
+# Written to keep the racc queue topped to 3 jobs alongside the (shelved) racc_chain.sh; both are
+# withdrawn after the chain incident. The filler is racc_feed.sh BATCH=1 per batch in order.
+#
 # Keep the racc queue topped up to 3 jobs (1 running + 2 pending) from already-generated batches.
 #
 #   code/racc_topup.sh runs/folds_md/rep5.chain runs/folds_md/rep6.chain

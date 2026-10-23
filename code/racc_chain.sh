@@ -1,4 +1,10 @@
 #!/bin/zsh
+# *** SHELVED 2026-10-23 — DO NOT USE. Queue filling belongs to racc_feed.sh (see CLAUDE.md). ***
+# This script's first real run burned all 17 replicate batches as empty no-op jobs in 40 s and
+# emptied the queue for ~2 h (no LEGS/RUNREL injected, no env/cwd, hook-masked exit codes). The
+# bugs are fixed in the version below and it is kept only for the record; the queue filler is
+# racc_feed.sh BATCH=1 per batch, driven in order by runs/folds_md/feed_rest.sh.
+#
 # Chain-submit a sequence of BATCH=1 replicate batches so the hand-offs never need the ssh socket.
 #
 #   code/racc_chain.sh runs/folds_md/rep5.chain

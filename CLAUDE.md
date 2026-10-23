@@ -217,15 +217,23 @@ pushes. Host/access facts and the measured
 H100 rate model live in `RACC.md`, which is untracked on purpose.
 
 **`gpuscavenger` is `MaxSubmitJobsPU=3`, `MaxJobsPU=1`.** Only three jobs may exist and only one
-runs, so **spare slots cannot add throughput** — a second job holding different legs just waits its
-turn, exactly as those legs would have inside the first. The only thing idle slots can usefully hold
-is a standby copy for failover, and with `Requeue=1` already set on these jobs even that is close to
-redundant. **Except queue depth itself is a priority bid, so always keep 3 jobs in queue (1 running
-+ 2 pending)** — user ruling 2026-10-23 after the chain ran lean at 2: a pending job improves our
-priority over another user's fresh submission, and the second pending is the preemption buffer
-(a preempted job's slurm hook line never fires and the chain loses its successor exactly then).
-`code/racc_topup.sh <chain files>` keeps the queue topped from already-generated slurm files in
-order, skipping anything in squeue or sacct, so it coexists with racc_chain.sh's name-guarded hooks. The real consequence is that one-leg-per-slot needs the socket re-touched every ~50
+runs. **Always keep 3 jobs in queue (1 running + 2 pending)** — queue depth is a priority bid over
+another user's fresh submission, and the second pending is the preemption buffer (a preempted
+job's own hook line never fires). **The queue filler is `racc_feed.sh` — nothing else.**
+`BATCH=1 BATCH_NAME=<batch> SYSNAME=<mol> SBATCH_OPTS="--time=<est+1h30> --cpus-per-task=8"
+code/racc_feed.sh runs/folds_md/<batch>.legs`, driven batch-by-batch in order from a detached
+driver (`runs/folds_md/feed_rest.sh`). Do NOT reach for `code/racc_chain.sh` or
+`code/racc_topup.sh` — shelved 2026-10-23 after burning all 17 replicate batches as empty no-op
+jobs in 40 s and emptying the queue for ~2 h: racc_run.py reads LEGS/RUNREL from the environment
+(so a bare sbatch runs a default leg that guard-skips instantly) and the generated slurm had no
+env activation, no cd, and a hook after the python line masking every exit code as COMPLETED. The
+signature is 0-byte `<name>_run.out` files in $HOME plus 1-2 s sacct Elapsed with nothing run.
+racc_feed.sh never had any of those bugs — it submits from inside
+`bash -lc 'module load anaconda; source activate openmm-md; cd ~/remote_work/openmm; ...'` so the
+job inherits env and cwd via sbatch's export, and it passes `LEGS`/`RUNREL` at submission. That
+incident also cost the GPU head position to a competing 5-day-limit job (the campaign may idle for
+days) — a wrong submission mechanism loses queue *position*, worth more than anything it saves.
+The real consequence otherwise is that one-leg-per-slot needs the socket re-touched every ~50
 minutes to submit the next, and that socket needs a password and TFA only the user can give. For any
 unattended stretch, bank the remainder in one job: `racc_run.py` takes `LEGS` as a comma-separated
 list and runs them in sequence, guarding each on its own `traj_wrapped.xtc` on scratch so a

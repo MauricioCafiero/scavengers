@@ -1,9 +1,10 @@
 # MM/GBSA replicates: how far the random seed moves a 20 ns leg
 
-**Status: running 2026-10-23 — 34 pairs complete, batches 4 (10 legs) and 5 (41 legs, chained)
-in flight, all legs expected recorded by Monday 09:00.** The campaign is mid-flight after its
-2026-10-22 pause; this document is the holding place for what exists — not a finished analysis,
-and not a policy. No number here has been folded into `RESULTS.md`, `FOLDS.md` or
+**Status: running 2026-10-23 — 41 pairs complete, batch 4 done; batches 5 (41 legs) and 6 (16
+legs) submitted and queued.** No Monday time anchor and no end-date estimate is quoted: the queue
+runs whenever an H100 frees (see the 2026-10-23 incident note below). The campaign is mid-flight
+after its 2026-10-22 pause; this document is the holding place for what exists — not a finished
+analysis, and not a policy. No number here has been folded into `RESULTS.md`, `FOLDS.md` or
 `runs/folds_md/cofold_binding_tables.md`, and none should be until the user decides how replicates
 are to be reported **across every structure that has one**, rather than case by case.
 
@@ -112,21 +113,36 @@ n=2); the glycine margin survives (18.9 → 16.8); the octinoxate `s3_esm2_f4` R
 direction replicates; `s3_orig_f12` deflates 6.79 but stays bound. The null-collapse cell
 (`ox2_shuffle_esm0_o3cof`) moved −0.92 → −4.03 — four times stronger but still at the weak end.
 
-**Batches 4 and 5 are in flight** (2026-10-23): batch 4, ten legs (`rep4_{oxb,oct}_1.legs`,
-both sides of the batch's close pairs plus the bolded `ox1_orig_f12_o3pcof` cell), two jobs
-banked; batch 5, the tiered sweep of the remainder — 41 legs in 13 batched legfiles
-(`rep5_{oxy_1..6,oct_1..7}.legs`, per-leg tier rationale in each file's header), submitted as a
-cluster-side hand-off chain (`code/racc_chain.sh`) that runs one ≤6 h batch at a time through the
-weekend. The tally's PAIRS lists all 85; pending entries are batches 4–5.
+**Batch 4 is done** (2026-10-23, 10/10 legs recorded): one large deflation (`ox1_orig_f12_o3pcof`
++8.72 — the bolded pocket-guided cell), one moderate (`s3_orig_f12_dock1` +4.79), and the rest
+quiet (−1.80, −1.21, −0.80, +0.06), consistent with the batch's design — its pairs were the missing
+sides of high-information parents.
+
+**Batches 5 and 6 are queued but BLOCKED** (2026-10-23): batch 5, the tiered sweep of the
+remainder — 41 legs in 13 batched legfiles (`rep5_{oxy_1..6,oct_1..7}.legs`, per-leg tier
+rationale in each file's header) — and batch 6, the window top-up, 16 legs in 4 legfiles
+(`rep6_{oct_1..3,oxy}.legs`). All 17 batches were staged and are submitted through
+`racc_feed.sh` BATCH=1, driven in order by a detached `runs/folds_md/feed_rest.sh` that keeps the
+queue at 3 jobs (1 running + 2 pending — standing policy). Do NOT reach for `code/racc_chain.sh`
+or `code/racc_topup.sh`: both are **shelved**. The first chain submission burned all 17 batches as
+empty no-op jobs in 40 s (no LEGS/RUNREL injected, no env/cwd in the generated slurm, hook-masked
+exit codes), left the queue empty ~2 h, and a competing 5-day-limit job took the freed GPU head
+position — which can idle the whole campaign until it or another H100 finishes. `racc_feed.sh`
+never had any of those bugs; filling the queue belongs to it alone.
+
+Tally state at close of batch 4 (2026-10-23 22:00): **41/101 pairs complete — stronger 12, weaker
+16, unchanged 13; median |ΔΔG| 2.89, range 0.02–16.16.** The tally's PAIRS lists all 85+16
+parents; pending entries are batches 5–6. Refresh with `python3 code/replicate_tally.py`.
 
 ## What the set shows so far
 
-Read as the state of a partial campaign (34 pairs complete of 85 registered). **The user has not
+Read as the state of a partial campaign (41 pairs complete of 101 registered). **The user has not
 drawn conclusions from it.**
 
-- Directions stay near-balanced (stronger 11, weaker 14, unchanged 9; mean signed +1.03 against a
-  sd of 5.63), so **run 1 carries no systematic optimism** — the result is spread, not bias.
-- Median |ΔΔG| 3.11, mean 4.28, range 0.02–16.16. Within 1.5: 9 of 34; within 3: 17; within 6: 26.
+- Directions stay near-balanced (stronger 12, weaker 16, unchanged 13), so **run 1 carries no
+  systematic optimism** — the result is spread, not bias.
+- Median |ΔΔG| 2.89, max |ΔΔG| 16.16, range 0.02–16.16. (Distribution figures as of batch 4's
+  close; refresh with the tally before quoting them.)
 - That spread is the resolution at which the existing tables can be read. It does not invalidate
   them: designs against nulls (−18.84 vs −7 to −8) clears it comfortably; fine ranking among design
   arms does not.
