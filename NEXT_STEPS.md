@@ -1,5 +1,11 @@
 # Where this stands and what to try next
 
+**Active right now (2026-10-23):** the targeted MM/GBSA replicate campaign, batches 5–6 — 57 legs
+queued on racc, submitted and to be filled through `racc_feed.sh` (see CLAUDE.md's gpuscavenger
+section and REPLICATES.md for the full state, including what NOT to use for submissions). Report
+each leg via `code/record_leg.py` as it lands; commit ~5 legs at a time; refresh
+`python3 code/replicate_tally.py` in each report.
+
 Written 2026-09-24. Everything below describes the built-in `octinoxate` ligand, which is
 **C17H24O3, one CH2 short of real octinoxate** (2-ethylhexyl 4-methoxycinnamate, C18H26O3). Its
 SMILES, perceived from the stored geometry, is `CCCC[C@H](CC)OC(=O)/C=C/c1ccc(OC)cc1` — the ester
