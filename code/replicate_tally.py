@@ -109,7 +109,23 @@ PAIRS = [("octinoxate", "orig_f12_dock1", "strong·clean"),
          ("oxybenzone", "bgox31_2", "rep5 T5"),
          ("oxybenzone", "bgox31_2_dock6", "rep5 T5"),
          ("oxybenzone", "bgox31_4", "rep5 T5"),
-         ("oxybenzone", "bgox31_4_dock1", "rep5 T5")]
+         ("oxybenzone", "bgox31_4_dock1", "rep5 T5"),
+         ("octinoxate", "s3_orig_f12_rf3cof_dock1", "rep6 T1"),
+         ("octinoxate", "s3_esm2_f4_rf3cof_dock3", "rep6 T1"),
+         ("octinoxate", "s2_esm2_control_rf3cof_dock1", "rep6 T3"),
+         ("octinoxate", "s3_esm2_control", "rep6 T2"),
+         ("octinoxate", "bg33_4_rf3cof_dock1", "rep6 T1"),
+         ("octinoxate", "bg33_4_rf3cof_dock4", "rep6 T1"),
+         ("octinoxate", "bg33_4_o3cof_dock7", "rep6 T3"),
+         ("octinoxate", "s2_esm2_control_o3cof_dock1", "rep6 T3"),
+         ("octinoxate", "s3_esm2_control_dock7", "rep6 T3"),
+         ("octinoxate", "s2_esm2_control_rf3cof_dock4", "rep6 T3"),
+         ("octinoxate", "bg33_1_o3cof", "rep6 T5"),
+         ("oxybenzone", "ox2_esm1_control", "rep6 T2"),
+         ("oxybenzone", "ox2_esm1_f8_o3cof_dock1", "rep6 T3"),
+         ("oxybenzone", "ox2_esm1_f8_o3pcof_dock1", "rep6 T3"),
+         ("oxybenzone", "ox1_orig_f12_o3pcof_dock4", "rep6 T3"),
+         ("oxybenzone", "ox3_orig_control_dock6", "rep6 T4")]
 UNCHANGED = 1.5
 # Third runs, for the two legs whose first two runs disagreed most -- a pair cannot say which of its
 # two values is the outlier, and these two carry the campaign's largest ddG (+10.71 and +16.16).

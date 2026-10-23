@@ -68,6 +68,10 @@ log "chain of $n batches: ${NAMES[*]}"
 
 # Stage every leg of every batch -- the same tar racc_feed.sh's BATCH=1 path uses (idempotent).
 # One molecule per batch; the SYSNAME field decides which runs/<mol>/md/ subtree it lands in.
+# SKIP_STAGE=1 omits the staging (an already-staged chain being re-generated or hook-extended).
+if [[ ${SKIP_STAGE:-0} == 1 ]]; then
+  log "SKIP_STAGE: not re-staging"
+else
 for i in {1..$n}; do
   name=${NAMES[$i]}; mol=${MOLS[$i]}
   lf=$REPO/runs/folds_md/$name.legs
@@ -87,13 +91,21 @@ for i in {1..$n}; do
   done
 done
 log "staging complete"
+fi
 
 # Build each batch's run.py + slurm, hooked to its successor. chain_gen.sh takes
-# <name> <time(unused, kept for the log)> <next name> <next time>.
+# <name> <time(unused, kept for the log)> <next name> <next time>. HOOK_TAIL=<name>:<time> hooks
+# this chain's LAST batch to the named successor chain head (a queued tail extending a chain).
+typeset -a HOOKP
+if [[ -n ${HOOK_TAIL:-} ]]; then
+  HOOKP=(${HOOK_TAIL%%:*} ${HOOK_TAIL#*:})   # split on the FIRST colon only: times are h:mm:ss
+fi
 for i in {1..$n}; do
   name=${NAMES[$i]}
   if (( i < n )); then
     out=$(rs "bash ~/remote_work/openmm/chain_gen.sh ${name} ${TIMES[$i]} ${NAMES[$((i+1))]} ${TIMES[$((i+1))]}" 2>&1 | tail -1)
+  elif [[ -n ${HOOK_TAIL:-} ]]; then
+    out=$(rs "bash ~/remote_work/openmm/chain_gen.sh ${name} ${TIMES[$i]} ${HOOKP[1]} ${HOOKP[2]}" 2>&1 | tail -1)
   else
     out=$(rs "bash ~/remote_work/openmm/chain_gen.sh ${name} ${TIMES[$i]} '' ''" 2>&1 | tail -1)
   fi
@@ -101,6 +113,14 @@ for i in {1..$n}; do
 done
 
 # Submit the head batch; wait for a free submit-slot like racc_feed.sh does.
+# STAGE_ONLY=1 skips this: a chained tail (e.g. rep6) arms its slurm files and hooks without
+# submitting, because submitting a head now would occupy the third gpuscavenger slot and the
+# chain's cluster-side hand-off sbatches regardless of job count (MaxSubmitJobsPU=3 means a
+# fourth pending job's sbatch fails and silently stalls the chain).
+if [[ ${STAGE_ONLY:-0} == 1 ]]; then
+  log "STAGE_ONLY: staged + generated $n batches; head not submitted"
+  exit 0
+fi
 log "waiting for a free slot to submit the head (max $CEILING)"
 while :; do
   cnt=$(rs 'squeue -u $USER -h | wc -l' 2>/dev/null | tr -d ' ')

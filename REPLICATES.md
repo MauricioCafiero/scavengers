@@ -1,8 +1,9 @@
 # MM/GBSA replicates: how far the random seed moves a 20 ns leg
 
-**Status: parked 2026-10-22 at 23 structures.** The campaign will almost certainly be resumed, so
-this document is the holding place for what exists — not a finished analysis, and not a policy. No
-number here has been folded into `RESULTS.md`, `FOLDS.md` or
+**Status: running 2026-10-23 — 34 pairs complete, batches 4 (10 legs) and 5 (41 legs, chained)
+in flight, all legs expected recorded by Monday 09:00.** The campaign is mid-flight after its
+2026-10-22 pause; this document is the holding place for what exists — not a finished analysis,
+and not a policy. No number here has been folded into `RESULTS.md`, `FOLDS.md` or
 `runs/folds_md/cofold_binding_tables.md`, and none should be until the user decides how replicates
 are to be reported **across every structure that has one**, rather than case by case.
 
@@ -67,7 +68,7 @@ landed interior, 6.4 from run 1 and 9.8 from run 2, leaving the spread unchanged
 cells a third sample widened or filled the range rather than identifying an outlier — which is a
 reason to be cautious about assuming more runs per cell converge on an answer.
 
-## Batch 3: eleven legs queued 2026-10-22 (running)
+## Batch 3: eleven legs queued 2026-10-22, all recorded 2026-10-23
 
 Chosen by information content, not staging convenience — five of the eleven had to be built
 (`<leg>_r2` staged from the parent's `system/`, `protein_fixed.pdb`, `ligand_prepped.sdf`,
@@ -90,17 +91,42 @@ one job each; `rep3_oxb_1` ran first). The rule each leg satisfies:
    "null collapses on OpenFold3" story is seed noise.
 5. **Shell coverage.** `ox3_orig_f8` (−18.84) — the ox3 shell had zero replicates among the 23.
 
-Next in line, not queued: `ox1_orig_f12_o3pcof` (−18.26/100.0%), `ox2_orig_f8_dock1` (−17.22),
-`s3_orig_f12_dock1` (−20.79), `bgox31_2`/`bgox31_3` families, and the 47 other legs already staged
-but never run from the paused 2026-10-12 pass.
+Results, each against `mmgbsa_summary.csv`'s whole-run value:
+
+| structure | rule | run 1 | run 2 | signed ΔΔG | verdict |
+|---|---|---:|---:|---:|---|
+| `s3_esm2_f4_o3pcof_dock1` | 3 | −17.12 | −17.60 | −0.48 | unchanged |
+| `s3_esm2_f4_rf3cof_dock1` | 3 | −20.39 | −19.09 | +1.30 | unchanged |
+| `s3_orig_f12` | 1 | −24.33 | −17.54 | +6.79 | weaker (still bound: 89.6% residence, 0 releases) |
+| `orig_f12_rf3cof` | 2 | −19.51 | −21.45 | −1.95 | stronger |
+| `shuffle_control` | 1 | −15.13 | −9.30 | +5.84 | weaker (10.4% release in 21 episodes) |
+| `ox2_shuffle_esm0_o3cof` | 4 | −0.92 | −4.03 | −3.11 | stronger (null-collapse cell; still the weakest leg) |
+| `ox2_esm1_f8_o3pcof_dock6` | 2 | −18.74 | −12.34 | +6.40 | weaker |
+| `ox3_orig_f8` | 5 | −18.84 | −10.19 | +8.65 | weaker |
+| `ox2_esm1_f8` | 1 | −20.81 | −19.32 | +1.49 | unchanged |
+| `ox2_shuffle_esm0` | 1 | −12.04 | −13.80 | −1.76 | stronger |
+| `ox2_orig_f8` | 1 | −24.21 | −21.24 | +2.97 | weaker |
+
+Batch-3 takeaways: the ESM2 design-vs-null margin **survives** (8.77 → 5.52, both sides now
+n=2); the glycine margin survives (18.9 → 16.8); the octinoxate `s3_esm2_f4` RF3>pocket
+direction replicates; `s3_orig_f12` deflates 6.79 but stays bound. The null-collapse cell
+(`ox2_shuffle_esm0_o3cof`) moved −0.92 → −4.03 — four times stronger but still at the weak end.
+
+**Batches 4 and 5 are in flight** (2026-10-23): batch 4, ten legs (`rep4_{oxb,oct}_1.legs`,
+both sides of the batch's close pairs plus the bolded `ox1_orig_f12_o3pcof` cell), two jobs
+banked; batch 5, the tiered sweep of the remainder — 41 legs in 13 batched legfiles
+(`rep5_{oxy_1..6,oct_1..7}.legs`, per-leg tier rationale in each file's header), submitted as a
+cluster-side hand-off chain (`code/racc_chain.sh`) that runs one ≤6 h batch at a time through the
+weekend. The tally's PAIRS lists all 85; pending entries are batches 4–5.
 
 ## What the set shows so far
 
-Read as the state of a parked, partial campaign. **The user has not drawn conclusions from it.**
+Read as the state of a partial campaign (34 pairs complete of 85 registered). **The user has not
+drawn conclusions from it.**
 
-- Directions are near-balanced (stronger 8, weaker 9, unchanged 6; mean signed +0.39 against a sd
-  of 6.23), so **run 1 carries no systematic optimism** — the result is spread, not bias.
-- Median |ΔΔG| 4.80, mean 4.55, range 0.02–16.16. Within 1.5: 6 of 23; within 3: 11; within 6: 18.
+- Directions stay near-balanced (stronger 11, weaker 14, unchanged 9; mean signed +1.03 against a
+  sd of 5.63), so **run 1 carries no systematic optimism** — the result is spread, not bias.
+- Median |ΔΔG| 3.11, mean 4.28, range 0.02–16.16. Within 1.5: 9 of 34; within 3: 17; within 6: 26.
 - That spread is the resolution at which the existing tables can be read. It does not invalidate
   them: designs against nulls (−18.84 vs −7 to −8) clears it comfortably; fine ranking among design
   arms does not.

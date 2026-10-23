@@ -15,7 +15,9 @@
 set -eu
 REPO=${0:A:h:h}
 mol=$1; leg=$2; n=${3:-2}
-src=$REPO/runs/$mol/md/$leg
+# The cofold and docked BoltzGen legs ran in boltzgen_local/md and have no run dir under
+# runs/<mol>/md -- point SRC_ROOT there for those (the destination stays under runs/<mol>/md).
+src=${SRC_ROOT:-$REPO/runs/$mol/md}/$leg
 dst=$REPO/runs/$mol/md/${leg}_r$n
 
 [[ -d $src ]] || { print -u2 "no such leg: $src"; exit 1; }
