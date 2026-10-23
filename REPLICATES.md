@@ -67,6 +67,33 @@ landed interior, 6.4 from run 1 and 9.8 from run 2, leaving the spread unchanged
 cells a third sample widened or filled the range rather than identifying an outlier — which is a
 reason to be cautious about assuming more runs per cell converge on an answer.
 
+## Batch 3: eleven legs queued 2026-10-22 (running)
+
+Chosen by information content, not staging convenience — five of the eleven had to be built
+(`<leg>_r2` staged from the parent's `system/`, `protein_fixed.pdb`, `ligand_prepped.sdf`,
+`<leg>_ligand.sdf`). Four legfiles `runs/folds_md/rep3_{oxb_1,oxb_2,oct_1,oct_2}.legs` (BATCH=1,
+one job each; `rep3_oxb_1` ran first). The rule each leg satisfies:
+
+1. **The design-vs-null margins, whose weak side had no replicate.** The ESM2 pair now has both
+   sides (`ox2_esm1_f8` −20.81 and `ox2_shuffle_esm0` −12.04 — the null whose 94.7–97.4% holding
+   broke `sim`); the glycine pair its design side (`ox2_orig_f8` −24.21, the strongest oxybenzone
+   cell); the octinoxate design-vs-null pair both sides (`s3_orig_f12` −24.33 and
+   `shuffle_control` −15.13).
+2. **Bolded column maxima with no replicate.** `orig_f12_rf3cof` (−19.51, RF3-cofold column max),
+   `ox2_esm1_f8_o3pcof_dock6` (−18.74, pocket-guided column max on oxybenzone).
+3. **A close comparison between lanes, 3.3 apart** — inside the 4.80 median spread, so a
+   published ranking that a replicate test can actually overturn: both sides,
+   `s3_esm2_f4_rf3cof_dock1` (−20.39) and `s3_esm2_f4_o3pcof_dock1` (−17.12). The latter is also
+   only the pocket-guided lane's third replicate across 26 legs.
+4. **A weak-end extreme.** `ox2_shuffle_esm0_o3cof` (−0.92, 1.1% holding) — the null-collapse cell;
+   its design side already has a replicate (+0.31). If a second run moves it to −5 or −8, the
+   "null collapses on OpenFold3" story is seed noise.
+5. **Shell coverage.** `ox3_orig_f8` (−18.84) — the ox3 shell had zero replicates among the 23.
+
+Next in line, not queued: `ox1_orig_f12_o3pcof` (−18.26/100.0%), `ox2_orig_f8_dock1` (−17.22),
+`s3_orig_f12_dock1` (−20.79), `bgox31_2`/`bgox31_3` families, and the 47 other legs already staged
+but never run from the paused 2026-10-12 pass.
+
 ## What the set shows so far
 
 Read as the state of a parked, partial campaign. **The user has not drawn conclusions from it.**
