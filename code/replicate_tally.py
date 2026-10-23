@@ -15,6 +15,7 @@ replicate is never in the canonical summary.
     python3 code/replicate_tally.py
 """
 import csv
+import glob
 import os
 
 PAIRS = [("octinoxate", "orig_f12_dock1", "strong·clean"),
@@ -42,7 +43,73 @@ PAIRS = [("octinoxate", "orig_f12_dock1", "strong·clean"),
          ("oxybenzone", "ox2_orig_f8_o3pcof_dock1", "strong·flagged"),
          ("oxybenzone", "ox1_orig_f12_o3pcof_dock1", "weak·flagged"),
          ("oxybenzone", "ox2_shuffle", "weak·clean"),
-         ("oxybenzone", "bgox31_4_o3cof_dock1", "mid·flagged")]
+         ("oxybenzone", "bgox31_4_o3cof_dock1", "mid·flagged"),
+         # RACC batches 3-5 (2026-10-22 to 10-27): batch 3 was the "chosen by information
+         # content" set, batch 4 its missing sides, batch 5 the tiered sweep of the remainder
+         # (REPLICATES.md batch-3 rules, per-leg rationale in runs/folds_md/rep*_*.legs headers).
+         # Batches 4-5 show as pending until their legs record.
+         ("octinoxate", "s3_esm2_f4_o3pcof_dock1", "rep3"),
+         ("octinoxate", "s3_esm2_f4_rf3cof_dock1", "rep3"),
+         ("octinoxate", "s3_orig_f12", "rep3"),
+         ("octinoxate", "orig_f12_rf3cof", "rep3"),
+         ("octinoxate", "shuffle_control", "rep3"),
+         ("oxybenzone", "ox2_shuffle_esm0_o3cof", "rep3"),
+         ("oxybenzone", "ox2_esm1_f8_o3pcof_dock6", "rep3"),
+         ("oxybenzone", "ox3_orig_f8", "rep3"),
+         ("oxybenzone", "ox2_esm1_f8", "rep3"),
+         ("oxybenzone", "ox2_shuffle_esm0", "rep3"),
+         ("oxybenzone", "ox2_orig_f8", "rep3"),
+         ("octinoxate", "s3_orig_f12_dock1", "rep4"),
+         ("octinoxate", "shuffle_control_dock1", "rep4"),
+         ("octinoxate", "s3_esm2_f4", "rep4"),
+         ("octinoxate", "shuffle_control_esm0", "rep4"),
+         ("octinoxate", "orig_f12_rf3cof_dock1", "rep4"),
+         ("oxybenzone", "ox1_orig_f12_o3pcof", "rep4"),
+         ("oxybenzone", "ox2_orig_f8_dock1", "rep4"),
+         ("oxybenzone", "ox3_orig_f8_dock1", "rep4"),
+         ("oxybenzone", "ox2_shuffle_esm0_dock1", "rep4"),
+         ("oxybenzone", "bgox31_3_dock3", "rep4"),
+         ("octinoxate", "bg33_4", "rep5 T1"),
+         ("octinoxate", "bg33_4_dock6", "rep5 T1"),
+         ("octinoxate", "bg33_4_dock1", "rep5 T1"),
+         ("octinoxate", "s2_esm2_control", "rep5 T2"),
+         ("octinoxate", "s2_esm2_control_dock1", "rep5 T2"),
+         ("octinoxate", "s3_esm2_f4_dock6", "rep5 T3"),
+         ("octinoxate", "shuffle_control_esm0_dock1", "rep5 T3"),
+         ("octinoxate", "shuffle_control_esm0_dock9", "rep5 T3"),
+         ("octinoxate", "bg33_3_dock1", "rep5 T3"),
+         ("octinoxate", "bg33_3_dock6", "rep5 T3"),
+         ("octinoxate", "bg33_2_dock1", "rep5 T3"),
+         ("octinoxate", "bg33_1_dock1", "rep5 T3"),
+         ("octinoxate", "bg33_1_dock2", "rep5 T5"),
+         ("octinoxate", "bg33_2", "rep5 T5"),
+         ("octinoxate", "bg33_3", "rep5 T5"),
+         ("octinoxate", "bg33_2_dock4", "rep5 T5"),
+         ("octinoxate", "orig_f12_dock5", "rep5 T5"),
+         ("octinoxate", "s3_orig_f12_dock9", "rep5 T5"),
+         ("octinoxate", "shuffle_control_dock9", "rep5 T5"),
+         ("octinoxate", "shuffle_control_dock7", "rep5 T5"),
+         ("octinoxate", "bg33_1", "rep5 T5"),
+         ("oxybenzone", "ox1_esm1_f8", "rep5 T1"),
+         ("oxybenzone", "ox1_orig_f12", "rep5 T1"),
+         ("oxybenzone", "bgox31_3", "rep5 T1"),
+         ("oxybenzone", "ox2_esm1_f8_dock1", "rep5 T2"),
+         ("oxybenzone", "ox2_shuffle_dock1", "rep5 T2"),
+         ("oxybenzone", "ox2_shuffle_dock4", "rep5 T4"),
+         ("oxybenzone", "ox2_shuffle_esm0_dock9", "rep5 T3"),
+         ("oxybenzone", "ox2_esm1_f8_dock3", "rep5 T3"),
+         ("oxybenzone", "ox1_esm1_f8_dock1", "rep5 T3"),
+         ("oxybenzone", "bgox31_2_dock1", "rep5 T4"),
+         ("oxybenzone", "bgox31_4_dock6", "rep5 T4"),
+         ("oxybenzone", "ox1_orig_f12_dock1", "rep5 T5"),
+         ("oxybenzone", "ox1_orig_f12_dock4", "rep5 T5"),
+         ("oxybenzone", "bgox31_5", "rep5 T5"),
+         ("oxybenzone", "bgox31_5_dock1", "rep5 T5"),
+         ("oxybenzone", "bgox31_5_dock2", "rep5 T5"),
+         ("oxybenzone", "bgox31_2", "rep5 T5"),
+         ("oxybenzone", "bgox31_2_dock6", "rep5 T5"),
+         ("oxybenzone", "bgox31_4", "rep5 T5"),
+         ("oxybenzone", "bgox31_4_dock1", "rep5 T5")]
 UNCHANGED = 1.5
 # Third runs, for the two legs whose first two runs disagreed most -- a pair cannot say which of its
 # two values is the outlier, and these two carry the campaign's largest ddG (+10.71 and +16.16).
@@ -59,6 +126,21 @@ def dg(mol, struct, fname):
         # diagnostic (md_window_modal.sh MODE=trailing) and would be read as the whole run here
         if r["structure"] == struct and not r["leg"].startswith(("first_", "last_")):
             return float(r["dg_bind"])
+    # Fallback for the BoltzGen legs run 1: their whole-run dG was never appended to the canonical
+    # summary -- cofold_tables.py reads each leg's own FINAL_RESULTS_MMPBSA.dat in place, so do
+    # the same (prod row only; window reads are not needed for run 1).
+    if fname == "mmgbsa_summary.csv":
+        BG = os.path.expanduser("~/python_mac/boltzgen_local/md")
+        blk = None
+        for root in (f"runs/{mol}/md", BG):
+            hits = glob.glob(f"{root}/{struct}/prod_*/mmgbsa/FINAL_RESULTS_MMPBSA.dat")
+            if hits:
+                blk = open(hits[0]).read().split("Differences")[-1]
+                break
+        if blk is not None:
+            for l in blk.split("\n"):
+                if l.startswith("DELTA TOTAL"):
+                    return float(l.split()[2])
     return None
 
 
