@@ -222,8 +222,8 @@ another user's fresh submission, and the second pending is the preemption buffer
 job's own hook line never fires). **The queue filler is `racc_feed.sh` — nothing else.**
 `BATCH=1 BATCH_NAME=<batch> SYSNAME=<mol> SBATCH_OPTS="--time=<est+1h30> --cpus-per-task=8"
 code/racc_feed.sh runs/folds_md/<batch>.legs`, driven batch-by-batch in order from a detached
-driver (`runs/folds_md/feed_rest.sh`). Do NOT reach for `code/racc_chain.sh` or
-`code/racc_topup.sh` — shelved 2026-10-23 after burning all 17 replicate batches as empty no-op
+driver (`runs/folds_md/feed_rest.sh`). `code/racc_chain.sh` and `code/racc_topup.sh` were
+**removed** 2026-10-23 (user instruction) after burning all 17 replicate batches as empty no-op
 jobs in 40 s and emptying the queue for ~2 h: racc_run.py reads LEGS/RUNREL from the environment
 (so a bare sbatch runs a default leg that guard-skips instantly) and the generated slurm had no
 env activation, no cd, and a hook after the python line masking every exit code as COMPLETED. The

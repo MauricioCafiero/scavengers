@@ -123,8 +123,9 @@ remainder — 41 legs in 13 batched legfiles (`rep5_{oxy_1..6,oct_1..7}.legs`, p
 rationale in each file's header) — and batch 6, the window top-up, 16 legs in 4 legfiles
 (`rep6_{oct_1..3,oxy}.legs`). All 17 batches were staged and are submitted through
 `racc_feed.sh` BATCH=1, driven in order by a detached `runs/folds_md/feed_rest.sh` that keeps the
-queue at 3 jobs (1 running + 2 pending — standing policy). Do NOT reach for `code/racc_chain.sh`
-or `code/racc_topup.sh`: both are **shelved**. The first chain submission burned all 17 batches as
+queue at 3 jobs (1 running + 2 pending — standing policy). `code/racc_chain.sh` and
+`code/racc_topup.sh` were **removed** (user instruction 2026-10-23) after the first chain
+submission burned all 17 batches as
 empty no-op jobs in 40 s (no LEGS/RUNREL injected, no env/cwd in the generated slurm, hook-masked
 exit codes), left the queue empty ~2 h, and a competing 5-day-limit job took the freed GPU head
 position — which can idle the whole campaign until it or another H100 finishes. `racc_feed.sh`

@@ -18,12 +18,42 @@ for lf in runs/folds_md/rep5.chain runs/folds_md/rep6.chain; do
   done < $lf
 done
 
+SOCK=$HOME/.ssh/cm-racc
+rs() { ssh -o ControlPath=$SOCK -o ConnectTimeout=15 -o BatchMode=yes racc.rdg.ac.uk "$@"; }
+mins_of() {  # "[-]d-hh:mm:ss" or "hh:mm:ss" -> minutes
+  local el=$1 tp=${1##*-} mins=0
+  [[ $el == *-* ]] && mins=$(( ${el%%-*} * 1440 ))
+  print $(( mins + ${tp%%:*} * 60 + ${${tp#*:}%%:*} ))
+}
+
 i=1
 while (( i <= ${#NAMES} )); do
   name=${NAMES[$i]}; mol=${MOLS[$i]}; t=${TIMES[$i]}
-  # rep5_oxy_1 is already in the queue as job 537778 with its legs baked in -- skip it, resuming
-  # is the rest of the list.
-  if [[ $name == rep5_oxy_1 ]]; then (( i++ )); continue; fi
+  # Skip batches whose job is queued/running, or that already genuinely ran (>= 10 min sacct
+  # elapsed). A 0-1 s COMPLETED/FAILED record is a resubmit: it is the no-op signature. A failure
+  # that ran >= 10 min is NOT touched -- it needs diagnosis (a leg that NaN'd mid-run would be
+  # relaunched into the same failure forever).
+  sq=$(rs "squeue -u \$USER -h -n ${name}_run" 2>/dev/null)
+  if [[ -n ${sq//[[:space:]]/} ]]; then
+    log "$name queued/running as $(rs "squeue -u \$USER -h -n ${name}_run -o %i" 2>/dev/null | tr -s ' ') -- skip"
+    (( i++ )); continue
+  fi
+  rec=$(rs "sacct --name=${name}_run -X -n -o State,Elapsed" 2>/dev/null | head -1 | tr -s ' \t')
+  rec=${rec##[ ]#}
+  st=${rec%% *}
+  if [[ $st == COMPLETED ]]; then
+    (( $(mins_of ${rec##* }) >= 10 )) && { log "$name completed after ${rec##* } -- skip"; (( i++ )); continue; }
+    log "$name sacct says COMPLETED after ${rec##* } -- resubmitting (no-op signature)"
+  elif [[ $st == FAILED || $st == PREEMPT* || $st == CANCEL* ]]; then
+    if (( $(mins_of ${rec##* }) >= 10 )); then
+      log "$name $st after ${rec##* } -- NOT resubmitting; needs diagnosis"
+      (( i++ )); continue
+    fi
+    log "$name ended instantly as $st -- resubmitting"
+  elif [[ -n $st ]]; then
+    log "$name state: $st -- skip"
+    (( i++ )); continue
+  fi
   log "feed $name ($mol, $t)"
   BATCH=1 BATCH_NAME=$name SYSNAME=$mol SBATCH_OPTS="--time=$t --cpus-per-task=8" \
     zsh code/racc_feed.sh runs/folds_md/$name.legs
