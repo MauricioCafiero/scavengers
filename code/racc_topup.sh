@@ -46,11 +46,43 @@ while (( i <= n )); do
     sleep $INTERVAL
     continue
   fi
-  # Skip batches already queued/running (squeue) or finished (sacct, for batches that completed
-  # between polls). A batch we have not yet submitted shows neither.
-  seen=$(rs "squeue -u \$USER -h -n ${NAMES[$i]}_run 2>/dev/null; sacct --name=${NAMES[$i]}_run -X -n -o State 2>/dev/null | head -1" | tr -d ' ')
-  if [[ -n $seen ]]; then
-    log "${NAMES[$i]} already ${seen} -- skip"
+  # Skip batches queued/running (squeue); skip COMPLETED batches that GENUINELY ran (>= 10 min
+  # elapsed) -- 2026-10-23 the chain burned 17 batches as empty 1-4 s jobs and a naive "any sacct
+  # record means done" skip refused to resubmit any of them. Instant COMPLETED/FAILED records
+  # resubmit; a failure that ran >= 10 min does NOT auto-resubmit -- that needs diagnosis first
+  # (a leg that NaN'd an hour in would be relaunched into the same failure forever).
+  sq=$(rs "squeue -u \$USER -h -n ${NAMES[$i]}_run 2>/dev/null | head -1")
+  if [[ -n ${sq//[[:space:]]/} ]]; then
+    log "${NAMES[$i]} queued/running -- skip"
+    (( i++ ))
+    continue
+  fi
+  rec=$(rs "sacct --name=${NAMES[$i]}_run -X -n -o State,Elapsed 2>/dev/null | head -1" | tr -s ' ')
+  st=${rec%% *}
+  if [[ $st == COMPLETED ]]; then
+    el=${rec##* }
+    mins=0; tp=$el
+    [[ $el == *-* ]] && { mins=$(( ${el%%-*} * 1440 )); tp=${el#*-}; }
+    mins=$(( mins + ${tp%%:*} * 60 + ${${tp#*:}%%:*} ))
+    if (( mins >= 10 )); then
+      log "${NAMES[$i]} completed after ${el} -- skip"
+      (( i++ ))
+      continue
+    fi
+    log "${NAMES[$i]} sacct says COMPLETED but ran ${mins} min -- resubmitting (bogus fast completion)"
+  elif [[ $st == FAILED || $st == PREEMPT* || $st == CANCEL* ]]; then
+    el=${rec##* }
+    mins=0; tp=$el
+    [[ $el == *-* ]] && { mins=$(( ${el%%-*} * 1440 )); tp=${el#*-}; }
+    mins=$(( mins + ${tp%%:*} * 60 + ${${tp#*:}%%:*} ))
+    if (( mins >= 10 )); then
+      log "${NAMES[$i]} $st after ${el} -- NOT resubmitting; needs diagnosis"
+      (( i++ ))
+      continue
+    fi
+    log "${NAMES[$i]} ended instantly as $st -- resubmitting"
+  elif [[ -n $st ]]; then
+    log "${NAMES[$i]} state: $st -- skip"
     (( i++ ))
     continue
   fi
@@ -58,7 +90,9 @@ while (( i <= n )); do
     sleep $INTERVAL
     continue
   fi
-  out=$(rs "sbatch --time=${TIMES[$i]} --cpus-per-task=8 \$HOME/remote_work/openmm/${NAMES[$i]}_run.slurm" 2>&1 | tail -1)
+  # bash -lc + workspace cwd, the same wrap the head submission gets: sbatch exports the
+  # submitter's environment and cwd into the job, and the hooks inherit them from there.
+  out=$(rs "bash -lc 'module load anaconda; source activate openmm-md 2>/dev/null; cd ~/remote_work/openmm && sbatch --time=${TIMES[$i]} --cpus-per-task=8 ${NAMES[$i]}_run.slurm'" 2>&1 | tail -1)
   log "submitted ${NAMES[$i]} (${TIMES[$i]}): $out"
   (( i++ ))
   sleep 20
