@@ -34,7 +34,11 @@
 #   never the analysis of what is already here.
 # * Every ssh call runs under a watchdog cap, not only keepalives: a wedged ControlMaster swallows
 #   the client-side ServerAlive probes (2026-10-16: two drains hung for hours in one poll despite
-#   ConnectTimeout/ServerAlive*), so the kill must be ours.
+#   ConnectTimeout/ServerAlive*), so the kill must be ours. Every call also forks transient zsh
+#   children (the ssh job, its watchdog) that carry this script's ARGV until they exec -- in ps they
+#   look exactly like fresh duplicate drains, parented to the real one, and vanish seconds later.
+#   2026-10-24: twice mistaken for a runaway spawner and "killed" (harmlessly); ps-etime two samples
+#   apart to prove it. The real fleet is one drain per legfile, nothing else.
 set -u
 
 LEGFILE=${1:?usage: racc_drain.sh <legfile>}

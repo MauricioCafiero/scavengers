@@ -4,7 +4,10 @@
 queued on racc, submitted and to be filled through `racc_feed.sh` (see CLAUDE.md's gpuscavenger
 section and REPLICATES.md for the full state, including what NOT to use for submissions). Report
 each leg via `code/record_leg.py` as it lands; commit ~5 legs at a time; refresh
-`python3 code/replicate_tally.py` in each report.
+`python3 code/replicate_tally.py` in each report. A ΔΔG histogram
+(`runs/folds_md/replicate_ddG_histogram.png`, regenerate via the `replicate_tally` import in the
+2026-10-24 transcript) is rendered but UNCOMMITTED by user instruction — commit it once several more
+legs have landed.
 
 Written 2026-09-24. Everything below describes the built-in `octinoxate` ligand, which is
 **C17H24O3, one CH2 short of real octinoxate** (2-ethylhexyl 4-methoxycinnamate, C18H26O3). Its
