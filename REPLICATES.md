@@ -1,10 +1,14 @@
 # MM/GBSA replicates: how far the random seed moves a 20 ns leg
 
-**Status: running 2026-10-23 — 41 pairs complete, batch 4 done; batches 5 (41 legs) and 6 (16
-legs) submitted and queued.** No Monday time anchor and no end-date estimate is quoted: the queue
-runs whenever an H100 frees (see the 2026-10-23 incident note below). The campaign is mid-flight
-after its 2026-10-22 pause; this document is the holding place for what exists — not a finished
-analysis, and not a policy. No number here has been folded into `RESULTS.md`, `FOLDS.md` or
+**Status: running 2026-10-25 — 69/101 legs complete (stronger 22, weaker 24, unchanged 23;
+median |ΔΔG| 2.37, range 0.02–16.16; batch 6, 9 legs, committed 2026-10-25).** Batches 5–6 are
+submitted and queued (rep5_oct_3/4/5 pending in queue, rep5_oct_6 waiting on the feeder,
+rep5_oct_7 and the three rep6 legfiles after). No Monday time anchor and no end-date estimate is
+quoted: the queue runs whenever an H100 frees (see the 2026-10-23 incident note below). The
+campaign is mid-flight after its 2026-10-22 pause; this document is the holding place for what
+exists — not a finished analysis, and not a policy. **Weekly racc allocation near its cap as of
+2026-10-25 — the campaign may pause mid-batch; the legfiles and the tally above are the
+resume point.** No number here has been folded into `RESULTS.md`, `FOLDS.md` or
 `runs/folds_md/cofold_binding_tables.md`, and none should be until the user decides how replicates
 are to be reported **across every structure that has one**, rather than case by case.
 

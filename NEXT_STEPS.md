@@ -1,13 +1,33 @@
 # Where this stands and what to try next
 
-**Active right now (2026-10-23):** the targeted MM/GBSA replicate campaign, batches 5–6 — 57 legs
-queued on racc, submitted and to be filled through `racc_feed.sh` (see CLAUDE.md's gpuscavenger
-section and REPLICATES.md for the full state, including what NOT to use for submissions). Report
-each leg via `code/record_leg.py` as it lands; commit ~5 legs at a time; refresh
-`python3 code/replicate_tally.py` in each report. A ΔΔG histogram
-(`runs/folds_md/replicate_ddG_histogram.png`, regenerate via the `replicate_tally` import in the
-2026-10-24 transcript) is rendered but UNCOMMITTED by user instruction — commit it once several more
-legs have landed.
+**Active right now (2026-10-25):** the targeted MM/GBSA replicate campaign, batches 5–6 — **69/101
+replicate legs complete** (stronger 22, weaker 24, unchanged 23, |ΔΔG| < 1.5; median 2.37, range
+0.02–16.16). Submitted and queued on racc: rep5_oct_3/4/5 (job IDs 538477/538506/538509, healthy
+`Priority`, limits 4:53–6:26); the feeder waits on rep5_oct_6 with MaxSubmitJobsPU=3 already used;
+then rep5_oct_7 and the three rep6 legfiles. Remaining legs land one at a time as an H100 frees;
+report each leg via `code/record_leg.py` as it is recorded, commit ~5 legs at a time (batch 6,
+9 legs, committed 2026-10-25 ~09:50), refresh `python3 code/replicate_tally.py` in each report,
+and re-arm `code/watch_legs.py` (17 legfiles, `--on record --max-minutes 600`, selftest first)
+after every report. **The histogram / scatter PNGs (`runs/folds_md/replicate_ddG_*.png`) stay
+UNCOMMITTED until ~10 more legs land — then regenerate and commit both.** If the racc allocation
+runs out (noted near the weekly limit 2026-10-25), the campaign pauses where it stands; a fresh
+session picks up at the tally state above and the legfiles still pending. The ΔΔG histogram
+regeneration is via the `replicate_tally` import (see the 2026-10-24 transcript).
+
+**The accounting workbook (2026-10-25).** `PB_runs_accounting.xlsx` at the repo root tracks every
+run by peptide/fold-type. Its fill/audit machinery now lives in `code/workbook/`
+(`j_pairs.py` → `premd_pairs.csv`; `fill_accounting.py` fills empty cells only; `audit_gihjlm.py`
+and `audit_wb.py` are independent audits — run all three with `.venv/bin/python`). Protocol: fill
+EMPTY cells only, overwrite only with an audit-proven mismatch; the workbook is untracked in git
+(the user's Excel copy is authoritative); writes only happen while Excel has the file closed.
+Column sources and semantics are in the scripts' docstrings — key facts: pre-MD pairs
+denominator comes from `pair_contacts_*.csv`'s `ceiling` column (66 = C(12,2) oct, 45 = all oxy
+guided rows), never from adjacent/nonadjacent cell text; GNINA pose keys are lane-aware
+(`o3gninaN`/`rf3gninaN`/bare `gninaN`); generator arms (`bg33_*`/`bgox31_*`) get NO pair cells
+(2026-10-22 ruling). G for the BoltzGen cofold rows comes from the **new `boltzcf` lane**
+(pepgraph `LANES` now includes it; scored 2026-10-25: perp 8.0–13.3, z +2.0 to +5.9 for all 8;
+pepgraph's `compare_lanes.py` rewrites `lane_comparison.json` wholesale per run, so score a new
+lane to a separate `--out` and merge rows back, or full-run).
 
 Written 2026-09-24. Everything below describes the built-in `octinoxate` ligand, which is
 **C17H24O3, one CH2 short of real octinoxate** (2-ethylhexyl 4-methoxycinnamate, C18H26O3). Its
