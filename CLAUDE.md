@@ -184,13 +184,32 @@ completion's tail (`run_dock_pose_md.sh` continuation or `md_window_modal.sh`-st
 a time, ~10–18 min per tail — with the drain never blocked on it; markers `.drained`, `.tail_launched`
 and `.tail_pid` in `runs/folds_md/` make the bookkeeping safe against reconnects and restarts (a
 re-launched drain resumes rather than refetches). Recording goes through
-`code/record_leg.py <mol> <leg>`, which appends to all the molecule's tables and to FOLDS.md; the
+`code/record_leg.py <mol> <leg>`, which appends to all the molecule's tables and to FOLDS.md.
+**Since 2026-10-27 it computes only that leg's rows** (slide, stability, pair contacts) and upserts
+them — replace in place, else append, every other row copied through, refuse if a row would be
+lost — in seconds. Before, it re-ran `ligand_slide.py`, `md_stability.py` and `pair_contacts.py`
+over every leg in every lane and rewrote the whole table (~3 min a record, ~6 h across 135, for
+rows that cannot change: fixed trajectory, deterministic code); verified identical row-for-row on
+two recorded legs before the switch. A full rebuild is still done by running those scripts by hand
+over the lane globs. **Records run under their own lock, `/tmp/peptidebuilder_record.lock`**, not
+the tail lock: they serialise among themselves (shared tables) but a tail writes only inside its
+leg dir, so they need not wait on one — on the shared lock `lockf`'s unordered wakeup let queued
+tails win every release and one record waited 2 h 14 m. (Drains launched before 2026-10-27 19:10
+still hold the old script and queue records on the tail lock.) The
 per-leg log `runs/folds_md/record_<leg>.log` ends with
 `<leg>: dG ... | windows ... | residence ... | slide ... | Ca ... | pairs ...` and an
 `audit: windows 4/4, summary rows 4, frames True, scatter 0 -> OK` line, which is the
 leg-is-done signal. A campaign is a chain of legfiles `runs/folds_md/dk*.legs` (lines
 `<abs local dir>:<leg name>`, `#` comments), one drain per legfile; a committed batch is every
 recorded leg since the last commit, verified additions-only.
+
+**The local pipeline keeps up only if legs arrive as they are produced.** Arrivals across both
+clusters ran ~1 leg / 35 min on 2026-10-27 against ~20 min tail + record, so there is headroom —
+but only when each leg is fetched on finish. **Every compute lane has a drain, including Young**
+(`racc_drain.sh` with the `DR_*` knobs, recipe in `YOUNG.md`), started at submission. Fetching a
+lane's legs in bulk at job end is the failure: on 2026-10-27 five Young legs finished 11:37–16:03
+were pulled together at ~16:25, stacking ~2 h of tails on the lock and pushing a racc leg three
+hours back.
 
 **The waiter is `code/watch_legs.py`, not a fresh scratchpad script.** It takes `mol/leg` specs,
 `--legfile <racc legfile>` (repeatable) or `--any`, waits for the next leg to finish, prints its
@@ -208,7 +227,10 @@ can never exist, and a signal that fires early. Both of those shipped in throwaw
 **Report every leg as it lands; commit every five.** These are two different cadences and
 collapsing them into one is a mistake in either direction. The report is the scientific output and
 is owed immediately — it needs nothing committed, because `FINAL_RESULTS_MMPBSA.dat` and the
-leg's tables are already on disk when the tail finishes. The commit is bookkeeping, and one per leg
+leg's tables are already on disk when the tail finishes. **Report off the MM/GBSA, not the record**
+(waiter `--on mmgbsa`): keying reports on records on 2026-10-27, while records starved, left nine
+finished legs unreported for hours while the user was told they had "finished". Slide and the
+tally follow when the record lands; the dG, windows and release (from `tail.log`) do not wait. The commit is bookkeeping, and one per leg
 turns a 26-leg campaign into 26 pushes of near-identical table deltas. So: read the number out and
 say it the moment the tail is done, let the recorded legs accumulate, and commit in batches of
 about five (or at a natural boundary -- a legfile finishing, a campaign ending, or stopping for the
@@ -313,7 +335,12 @@ half-written xtc without its `.pdb` topology, so the frame check reports a confu
 finished, never re-fetch, tail it", so a truncated file left in place yields a tail and an MM/GBSA
 number computed over half a trajectory, which looks entirely plausible. Delete the partial and let
 the drain re-poll; it costs one ~30 MB re-download and no compute. For the same reason, when staging
-a fetch by hand, move `traj_wrapped.xtc` into place **last**, after the small files.
+a fetch by hand, move `traj_wrapped.xtc` into place **last**, after the small files. **The drain does
+this itself since 2026-10-27**: it fetches into `prod_20ns/.fetch/` and moves the xtc in last, only
+after the stream succeeded and xtc, pdb and `energy.csv` are all non-empty, so a dropped fetch
+leaves nothing behind and is retried. That fix followed a 0-byte xtc (`bg33_4_rf3cof_dock1_r2`)
+that the drain would have tailed in a loop — it relaunches any tail that exits without MM/GBSA and
+never re-fetches a leg whose xtc exists. Drains started before then still run the old fetch.
 
 **Submission is socket-free once batched; draining is not.** A network loss stops nothing on the
 cluster — the legs keep computing and their wrapped solutes wait on scratch indefinitely — but the

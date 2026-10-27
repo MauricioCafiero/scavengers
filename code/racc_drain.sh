@@ -155,8 +155,10 @@ local_phase() {    # offline-safe: resolve recently finished tails, queue their 
             find $src -path '*/first_*ns/traj.dcd' -delete 2>/dev/null
             log "  tail done; MM/GBSA present; leg now $(du -sh $src | cut -f1)"
             touch $src/.drained
-            # The leg's tables + FOLDS row, under the same tail lock so it never overlaps a tail.
-            ( exec lockf -k /tmp/peptidebuilder_tail.lock $MDPY $REPO/code/record_leg.py $SYSNAME $leg ) \
+            # The leg's tables + FOLDS row, under its OWN lock: records serialise among themselves (shared
+            # tables) but never wait on a tail, which writes only inside its leg dir. Until 2026-10-27 they
+            # shared the tail lock and starved behind every queued tail (one waited 2 h for a seconds-long job).
+            ( exec lockf -k /tmp/peptidebuilder_record.lock $MDPY $REPO/code/record_leg.py $SYSNAME $leg ) \
                 >> $REPO/runs/folds_md/record_$leg.log 2>&1 &
             disown
         else
@@ -207,15 +209,20 @@ remote_phase() {    # bounded ssh calls: status + eager fetch of every completed
 
         if [[ $state == COMPLETED ]]; then
             log "=== $leg COMPLETED -- fetching wrapped solute"
-            mkdir -p $src/prod_20ns
-            if r 600 "cd $DCD/${(e)LEGDIR} 2>/dev/null && tar czf - traj_wrapped.xtc traj_wrapped.pdb energy.csv rmsd.csv analysis.png final.pdb 2>/dev/null" | tar xzf - -C $src/prod_20ns 2>/dev/null; then
-                if [[ ! -f $src/prod_20ns/traj_wrapped.xtc ]]; then
-                    log "  FETCH INCOMPLETE for $leg: no traj_wrapped.xtc -- did the in-job analyze run? retrying next round"
-                    remaining=$((remaining+1)); continue
-                fi
+            # Fetch into a staging dir and move traj_wrapped.xtc into place LAST: its presence is what
+            # marks the leg finished (line above), so a fetch that dies mid-stream must never leave
+            # one behind (2026-10-27: a 0-byte xtc from a dropped fetch was tailed in a loop).
+            stage=$src/prod_20ns/.fetch
+            rm -rf $stage; mkdir -p $stage
+            if r 600 "cd $DCD/${(e)LEGDIR} 2>/dev/null && tar czf - traj_wrapped.xtc traj_wrapped.pdb energy.csv rmsd.csv analysis.png final.pdb 2>/dev/null" | tar xzf - -C $stage 2>/dev/null \
+               && [[ -s $stage/traj_wrapped.xtc && -s $stage/traj_wrapped.pdb && -s $stage/energy.csv ]]; then
+                for f in $stage/*(N); do [[ ${f:t} == traj_wrapped.xtc ]] || mv -f $f $src/prod_20ns/; done
+                mv -f $stage/traj_wrapped.xtc $src/prod_20ns/
+                rm -rf $stage
                 log "  fetched $(du -sh $src/prod_20ns | cut -f1)"
             else
-                log "  FETCH FAILED for $leg -- retrying next round"
+                rm -rf $stage
+                log "  FETCH FAILED or INCOMPLETE for $leg (stream died, or no xtc/pdb/energy) -- retrying next round"
                 remaining=$((remaining+1)); continue
             fi
             launch_tail $src $leg

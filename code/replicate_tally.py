@@ -125,12 +125,21 @@ PAIRS = [("octinoxate", "orig_f12_dock1", "strong·clean"),
          ("oxybenzone", "ox2_esm1_f8_o3cof_dock1", "rep6 T3"),
          ("oxybenzone", "ox2_esm1_f8_o3pcof_dock1", "rep6 T3"),
          ("oxybenzone", "ox1_orig_f12_o3pcof_dock4", "rep6 T3"),
-         ("oxybenzone", "ox3_orig_control_dock6", "rep6 T4")]
+         ("oxybenzone", "ox3_orig_control_dock6", "rep6 T4"),
+         # Full sweep of the remaining unreplicated canonical legs (2026-10-27, user: "over 100 runs we
+         # still need to replicate" -- 129 at the start, 59 oct / 70 oxy), on Young, no tiering.
+         ("octinoxate", "bg33_1_o3cof_dock1", "sweep Y1"),
+         ("octinoxate", "bg33_1_o3cof_dock6", "sweep Y1"),
+         ("octinoxate", "bg33_1_rf3cof", "sweep Y2"),
+         ("octinoxate", "bg33_1_rf3cof_dock1", "sweep Y2"),
+         ("octinoxate", "bg33_1_rf3cof_dock8", "sweep Y3"),
+         ("octinoxate", "bg33_2_o3cof", "sweep Y3")]
 UNCHANGED = 1.5
 # Third runs, for the two legs whose first two runs disagreed most -- a pair cannot say which of its
 # two values is the outlier, and these two carry the campaign's largest ddG (+10.71 and +16.16).
 # They extend an existing PAIRS row rather than adding one: same cell, a third sample of it.
-THIRD = {"orig_f12_dock1", "ox1_esm1_control"}
+# shuffle_control_dock7 joined 2026-10-27: r2 (Young) moved -16.35 from run 1 (racc), the pair max.
+THIRD = {"orig_f12_dock1", "ox1_esm1_control", "shuffle_control_dock7"}
 
 
 def dg(mol, struct, fname):

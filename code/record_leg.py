@@ -36,14 +36,35 @@ def rows_by(path, key):
     return {r[key] for r in csv.DictReader(open(path))} if os.path.exists(path) else set()
 
 
-def rewrite_checked(path, key, run):
-    """Run a whole-table writer into a temp copy; install it only if no existing row is lost."""
+def upsert(path, key, new):
+    """Put this leg's row(s) into a table: replace in place if the key is there, else append.
+
+    Every other row is copied through untouched. Until 2026-10-27 recording re-ran ligand_slide.py,
+    md_stability.py and pair_contacts.py over EVERY leg in every lane and rewrote the whole file --
+    ~8 min of re-reading ~150 trajectories to add one row whose neighbours cannot change (fixed
+    trajectory, deterministic code), and the source of every dropped-row incident in CLAUDE.md.
+    A full rebuild is still available by running those scripts by hand over the lane globs.
+    """
+    rows = list(csv.DictReader(open(path))) if os.path.exists(path) else []
+    fields = list(rows[0].keys()) if rows else list(new[0].keys())
+    by_key = {r[key]: r for r in new}
+    out = [by_key.pop(r[key], r) for r in rows] + list(by_key.values())
+    tmp = tempfile.mktemp(suffix=".csv", dir=os.path.dirname(path))
+    with open(tmp, "w", newline="") as fh:
+        w = csv.DictWriter(fh, fieldnames=fields)
+        w.writeheader()
+        w.writerows(out)
+    assert rows_by(path, key) <= rows_by(tmp, key), f"{path} lost rows"
+    shutil.move(tmp, path)
+
+
+def one_leg_rows(run):
+    """Run a table writer on this leg alone into a temp csv and return its rows."""
     tmp = tempfile.mktemp(suffix=".csv")
     run(tmp)
-    lost = rows_by(path, key) - rows_by(tmp, key)
-    if lost:
-        sys.exit(f"REFUSED {path}: would drop {sorted(lost)}")
-    shutil.move(tmp, path)
+    rows = list(csv.DictReader(open(tmp)))
+    os.remove(tmp)
+    return rows
 
 
 def main(mol, leg):
@@ -66,13 +87,11 @@ def main(mol, leg):
                     "--md-root", f"runs/{mol}/md", "--outdir", f"runs/{mol}", "--summary", summary], check=True,
                    stdout=subprocess.DEVNULL)
 
-    lanes = lambda m: sorted(glob.glob(f"runs/{m}/md/*/prod_20ns") + glob.glob(f"runs/{m}/md/*/prod_L1_modal"))
-    bgpat = "bg33_*" if mol == "octinoxate" else "bgox31_*"
-    rewrite_checked(f"runs/{mol}/md/ligand_slide.csv", "leg",
-                    lambda out: ligand_slide.main(lanes(mol) + sorted(glob.glob(f"{BG}/{bgpat}/prod_20ns"))
-                                                  + ["--csv", out]))
-    stab_legs = lanes("octinoxate") + lanes("oxybenzone") + sorted(glob.glob(f"{BG}/*/prod_20ns"))
-    md_stability.main(stab_legs)   # refuses to shrink on its own
+    upsert(f"runs/{mol}/md/ligand_slide.csv", "leg",
+           one_leg_rows(lambda out: ligand_slide.main([prod, "--csv", out])))
+    st_row = md_stability.stats(prod)
+    st_row["peptide"], st_row["pose"] = md_stability.label(prod)
+    upsert("runs/octinoxate/md/protein_stability.csv", "leg", [st_row])
 
     # strip the run suffix first, then the pose suffix: _r\d+ not _r2, so a third run resolves to the
     # same parent structure its earlier runs did rather than to a name no pair table has ever held
@@ -133,8 +152,9 @@ def main(mol, leg):
                      f"{parent} has no design arm -- slot measures do not apply)")
         pair = None
     if pair:
-        subprocess.run([py, "code/pair_contacts.py", *legs, "--run-dir", f"runs/{mol}", "--design", design,
-                        "--csv", f], check=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+        upsert(f, "structure", one_leg_rows(lambda out: subprocess.run(
+            [py, "code/pair_contacts.py", prod, "--run-dir", f"runs/{mol}", "--design", design, "--csv", out],
+            check=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)))
         after = {r["structure"]: r for r in csv.DictReader(open(f))}
         assert before <= set(after), f"pair table lost rows: {before - set(after)}"
         r = after[leg]

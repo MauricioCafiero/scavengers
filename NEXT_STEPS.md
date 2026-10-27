@@ -1,31 +1,47 @@
 # Where this stands and what to try next
 
-**Active right now (2026-10-27):** the targeted MM/GBSA replicate campaign — **79/101 replicate
-legs complete** via `code/replicate_tally.py` (stronger 26 / weaker 26 / unchanged 27, |ΔΔG| < 1.5;
-median 2.52, range 0.02–16.35) — running on **Young** now (job **115814** = rep5_oct_7 top-up, since
-leg 1 shuffle_control_dock9_r2 failed to an rm race and still owes a resubmission; job **115841** =
-rep6_oct_1, legs in sequence). The Young lane's recipe is **YOUNG.md** (hosts, env, staging,
-requests-minimal policy); measured A100 OpenCL rate **0.466 ms/step at 7,327 particles** (batch
-sizing: use racc exponents 0.4 ≤13k / 0.64 above; H100 numbers do not transfer). Racc still holds
-PENDING rep5_oct_6 (547220) — the stall behind the other user's 5-day GPU job continues — with the
-detached feeder `runs/folds_md/feed_rest.sh` armed to submit rep6_oct_2/rep6_oct_3/rep6_oxy as
-slots appear (the feeder is linear: it never revisits a passed batch). **The racc duplicates of the
-Young batches — rep5_oct_7 (547254) and rep6_oct_1 (547288) — were CANCELED 2026-10-27 at the
-user's direction; no double-compute risk remains for those legs.** Whatever runs
-completes: fetch+tail+`code/record_leg.py octinoxate <leg>` per the legfiles, report every leg as
-it lands, re-arm `code/watch_legs.py` (--on record, selftest first) after every report, commit ~5
-legs at a time with an additions-only `git diff --numstat` check (last commit 6074292d, 5 legs).
-**The histogram / scatter PNGs (`runs/folds_md/replicate_ddG_*.png`)
-stay UNCOMMITTED until ~10 more legs land — then regenerate and commit both** (regenerate via the
-`replicate_tally` import, see the 2026-10-24 transcript).
+**Active right now (2026-10-27, 19:50):** MM/GBSA replicates — tally **88/107** via
+`code/replicate_tally.py` (stronger 30 / weaker 28 / unchanged 30, |ΔΔG| < 1.5; median |ΔΔG|
+2.50). Batch 9 (six legs) recorded and committed: s3_orig_f12_rf3cof_dock1_r2 +7.03,
+s3_esm2_f4_rf3cof_dock3_r2 −0.34, s2_esm2_control_rf3cof_dock1_r2 +2.06, s3_esm2_control_r2 −1.73,
+s3_orig_f12_dock9_r2 +7.65 (vs its Modal run 1), shuffle_control_dock7_r3 (third run: −8.40 racc /
+−24.75 / −24.91 Young — enrolled in `THIRD`).
 
-**DO A THIRD RUN of `shuffle_control_dock7` (`_r3`)** — its r2 (the first Young/A100 leg, ddG
-−16.35 vs run 1's −8.40) set the new max |ΔΔG| of the ordinary-pair distribution. **Submitted
-2026-10-27 as part of Young job 115876 (`topup2`)**, batched with the owed dock9_r2 top-up; Young
-estimate 172 min + 1 h 30 = `--time=4:22:00`. When the leg lands: enroll the structure in `THIRD`
-in `code/replicate_tally.py` so the triple column lights up. **The racc duplicates of these two
-batches (547254/547288) were canceled the same day** — the Young lane is their only lane now, so
-this r3 is Young-vs-racc cluster-sensitive only through the seed question, not a rerun race.
+- **Full sweep of the remaining unreplicated canonical legs started** (user 2026-10-27: "over 100
+  runs we still need to replicate"): **129** at the start (59 octinoxate / 70 oxybenzone, read off
+  both `mmgbsa_summary.csv` files minus the tally's PAIRS). First six on Young — jobs 116195
+  `sweepY1` (bg33_1_o3cof_dock1/dock6), 116196 `sweepY2` (bg33_1_rf3cof, _rf3cof_dock1), 116197
+  `sweepY3` (bg33_1_rf3cof_dock8, bg33_2_o3cof), `_r2` each, PENDING on Resources; each has its own
+  drain on `runs/folds_md/young_<job>.legs`. **123 remain** (53 oct, 70 oxy); oxybenzone needs its
+  `runs/oxybenzone/md` tree staged on Young first. Packing: first-fit in the inventory's order, ≤6 h
+  of Young model estimate per job (the model over-predicted 115841 by ~1.3×, so it is a safe
+  `--time` basis).
+- **racc:** feeder on rep6_oct_2 (RUNNING) / rep6_oxy / rep6_oct_3 (PENDING). Socket back 19:46. rep6_oct_2 legs 1–2
+  (`bg33_4_rf3cof_dock1_r2`, `_dock4_r2`) done on scratch, re-fetching (dock1's first fetch died at
+  16:48 leaving a 0-byte xtc, removed so the drain re-fetches).
+- **Young at 19:48:** 116195 RUNNING (started 19:46:28, a minute after submission); 116196/116197
+  PENDING on `Resources` — all 40 A100s busy, and they are 2 of the only 3 jobs on the partition
+  with that reason (the other ~150 pending are `Priority`/`Dependency`, behind us), so they start on
+  the next free GPU.
+- **Local queue:** empty — every tail and record through s3_esm2_control_r2 is done.
+- **Pipeline changes 2026-10-27 (committed in batch 9; described in CLAUDE.md):**
+  `record_leg.py` upserts only its own leg's rows (five records ran in 30 s, not ~3 min each);
+  records take `/tmp/peptidebuilder_record.lock`; `racc_drain.sh` stages fetches and moves the
+  xtc in last. The racc drains started before 19:10 keep the old copy; the Young drains have both.
+- **Waiters:** `watch_legs --on mmgbsa` on rep6_oct_2/3/oxy and on the three young_*.legs. Report
+  off the MM/GBSA, not the record.
+- **racc's rep5_oct_6 guard-missed bg33_3_r2** (scratch cleaned, so it recomputed); the leg was
+  already recorded, the second trajectory stays unfetched, no double rows.
+- **Next commit (batch 10):** the next ~5 recorded legs (rep6_oct_2's four + the first sweep
+  legs). The Young-vs-racc ΔΔG read-out waits for ~10 Young legs (user ruling).
+  The `runs/folds_md/replicate_ddG_*.png` stay uncommitted until ~10 more legs, then regenerate
+  (via the `replicate_tally` import) and commit.
+
+**Third run of `shuffle_control_dock7`: produced and tailed.** r1 −8.40 (racc), r2 −24.75 (Young),
+**r3 −24.91 (Young)** — the two Young draws agree within 0.16 and racc's run 1 is the outlier.
+When its record lands, enroll the structure in `THIRD` (`code/replicate_tally.py:133`) so the
+triple column lights up. The racc duplicates of the two Young batches (547254/547288) were
+canceled the same day.
 
 **The accounting workbook (2026-10-25).** `PB_runs_accounting.xlsx` at the repo root tracks every
 run by peptide/fold-type. Its fill/audit machinery now lives in `code/workbook/`
