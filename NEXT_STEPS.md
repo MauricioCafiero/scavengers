@@ -24,8 +24,14 @@ s3_orig_f12_dock9_r2 +7.65 (vs its Modal run 1), shuffle_control_dock7_r3 (third
   Young: sweepY4/5/6 = 116212/116213/116214 (submitted now) and sweepY7/8/9 = 116215/116216/116217
   (`--dependency=afterany` on Y4/Y5/Y6), octinoxate; `~/openmm/submit_sweepY<n>.sh`; all 84 staged
   files md5-matched; one drain per `young_<job>.legs`. Session caffeinate re-armed `-t 43200` 21:20.
-  Next Young batch starts at `s2_esm2_control_o3cof_dock5` (oct) -- or oxybenzone once its tree is
-  staged on Young; next racc batch at `bgox31_5_rf3cof` (oxy).
+  **22:55:** Young ran ~2x faster than the model on big legs (YOUNG.md: overhead-bound, ~85 min a
+  leg flat on a good node, ~150 on a slow one), so Y7-Y9 would have drained by ~04:00. Queued the
+  **whole rest of octinoxate** (32 legs) as sweepY10-Y17 = 116252-116259, 4 legs each,
+  `--time=7:10:00` (not padded for slow nodes -- user: small requests are for backfill), in three
+  `afterany` chains behind Y7/Y8/Y9; one drain each. **Octinoxate is fully enrolled; 53
+  unreplicated remain, all oxybenzone** (17 in rep7_oxy_1-3). Young drains before 22:25 polled racc
+  by mistake (`DR_SOCK` `:-` bug, fixed + restarted). Next racc batch at `bgox31_5_rf3cof` (oxy);
+  Young's next work needs the oxybenzone tree staged there.
 - **racc (21:01):** rep6_oct_3 548596 RUNNING, rep6_oxy 548701 + **rep7_oct_1 548907** PENDING.
   rep7_oct_1 = sweep R1, the first racc sweep batch (user 2026-10-27 "go ahead and submit"): the 7
   small bg33_3/bg33_4 co-fold legs, 5.6 h est, `--time=7:07:00`; its drain (new script) runs on
