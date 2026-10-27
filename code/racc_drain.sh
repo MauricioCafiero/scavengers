@@ -43,7 +43,7 @@ set -u
 
 LEGFILE=${1:?usage: racc_drain.sh <legfile>}
 INTERVAL=${INTERVAL:-300}
-SOCK=${DR_SOCK:-$HOME/.ssh/cm-racc}    # empty DR_SOCK => plain ssh, no ControlMaster (Young)
+SOCK=${DR_SOCK-$HOME/.ssh/cm-racc}     # empty DR_SOCK => plain ssh, no ControlMaster (Young). NOT :- (2026-10-27: :- made an empty DR_SOCK fall back to cm-racc, so every Young drain polled racc and silently saw nothing)
 REMOTE=${DR_REMOTE:-racc.rdg.ac.uk}
 DCD=${DR_DCD:-/scratch5/gaussian/io927423/dcd}
 # How the leg's prod dir is built from the leg name ON THE CLUSTER: racc keeps it on scratch as
