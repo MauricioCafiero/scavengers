@@ -1,5 +1,10 @@
 # Working rules for this repo
 
+**Start of every session: read `NEXT_STEPS.md`'s "Active right now" block and its "Resume
+checklist" first, then `YOUNG.md` (untracked, Young HPC lane) and `RACC.md` (untracked, racc lane)
+before touching either cluster.** Live jobs, drains and the next batch to submit are recorded
+there, not in this file.
+
 Written 2026-10-02 after a day in which every rule below was learned by breaking it.
 
 **Use the scripts that already exist; parameterise, don't reimplement.** The established flow for a

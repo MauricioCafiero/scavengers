@@ -37,6 +37,38 @@ s3_orig_f12_dock9_r2 +7.65 (vs its Modal run 1), shuffle_control_dock7_r3 (third
   The `runs/folds_md/replicate_ddG_*.png` stay uncommitted until ~10 more legs, then regenerate
   (via the `replicate_tally` import) and commit.
 
+**Resume checklist (written 2026-10-27 19:55, before a context reset).** The drains are detached
+and survive a reset; the waiters do not — they were tasks of the old session.
+1. `date`; `pgrep -fl 'caffeinate -i -s'` — the session caffeinate (pid 33291, `-t 21600`) expires
+   ~00:56 on 2026-10-28. Re-arm detached if it is gone:
+   `~/miniforge3/bin/python -c "import subprocess; subprocess.Popen(['caffeinate','-i','-s','-t','21600'], start_new_session=True)"`.
+2. Drains that should be alive (`ps ax | grep racc_drain`; short-lived duplicates are forked poll
+   children): **racc** `rep6_oct_2`, `rep6_oct_3`, `rep6_oxy` (started 2026-10-23 on the OLD
+   script: direct fetch, records on the tail lock — compare each fetched `traj_wrapped.xtc` size
+   with the cluster's, CLAUDE.md "wedged fetch"); **Young** `young_116195/6/7` (new script). A drain
+   exits by itself once all its legs are drained or flagged.
+3. Re-arm the waiters (each exits after one report or 120 min; re-arm after every report):
+   `~/miniforge3/envs/openmm-md/bin/python code/watch_legs.py --on mmgbsa --legfile runs/folds_md/rep6_oct_2.legs --legfile runs/folds_md/rep6_oct_3.legs --legfile runs/folds_md/rep6_oxy.legs --legfile runs/folds_md/young_116195.legs --legfile runs/folds_md/young_116196.legs --legfile runs/folds_md/young_116197.legs`
+   (`--selftest` first), backgrounded. Report each leg off its whole-run MM/GBSA as it lands:
+   dG, windows, signed ΔΔG vs run 1, release/residence from `tail.log`; slide and tally after the record.
+4. Queue state: racc `squeue -u $USER` through the socket (`ssh -o ControlPath=~/.ssh/cm-racc
+   racc.rdg.ac.uk`), Young `ssh young-ng 'squeue -u $USER'`. A Young `Resources` reason means
+   "next for a free A100", not a long queue (YOUNG.md).
+5. **Next Young batch** (the full sweep): `python3 code/replicate_tally.py --unreplicated` lists
+   the remaining canonical legs (123 at 19:55: 53 oct, 70 oxy) with true particle counts. Take the
+   next ones in order; pack first-fit to ≤6 h of `8 + 10M × 0.466 ms × (N/7327)^e` min (e 0.4 ≤13k,
+   0.64 above), `--time` = estimate + 1 h 30; stage `<leg>_r2` from the parent's `system/`,
+   `protein_fixed.pdb`, `ligand_prepped.sdf`, `*_ligand.sdf`; tar each leg to
+   `young-ng:~/openmm/runs/<mol>/md/` and **md5-compare every file** (a dropped stream left a
+   truncated `system.xml` on 2026-10-27); sbatch from `~/openmm/submit_sweepY1.sh` (copy, change
+   `-J`, `--time`, `LEGS`); write `runs/folds_md/young_<jobid>.legs`, start its drain with the
+   YOUNG.md `DR_*` recipe at submission; add the structures to `PAIRS` in `replicate_tally.py`
+   as `sweep Y<n>`. Oxybenzone legs also need `RUNREL=runs/oxybenzone/md`, `SYSNAME=oxybenzone`,
+   `DR_LEGDIR='runs/oxybenzone/md/${leg}/prod_20ns'`, and the `~/openmm/runs/oxybenzone/md` tree
+   created on Young (absent so far).
+6. Commit every ~5 recorded legs (tables + each leg's `md_contacts.csv` + legfiles), additions-only
+   `git diff --numstat`. `main` is 7 commits ahead of `scavengers/main`; pushing is the user's call.
+
 **Third run of `shuffle_control_dock7`: produced and tailed.** r1 −8.40 (racc), r2 −24.75 (Young),
 **r3 −24.91 (Young)** — the two Young draws agree within 0.16 and racc's run 1 is the outlier.
 When its record lands, enroll the structure in `THIRD` (`code/replicate_tally.py:133`) so the

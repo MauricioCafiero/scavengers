@@ -252,5 +252,31 @@ def main():
               + f"   spread {max(runs) - min(runs):.2f}")
 
 
+def unreplicated():
+    """The full sweep's to-do list: canonical whole-run legs with no PAIRS entry, with true particle
+    counts (system.xml lists each particle twice) for batch sizing. `staged` = an <leg>_r2 dir
+    already exists, i.e. it is queued somewhere and must not be picked again."""
+    bg = os.path.expanduser("~/python_mac/boltzgen_local/md")
+    have = {(m, s) for m, s, _ in PAIRS}
+    print(f"{'mol':11s} {'structure':36s} {'run1 leg':14s} {'particles':>9s}  staged")
+    n = 0
+    for mol in ("octinoxate", "oxybenzone"):
+        canon = {}
+        for r in csv.DictReader(open(f"runs/{mol}/md/mmgbsa_summary.csv")):
+            if r["leg"] in ("prod_20ns", "prod_L1_modal"):
+                canon.setdefault(r["structure"], r["leg"])
+        for s, leg in sorted(canon.items()):
+            if (mol, s) in have:
+                continue
+            d = next(p for p in (f"runs/{mol}/md/{s}", f"{bg}/{s}") if os.path.isdir(p))
+            with open(f"{d}/system/system.xml") as fh:
+                parts = sum(1 for l in fh if l.lstrip().startswith("<Particle ")) // 2
+            staged = os.path.isdir(f"runs/{mol}/md/{s}_r2")
+            print(f"{mol:11s} {s:36s} {leg:14s} {parts:9d}  {'yes' if staged else ''}")
+            n += 1
+    print(f"\n{n} unreplicated canonical legs")
+
+
 if __name__ == "__main__":
-    main()
+    import sys
+    unreplicated() if "--unreplicated" in sys.argv else main()
