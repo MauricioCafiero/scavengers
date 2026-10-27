@@ -67,7 +67,9 @@ and survive a reset; the waiters do not — they were tasks of the old session.
    `DR_LEGDIR='runs/oxybenzone/md/${leg}/prod_20ns'`, and the `~/openmm/runs/oxybenzone/md` tree
    created on Young (absent so far).
 6. Commit every ~5 recorded legs (tables + each leg's `md_contacts.csv` + legfiles), additions-only
-   `git diff --numstat`. `main` is 7 commits ahead of `scavengers/main`; pushing is the user's call.
+   `git diff --numstat`, and **push each commit immediately** (`git push scavengers
+   "${c}:refs/heads/main"`, one commit at a time). Do not let commits accumulate unpushed — seven
+   did on 2026-10-27 and the user asked why on earth they were saved up.
 
 **Third run of `shuffle_control_dock7`: produced and tailed.** r1 −8.40 (racc), r2 −24.75 (Young),
 **r3 −24.91 (Young)** — the two Young draws agree within 0.16 and racc's run 1 is the outlier.
