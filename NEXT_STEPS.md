@@ -1,23 +1,31 @@
 # Where this stands and what to try next
 
-**Active right now (2026-10-27):** the targeted MM/GBSA replicate campaign — **78/101 replicate
-legs complete** via `code/replicate_tally.py` (stronger 25 / weaker 26 / unchanged 27, |ΔΔG| < 1.5;
-median 2.37, range 0.02–16.16). The racc queue stalled behind another user's GPU head, and the
-weekly racc allocation was nearly spent, so **rep5_oct_7 went to Young instead**: job **115794**
-on `young-ng` (`sbatch ~/openmm/submit_rep5_oct_7.sh`, 3 legs in one job — shuffle_control_dock9_r2,
-shuffle_control_dock7_r2, bg33_1_r2). The Young lane's recipe is **YOUNG.md** (hosts, env, staging,
-requests-minimal policy). Racc still holds PENDING rep5_oct_6 (547220), rep5_oct_7 (547254) and
-rep6_oct_1 (547288), driven onward by the detached feeder `runs/folds_md/feed_rest.sh`; rep6_oct_2/
-rep6_oct_3/rep6_oxy remain unsubmitted. **If racc's rep5_oct_7 (547254) starts while Young's 115794
-is running, the legs compute twice** — the per-leg guard cannot see across clusters; canceling
-547254 is the user's call. Whatever runs completes: fetch+tail+`code/record_leg.py octinoxate
-<leg>` per the legfiles, report every leg as it lands, re-arm `code/watch_legs.py` (--on record,
-selftest first) after every report, commit ~5 legs at a time with an additions-only
-`git diff --numstat` check. **The histogram / scatter PNGs (`runs/folds_md/replicate_ddG_*.png`)
+**Active right now (2026-10-27):** the targeted MM/GBSA replicate campaign — **79/101 replicate
+legs complete** via `code/replicate_tally.py` (stronger 26 / weaker 26 / unchanged 27, |ΔΔG| < 1.5;
+median 2.52, range 0.02–16.35) — running on **Young** now (job **115814** = rep5_oct_7 top-up, since
+leg 1 shuffle_control_dock9_r2 failed to an rm race and still owes a resubmission; job **115841** =
+rep6_oct_1, legs in sequence). The Young lane's recipe is **YOUNG.md** (hosts, env, staging,
+requests-minimal policy); measured A100 OpenCL rate **0.466 ms/step at 7,327 particles** (batch
+sizing: use racc exponents 0.4 ≤13k / 0.64 above; H100 numbers do not transfer). Racc still holds
+PENDING rep5_oct_6 (547220) — the stall behind the other user's 5-day GPU job continues — with the
+detached feeder `runs/folds_md/feed_rest.sh` armed to submit rep6_oct_2/rep6_oct_3/rep6_oxy as
+slots appear (the feeder is linear: it never revisits a passed batch). **The racc duplicates of the
+Young batches — rep5_oct_7 (547254) and rep6_oct_1 (547288) — were CANCELED 2026-10-27 at the
+user's direction; no double-compute risk remains for those legs.** Whatever runs
+completes: fetch+tail+`code/record_leg.py octinoxate <leg>` per the legfiles, report every leg as
+it lands, re-arm `code/watch_legs.py` (--on record, selftest first) after every report, commit ~5
+legs at a time with an additions-only `git diff --numstat` check (last commit 6074292d, 5 legs).
+**The histogram / scatter PNGs (`runs/folds_md/replicate_ddG_*.png`)
 stay UNCOMMITTED until ~10 more legs land — then regenerate and commit both** (regenerate via the
-`replicate_tally` import, see the 2026-10-24 transcript). Four legs (bg33_2_dock1_r2, bg33_1_dock1_r2,
-bg33_1_dock2_r2, bg33_2_r2) are recorded but UNCOMMITTED — the next commit is nearly due. Young's
-A100 per-step rate is unmeasured; read the first leg's `energy.csv` before sizing later batches.
+`replicate_tally` import, see the 2026-10-24 transcript).
+
+**DO A THIRD RUN of `shuffle_control_dock7` (`_r3`)** — its r2 (the first Young/A100 leg, ddG
+−16.35 vs run 1's −8.40) set the new max |ΔΔG| of the ordinary-pair distribution. **Submitted
+2026-10-27 as part of Young job 115876 (`topup2`)**, batched with the owed dock9_r2 top-up; Young
+estimate 172 min + 1 h 30 = `--time=4:22:00`. When the leg lands: enroll the structure in `THIRD`
+in `code/replicate_tally.py` so the triple column lights up. **The racc duplicates of these two
+batches (547254/547288) were canceled the same day** — the Young lane is their only lane now, so
+this r3 is Young-vs-racc cluster-sensitive only through the seed question, not a rerun race.
 
 **The accounting workbook (2026-10-25).** `PB_runs_accounting.xlsx` at the repo root tracks every
 run by peptide/fold-type. Its fill/audit machinery now lives in `code/workbook/`
