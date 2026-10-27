@@ -10,8 +10,10 @@ cd $REPO
 caffeinate -w $$ &               # dies with this script
 log() { print -r -- "[$(date '+%Y-%m-%d %H:%M:%S')] $*"; }
 
-typeset -a NAMES MOLS TIMES
-for lf in runs/folds_md/rep5.chain runs/folds_md/rep6.chain; do
+typeset -a NAMES MOLS TIMES CHAINS
+CHAINS=("$@")                    # chain files to feed, in order; default the original rep5 + rep6
+(( ${#CHAINS} )) || CHAINS=(runs/folds_md/rep5.chain runs/folds_md/rep6.chain)
+for lf in $CHAINS; do
   while IFS= read -r line; do
     [[ -z ${line// /} || ${line[1]} == '#' ]] && continue
     p=(${=line}); NAMES+=($p[1]); MOLS+=($p[2]); TIMES+=($p[3])

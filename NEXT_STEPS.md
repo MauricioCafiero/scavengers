@@ -16,7 +16,23 @@ s3_orig_f12_dock9_r2 +7.65 (vs its Modal run 1), shuffle_control_dock7_r3 (third
   `runs/oxybenzone/md` tree staged on Young first. Packing: first-fit in the inventory's order, ≤6 h
   of Young model estimate per job (the model over-predicted 115841 by ~1.3×, so it is a safe
   `--time` basis).
-- **racc:** feeder on rep6_oct_2 (RUNNING) / rep6_oxy / rep6_oct_3 (PENDING). Socket back 19:46. rep6_oct_2 legs 1–2
+- **Overnight cover (21:20, user: "make sure the queues don't empty out overnight"):** 31 more
+  sweep legs staged and queued, **85 unreplicated remain**.
+  racc: `runs/folds_md/feed_rest.sh runs/folds_md/rep7.chain` (feed_rest now takes chain files as
+  args) feeds `rep7_oxy_1/2/3` (sweep R2-R4, oxybenzone bgox31_2..5, 5.4-5.8 h est each) behind
+  rep7_oct_1, one per freed slot; each has its own drain (SYSNAME=oxybenzone).
+  Young: sweepY4/5/6 = 116212/116213/116214 (submitted now) and sweepY7/8/9 = 116215/116216/116217
+  (`--dependency=afterany` on Y4/Y5/Y6), octinoxate; `~/openmm/submit_sweepY<n>.sh`; all 84 staged
+  files md5-matched; one drain per `young_<job>.legs`. Session caffeinate re-armed `-t 43200` 21:20.
+  Next Young batch starts at `s2_esm2_control_o3cof_dock5` (oct) -- or oxybenzone once its tree is
+  staged on Young; next racc batch at `bgox31_5_rf3cof` (oxy).
+- **racc (21:01):** rep6_oct_3 548596 RUNNING, rep6_oxy 548701 + **rep7_oct_1 548907** PENDING.
+  rep7_oct_1 = sweep R1, the first racc sweep batch (user 2026-10-27 "go ahead and submit"): the 7
+  small bg33_3/bg33_4 co-fold legs, 5.6 h est, `--time=7:07:00`; its drain (new script) runs on
+  `runs/folds_md/rep7_oct_1.legs`. `feed_rest.sh` is finished -- the next racc batch is packed by
+  hand off `replicate_tally.py --unreplicated` (racc rate model), named `rep7_oct_<n>`/sweep R<n>.
+  rep6_oct_2 all four legs MM/GBSA'd 20:04-20:55 (+2.01, -0.09, +0.97, +3.22); records queued.
+- **racc (earlier):** feeder on rep6_oct_2 (RUNNING) / rep6_oxy / rep6_oct_3 (PENDING). Socket back 19:46. rep6_oct_2 legs 1–2
   (`bg33_4_rf3cof_dock1_r2`, `_dock4_r2`) done on scratch, re-fetching (dock1's first fetch died at
   16:48 leaving a 0-byte xtc, removed so the drain re-fetches).
 - **Young at 19:48:** 116195 RUNNING (started 19:46:28, a minute after submission); 116196/116197
