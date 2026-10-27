@@ -1,18 +1,23 @@
 # Where this stands and what to try next
 
-**Active right now (2026-10-25):** the targeted MM/GBSA replicate campaign, batches 5–6 — **69/101
-replicate legs complete** (stronger 22, weaker 24, unchanged 23, |ΔΔG| < 1.5; median 2.37, range
-0.02–16.16). Submitted and queued on racc: rep5_oct_3/4/5 (job IDs 538477/538506/538509, healthy
-`Priority`, limits 4:53–6:26); the feeder waits on rep5_oct_6 with MaxSubmitJobsPU=3 already used;
-then rep5_oct_7 and the three rep6 legfiles. Remaining legs land one at a time as an H100 frees;
-report each leg via `code/record_leg.py` as it is recorded, commit ~5 legs at a time (batch 6,
-9 legs, committed 2026-10-25 ~09:50), refresh `python3 code/replicate_tally.py` in each report,
-and re-arm `code/watch_legs.py` (17 legfiles, `--on record --max-minutes 600`, selftest first)
-after every report. **The histogram / scatter PNGs (`runs/folds_md/replicate_ddG_*.png`) stay
-UNCOMMITTED until ~10 more legs land — then regenerate and commit both.** If the racc allocation
-runs out (noted near the weekly limit 2026-10-25), the campaign pauses where it stands; a fresh
-session picks up at the tally state above and the legfiles still pending. The ΔΔG histogram
-regeneration is via the `replicate_tally` import (see the 2026-10-24 transcript).
+**Active right now (2026-10-27):** the targeted MM/GBSA replicate campaign — **78/101 replicate
+legs complete** via `code/replicate_tally.py` (stronger 25 / weaker 26 / unchanged 27, |ΔΔG| < 1.5;
+median 2.37, range 0.02–16.16). The racc queue stalled behind another user's GPU head, and the
+weekly racc allocation was nearly spent, so **rep5_oct_7 went to Young instead**: job **115794**
+on `young-ng` (`sbatch ~/openmm/submit_rep5_oct_7.sh`, 3 legs in one job — shuffle_control_dock9_r2,
+shuffle_control_dock7_r2, bg33_1_r2). The Young lane's recipe is **YOUNG.md** (hosts, env, staging,
+requests-minimal policy). Racc still holds PENDING rep5_oct_6 (547220), rep5_oct_7 (547254) and
+rep6_oct_1 (547288), driven onward by the detached feeder `runs/folds_md/feed_rest.sh`; rep6_oct_2/
+rep6_oct_3/rep6_oxy remain unsubmitted. **If racc's rep5_oct_7 (547254) starts while Young's 115794
+is running, the legs compute twice** — the per-leg guard cannot see across clusters; canceling
+547254 is the user's call. Whatever runs completes: fetch+tail+`code/record_leg.py octinoxate
+<leg>` per the legfiles, report every leg as it lands, re-arm `code/watch_legs.py` (--on record,
+selftest first) after every report, commit ~5 legs at a time with an additions-only
+`git diff --numstat` check. **The histogram / scatter PNGs (`runs/folds_md/replicate_ddG_*.png`)
+stay UNCOMMITTED until ~10 more legs land — then regenerate and commit both** (regenerate via the
+`replicate_tally` import, see the 2026-10-24 transcript). Four legs (bg33_2_dock1_r2, bg33_1_dock1_r2,
+bg33_1_dock2_r2, bg33_2_r2) are recorded but UNCOMMITTED — the next commit is nearly due. Young's
+A100 per-step rate is unmeasured; read the first leg's `energy.csv` before sizing later batches.
 
 **The accounting workbook (2026-10-25).** `PB_runs_accounting.xlsx` at the repo root tracks every
 run by peptide/fold-type. Its fill/audit machinery now lives in `code/workbook/`

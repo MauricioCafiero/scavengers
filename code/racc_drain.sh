@@ -43,9 +43,14 @@ set -u
 
 LEGFILE=${1:?usage: racc_drain.sh <legfile>}
 INTERVAL=${INTERVAL:-300}
-SOCK=$HOME/.ssh/cm-racc
-REMOTE=racc.rdg.ac.uk
-DCD=/scratch5/gaussian/io927423/dcd
+SOCK=${DR_SOCK:-$HOME/.ssh/cm-racc}    # empty DR_SOCK => plain ssh, no ControlMaster (Young)
+REMOTE=${DR_REMOTE:-racc.rdg.ac.uk}
+DCD=${DR_DCD:-/scratch5/gaussian/io927423/dcd}
+# How the leg's prod dir is built from the leg name ON THE CLUSTER: racc keeps it on scratch as
+# "<leg>_prod"; Young keeps it in the tree as "runs/octinoxate/md/<leg>/prod_20ns" (DCD then the
+# workspace root). ${(e)...} expands the inner ${leg} per leg. (Young: DR_DCD='$HOME/openmm'
+# DR_LEGDIR='runs/octinoxate/md/${leg}/prod_20ns' DR_SOCK= DR_REMOTE=young-ng SYSNAME=octinoxate)
+LEGDIR=${DR_LEGDIR:-'${leg}_prod'}
 BG=$HOME/python_mac/boltzgen_local
 REPO=${0:A:h:h}
 MDPY=$HOME/miniforge3/envs/openmm-md/bin/python
@@ -56,7 +61,10 @@ caffeinate -w $$ &
 # r <seconds> <remote command>: ssh bounded by a hard watchdog. ConnectTimeout/ServerAlive* cover a
 # dead network; the wedged-master case (socket path alive, master stuck) is what the cap is for.
 r() { cap=$1; shift
-      ssh -n -o ControlPath=$SOCK -o ConnectTimeout=15 -o ServerAliveInterval=10 \
+      typeset -a ssho
+      ssho=()
+      [[ -n $SOCK ]] && ssho=(-o ControlPath=$SOCK)
+      ssh -n "${ssho[@]}" -o ConnectTimeout=15 -o ServerAliveInterval=10 \
           -o ServerAliveCountMax=3 -o BatchMode=yes $REMOTE "$@" & pid=$!
       { sleep $cap; kill -9 $pid 2>/dev/null } & wd=$!
       wait $pid; rc=$?
@@ -177,7 +185,7 @@ remote_phase() {    # bounded ssh calls: status + eager fetch of every completed
                 launch_tail $src $leg
             fi
             remaining=$((remaining+1))
-        elif r 30 "test -f $DCD/${leg}_prod/traj_wrapped.xtc" 2>/dev/null; then
+        elif r 30 "test -f $DCD/${(e)LEGDIR}/traj_wrapped.xtc" 2>/dev/null; then
             state=COMPLETED
         else
             # Not finished. Only consult sacct to tell "still going / not yet started" from a leg
@@ -200,7 +208,7 @@ remote_phase() {    # bounded ssh calls: status + eager fetch of every completed
         if [[ $state == COMPLETED ]]; then
             log "=== $leg COMPLETED -- fetching wrapped solute"
             mkdir -p $src/prod_20ns
-            if r 600 "cd $DCD/${leg}_prod 2>/dev/null && tar czf - traj_wrapped.xtc traj_wrapped.pdb energy.csv rmsd.csv analysis.png final.pdb 2>/dev/null" | tar xzf - -C $src/prod_20ns 2>/dev/null; then
+            if r 600 "cd $DCD/${(e)LEGDIR} 2>/dev/null && tar czf - traj_wrapped.xtc traj_wrapped.pdb energy.csv rmsd.csv analysis.png final.pdb 2>/dev/null" | tar xzf - -C $src/prod_20ns 2>/dev/null; then
                 if [[ ! -f $src/prod_20ns/traj_wrapped.xtc ]]; then
                     log "  FETCH INCOMPLETE for $leg: no traj_wrapped.xtc -- did the in-job analyze run? retrying next round"
                     remaining=$((remaining+1)); continue

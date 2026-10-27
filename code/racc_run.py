@@ -19,6 +19,11 @@ Staging, submission and the tail are all driven over ssh from the Mac; RACC.md (
 connection recipe and the host-specific facts, CLAUDE.md the workflow. Cluster-side paths assume the
 workspace `~/remote_work/openmm` and env `~/.conda/envs/openmm-md` (RACC.md maps them).
 
+Workspace, env, platform and scratch are env-overridable (WORKROOT, RUNREL, OMD, PLATFORM,
+DCD_DIR): defaults are racc's (`~/remote_work/openmm`, openmm-md, OpenCL) and Young uses
+WORKROOT=~/openmm, OMD=~/envs/pept-md-gpu/bin/omd, PLATFORM=CUDA, DCD_DIR= (empty -- dcd stays
+in the leg dir; home and scratch are the same lustre there).
+
 Launch (from ~/remote_work/openmm, in an activated env):
     LEG=bgox31_3 submit_gpu.sh racc_run.py                     # one leg, full 20 ns
     LEGS=bgox31_4,bgox31_4_dock1 submit_gpu.sh racc_run.py     # several, sequentially, one slot
@@ -34,9 +39,13 @@ WORKROOT = os.path.expanduser(os.environ.get("WORKROOT", "~/remote_work/openmm")
 # second molecule (e.g. RUNREL=runs/oxybenzone/md). The scratch dcd dir keys on the leg name only, so
 # it needs no change as long as leg names stay unique across systems.
 RUNREL = os.environ.get("RUNREL", "runs/octinoxate/md")
-DCD_DIR = "/scratch5/gaussian/io927423/dcd"
+# DCD_DIR is racc's scratch volume; setting it EMPTY puts the dcd in the leg's own prod dir
+# instead (Young's lustre home has room, and no racc scratch exists there). PLATFORM and OMD
+# likewise: rac's env runs OpenCL (no CUDA build), Young's runs CUDA.
+DCD_DIR = os.environ.get("DCD_DIR", "/scratch5/gaussian/io927423/dcd")
+PLATFORM = os.environ.get("PLATFORM", "OpenCL")
 STEPS = os.environ.get("STEPS", "10000000")
-OMD = os.path.expanduser("~/.conda/envs/openmm-md/bin/omd")
+OMD = os.path.expanduser(os.environ.get("OMD", "~/.conda/envs/openmm-md/bin/omd"))
 
 # LEGS wins if set; LEG stays supported so existing single-leg invocations are unchanged.
 LEGS = [x for x in os.environ.get("LEGS", os.environ.get("LEG", "shuffle_control_dock7")).split(",")
@@ -52,16 +61,19 @@ def run_leg(leg):
     """Dynamics plus the on-cluster strip for one leg. Returns True if the leg is done."""
     base = os.path.join(WORKROOT, RUNREL, leg)
     prod = os.path.join(base, "prod_20ns")
-    scratch_prod = os.path.join(DCD_DIR, f"{leg}_prod")
+    # racc keeps the dcd on a scratch volume via a symlink; when DCD_DIR is unset the prod dir is
+    # just a real directory in the leg (fine where home and scratch share a big filesystem).
+    scratch_prod = os.path.join(DCD_DIR, f"{leg}_prod") if DCD_DIR else prod
 
     if not os.path.exists(f"{base}/system/system.xml"):
         print(f"[skip] {leg}: no system.xml at {base}/system -- stage and build it first")
         return False
 
     # Already finished, by its own output: a batch resubmitted after a preemption skips what it
-    # already did rather than paying for it twice.
+    # already did rather than paying for it twice. (On racc prod is the scratch symlink, so this
+    # and the scratch check below are the same file.)
     if os.path.exists(f"{scratch_prod}/traj_wrapped.xtc"):
-        print(f"[skip] {leg}: traj_wrapped.xtc already on scratch, nothing to redo")
+        print(f"[skip] {leg}: traj_wrapped.xtc already present, nothing to redo")
         return True
 
     # Preflight, before the GPU does anything: the 2026-10-04 quota fill killed both in-flight legs
@@ -73,9 +85,9 @@ def run_leg(leg):
     n_particles = XmlSerializer.deserialize(sysxml).getNumParticles()
     dcd_bytes = int(n_particles * (int(STEPS) / 500 + 1) * 12 * 1.05)
     need_scratch = dcd_bytes / 2**30 * 1.2  # 20% headroom over the projection
-    if free_gb(DCD_DIR) < need_scratch:
+    if free_gb(base) < need_scratch:
         print(f"ABORTING {leg}: projected dcd {dcd_bytes / 2**30:.1f} GB; "
-              f"scratch {free_gb(DCD_DIR):.1f} GB free (need {need_scratch:.1f})")
+              f"disk {free_gb(base):.1f} GB free (need {need_scratch:.1f})")
         return False
     print(f"[preflight] {leg}: {n_particles} particles, "
           f"projected dcd {dcd_bytes / 2**30:.1f} GB, OK", flush=True)
@@ -86,13 +98,16 @@ def run_leg(leg):
     # the leg dir, so the dcd lands on scratch from its first byte while every path reading
     # `<leg>/prod_20ns` (the Mac-side fetch, run_dock_pose_md.sh's tail) stays unchanged. The small
     # out-dir residents (energy.csv, checkpoint.chk, final.pdb) ride along; home stays a few MB.
-    os.makedirs(DCD_DIR, exist_ok=True)
-    if os.path.lexists(prod) and not os.path.islink(prod):
-        # a real prod dir means a legacy/failed run's leftovers; set them aside rather than delete
-        os.replace(prod, prod + "_home_old")
-    os.makedirs(scratch_prod, exist_ok=True)
-    if not os.path.islink(prod):
-        os.symlink(scratch_prod, prod)
+    if DCD_DIR:
+        os.makedirs(DCD_DIR, exist_ok=True)
+        if os.path.lexists(prod) and not os.path.islink(prod):
+            # a real prod dir means a legacy/failed run's leftovers; set them aside rather than delete
+            os.replace(prod, prod + "_home_old")
+        os.makedirs(scratch_prod, exist_ok=True)
+        if not os.path.islink(prod):
+            os.symlink(scratch_prod, prod)
+    else:
+        os.makedirs(prod, exist_ok=True)
 
     # Same invocation as run_dock_pose_md.sh's dynamics stage, platform OpenCL: the conda-forge
     # OpenMM build has no CUDA platform (RACC.md), and the platform string matches the OpenCL legs
@@ -102,7 +117,7 @@ def run_leg(leg):
                     "--topology", f"{base}/system/complex.pdb",
                     "--out-dir", prod,
                     "--steps", STEPS,
-                    "--platform", "OpenCL"], check=True)
+                    "--platform", PLATFORM], check=True)
 
     # Strip to the wrapped solute HERE, on the cluster -- mirroring modal_md.py::produce. The
     # full-system dcd (21k+ atoms, ~5 GB) stays on scratch for a possible re-strip/warm restart, and
@@ -120,8 +135,8 @@ def run_leg(leg):
     # Fetched from the Mac side as `dcd/<leg>_prod/traj_wrapped.{xtc,pdb}` (NOT the full dcd, which
     # stays here); run_dock_pose_md.sh's whole-run analyze guard then skips, and its window loop
     # slices the wrapped solute instead of the full box. Nothing needs moving.
-    print(f"[racc_run] {leg}: full trajectory at {scratch_prod}/traj.dcd (kept on scratch)")
-    print(f"[racc_run] {leg}: wrapped solute at {scratch_prod}/traj_wrapped.xtc -- fetch this, "
+    print(f"[racc_run] {leg}: full trajectory at {prod}/traj.dcd (kept on-cluster)")
+    print(f"[racc_run] {leg}: wrapped solute at {prod}/traj_wrapped.xtc -- fetch this, "
           f"not the dcd", flush=True)
     return True
 
