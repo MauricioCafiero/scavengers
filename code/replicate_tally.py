@@ -348,6 +348,76 @@ def unreplicated():
     print(f"\n{n} unreplicated canonical legs")
 
 
+def plot(out="runs/folds_md/replicate_ddG_histogram.png"):
+    """The signed-ddG histogram over every complete pair, plus the run 1 and run 2 dG distributions
+    on identical bins and axes -- the seed moves individual legs, and the lower two panels show
+    whether it moves the population. Needs matplotlib, so run with .venv/bin/python."""
+    import statistics as st
+    import matplotlib
+    matplotlib.use("Agg")
+    import matplotlib.pyplot as plt
+    pairs = [(a, b) for a, b in ((dg(m, s, "mmgbsa_summary.csv"),
+                                  dg(m, s + "_r2", "mmgbsa_replicates.csv")) for m, s, _ in PAIRS)
+             if a is not None and b is not None]
+    r1, r2 = [a for a, _ in pairs], [b for _, b in pairs]
+    d = [b - a for a, b in pairs]
+    n = {"stronger": sum(x <= -UNCHANGED for x in d), "weaker": sum(x >= UNCHANGED for x in d)}
+    n["unchanged"] = len(d) - n["stronger"] - n["weaker"]
+    ink, muted, grid = "#1f1f1f", "#6b6b6b", "#e3e3e3"
+    col = {"stronger": "#2a78d6", "unchanged": "#a8a39e", "weaker": "#e24a4a"}
+    fig = plt.figure(figsize=(10.5, 9.6))
+    gs = fig.add_gridspec(2, 2, height_ratios=[1.15, 1], hspace=0.55, wspace=0.12)
+    ax = fig.add_subplot(gs[0, :])
+    lo, hi = int(min(d)) - 2, int(max(d)) + 2
+    for c in range(lo, hi + 1):   # 1 kcal/mol bins centred on integers: the grey trio is |ddG| < 1.5
+        k = sum(c - 0.5 <= x < c + 0.5 for x in d)
+        if k:
+            v = "unchanged" if abs(c) < UNCHANGED else ("stronger" if c < 0 else "weaker")
+            ax.bar(c, k, width=0.86, color=col[v])
+    ax.axvline(0, color=muted, lw=1, ymin=0.97)
+    ax.set_xlabel("signed ΔΔG, replicate - run 1 (kcal/mol)", color=ink)
+    ax.set_ylabel("legs", color=ink)
+    ax.set_title("Replicate MM/GBSA dG: run 2 vs run 1, all complete campaign pairs", color=ink)
+    med = st.median(abs(x) for x in d)
+    ax.text(0, -0.2, f"n = {len(d)}/{len(PAIRS)} pairs    stronger (neg): {n['stronger']}    "
+            f"unchanged (|ddG| < {UNCHANGED}): {n['unchanged']}    weaker (pos): {n['weaker']}\n"
+            f"median |ddG| {med:.2f} kcal/mol    same system.xml, different seed    run 2 vs run 1",
+            transform=ax.transAxes, va="top", color=muted, fontsize=9)
+    # Run 1 and run 2 on one bin grid and one y-scale, so the two shapes compare by eye.
+    blo, bhi = int(min(r1 + r2)) - 2, int(max(r1 + r2)) + 2
+    bins = [blo + 2 * i for i in range((bhi - blo) // 2 + 2)]
+    ymax = max(max(sum(e <= x < e + 2 for x in r) for e in bins) for r in (r1, r2)) + 1
+    for j, (r, name) in enumerate(((r1, "run 1"), (r2, "run 2"))):
+        a2 = fig.add_subplot(gs[1, j])
+        a2.hist(r, bins=bins, color="#5b6b7f", rwidth=0.86)
+        a2.set_ylim(0, ymax)
+        a2.set_xlim(bins[0], bins[-1])
+        a2.set_title(f"{name} whole-run dG (n = {len(r)})", color=ink, fontsize=11)
+        a2.set_xlabel("dG bind (kcal/mol)", color=ink)
+        if j == 0:
+            a2.set_ylabel("legs", color=ink)
+        else:
+            a2.tick_params(labelleft=False)
+        a2.text(0.02, 0.97, f"mean {st.mean(r):.2f}\nmedian {st.median(r):.2f}\nSD {st.stdev(r):.2f}",
+                transform=a2.transAxes, va="top", color=muted, fontsize=9)
+    for a in fig.axes:
+        a.yaxis.set_major_locator(matplotlib.ticker.MaxNLocator(integer=True))   # counts of legs
+        a.grid(axis="y", color=grid, lw=0.8)
+        a.set_axisbelow(True)
+        for s in ("top", "right", "left"):
+            a.spines[s].set_visible(False)
+        a.spines["bottom"].set_color(muted)
+        a.tick_params(colors=muted, length=0)
+    fig.savefig(out, dpi=110, bbox_inches="tight")
+    print(f"wrote {out}: {len(d)} pairs; run 1 mean {st.mean(r1):.2f} SD {st.stdev(r1):.2f}, "
+          f"run 2 mean {st.mean(r2):.2f} SD {st.stdev(r2):.2f}, mean ddG {st.mean(d):+.2f}")
+
+
 if __name__ == "__main__":
     import sys
-    unreplicated() if "--unreplicated" in sys.argv else main()
+    if "--unreplicated" in sys.argv:
+        unreplicated()
+    elif "--plot" in sys.argv:
+        plot()
+    else:
+        main()
