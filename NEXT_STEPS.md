@@ -16,6 +16,14 @@ s3_orig_f12_dock9_r2 +7.65 (vs its Modal run 1), shuffle_control_dock7_r3 (third
   `runs/oxybenzone/md` tree staged on Young first. Packing: first-fit in the inventory's order, ≤6 h
   of Young model estimate per job (the model over-predicted 115841 by ~1.3×, so it is a safe
   `--time` basis).
+- **03:15 2026-10-28: Young home quota (100 GB) filled with full dcds** -> Y7 leg 3, Y8 legs 3-4
+  aborted and Y10-Y17 (116252-116259) FAILED in 1-2 s; queue empty 02:34-03:15. 25 dcds moved to
+  `/scratch/mmm1166/dcd` (symlinked; nothing deleted), all submit scripts now `DCD_DIR=` scratch.
+  **Resubmitted:** Y10=116330 Y11=116331 Y12=116332 (start now), **Y18=116333** (the 3 aborted
+  legs: orig_f12_o3cof_dock1_r2, orig_f12_o3pcof_dock4_r2, orig_f12_rf3cof_dock5_r2), Y13=116334
+  Y14=116335 Y15=116336 Y16=116337 Y17=116338 chained afterany as before. The legfiles keep the OLD
+  job ids in their names (`young_116252..9.legs`, and Y18's legs sit in `young_116215/6.legs`);
+  their drains key on xtc paths, not job ids, so they need no restart. See YOUNG.md.
 - **Overnight cover (21:20, user: "make sure the queues don't empty out overnight"):** 31 more
   sweep legs staged and queued, **85 unreplicated remain**.
   racc: `runs/folds_md/feed_rest.sh runs/folds_md/rep7.chain` (feed_rest now takes chain files as
