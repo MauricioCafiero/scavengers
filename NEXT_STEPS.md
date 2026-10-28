@@ -16,6 +16,16 @@ s3_orig_f12_dock9_r2 +7.65 (vs its Modal run 1), shuffle_control_dock7_r3 (third
   `runs/oxybenzone/md` tree staged on Young first. Packing: first-fit in the inventory's order, ≤6 h
   of Young model estimate per job (the model over-predicted 115841 by ~1.3×, so it is a safe
   `--time` basis).
+- **15:00 2026-10-28: the last 53 oxybenzone legs went to Young** (user: "load them on young" --
+  the balance NOT already in racc's rep7_oxy_1-3). `~/openmm/runs/oxybenzone/md` created on Young,
+  318 files md5-matched; sweepY19-Y32 = 117342-117355 (13 x 4 legs + 1, `RUNREL=runs/oxybenzone/md`,
+  `DCD_DIR` scratch), three `afterany` chains behind Y16 (116337), Y17 (116338) and a fresh one
+  (Y21, PENDING on Priority -- other users now ahead); one drain each with `SYSNAME=oxybenzone`,
+  `DR_LEGDIR='runs/oxybenzone/md/${leg}/prod_20ns'`. **Every canonical leg is now enrolled: tally
+  148/230, 0 unreplicated.** racc (stalled since its 10:40/10:48 preemptions behind another user)
+  still holds rep7_oct_1 (3 legs left) + rep7_oxy_1/2 queued, rep7_oxy_3 held by feed_rest.sh.
+  Measured Young per-leg wall today: 67-91 min (sacct). Read job state from sacct, not from when a
+  leg's MM/GBSA lands -- that lags the job end by 30-60 min of fetch + tail.
 - **03:15 2026-10-28: Young home quota (100 GB) filled with full dcds** -> Y7 leg 3, Y8 legs 3-4
   aborted and Y10-Y17 (116252-116259) FAILED in 1-2 s; queue empty 02:34-03:15. 25 dcds moved to
   `/scratch/mmm1166/dcd` (symlinked; nothing deleted), all submit scripts now `DCD_DIR=` scratch.
