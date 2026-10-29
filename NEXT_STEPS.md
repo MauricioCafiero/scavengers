@@ -26,6 +26,12 @@ s3_orig_f12_dock9_r2 +7.65 (vs its Modal run 1), shuffle_control_dock7_r3 (third
   still holds rep7_oct_1 (3 legs left) + rep7_oxy_1/2 queued, rep7_oxy_3 held by feed_rest.sh.
   Measured Young per-leg wall today: 67-91 min (sacct). Read job state from sacct, not from when a
   leg's MM/GBSA lands -- that lags the job end by 30-60 min of fetch + tail.
+- **18:06 2026-10-29: Young SCRATCH quota (250 GB) filled with full dcds** -> Y25, Y28, Y29, Y30,
+  Y32 (17 legs) FAILED on `Errno 122`; Y26's last leg finished just before and is complete. User
+  rule: never keep dcds once the wrapped solute is verified local -> 91 verified dcds deleted
+  (scratch 250 -> 4 GB). **Resubmitted:** Y25=119187, Y29=119188 (heads), Y28=119189 afterany
+  Y25, Y32=119190 afterany Y29, Y30=119191 afterany Y31 (117354, untouched, pending). Legfiles
+  keep the old 1173xx IDs; their drains are still running. Delete each Young dcd once recorded.
 - **03:15 2026-10-28: Young home quota (100 GB) filled with full dcds** -> Y7 leg 3, Y8 legs 3-4
   aborted and Y10-Y17 (116252-116259) FAILED in 1-2 s; queue empty 02:34-03:15. 25 dcds moved to
   `/scratch/mmm1166/dcd` (symlinked; nothing deleted), all submit scripts now `DCD_DIR=` scratch.
