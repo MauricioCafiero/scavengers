@@ -466,11 +466,63 @@ def plot(out="runs/folds_md/replicate_ddG_histogram.png"):
           f"run 2 mean {st.mean(r2):.2f} SD {st.stdev(r2):.2f}, mean ddG {st.mean(d):+.2f}")
 
 
+def plot_meanbe(out="runs/folds_md/replicate_ddG_vs_meanBE.png"):
+    """Signed ddG and |ddG| against the mean of the two runs' dG, one point per complete pair,
+    coloured by molecule, each with a least-squares line and Pearson r. x is the mean rather than
+    run 1 because run 1 sits inside the delta (Oldham): ddG against run 1 alone correlates
+    negatively by construction. Needs matplotlib, so run with .venv/bin/python."""
+    import statistics as st
+    import matplotlib
+    matplotlib.use("Agg")
+    import matplotlib.pyplot as plt
+    pts = [(m, (a + b) / 2, b - a) for m, a, b in ((m, dg(m, s, "mmgbsa_summary.csv"),
+                                                    dg(m, s + "_r2", "mmgbsa_replicates.csv"))
+                                                   for m, s, _ in PAIRS)
+           if a is not None and b is not None]
+    ink, muted, grid = "#1f1f1f", "#6b6b6b", "#e3e3e3"
+    col = {"octinoxate": "#1f8a3a", "oxybenzone": "#2a78d6"}
+    fig, axes = plt.subplots(1, 2, figsize=(14.5, 5.6))
+    x = [p[1] for p in pts]
+    for ax, ys, title, ylab in ((axes[0], [p[2] for p in pts], "Direction: run 2 - run 1",
+                                 "signed ΔΔG (kcal/mol)"),
+                                (axes[1], [abs(p[2]) for p in pts],
+                                 "Magnitude: how far apart the two runs land", "|ddG| (kcal/mol)")):
+        for mol in col:
+            ax.scatter([p[1] for p in pts if p[0] == mol],
+                       [y for p, y in zip(pts, ys) if p[0] == mol],
+                       s=34, color=col[mol], edgecolor="white", linewidth=0.8, label=mol, zorder=3)
+        slope, icpt = st.linear_regression(x, ys)
+        xs = [min(x) - 0.5, max(x) + 0.5]
+        ax.plot(xs, [slope * v + icpt for v in xs], color=muted, lw=1.6, zorder=2)
+        if ax is axes[0]:
+            ax.axhline(0, color=muted, lw=1, zorder=1)
+        ax.text(0.04, 0.95, f"r = {st.correlation(x, ys):+.2f}", transform=ax.transAxes,
+                va="top", color=ink, fontsize=12, fontweight="bold")
+        ax.set_title(title, color=ink)
+        ax.set_xlabel("mean of run 1 and run 2 dG (kcal/mol)", color=ink)
+        ax.set_ylabel(ylab, color=ink)
+        ax.grid(color=grid, lw=0.8)
+        ax.set_axisbelow(True)
+        for s in ("top", "right"):
+            ax.spines[s].set_visible(False)
+        ax.spines["bottom"].set_color(muted)
+        ax.spines["left"].set_color(muted)
+        ax.tick_params(colors=muted, length=0)
+    axes[0].legend(loc="lower left", bbox_to_anchor=(-0.12, 1.08), frameon=False, labelcolor=ink)
+    fig.text(0.08, -0.02, f"n = {len(pts)}/{len(PAIRS)} complete pairs    x = mean of the two runs "
+             f"(Oldham correction: run 1 alone is inside the delta)", color=muted, fontsize=9)
+    fig.savefig(out, dpi=110, bbox_inches="tight")
+    print(f"wrote {out}: {len(pts)} pairs; r(signed) {st.correlation(x, [p[2] for p in pts]):+.2f}, "
+          f"r(|ddG|) {st.correlation(x, [abs(p[2]) for p in pts]):+.2f}")
+
+
 if __name__ == "__main__":
     import sys
     if "--unreplicated" in sys.argv:
         unreplicated()
     elif "--plot" in sys.argv:
         plot()
+    elif "--meanbe" in sys.argv:
+        plot_meanbe()
     else:
         main()
