@@ -174,6 +174,9 @@ remote_phase() {    # bounded ssh calls: status + eager fetch of every completed
     local i state
     for i in {1..${#LEGS}}; do
         src=${SRCS[$i]}; leg=${LEGS[$i]}
+        # Reset per leg: the COMPLETED fetch block below sits outside the if/elif, so a state left
+        # over from the previous leg re-fetched (and re-tailed) an already-local leg (2026-10-30).
+        state=""
         [[ -f $src/.drained || -f $src/.drain_failed ]] && continue
         if [[ $online == 0 ]]; then
             remaining=$((remaining+1)); continue
