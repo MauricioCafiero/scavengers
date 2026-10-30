@@ -368,8 +368,10 @@ was tried first and is wrong: it saves nothing from the kill that happens mid-wr
 
 **Strip to the solute on the cluster; fetch only the wrapped solute, never the full dcd (racc mirrors
 Modal).** After `omd run`, `racc_run.py` runs the same `omd analyze` the local tail runs to write
-`traj_wrapped.{xtc,pdb}` (solute-only, ~100 MB) beside the full dcd on scratch; the full `traj.dcd`
-stays on scratch. Fetch `dcd/<leg>_prod/traj_wrapped.{xtc,pdb}` + `energy.csv` + the small analyze
+`traj_wrapped.{xtc,pdb}` (solute-only, ~100 MB) beside the full dcd on scratch. **The full `traj.dcd`
+is NOT kept** (user rule): once the local `traj_wrapped.xtc` matches the cluster's size (or reads
+20,000 frames) and `energy.csv` has 20,001 rows, delete the dcd on scratch -- on racc and on Young
+alike. Young's 250 GB scratch quota filled with kept dcds on 2026-10-29 and killed 17 legs. Fetch `dcd/<leg>_prod/traj_wrapped.{xtc,pdb}` + `energy.csv` + the small analyze
 outputs — **not** the 5 GB dcd. The Mac has 8 GB RAM and mdtraj loads a trajectory whole, so fetching
 the full box and stripping locally OOM'd the analyze at ~4–5 GB. With only the wrapped solute local,
 run_dock_pose_md.sh's whole-run analyze guard skips and its window loop slices the wrapped solute
@@ -400,7 +402,14 @@ situation is a lane with no table yet. That message reads as "nothing to do", so
 pocket-guided lane's first legs recorded with no pair row while the audit line still said `OK`.
 It now starts the lane's table — but **that file is keyed on the design arm, not the peptide**, so a
 "new" lane table is often one another peptide of the same shell already owns (`s3_esm2_f4` and
-`s3_orig_f12` are both `design_shell3`). Starting it from an empty row list rewrote it with only the
+`s3_orig_f12` are both `design_shell3`). **Two more lookup bugs, fixed 2026-10-30:** it globbed
+`pair_contacts_*.csv`, which cannot match the bare `pair_contacts.csv` holding octinoxate's
+base-lane parents (37 designed-peptide replicates recorded with no pair row, logged as "not a
+co-fold lane leg"); and it took the design from the table's FIRST row, which in the mixed-design
+base-lane tables (`pair_contacts.csv`, `pair_contacts_boltz_missing.csv`: design.json + shells 1-3)
+scored 14 ox2/ox3 legs against shell 1 on the backfill (caught before commit). It now globs
+`pair_contacts*.csv` and uses the parent's own row's design. After any pair backfill, check each new
+row's `design` against its run-1 row's. Starting it from an empty row list rewrote it with only the
 new leg, and the `before <= set(after)` assertion passed vacuously because `before` was empty: five
 rows went that way across three files before a `git diff --numstat` caught it on 2026-10-20. It now
 loads the file's rows when it exists. **Run `git diff --numstat` on every leg's commit** — an

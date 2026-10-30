@@ -1,6 +1,26 @@
 # Where this stands and what to try next
 
-**Active right now (2026-10-27, 19:50):** MM/GBSA replicates — tally **88/107** via
+**Active right now (2026-10-30, 23:59): nothing.** The MM/GBSA replicate campaign is **complete:
+230/230** (`code/replicate_tally.py`: stronger 78 / weaker 65 / unchanged 87, |ΔΔG| < 1.5; median
+|ΔΔG| 2.37; run 1 mean −12.13 SD 4.87, run 2 mean −12.66 SD 4.84; mean ΔΔG −0.53). Last batch
+c79f79b3. No jobs on either cluster, no drains/tails/records running locally; every full cluster
+dcd of a recorded leg deleted (user rule: never kept once the wrapped solute is verified local).
+- **Figures at 230/230** (2f21bd70): `runs/folds_md/replicate_ddG_histogram.png` (`--plot`) and
+  `replicate_ddG_vs_meanBE.png` (new `--meanbe`; r(signed ΔΔG, mean dG) −0.01, r(|ΔΔG|) −0.08 --
+  the 59-pair −0.24 trend is gone).
+- **Workbook** `PB_runs_accounting.xlsx` (untracked): R-V (DG2 block) filled on all 229 rows;
+  new **W/X/Y = K/L/M for run 2** (550765b1). 229 rows vs 230 replicates is by design
+  (`shuffle_control_dock9` extra dock). Both audits 0 problems.
+- **Fixed tonight:** `racc_drain.sh` re-fetched an already-local leg after a fresh fetch (stale
+  `state`, 2fdf97b0); `record_leg.py` missed `pair_contacts.csv` and took the design from a mixed
+  table's first row (550765b1) -- 37 base-lane replicate pair rows backfilled on their run-1 design.
+- **Last 30 h** (the scratch-quota incident and the racc duplicate campaign rep8-rep10 that finished
+  every Young leg while Young sat on Priority) is logged in the history block below; the method is in
+  YOUNG.md ("Duplicating legs on racc").
+- **Next:** whatever the user picks; the replicate question itself is answered. Third runs exist for
+  the three cells in `THIRD` only.
+
+**History -- active block as of 2026-10-27, 19:50 (kept for the log):** MM/GBSA replicates — tally **88/107** via
 `code/replicate_tally.py` (stronger 30 / weaker 28 / unchanged 30, |ΔΔG| < 1.5; median |ΔΔG|
 2.50). Batch 9 (six legs) recorded and committed: s3_orig_f12_rf3cof_dock1_r2 +7.03,
 s3_esm2_f4_rf3cof_dock3_r2 −0.34, s2_esm2_control_rf3cof_dock1_r2 +2.06, s3_esm2_control_r2 −1.73,
