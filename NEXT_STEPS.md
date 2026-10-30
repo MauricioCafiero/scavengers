@@ -151,7 +151,10 @@ guided rows), never from adjacent/nonadjacent cell text; GNINA pose keys are lan
 (`o3gninaN`/`rf3gninaN`/bare `gninaN`); generator arms (`bg33_*`/`bgox31_*`) get NO pair cells
 (2026-10-22 ruling). **230 replicates vs 229 workbook rows is correct** (2026-10-30, all R-V filled,
 both audits 0 problems): `shuffle_control_dock9` is an extra dock no other run has, so it has no
-workbook row by design (user). G for the BoltzGen cofold rows comes from the **new `boltzcf` lane**
+workbook row by design (user). **W/X/Y = K/L/M for run 2** (post-MD enclosure, pairs, retention of
+`<leg>_r2`), filled by `fill_accounting.py`, audited by `audit_gihjlm.py`; enclosure rows from
+`code/workbook/postmd_enclosure.py` (`--check` reproduces all 229 run-1 rows; `--add-replicates`).
+G for the BoltzGen cofold rows comes from the **new `boltzcf` lane**
 (pepgraph `LANES` now includes it; scored 2026-10-25: perp 8.0–13.3, z +2.0 to +5.9 for all 8;
 pepgraph's `compare_lanes.py` rewrites `lane_comparison.json` wholesale per run, so score a new
 lane to a separate `--out` and merge rows back, or full-run).

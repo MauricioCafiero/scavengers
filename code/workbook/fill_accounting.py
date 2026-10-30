@@ -15,6 +15,8 @@ Sources, per column:
                  cofold_binding_tables.md
   N..Q DG1+ws    mmgbsa_summary.csv (prod_20ns, first_5/10/15ns)
   R..V DG2..ave  mmgbsa_replicates.csv for <leg>_r2, V = mean of DG1/DG2
+  W/X/Y          K/L/M for the replicate <leg>_r2 (postmd_enclosure.csv _r2 rows, written by
+                 postmd_enclosure.py --add-replicates; pair_contacts _r2 rows; record_<leg>_r2.log)
 Only fills cells that are currently empty. Idempotent.
 """
 from pathlib import Path
@@ -350,6 +352,25 @@ for sheet, mol in (('Octinoxate', 'Octinoxate'), ('Oxybenzone', 'Oxybenzone')):
                 pr = PAIRS.get((mol, leg))
                 put(12, f'{pr[0]}/{pr[1]}' if pr and pr[1] else (pr[0] if pr else None), None,
                     f'no pair_contacts row for {leg}')
+                # W/X/Y: K/L/M again for the replicate (<leg>_r2), only where a replicate exists
+                if g2:
+                    leg2 = leg + '_r2'
+                    put(23, KPOST.get((mol.lower(), leg2)), '0.00', f'no post-MD enclosure leg {leg2}')
+                    pr2 = PAIRS.get((mol, leg2))
+                    put(24, f'{pr2[0]}/{pr2[1]}' if pr2 and pr2[1] else (pr2[0] if pr2 else None), None,
+                        f'no pair_contacts row for {leg2}')
+                    ret2 = RES.get((mol, leg2))
+                    put(25, round(ret2, 1) if ret2 is not None else None, '0.0', f'no residence for {leg2}')
+
+# Headers for W/X/Y: K/L/M's own header text with " 2" (as DG1 -> DG2), in K/L/M's style.
+from copy import copy
+for ws in wb.worksheets:
+    for col, src in ((23, 11), (24, 12), (25, 13)):
+        if ws.cell(1, col).value is None:
+            ws.cell(1, col).value = f'{ws.cell(1, src).value} 2'
+            ws.cell(1, col)._style = copy(ws.cell(1, src)._style)
+            L, S = openpyxl.utils.get_column_letter(col), openpyxl.utils.get_column_letter(src)
+            ws.column_dimensions[L].width = ws.column_dimensions[S].width
 
 wb.save('PB_runs_accounting.xlsx')
 print('saved.')

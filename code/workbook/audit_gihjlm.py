@@ -226,6 +226,22 @@ for sheet, mol in (('Octinoxate', 'Octinoxate'), ('Oxybenzone', 'Oxybenzone')):
                     if c is not None: prob.append((sheet, r, 'M', f'filled {c} but no residence ({leg})'))
                 elif abs(fnum(c) - mv) > 0.05:
                     prob.append((sheet, r, 'M', f'expected {mv}', str(c)))
+                # ---- W/X/Y: K/L/M for the replicate <leg>_r2 ----
+                leg2 = leg + '_r2' if leg else None
+                kv2 = None
+                if leg2:
+                    for r2 in csv.DictReader(open(POSTMD_CSV)):
+                        if r2['mol'] == molkey and r2['leg'] == leg2: kv2 = float(r2['enclosed']); break
+                for colno, tag, want, ok in (
+                        (23, 'W', kv2, lambda c, v: fnum(c) is not None and abs(fnum(c) - v) <= 0.005),
+                        (24, 'X', PAIRS.get((mol, leg2)) if leg2 else None, lambda c, v: str(c) == str(v)),
+                        (25, 'Y', RES.get((mol, leg2)) if leg2 else None,
+                         lambda c, v: fnum(c) is not None and abs(fnum(c) - v) <= 0.05)):
+                    c = ws.cell(row=r, column=colno).value
+                    if want is None:
+                        if c is not None: prob.append((sheet, r, tag, f'filled {c} but no source ({leg2})'))
+                    elif not ok(c, want):
+                        prob.append((sheet, r, tag, f'expected {want}', str(c)))
 
 from collections import Counter
 print(Counter(p[2] for p in prob))

@@ -97,7 +97,9 @@ def main(mol, leg):
     # same parent structure its earlier runs did rather than to a name no pair table has ever held
     parent = re.sub(r"_dock\d+$", "", re.sub(r"_r\d+$", "", leg))
     pair = None
-    for f in glob.glob(f"runs/{mol}/md/pair_contacts_*.csv"):
+    # pair_contacts*.csv, not pair_contacts_*.csv: the latter missed the bare pair_contacts.csv that
+    # holds octinoxate's base-lane parents, so 18 base-lane replicates recorded with no pair row.
+    for f in glob.glob(f"runs/{mol}/md/pair_contacts*.csv"):
         rs = list(csv.DictReader(open(f)))
         if any(r["structure"] == parent for r in rs):
             pair = (f, rs)
@@ -124,7 +126,11 @@ def main(mol, leg):
     if pair:
         f, rs = pair
         legs = [r["leg"] for r in rs if r["structure"] != leg] + [prod]
-        design = rs[0]["design"] if rs else pair_contacts.design_for(parent)
+        # The PARENT's design, not the file's first row: the base-lane tables (pair_contacts.csv,
+        # pair_contacts_boltz_missing.csv) mix design.json and shells 1-3, and rs[0] scored 14
+        # ox2/ox3 replicates against shell 1 on 2026-10-30 (caught before commit).
+        design = next((r["design"] for r in rs if r["structure"] == parent), None) \
+            or pair_contacts.design_for(parent)
         before = {r["structure"] for r in rs}
     # design_for() falls through to the unnumbered "design.json" for any name it does not
     # recognise. That file exists for octinoxate and NOT for oxybenzone, so a BoltzGen structure
