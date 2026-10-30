@@ -45,6 +45,9 @@ s3_orig_f12_dock9_r2 +7.65 (vs its Modal run 1), shuffle_control_dock7_r3 (third
   552143, 552358; `rep9.chain`) duplicate Y28 L1-2 + Y30 L1, and legs 4 then 3 of Y31/Y29/Y25. Same
   copy-to-Young-scratch rule; Y25/Y29/Y31 legs have no scratch dir yet (never ran) -> `mkdir -p` it.
   rep8_oxy_2 PREEMPTED 06:07 during its leg 3 (ox3_orig_f8_o3cof_r2), requeued.
+  12:10-12:44: **rep10_oxy_1** (552407; leg 2 of Y31/Y29/Y25), **rep10_oxy_2** (552443; leg 1 of
+  Y31/Y29/Y25), **rep10_oct_1** (552650; s3_orig_control_r2 = Y33) -> every remaining Young leg is
+  now also on racc. 15:08: **Y28 119189 and Y30 119191 CANCELLED** (all 8 legs done via racc).
 - **03:15 2026-10-28: Young home quota (100 GB) filled with full dcds** -> Y7 leg 3, Y8 legs 3-4
   aborted and Y10-Y17 (116252-116259) FAILED in 1-2 s; queue empty 02:34-03:15. 25 dcds moved to
   `/scratch/mmm1166/dcd` (symlinked; nothing deleted), all submit scripts now `DCD_DIR=` scratch.
