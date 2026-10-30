@@ -32,6 +32,13 @@ s3_orig_f12_dock9_r2 +7.65 (vs its Modal run 1), shuffle_control_dock7_r3 (third
   (scratch 250 -> 4 GB). **Resubmitted:** Y25=119187, Y29=119188 (heads), Y28=119189 afterany
   Y25, Y32=119190 afterany Y29, Y30=119191 afterany Y31 (117354, untouched, pending). Legfiles
   keep the old 1173xx IDs; their drains are still running. Delete each Young dcd once recorded.
+  **Also found:** `s3_orig_control_r2` (octinoxate) NaN'd in minimisation in Y12 (116332) on
+  10-28 and went unnoticed (batch carried on). Plain retry as single-leg Y33 = 119207 (2:55);
+  drained by the still-running `young_116254.legs` drain.
+  **racc duplicates rep8_oxy_1 (551590) / rep8_oxy_2 (551592)** = Young's last-starting legs
+  (Y28 L3-4, Y32, Y30 L2-4). As each lands from racc: copy its verified local
+  `traj_wrapped.{xtc,pdb}` to Young `/scratch/mmm1166/dcd/<leg>_prod/` so `racc_run.py`'s guard
+  skips it; cancel Y32 (119190, single leg) outright if racc finishes ox3_orig_f8_rf3cof_dock8_r2 first.
 - **03:15 2026-10-28: Young home quota (100 GB) filled with full dcds** -> Y7 leg 3, Y8 legs 3-4
   aborted and Y10-Y17 (116252-116259) FAILED in 1-2 s; queue empty 02:34-03:15. 25 dcds moved to
   `/scratch/mmm1166/dcd` (symlinked; nothing deleted), all submit scripts now `DCD_DIR=` scratch.
