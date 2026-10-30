@@ -323,7 +323,10 @@ the result. A one-leg retry legfile (`bzfree_oxb_retry.legs`) resubmits with the
 streams `ssh ... | tar xzf -`, and if the ssh end dies the `tar` blocks on an EOF that never comes —
 it sat 40 minutes on 2026-10-19 holding `drain_bzfree_oxb_1` behind it, with every file already
 written. Verify before assuming loss: `mdtraj` frame count on `traj_wrapped.xtc` (expect 20,000 at
-20 ns) and `wc -l` on `energy.csv` (expect 20,001). Both were complete, so killing the `tar` was
+20 ns) and `wc -l` on `energy.csv` (expect 20,001). **Current drains clear this themselves**: every
+fetch runs under `r 600`, so a stream whose EOF the socket drops ends at exactly 10 minutes and its
+staged files are moved into place -- wait the 10 minutes before killing anything (2026-10-30: three
+tars killed at 4-9 min each cost a retry round for nothing). Both were complete, so killing the `tar` was
 enough — the drain re-polled, found the leg, tailed it locally and recorded it with no network at
 all. A mid-tail leg transiently holds ~1.5 GB of MM/GBSA scatter (a 1.2 GB `reference.frc` plus the
 `_MMPBSA_*` mdcrds) which the drain's `find -delete` strips on completion, so a leg directory in the
