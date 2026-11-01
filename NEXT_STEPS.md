@@ -1056,6 +1056,22 @@ the renewed balance rather than assumed. Whether OF3 and RF3 are even unseeded b
 unverified — check each lane's invocation the way `boltz_env.run_boltz` was checked, because a
 model that seeds by default would give a spread of zero and that would be a finding, not a bug.
 
+**DONE 2026-11-01: OF3 + RF3 fold replicates on Modal** (results in `FOLD_REPLICATES.md`), 21 structures (`folds/inputs/`) x
+rep1/rep2 per lane via `fold_batch.sh LANE=<openfold3|rf3> REP=<k>`, compared with
+`compare_folds.py --replicates --lane <lane>`. OF3 seeds by default (`seeds = [42]`; a re-run
+reproduced to 0.02 A), so OF3 rep k runs `--seed k`; RF3 re-runs are fresh draws without one.
+Workbook columns Z-AC (`fill_accounting.py --cols 26-29`) carry rep 2/3 peptide and ligand RMSD
+against the published fold, co-fold rows only.
+
+**BoltzGen replicates: the scheme is a Boltz-2 re-fold of the generator's output, and it is done**
+(user, 2026-11-01). Re-running BoltzGen itself would risk a different sequence, so a replicate
+re-folds the sequence + ligand it produced with Boltz-2, the machinery BoltzGen uses anyway. The
+bg33_*/bgox31_* rows of `FOLD_REPLICATES.md` (2026-10-22) are exactly that: replicate 1 is
+`boltzgen_local/md/inputs{,_oxyb}/boltz/boltz_results_<name>/` -- the structure the Boltzgen MD legs
+started from (CA RMSD 0.001 A to `md/<name>/<name>_protein.pdb`, checked bg33_1, bg33_3) -- and
+rep1/rep2 under `runs/<mol>/folds/foldrep/<name>/`. Note `BG` in `compare_folds.py` is
+`boltzgen_local/md`, so the original lives under `md/inputs/`, not `boltzgen_local/inputs/`.
+
 **Established fact, checked 2026-10-22: no co-fold in this project has ever been seeded.**
 `boltz_env.run_boltz()` builds `predict <yaml> --num_workers 0 --out_dir <dir>` plus any
 `extra_args`, and nothing in the repo passes `--seed`. Boltz's own help states the default

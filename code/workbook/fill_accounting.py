@@ -17,7 +17,16 @@ Sources, per column:
   R..V DG2..ave  mmgbsa_replicates.csv for <leg>_r2, V = mean of DG1/DG2
   W/X/Y          K/L/M for the replicate <leg>_r2 (postmd_enclosure.csv _r2 rows, written by
                  postmd_enclosure.py --add-replicates; pair_contacts _r2 rows; record_<leg>_r2.log)
+  Z..AC         fold replicates, Co-fold rows only: peptide CA RMSD and ligand RMSD of replicate 2
+                 (= rep1) and replicate 3 (= rep2) against replicate 1, the published fold, from
+                 runs/<mol>/folds/fold_replicate_rms{,_openfold3,_rf3}.csv (compare_folds.py
+                 --replicates [--lane]). Blank on dock legs and on Guided rows (never replicated).
 Only fills cells that are currently empty. Idempotent.
+
+--cols A-B (1-based column numbers, e.g. --cols 26-29) restricts writing to those columns: every
+other cell, header and width is left exactly as it is. Use it whenever adding new columns -- the
+user's rule (2026-11-01) is that an addition must not repopulate anything that exists, and a plain
+run would also fill any blank cell in F-Y.
 """
 from pathlib import Path
 REPO = Path(__file__).resolve().parents[2]
@@ -192,6 +201,23 @@ def load_k():
 
 TOX = load_tox(); PREMD = load_j(); KPOST = load_k()
 
+# Boltz replicate CSV keys shell 1's unforced fold by its yaml name, not orig_control
+FOLDREP_ALIAS = {'orig_control': 'RGGDGGKGGGGLGGGGKGIGEGWGGDGSGGEGS_control'}
+
+def load_foldrep():
+    """(mol, lane, structure, pair) -> (rmsd_pep, rmsd_lig); lane boltz / openfold3 / rf3."""
+    out = {}
+    for mol in ('Octinoxate', 'Oxybenzone'):
+        for lane, fn in (('boltz', 'fold_replicate_rms.csv'), ('openfold3', 'fold_replicate_rms_openfold3.csv'),
+                         ('rf3', 'fold_replicate_rms_rf3.csv')):
+            path = f'runs/{mol.lower()}/folds/{fn}'
+            if os.path.exists(path):
+                for r in csv.DictReader(open(path)):
+                    out[(mol, lane, r['structure'], r['pair'])] = (float(r['rmsd_pep']), float(r['rmsd_lig']))
+    return out
+
+FREP = load_foldrep()
+
 def j_pkey(mk, cl, base, pose):
     """Return the premd_pairs lookup: posekey for this row; for cofold-lane rows the
     peptide key is the design base with the lane suffix stripped."""
@@ -221,6 +247,15 @@ def pose_label(mk, leg_pose):
 
 def gnina_pose_from_md(pmol, base, mdroot):
     return None
+
+import argparse
+_ap = argparse.ArgumentParser()
+_ap.add_argument('--cols', help='only write these 1-based columns, e.g. 26-29')
+_a = _ap.parse_args()
+ONLY = None
+if _a.cols:
+    lo, hi = (int(x) for x in _a.cols.split('-'))
+    ONLY = set(range(lo, hi + 1))
 
 wb = openpyxl.load_workbook('PB_runs_accounting.xlsx')
 report = defaultdict(list)
@@ -276,6 +311,8 @@ for sheet, mol in (('Octinoxate', 'Octinoxate'), ('Oxybenzone', 'Oxybenzone')):
                     pose = int(GP.get(base, nonp1[0][-1]))
                     leg = base + '_dock%d' % pose; dock_struct = base
                 def put(col, val, fmt=None, why=None):
+                    if ONLY is not None and col not in ONLY:
+                        return
                     cell = ws.cell(row=r, column=col)
                     if cell.value is not None and cell.value != '':
                         report[sheet].append(f"E{r} col {col}: already {cell.value!r}, kept")
@@ -334,6 +371,17 @@ for sheet, mol in (('Octinoxate', 'Octinoxate'), ('Oxybenzone', 'Oxybenzone')):
                     put(7, round(pv, 1) if pv is not None else None, '0.0',
                         f'no pepgraph row ({planelane},{base})')
                     put(8, TOX.get(p), None, f'no peptox result for {p}')
+                    # Z..AC fold replicates (replicate 1 = the published fold)
+                    # Boltzgen rows: the BoltzGen replicate IS a Boltz-2 re-fold of the generator's
+                    # output (re-running BoltzGen would change the sequence; user 2026-11-01). The MD
+                    # legs start from boltzgen_local/md/inputs/boltz/ (0.001 A), = replicate 1.
+                    flane = None if ft.startswith('Guided') else \
+                        {'Boltz': 'boltz', 'Boltzgen': 'boltz', 'OpenFold': 'openfold3', 'RosettaFold': 'rf3'}[cl]
+                    fstruct = FOLDREP_ALIAS.get(pbase, pbase) if flane == 'boltz' else pbase
+                    for k, pair in enumerate(('orig-rep1', 'orig-rep2')):
+                        fr = FREP.get((mol, flane, fstruct, pair)) if flane else None
+                        put(26 + 2 * k, fr[0] if fr else None, '0.00', f'no fold replicate {flane}/{fstruct} {pair}')
+                        put(27 + 2 * k, fr[1] if fr else None, '0.00', f'no fold replicate {flane}/{fstruct} {pair}')
                 # I pre-MD enclosure
                 ge = GEO.get((mol, dock_struct, pose))
                 if ge is None and p in BG:
@@ -366,11 +414,16 @@ for sheet, mol in (('Octinoxate', 'Octinoxate'), ('Oxybenzone', 'Oxybenzone')):
 from copy import copy
 for ws in wb.worksheets:
     for col, src in ((23, 11), (24, 12), (25, 13)):
-        if ws.cell(1, col).value is None:
+        if ws.cell(1, col).value is None and (ONLY is None or col in ONLY):
             ws.cell(1, col).value = f'{ws.cell(1, src).value} 2'
             ws.cell(1, col)._style = copy(ws.cell(1, src)._style)
             L, S = openpyxl.utils.get_column_letter(col), openpyxl.utils.get_column_letter(src)
             ws.column_dimensions[L].width = ws.column_dimensions[S].width
+    for col, head in ((26, 'Fold rep 2 RMSD pep'), (27, 'Fold rep 2 RMSD lig'),
+                      (28, 'Fold rep 3 RMSD pep'), (29, 'Fold rep 3 RMSD lig')):
+        if ws.cell(1, col).value is None and (ONLY is None or col in ONLY):
+            ws.cell(1, col).value = head
+            ws.cell(1, col)._style = copy(ws.cell(1, 25)._style)
 
 wb.save('PB_runs_accounting.xlsx')
 print('saved.')

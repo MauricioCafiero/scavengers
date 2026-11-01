@@ -56,7 +56,20 @@ def load(cif):
     return ca, heavy
 
 
-def replicate_report(outdir, out_csv):
+def load_pdb(pdb):
+    """(CA coordinates, ligand heavy atoms) from a fold lane's converted pdb. Ligand atoms keep file
+    order, which is fixed within one lane (same SMILES, same model), so draws pair by position."""
+    ca, lig = [], []
+    for ln in open(pdb):
+        xyz = (float(ln[30:38]), float(ln[38:46]), float(ln[46:54])) if ln[:6] in ("ATOM  ", "HETATM") else None
+        if ln.startswith("ATOM  ") and ln[12:16].strip() == "CA":
+            ca.append(xyz)
+        elif ln.startswith("HETATM") and ln[76:78].strip() != "H":
+            lig.append(xyz)
+    return np.array(ca), np.array(lig)
+
+
+def replicate_report(outdir, out_csv, lane=None):
     """All pairwise distances among a structure's unseeded draws. See code/fold_replicates.py.
 
     **No draw is the reference.** The published fold is simply the first sample, so comparing each
@@ -74,8 +87,8 @@ def replicate_report(outdir, out_csv):
     """
     import itertools as it
     BG = os.path.expanduser("~/python_mac/boltzgen_local/md")
-    names = sorted({os.path.basename(d) for d in
-                    glob.glob(os.path.join(outdir, "folds", "foldrep", "*"))})
+    rdir = os.path.join(outdir, "folds", f"foldrep_{lane}" if lane else "foldrep")
+    names = sorted({os.path.basename(d) for d in glob.glob(os.path.join(rdir, "*"))})
     if not names:
         sys.exit(f"no replicate folds under {outdir}/folds/foldrep/ -- run code/fold_replicates.py")
 
@@ -91,18 +104,27 @@ def replicate_report(outdir, out_csv):
     rows = []
     for name in names:
         draws = {}
-        orig = original(name)
-        if orig:
-            draws["orig"] = orig
-        for rep in sorted(glob.glob(os.path.join(outdir, "folds", "foldrep", name, "rep*"))):
-            p = os.path.join(rep, f"boltz_results_{name}", "predictions", name,
-                             f"{name}_model_0.cif")
+        if lane:
+            # OF3/RF3 (2026-11-01): the published top model plus each replicate's top model.
+            # OF3 rep k is seed k (published = 42); RF3 re-runs differ without a seed change.
+            p = os.path.join(outdir, "folds", lane, f"{name}.pdb")
             if os.path.exists(p):
-                draws[os.path.basename(rep)] = p
+                draws["orig"] = p
+            for p in sorted(glob.glob(os.path.join(rdir, name, "rep*.pdb"))):
+                draws[os.path.basename(p)[:-4]] = p
+        else:
+            orig = original(name)
+            if orig:
+                draws["orig"] = orig
+            for rep in sorted(glob.glob(os.path.join(rdir, name, "rep*"))):
+                p = os.path.join(rep, f"boltz_results_{name}", "predictions", name,
+                                 f"{name}_model_0.cif")
+                if os.path.exists(p):
+                    draws[os.path.basename(rep)] = p
         if len(draws) < 2:
             print(f"skipping {name}: only {len(draws)} structure(s) found")
             continue
-        loaded = {k: load(v) for k, v in draws.items()}
+        loaded = {k: (load_pdb(v) if lane else load(v)) for k, v in draws.items()}
         n0 = {len(ca) for ca, _ in loaded.values()}
         if len(n0) > 1:
             print(f"skipping {name}: draws differ in residue count {sorted(n0)}")
@@ -135,7 +157,8 @@ def replicate_report(outdir, out_csv):
         w.writeheader()
         w.writerows(rows)
     print(f"\n{len(rows)} pairs over {len(by)} structures -> {path}")
-    print("Unseeded draws: the spread IS the measurement, and no draw is the reference.")
+    print("OF3: rep k = seed k vs published seed 42; RF3: re-runs draw anew. No draw is the reference."
+          if lane else "Unseeded draws: the spread IS the measurement, and no draw is the reference.")
     return 0
 
 def main(argv=None):
@@ -146,10 +169,14 @@ def main(argv=None):
     parser.add_argument("--replicates", action="store_true",
                         help="compare each unseeded re-fold under folds/foldrep/ against its own "
                              "original, instead of all pairs of different peptides")
+    parser.add_argument("--lane", choices=["openfold3", "rf3"],
+                        help="with --replicates: compare folds/foldrep_<lane>/ (OF3/RF3 top models) "
+                             "instead of the Boltz foldrep/; writes fold_replicate_rms_<lane>.csv")
     args = parser.parse_args(argv)
     if args.replicates:
-        out = args.out if args.out != "fold_similarity.csv" else "fold_replicate_rms.csv"
-        return replicate_report(args.outdir, out)
+        out = args.out if args.out != "fold_similarity.csv" else (
+            f"fold_replicate_rms_{args.lane}.csv" if args.lane else "fold_replicate_rms.csv")
+        return replicate_report(args.outdir, out, args.lane)
 
     boltz_dir = os.path.join(args.outdir, "boltz")
     cifs = sorted(glob.glob(os.path.join(boltz_dir, "boltz_results_*", "predictions", "*",

@@ -47,6 +47,13 @@ esac
 INDIR=inputs; [[ $LANE == openfold3p ]] && INDIR=inputs_pocket
 MOL=${MOL:-*}
 ONLY=${ONLY:-}
+# REP=<k> (openfold3 / rf3 only): a fold replicate. Job <name>_rep<k>, output
+# runs/<mol>/folds/foldrep_<lane>/<name>/rep<k>.pdb, so the published fold and its raw
+# outputs/<name> are never touched. Both models seed by default (OF3 seed_42, RF3 seed-0;
+# checked 2026-11-01). RF3 re-runs are nonetheless independent draws (5.5-8.2 A apart); OF3
+# reproduces to ~0.02 A, so for openfold3 REP=k also passes --seed k (job <name>_seed<k>).
+REP=${REP:-}
+[[ -n $REP && $LANE != (openfold3|rf3) ]] && { print -u2 "REP is for LANE=openfold3 or rf3"; exit 1; }
 
 for f in runs/${~MOL}/folds/$INDIR/*.txt(N); do
     mol=${f:h:h:h:t}
@@ -108,11 +115,15 @@ print(find_best_cif('outputs/$dirjob'))" 2>/dev/null | tail -1 )
         fi
     else
         out=$REPO/runs/$mol/folds/$LANE/$name.pdb
-        [[ -e $out ]] && { echo "skip $mol/$name (exists)" >> $log; continue; }
         APP=src/fold/app.py::main; prefix=""; job=$name
         [[ $LANE == rf3 ]] && { APP=src/fold/rf3_app.py::main; prefix=rf3_; }
         [[ $LANE == openfold3p ]] && job=${name}_pocket
-        ( cd $FOLD && caffeinate -i -s uv run modal run $APP --input-file $REPO/$f --job-name $job ) \
+        SEEDARG=()
+        [[ -n $REP ]] && { job=${name}_rep$REP; out=$REPO/runs/$mol/folds/foldrep_$LANE/$name/rep$REP.pdb; }
+        # OF3 replicates need an explicit seed: rep k runs seed k (published = default 42)
+        [[ -n $REP && $LANE == openfold3 ]] && { job=${name}_seed$REP; SEEDARG=(--seed $REP); }
+        [[ -e $out ]] && { echo "skip $mol/$name (exists)" >> $log; continue; }
+        ( cd $FOLD && caffeinate -i -s uv run modal run $APP --input-file $REPO/$f --job-name $job $SEEDARG ) \
             >> $log 2>&1
         rc=$?
         # best-ranked cif -> pdb beside the manifest; raw cifs stay in the fold repo's outputs/
@@ -120,7 +131,7 @@ print(find_best_cif('outputs/$dirjob'))" 2>/dev/null | tail -1 )
 from fold.results import find_best_cif
 print(find_best_cif('outputs/$prefix$job'))" 2>/dev/null | tail -1 )
         if [[ -n $cif && -f $FOLD/$cif ]]; then
-            mkdir -p runs/$mol/folds/$LANE
+            mkdir -p ${out:h}
             ( cd $FOLD && uv run python -m fold.analyze cif-to-pdb $cif --out-path $out ) >> $log 2>&1
             echo "--- $LANE $mol/$name exit $rc, converted ($(date '+%H:%M:%S'))" >> $log
             [[ -s $out ]] || echo "CONVERT FAILED $mol/$name -- cif found but pdb empty, see $log" \
