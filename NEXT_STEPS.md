@@ -1035,7 +1035,7 @@ in dir:leg format for `racc_feed.sh BATCH=1`). The remaining actions on a go are
 `SYSNAME` set to the batch's molecule, a `racc_drain.sh` watcher per molecule, and the same-day tails.
 
 
-## Co-fold determinism: are the co-folds reproducible at all? — DONE 2026-10-22, see `FOLD_REPLICATES.md`
+## Co-fold determinism: are the co-folds reproducible at all? — DONE (Boltz-2 + BoltzGen 2026-10-22, OF3 + RF3 2026-11-01), see `FOLD_REPLICATES.md`
 
 **Answered.** 29 structures re-folded twice each, unseeded, 87 pairwise comparisons; commit
 e8743bfb. The result and the tables live in `FOLD_REPLICATES.md`. Headline: glycine content
@@ -1045,7 +1045,7 @@ reproducibility is independent of where the ligand lands. Nothing from it is fol
 other table. What remains open below is only the seeding policy, which the user settled: do not
 seed.
 
-**STILL TO DO, after 2026-11-01: the same replicates for OpenFold3 and RosettaFold3** (user,
+**DONE 2026-11-01 (see the next paragraph and `FOLD_REPLICATES.md`); the original to-do, kept for the record: the same replicates for OpenFold3 and RosettaFold3** (user,
 2026-10-22 — gated on the Modal credit renewal, since unlike Boltz-2 these two do not run on
 this Mac and bill per fold). What was measured above is Boltz-2's seed-to-seed spread only; the
 cofold tables compare three co-folders, so the other two need the same treatment before any
@@ -1089,7 +1089,7 @@ variation sits one level upstream of that — if a second co-fold puts the ligan
 starting structure is itself a draw and every MD leg inherits it. The two are different sources of
 variation and the replicate spread does not bound this one.
 
-**SET UP 2026-10-22, NOT RUN** (user: "set up but do not yet run folding replicates"). Two pieces,
+**History: SET UP 2026-10-22, then RUN the same day** (commit e8743bfb, 29 structures x 3 draws; the user had first said "set up but do not yet run folding replicates"). Two pieces,
 both committed and dry-run verified; no fold has been drawn.
 
 ```sh
@@ -1124,7 +1124,7 @@ lane measured ~45 s/peptide and BoltzGen ~100 s/design, so a co-fold draw is pro
 **not measured, and co-folds carry a ligand, so measure one before trusting any total.** The
 sensible shape is several draws of a few chosen structures (`--only`), not n=3 across 119: the
 question is within-arm spread, which one peptide answers, and the per-structure choice is the
-user's. `--n`, `--only` and the ordering are all still open; **do not launch it unasked**.
+user's. (Settled when it ran: n=3 over the 29 structures in `FOLD_REPLICATES.md`.)
 
 **DECIDED by the user 2026-10-22: do not seed.** *"I don't want to seed because I'd like to see
 what the spread is from doing different replicates."* So `run_boltz` keeps passing no `--seed`,
