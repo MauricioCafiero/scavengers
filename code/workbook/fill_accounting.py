@@ -19,8 +19,8 @@ Sources, per column:
                  postmd_enclosure.py --add-replicates; pair_contacts _r2 rows; record_<leg>_r2.log)
   Z..AC         fold replicates, Co-fold rows only: peptide CA RMSD and ligand RMSD of replicate 2
                  (= rep1) and replicate 3 (= rep2) against replicate 1, the published fold, from
-                 runs/<mol>/folds/fold_replicate_rms{,_openfold3,_rf3}.csv (compare_folds.py
-                 --replicates [--lane]). Blank on dock legs and on Guided rows (never replicated).
+                 runs/<mol>/folds/fold_replicate_rms{,_openfold3,_openfold3p,_rf3}.csv (compare_folds.py
+                 --replicates [--lane]). Guided rows read fold_replicate_rms_openfold3p.csv. Blank on dock legs.
 Only fills cells that are currently empty. Idempotent.
 
 --cols A-B (1-based column numbers, e.g. --cols 26-29) restricts writing to those columns: every
@@ -209,6 +209,7 @@ def load_foldrep():
     out = {}
     for mol in ('Octinoxate', 'Oxybenzone'):
         for lane, fn in (('boltz', 'fold_replicate_rms.csv'), ('openfold3', 'fold_replicate_rms_openfold3.csv'),
+                         ('openfold3p', 'fold_replicate_rms_openfold3p.csv'),
                          ('rf3', 'fold_replicate_rms_rf3.csv')):
             path = f'runs/{mol.lower()}/folds/{fn}'
             if os.path.exists(path):
@@ -375,7 +376,7 @@ for sheet, mol in (('Octinoxate', 'Octinoxate'), ('Oxybenzone', 'Oxybenzone')):
                     # Boltzgen rows: the BoltzGen replicate IS a Boltz-2 re-fold of the generator's
                     # output (re-running BoltzGen would change the sequence; user 2026-11-01). The MD
                     # legs start from boltzgen_local/md/inputs/boltz/ (0.001 A), = replicate 1.
-                    flane = None if ft.startswith('Guided') else \
+                    flane = 'openfold3p' if ft.startswith('Guided') else \
                         {'Boltz': 'boltz', 'Boltzgen': 'boltz', 'OpenFold': 'openfold3', 'RosettaFold': 'rf3'}[cl]
                     fstruct = FOLDREP_ALIAS.get(pbase, pbase) if flane == 'boltz' else pbase
                     for k, pair in enumerate(('orig-rep1', 'orig-rep2')):

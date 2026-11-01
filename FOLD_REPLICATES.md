@@ -165,3 +165,32 @@ loose in every model, 6.6-9.2 Å mean, and as with Boltz it does not follow back
 | `ox2_shuffle` | 2.14 | 2.28 | 4.81 | 6.22 | 4.98 | 5.60 | 10.89 | 14.78 |
 | `ox2_shuffle_esm0` | 2.28 | 2.96 | 3.14 | 3.70 | 1.01 | 1.25 | 2.17 | 2.50 |
 | `ox3_orig_f8` | 5.52 | 5.61 | 10.61 | 12.16 | 5.71 | 6.87 | 11.44 | 14.15 |
+
+## Pocket-guided OpenFold3 (`openfold3p`, 2026-11-01)
+
+The guided lane's 9 structures (`runs/<mol>/folds/inputs_pocket/`: OF3 with the forced Boltz
+contacts as a `pocket_constraint`), same protocol as OF3 above: published fold (seed 42) plus
+seeds 1 and 2, identical pocket constraint (checked against the published query). Draws in
+`runs/<mol>/folds/foldrep_openfold3p/`, table `fold_replicate_rms_openfold3p.csv`;
+`LANE=openfold3p REP=<k> code/fold_batch.sh`, `compare_folds.py --replicates --lane openfold3p`.
+
+| structure | guided pep | guided lig | OF3 unguided pep | lig | forced Boltz pep | lig |
+|---|---:|---:|---:|---:|---:|---:|
+| `orig_f12` | 7.13 | 8.78 | 6.49 | 8.96 | 7.98 | 5.99 |
+| `s2_esm2_control` | 1.35 | 9.70 | 1.28 | 3.80 | 0.58 | 9.57 |
+| `s3_esm2_f4` | 0.97 | 8.95 | 1.46 | 2.84 | 1.19 | 8.98 |
+| `s3_orig_f12` | 7.09 | 8.87 | 5.13 | 9.08 | 7.27 | 12.37 |
+| `ox1_esm1_f8` | 4.36 | 9.35 | 3.47 | 11.51 | 5.03 | 4.99 |
+| `ox1_orig_f12` | 4.64 | 5.60 | 5.50 | 8.96 | 6.02 | 7.59 |
+| `ox2_esm1_f8` | 1.58 | 6.44 | 1.88 | 3.81 | 0.99 | 1.86 |
+| `ox2_orig_f8` | 6.46 | 7.14 | 5.84 | 7.90 | 8.76 | 5.41 |
+| `ox3_orig_f8` | 5.82 | 7.75 | 5.52 | 10.61 | 9.12 | 12.32 |
+| **mean (9)** | **4.38** | **8.06** | **4.06** | **7.50** | | |
+
+(Mean RMSD over the three pairs, Å. `s2_esm2_control`'s Boltz column is its unforced fold -- it
+has no forced Boltz fold.)
+
+**The pocket constraint does not make the ligand reproducible.** Guided ligand spread is 8.06 Å
+against 7.50 Å unguided on the same nine, and forced Boltz is 7.44 Å on the eight forced ones; the
+backbone spread is unchanged too (4.38 vs 4.06). Guidance biases where the ligand goes but three
+draws of it still land the ligand ~8 Å apart, the same resolution as every other co-fold lane.

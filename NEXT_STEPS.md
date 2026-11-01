@@ -1035,7 +1035,7 @@ in dir:leg format for `racc_feed.sh BATCH=1`). The remaining actions on a go are
 `SYSNAME` set to the batch's molecule, a `racc_drain.sh` watcher per molecule, and the same-day tails.
 
 
-## Co-fold determinism: are the co-folds reproducible at all? — DONE (Boltz-2 + BoltzGen 2026-10-22, OF3 + RF3 2026-11-01), see `FOLD_REPLICATES.md`
+## Co-fold determinism: are the co-folds reproducible at all? — DONE (Boltz-2 + BoltzGen 2026-10-22, OF3 + guided OF3 + RF3 2026-11-01), see `FOLD_REPLICATES.md`
 
 **Answered.** 29 structures re-folded twice each, unseeded, 87 pairwise comparisons; commit
 e8743bfb. The result and the tables live in `FOLD_REPLICATES.md`. Headline: glycine content
@@ -1061,7 +1061,9 @@ rep1/rep2 per lane via `fold_batch.sh LANE=<openfold3|rf3> REP=<k>`, compared wi
 `compare_folds.py --replicates --lane <lane>`. OF3 seeds by default (`seeds = [42]`; a re-run
 reproduced to 0.02 A), so OF3 rep k runs `--seed k`; RF3 re-runs are fresh draws without one.
 Workbook columns Z-AC (`fill_accounting.py --cols 26-29`) carry rep 2/3 peptide and ligand RMSD
-against the published fold, co-fold rows only.
+against the published fold, co-fold rows only. **Pocket-guided OF3 (`openfold3p`, 9 structures)
+added the same day** (user: "that's a hole") -- seeds 1/2, same constraint; every co-fold row in
+the workbook now has Z-AC filled.
 
 **BoltzGen replicates: the scheme is a Boltz-2 re-fold of the generator's output, and it is done**
 (user, 2026-11-01). Re-running BoltzGen itself would risk a different sequence, so a replicate

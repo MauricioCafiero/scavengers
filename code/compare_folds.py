@@ -169,7 +169,7 @@ def main(argv=None):
     parser.add_argument("--replicates", action="store_true",
                         help="compare each unseeded re-fold under folds/foldrep/ against its own "
                              "original, instead of all pairs of different peptides")
-    parser.add_argument("--lane", choices=["openfold3", "rf3"],
+    parser.add_argument("--lane", choices=["openfold3", "openfold3p", "rf3"],
                         help="with --replicates: compare folds/foldrep_<lane>/ (OF3/RF3 top models) "
                              "instead of the Boltz foldrep/; writes fold_replicate_rms_<lane>.csv")
     args = parser.parse_args(argv)
