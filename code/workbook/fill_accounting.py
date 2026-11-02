@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-"""Fill F-V of PB_runs_accounting.xlsx from the repo's published tables.
+"""Fill F-V of paper_info/PB_runs_accounting.xlsx from the repo's published tables.
 
 Sources, per column:
   F strain       morph results/strain_summary.csv (dE_strain_kcal), cofold rows only
@@ -258,7 +258,7 @@ if _a.cols:
     lo, hi = (int(x) for x in _a.cols.split('-'))
     ONLY = set(range(lo, hi + 1))
 
-wb = openpyxl.load_workbook('PB_runs_accounting.xlsx')
+wb = openpyxl.load_workbook('paper_info/PB_runs_accounting.xlsx')
 report = defaultdict(list)
 for sheet, mol in (('Octinoxate', 'Octinoxate'), ('Oxybenzone', 'Oxybenzone')):
     ws = wb[sheet]
@@ -426,7 +426,7 @@ for ws in wb.worksheets:
             ws.cell(1, col).value = head
             ws.cell(1, col)._style = copy(ws.cell(1, 25)._style)
 
-wb.save('PB_runs_accounting.xlsx')
+wb.save('paper_info/PB_runs_accounting.xlsx')
 print('saved.')
 for s, items in report.items():
     print(f'\n===== {s} =====')

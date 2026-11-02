@@ -8,7 +8,7 @@ dcd of a recorded leg deleted (user rule: never kept once the wrapped solute is 
 - **Figures at 230/230** (2f21bd70): `runs/folds_md/replicate_ddG_histogram.png` (`--plot`) and
   `replicate_ddG_vs_meanBE.png` (new `--meanbe`; r(signed ΔΔG, mean dG) −0.01, r(|ΔΔG|) −0.08 --
   the 59-pair −0.24 trend is gone).
-- **Workbook** `PB_runs_accounting.xlsx` (untracked): R-V (DG2 block) filled on all 229 rows;
+- **Workbook** `paper_info/PB_runs_accounting.xlsx` (untracked): R-V (DG2 block) filled on all 229 rows;
   new **W/X/Y = K/L/M for run 2** (550765b1). 229 rows vs 230 replicates is by design
   (`shuffle_control_dock9` extra dock). Both audits 0 problems.
 - **Fixed tonight:** `racc_drain.sh` re-fetched an already-local leg after a fresh fetch (stale
@@ -159,7 +159,8 @@ When its record lands, enroll the structure in `THIRD` (`code/replicate_tally.py
 triple column lights up. The racc duplicates of the two Young batches (547254/547288) were
 canceled the same day.
 
-**The accounting workbook (2026-10-25).** `PB_runs_accounting.xlsx` at the repo root tracks every
+**The accounting workbook (2026-10-25).** `paper_info/PB_runs_accounting.xlsx` (moved from the
+repo root into `paper_info/`, 2026-11-02) tracks every
 run by peptide/fold-type. Its fill/audit machinery now lives in `code/workbook/`
 (`j_pairs.py` → `premd_pairs.csv`; `fill_accounting.py` fills empty cells only; `audit_gihjlm.py`
 and `audit_wb.py` are independent audits — run all three with `.venv/bin/python`). Protocol: fill

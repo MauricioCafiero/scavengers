@@ -9,7 +9,7 @@ import openpyxl, csv, json, os, re
 from collections import defaultdict
 
 os.chdir('/Users/cafierom/python_mac/peptidebuilder')
-wb = openpyxl.load_workbook('PB_runs_accounting.xlsx')
+wb = openpyxl.load_workbook('paper_info/PB_runs_accounting.xlsx')
 
 STD = dict(S1_orig='orig_control', S2_ESM2='s2_esm2_control', S3_ESM2='s3_esm2_control',
            S3_orig='s3_orig_control', S3_shuffle='shuffle_control', S3_shuffle_ESM2='shuffle_control_esm0')

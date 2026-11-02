@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-"""Independent audit of PB_runs_accounting.xlsx columns F..V against raw sources.
+"""Independent audit of paper_info/PB_runs_accounting.xlsx columns F..V against raw sources.
 
 Re-derives every cofold-row cell from the primary tables (NOT reusing the fill
 scripts' intermediates /tmp/passcsv except where that file IS the source-of-truth
@@ -9,7 +9,7 @@ import openpyxl, csv, json, os, re
 from collections import defaultdict
 
 os.chdir('/Users/cafierom/python_mac/peptidebuilder')
-wb = openpyxl.load_workbook('PB_runs_accounting.xlsx')
+wb = openpyxl.load_workbook('paper_info/PB_runs_accounting.xlsx')
 fnum = lambda x: (float(x) if str(x).replace('.','',1).replace('-','',1).isdigit() else None)
 
 STD = dict(S1_orig='orig_control', S2_ESM2='s2_esm2_control', S3_ESM2='s3_esm2_control',
